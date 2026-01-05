@@ -55,16 +55,8 @@ export default function Courses() {
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      fetchCourses();
-    }
-  }, [user]);
+    fetchCourses();
+  }, []);
 
   const fetchCourses = async () => {
     try {
@@ -116,7 +108,7 @@ export default function Courses() {
     return `${hours}h ${mins}m`;
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">

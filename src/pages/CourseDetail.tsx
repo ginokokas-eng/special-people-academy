@@ -59,19 +59,13 @@ export default function CourseDetail() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user && id) {
+    if (id) {
       fetchCourseData();
     }
-  }, [user, id]);
+  }, [id, user]);
 
   const fetchCourseData = async () => {
-    if (!user || !id) return;
+    if (!id) return;
 
     try {
       // Fetch course
@@ -91,34 +85,41 @@ export default function CourseDetail() {
         .eq('course_id', id)
         .order('order_index');
 
-      // Fetch lesson progress
-      const { data: progressData } = await supabase
-        .from('lesson_progress')
-        .select('lesson_id, completed')
-        .eq('user_id', user.id);
+      // Fetch lesson progress and enrollment only if user is logged in
+      if (user) {
+        const { data: progressData } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id, completed')
+          .eq('user_id', user.id);
 
-      const progressMap = new Map(progressData?.map(p => [p.lesson_id, p.completed]) || []);
-      
-      const lessonsWithProgress = (lessonsData || []).map(lesson => ({
-        ...lesson,
-        completed: progressMap.get(lesson.id) || false,
-      }));
+        const progressMap = new Map(progressData?.map(p => [p.lesson_id, p.completed]) || []);
+        
+        const lessonsWithProgress = (lessonsData || []).map(lesson => ({
+          ...lesson,
+          completed: progressMap.get(lesson.id) || false,
+        }));
 
-      setLessons(lessonsWithProgress);
-      
-      // Set first incomplete lesson as current, or first lesson if all complete
-      const firstIncomplete = lessonsWithProgress.find(l => !l.completed);
-      setCurrentLesson(firstIncomplete || lessonsWithProgress[0] || null);
+        setLessons(lessonsWithProgress);
+        
+        // Set first incomplete lesson as current, or first lesson if all complete
+        const firstIncomplete = lessonsWithProgress.find(l => !l.completed);
+        setCurrentLesson(firstIncomplete || lessonsWithProgress[0] || null);
 
-      // Fetch enrollment
-      const { data: enrollmentData } = await supabase
-        .from('enrollments')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('course_id', id)
-        .maybeSingle();
+        // Fetch enrollment
+        const { data: enrollmentData } = await supabase
+          .from('enrollments')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('course_id', id)
+          .maybeSingle();
 
-      setEnrollment(enrollmentData);
+        setEnrollment(enrollmentData);
+      } else {
+        // Not logged in - just set lessons without progress
+        setLessons((lessonsData || []).map(lesson => ({ ...lesson, completed: false })));
+        setCurrentLesson((lessonsData || [])[0] || null);
+        setEnrollment(null);
+      }
     } catch (error) {
       console.error('Error fetching course:', error);
       toast.error('Failed to load course');
@@ -294,34 +295,43 @@ export default function CourseDetail() {
                 </div>
                 <Badge variant="outline">{course.level}</Badge>
 
-                {enrollment ? (
-                  <div className="mt-6 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span className="font-medium">{progress}%</span>
+              {user ? (
+                  enrollment ? (
+                    <div className="mt-6 space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>Progress</span>
+                        <span className="font-medium">{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
+                      {progress === 100 && (
+                        <Button className="w-full mt-4" onClick={() => navigate('/certificates')}>
+                          <Award className="h-4 w-4 mr-2" />
+                          View Certificate
+                        </Button>
+                      )}
                     </div>
-                    <Progress value={progress} className="h-2" />
-                    {progress === 100 && (
-                      <Button className="w-full mt-4" onClick={() => navigate('/certificates')}>
-                        <Award className="h-4 w-4 mr-2" />
-                        View Certificate
-                      </Button>
-                    )}
-                  </div>
+                  ) : (
+                    <Button 
+                      className="w-full mt-6" 
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                    >
+                      {enrolling ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Enrolling...
+                        </>
+                      ) : (
+                        'Enroll Now'
+                      )}
+                    </Button>
+                  )
                 ) : (
                   <Button 
                     className="w-full mt-6" 
-                    onClick={handleEnroll}
-                    disabled={enrolling}
+                    onClick={() => navigate('/auth')}
                   >
-                    {enrolling ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Enrolling...
-                      </>
-                    ) : (
-                      'Enroll Now'
-                    )}
+                    Sign In to Enroll
                   </Button>
                 )}
               </CardContent>
