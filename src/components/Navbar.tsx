@@ -21,7 +21,7 @@ export const Navbar = () => {
             <div className="p-2 rounded-lg gradient-primary">
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-foreground">TrainHub</span>
+            <span className="text-foreground">Special People Academy</span>
           </a>
 
           {/* Desktop Navigation */}

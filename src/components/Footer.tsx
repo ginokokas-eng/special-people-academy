@@ -18,10 +18,10 @@ export const Footer = () => {
               <div className="p-2 rounded-lg gradient-primary">
                 <GraduationCap className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span>TrainHub</span>
+              <span>Special People Academy</span>
             </a>
             <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
-              Empowering organizations to build skilled, compliant, and future-ready teams through world-class training.
+              Empowering special individuals to develop essential skills through personalized, inclusive training programs.
             </p>
             <div className="flex gap-3">
               {[Twitter, Linkedin, Youtube, Mail].map((Icon, index) => (
@@ -58,10 +58,10 @@ export const Footer = () => {
 
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/50">
-            © 2026 TrainHub. All rights reserved.
+            © 2026 Special People Academy. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-sm text-primary-foreground/50">
-            <span>Made with ❤️ for learning teams everywhere</span>
+            <span>Made with ❤️ for every learner</span>
           </div>
         </div>
       </div>

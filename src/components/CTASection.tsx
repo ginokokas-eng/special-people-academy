@@ -21,7 +21,7 @@ export const CTASection = () => {
             </h2>
             
             <p className="text-primary-foreground/80 max-w-xl mx-auto text-lg">
-              Join thousands of companies using TrainHub to upskill their teams, ensure compliance, and drive organizational success.
+              Join organizations using Special People Academy to unlock potential, build confidence, and drive meaningful growth.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">

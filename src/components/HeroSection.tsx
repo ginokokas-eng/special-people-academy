@@ -20,7 +20,7 @@ export const HeroSection = () => {
 
             <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
               Transform Your Skills with{" "}
-              <span className="text-gradient-primary bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="text-gradient-primary">
                 Special People Academy
               </span>
             </h1>
