@@ -10,6 +10,7 @@ interface CourseCardProps {
   progress?: number;
   image: string;
   level: "Beginner" | "Intermediate" | "Advanced";
+  price: number;
 }
 
 const CourseCard = ({
@@ -21,6 +22,7 @@ const CourseCard = ({
   progress,
   image,
   level,
+  price,
 }: CourseCardProps) => {
   const levelColors = {
     Beginner: "bg-success/10 text-success",
@@ -81,9 +83,15 @@ const CourseCard = ({
             </div>
           </div>
         ) : (
-          <Button variant="outline" size="sm" className="w-full">
-            Start Course
-          </Button>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-2xl font-bold text-foreground">${price}</span>
+              {price === 0 && <span className="text-sm text-success font-medium">Free</span>}
+            </div>
+            <Button variant="outline" size="sm" className="w-full">
+              Contact Sales
+            </Button>
+          </div>
         )}
       </div>
     </div>
@@ -101,6 +109,7 @@ export const CoursesSection = () => {
       progress: 75,
       image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=400&fit=crop",
       level: "Beginner",
+      price: 99,
     },
     {
       title: "Leadership Skills for New Managers",
@@ -110,6 +119,7 @@ export const CoursesSection = () => {
       rating: 4.9,
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop",
       level: "Intermediate",
+      price: 199,
     },
     {
       title: "Advanced Data Analysis with Excel",
@@ -120,6 +130,7 @@ export const CoursesSection = () => {
       progress: 30,
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
       level: "Advanced",
+      price: 249,
     },
     {
       title: "Effective Communication Strategies",
@@ -129,6 +140,7 @@ export const CoursesSection = () => {
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1515169067868-5387ec356754?w=600&h=400&fit=crop",
       level: "Beginner",
+      price: 149,
     },
     {
       title: "Project Management Essentials",
@@ -138,6 +150,7 @@ export const CoursesSection = () => {
       rating: 4.8,
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop",
       level: "Intermediate",
+      price: 179,
     },
     {
       title: "Cybersecurity Awareness Training",
@@ -148,6 +161,7 @@ export const CoursesSection = () => {
       progress: 100,
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=400&fit=crop",
       level: "Beginner",
+      price: 79,
     },
   ];
 

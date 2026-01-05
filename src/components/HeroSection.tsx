@@ -33,8 +33,8 @@ export const HeroSection = () => {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="xl" onClick={() => navigate('/auth')}>
-                Start Learning
+              <Button variant="hero" size="xl" onClick={() => navigate('/contact')}>
+                Contact Sales
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button variant="heroOutline" size="xl">

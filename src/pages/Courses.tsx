@@ -34,6 +34,7 @@ interface Course {
   duration_minutes: number;
   level: string;
   is_published: boolean;
+  price: number;
   enrollmentCount?: number;
 }
 
@@ -217,9 +218,14 @@ export default function Courses() {
                   </h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                     {course.description}
                   </p>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xl font-bold text-foreground">
+                      {course.price > 0 ? `$${course.price}` : 'Free'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />

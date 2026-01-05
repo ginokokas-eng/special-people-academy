@@ -28,8 +28,8 @@ export const CTASection = () => {
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Button variant="hero" size="xl" onClick={() => navigate('/auth')}>
-                Get Started Free
+              <Button variant="hero" size="xl" onClick={() => navigate('/contact')}>
+                Contact Sales
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button variant="heroOutline" size="xl">
