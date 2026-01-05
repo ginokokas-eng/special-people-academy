@@ -42,7 +42,10 @@ import {
   Trash2, 
   Loader2,
   Eye,
-  EyeOff
+  EyeOff,
+  Video,
+  UserPlus,
+  GraduationCap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
@@ -58,6 +61,16 @@ interface Course {
   created_at: string;
 }
 
+interface Lesson {
+  id: string;
+  title: string;
+  description: string | null;
+  video_url: string | null;
+  duration_minutes: number;
+  order_index: number;
+  course_id: string;
+}
+
 interface User {
   id: string;
   email: string;
@@ -66,6 +79,7 @@ interface User {
     department: string | null;
   } | null;
   enrollments: number;
+  enrolledCourses: string[];
 }
 
 interface Stats {
@@ -91,6 +105,19 @@ export default function AdminDashboard() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Lesson management state
+  const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
+  const [selectedCourseForLessons, setSelectedCourseForLessons] = useState<Course | null>(null);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [lessonsLoading, setLessonsLoading] = useState(false);
+
+  // Assign training state
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedUserForAssign, setSelectedUserForAssign] = useState<User | null>(null);
+  const [assigning, setAssigning] = useState(false);
+  const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -99,6 +126,15 @@ export default function AdminDashboard() {
     level: 'Beginner',
     duration_minutes: 0,
     is_published: false,
+  });
+
+  // Lesson form state
+  const [lessonFormData, setLessonFormData] = useState({
+    title: '',
+    description: '',
+    video_url: '',
+    duration_minutes: 0,
+    order_index: 0,
   });
 
   useEffect(() => {
@@ -126,27 +162,28 @@ export default function AdminDashboard() {
 
       setCourses(coursesData || []);
 
-      // Fetch users with profiles
+      // Fetch users with profiles and their enrollments
       const { data: profilesData } = await supabase
         .from('profiles')
         .select('user_id, full_name, department');
 
-      // Get enrollment counts per user
+      // Get enrollment counts and enrolled courses per user
       const usersWithEnrollments: User[] = [];
       for (const profile of profilesData || []) {
-        const { count } = await supabase
+        const { data: enrollmentsData, count } = await supabase
           .from('enrollments')
-          .select('*', { count: 'exact', head: true })
+          .select('course_id', { count: 'exact' })
           .eq('user_id', profile.user_id);
 
         usersWithEnrollments.push({
           id: profile.user_id,
-          email: '', // We don't have access to auth.users email directly
+          email: '',
           profile: {
             full_name: profile.full_name,
             department: profile.department,
           },
           enrollments: count || 0,
+          enrolledCourses: enrollmentsData?.map(e => e.course_id) || [],
         });
       }
       setUsers(usersWithEnrollments);
@@ -282,6 +319,183 @@ export default function AdminDashboard() {
       fetchData();
     } catch (error) {
       console.error('Error toggling publish:', error);
+    }
+  };
+
+  // Lesson management functions
+  const handleManageLessons = async (course: Course) => {
+    setSelectedCourseForLessons(course);
+    setLessonsLoading(true);
+    setLessonDialogOpen(true);
+    
+    try {
+      const { data } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('course_id', course.id)
+        .order('order_index');
+      
+      setLessons(data || []);
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+    } finally {
+      setLessonsLoading(false);
+    }
+  };
+
+  const handleAddLesson = () => {
+    setEditingLesson(null);
+    setLessonFormData({
+      title: '',
+      description: '',
+      video_url: '',
+      duration_minutes: 0,
+      order_index: lessons.length,
+    });
+  };
+
+  const handleEditLesson = (lesson: Lesson) => {
+    setEditingLesson(lesson);
+    setLessonFormData({
+      title: lesson.title,
+      description: lesson.description || '',
+      video_url: lesson.video_url || '',
+      duration_minutes: lesson.duration_minutes,
+      order_index: lesson.order_index,
+    });
+  };
+
+  const handleSaveLesson = async () => {
+    if (!lessonFormData.title || !selectedCourseForLessons) {
+      toast.error('Lesson title is required');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (editingLesson) {
+        const { error } = await supabase
+          .from('lessons')
+          .update({
+            title: lessonFormData.title,
+            description: lessonFormData.description,
+            video_url: lessonFormData.video_url,
+            duration_minutes: lessonFormData.duration_minutes,
+            order_index: lessonFormData.order_index,
+          })
+          .eq('id', editingLesson.id);
+
+        if (error) throw error;
+        toast.success('Lesson updated');
+      } else {
+        const { error } = await supabase
+          .from('lessons')
+          .insert({
+            course_id: selectedCourseForLessons.id,
+            title: lessonFormData.title,
+            description: lessonFormData.description,
+            video_url: lessonFormData.video_url,
+            duration_minutes: lessonFormData.duration_minutes,
+            order_index: lessonFormData.order_index,
+          });
+
+        if (error) throw error;
+        toast.success('Lesson added');
+      }
+
+      // Refresh lessons
+      handleManageLessons(selectedCourseForLessons);
+      setEditingLesson(null);
+      setLessonFormData({
+        title: '',
+        description: '',
+        video_url: '',
+        duration_minutes: 0,
+        order_index: lessons.length + 1,
+      });
+    } catch (error) {
+      console.error('Error saving lesson:', error);
+      toast.error('Failed to save lesson');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    if (!confirm('Are you sure you want to delete this lesson?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', lessonId);
+
+      if (error) throw error;
+      toast.success('Lesson deleted');
+      if (selectedCourseForLessons) {
+        handleManageLessons(selectedCourseForLessons);
+      }
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      toast.error('Failed to delete lesson');
+    }
+  };
+
+  // Assign training functions
+  const handleOpenAssignDialog = (u: User) => {
+    setSelectedUserForAssign(u);
+    setSelectedCourseIds(u.enrolledCourses);
+    setAssignDialogOpen(true);
+  };
+
+  const handleToggleCourseAssignment = (courseId: string) => {
+    setSelectedCourseIds(prev => 
+      prev.includes(courseId) 
+        ? prev.filter(id => id !== courseId)
+        : [...prev, courseId]
+    );
+  };
+
+  const handleSaveAssignments = async () => {
+    if (!selectedUserForAssign) return;
+
+    setAssigning(true);
+    try {
+      const currentEnrolled = selectedUserForAssign.enrolledCourses;
+      const toAdd = selectedCourseIds.filter(id => !currentEnrolled.includes(id));
+      const toRemove = currentEnrolled.filter(id => !selectedCourseIds.includes(id));
+
+      // Add new enrollments
+      if (toAdd.length > 0) {
+        const { error } = await supabase
+          .from('enrollments')
+          .insert(toAdd.map(courseId => ({
+            user_id: selectedUserForAssign.id,
+            course_id: courseId,
+          })));
+        
+        if (error) throw error;
+      }
+
+      // Remove enrollments
+      if (toRemove.length > 0) {
+        const { error } = await supabase
+          .from('enrollments')
+          .delete()
+          .eq('user_id', selectedUserForAssign.id)
+          .in('course_id', toRemove);
+        
+        if (error) throw error;
+      }
+
+      toast.success('Training assignments updated');
+      setAssignDialogOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating assignments:', error);
+      toast.error('Failed to update assignments');
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -473,6 +687,14 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                onClick={() => handleManageLessons(course)}
+                                title="Manage Lessons"
+                              >
+                                <Video className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => togglePublish(course)}
                                 title={course.is_published ? 'Unpublish' : 'Publish'}
                               >
@@ -520,12 +742,13 @@ export default function AdminDashboard() {
                       <TableHead>Name</TableHead>
                       <TableHead>Department</TableHead>
                       <TableHead>Enrollments</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {users.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                           No users yet.
                         </TableCell>
                       </TableRow>
@@ -537,6 +760,16 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>{u.profile?.department || '-'}</TableCell>
                           <TableCell>{u.enrollments}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenAssignDialog(u)}
+                            >
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Assign Training
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -546,6 +779,196 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Lesson Management Dialog */}
+        <Dialog open={lessonDialogOpen} onOpenChange={setLessonDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5" />
+                Manage Lessons - {selectedCourseForLessons?.title}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {lessonsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Lesson Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {editingLesson ? 'Edit Lesson' : 'Add New Lesson'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input
+                          value={lessonFormData.title}
+                          onChange={(e) => setLessonFormData({ ...lessonFormData, title: e.target.value })}
+                          placeholder="Lesson title"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Duration (minutes)</Label>
+                        <Input
+                          type="number"
+                          value={lessonFormData.duration_minutes}
+                          onChange={(e) => setLessonFormData({ ...lessonFormData, duration_minutes: parseInt(e.target.value) || 0 })}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={lessonFormData.description}
+                        onChange={(e) => setLessonFormData({ ...lessonFormData, description: e.target.value })}
+                        placeholder="Lesson description"
+                        rows={2}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Video URL (YouTube embed URL)</Label>
+                      <Input
+                        value={lessonFormData.video_url}
+                        onChange={(e) => setLessonFormData({ ...lessonFormData, video_url: e.target.value })}
+                        placeholder="https://www.youtube.com/embed/..."
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSaveLesson} disabled={saving}>
+                        {saving ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          editingLesson ? 'Update Lesson' : 'Add Lesson'
+                        )}
+                      </Button>
+                      {editingLesson && (
+                        <Button variant="outline" onClick={handleAddLesson}>
+                          Cancel Edit
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Lessons List */}
+                <div className="space-y-2">
+                  <h3 className="font-medium">Lessons ({lessons.length})</h3>
+                  {lessons.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      No lessons yet. Add your first lesson above.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {lessons.map((lesson, index) => (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-muted-foreground w-6">
+                              {index + 1}.
+                            </span>
+                            <div>
+                              <p className="font-medium">{lesson.title}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {lesson.duration_minutes} min
+                                {lesson.video_url && ' • Video included'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditLesson(lesson)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteLesson(lesson.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Training Dialog */}
+        <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Assign Training
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Assign courses to <span className="font-medium text-foreground">{selectedUserForAssign?.profile?.full_name || 'this user'}</span>
+              </p>
+              
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {courses.filter(c => c.is_published).length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">
+                    No published courses available
+                  </p>
+                ) : (
+                  courses.filter(c => c.is_published).map((course) => (
+                    <div
+                      key={course.id}
+                      className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                        selectedCourseIds.includes(course.id) ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleToggleCourseAssignment(course.id)}
+                    >
+                      <div>
+                        <p className="font-medium">{course.title}</p>
+                        <p className="text-sm text-muted-foreground">{course.category} • {course.level}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedCourseIds.includes(course.id) ? 'border-primary bg-primary' : 'border-muted-foreground'
+                      }`}>
+                        {selectedCourseIds.includes(course.id) && (
+                          <div className="w-2 h-2 bg-primary-foreground rounded-full" />
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <Button onClick={handleSaveAssignments} className="w-full" disabled={assigning}>
+                {assigning ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  `Save Assignments (${selectedCourseIds.length} courses)`
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
