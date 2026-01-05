@@ -1,4 +1,5 @@
-import { GraduationCap, Twitter, Linkedin, Youtube, Mail } from "lucide-react";
+import { Twitter, Linkedin, Youtube, Mail } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export const Footer = () => {
   const footerLinks = {
@@ -15,9 +16,7 @@ export const Footer = () => {
           {/* Brand Column */}
           <div className="col-span-2">
             <a href="/" className="flex items-center gap-2 font-bold text-xl mb-4">
-              <div className="p-2 rounded-lg gradient-primary">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img src={logo} alt="Special People Academy" className="h-10 w-10 object-contain" />
               <span>Special People Academy</span>
             </a>
             <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
