@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, LogIn } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,9 +21,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="p-2 rounded-lg gradient-primary">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="Special People Academy" className="h-10 w-10 object-contain" />
             <span className="text-foreground">Special People Academy</span>
           </a>
 
