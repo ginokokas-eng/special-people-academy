@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="relative gradient-hero text-primary-foreground overflow-hidden">
       {/* Background Pattern */}
@@ -30,7 +33,7 @@ export const HeroSection = () => {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="xl">
+              <Button variant="hero" size="xl" onClick={() => navigate('/auth')}>
                 Start Learning
                 <ArrowRight className="h-5 w-5" />
               </Button>
