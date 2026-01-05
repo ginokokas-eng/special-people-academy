@@ -8,9 +8,10 @@ export const Navbar = () => {
   const navigate = useNavigate();
 
   const navLinks = [
-    { label: "Courses", href: "#courses" },
-    { label: "Features", href: "#features" },
-    { label: "About", href: "#about" },
+    { label: "Courses", href: "/courses" },
+    { label: "My Learning", href: "/my-learning" },
+    { label: "Certifications", href: "/certificates" },
+    { label: "Resources", href: "#resources" },
   ];
 
   return (
