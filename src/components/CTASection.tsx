@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const CTASection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="py-20 px-6 bg-background">
       <div className="container mx-auto max-w-4xl">
@@ -25,7 +28,7 @@ export const CTASection = () => {
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Button variant="hero" size="xl">
+              <Button variant="hero" size="xl" onClick={() => navigate('/auth')}>
                 Get Started Free
                 <ArrowRight className="h-5 w-5" />
               </Button>

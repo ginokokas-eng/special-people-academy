@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, Search, Bell, User } from "lucide-react";
+import { GraduationCap, Menu, LogIn } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
     { label: "Courses", href: "#courses" },
-    { label: "My Learning", href: "#learning" },
-    { label: "Certifications", href: "#certifications" },
-    { label: "Resources", href: "#resources" },
+    { label: "Features", href: "#features" },
+    { label: "About", href: "#about" },
   ];
 
   return (
@@ -39,18 +40,12 @@ export const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Search className="h-5 w-5" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="hidden md:flex">
+              Sign In
             </Button>
-            <Button variant="ghost" size="icon" className="hidden md:flex relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="default" size="sm" className="hidden md:flex">
-              Browse Courses
+            <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="hidden md:flex">
+              <LogIn className="h-4 w-4 mr-2" />
+              Get Started
             </Button>
 
             {/* Mobile Menu Button */}
@@ -78,9 +73,14 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
-              <Button variant="default" size="sm" className="mt-2">
-                Browse Courses
-              </Button>
+              <div className="flex flex-col gap-2 mt-2 px-4">
+                <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+                  Sign In
+                </Button>
+                <Button variant="default" size="sm" onClick={() => navigate('/auth')}>
+                  Get Started
+                </Button>
+              </div>
             </div>
           </div>
         )}
