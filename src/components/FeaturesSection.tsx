@@ -45,10 +45,10 @@ export const FeaturesSection = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Why Teams Choose TrainHub
+            Why Choose Special People Academy
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to build a culture of continuous learning and development.
+            Everything you need to build an inclusive culture of continuous learning and personal development.
           </p>
         </div>
 
