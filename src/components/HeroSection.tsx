@@ -19,9 +19,9 @@ export const HeroSection = () => {
             </div>
 
             <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-              Empower Your Team with{" "}
+              Transform Your Skills with{" "}
               <span className="text-gradient-primary bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Expert Training
+                Special People Academy
               </span>
             </h1>
 
