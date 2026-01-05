@@ -39,6 +39,7 @@ interface Course {
   thumbnail_url: string | null;
   duration_minutes: number;
   level: string;
+  price: number;
 }
 
 interface Enrollment {
@@ -293,6 +294,11 @@ export default function CourseDetail() {
                     {lessons.length} lessons
                   </span>
                 </div>
+                <div className="flex items-center justify-between mt-4 mb-2">
+                  <span className="text-2xl font-bold text-foreground">
+                    {(course.price ?? 0) > 0 ? `£${course.price}` : 'Free'}
+                  </span>
+                </div>
                 <Badge variant="outline">{course.level}</Badge>
 
               {user ? (
@@ -313,25 +319,17 @@ export default function CourseDetail() {
                   ) : (
                     <Button 
                       className="w-full mt-6" 
-                      onClick={handleEnroll}
-                      disabled={enrolling}
+                      onClick={() => navigate('/contact')}
                     >
-                      {enrolling ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Enrolling...
-                        </>
-                      ) : (
-                        'Enroll Now'
-                      )}
+                      Contact Sales
                     </Button>
                   )
                 ) : (
                   <Button 
                     className="w-full mt-6" 
-                    onClick={() => navigate('/auth')}
+                    onClick={() => navigate('/contact')}
                   >
-                    Sign In to Enroll
+                    Contact Sales
                   </Button>
                 )}
               </CardContent>

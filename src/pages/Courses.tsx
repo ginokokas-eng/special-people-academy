@@ -223,7 +223,7 @@ export default function Courses() {
                   </p>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xl font-bold text-foreground">
-                      {course.price > 0 ? `$${course.price}` : 'Free'}
+                      {(course.price ?? 0) > 0 ? `£${course.price}` : 'Free'}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">

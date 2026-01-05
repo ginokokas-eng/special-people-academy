@@ -44,9 +44,8 @@ export const Navbar = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="hidden md:flex">
               Sign In
             </Button>
-            <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="hidden md:flex">
-              <LogIn className="h-4 w-4 mr-2" />
-              Get Started
+            <Button variant="default" size="sm" onClick={() => navigate('/contact')} className="hidden md:flex">
+              Contact Sales
             </Button>
 
             {/* Mobile Menu Button */}
@@ -78,8 +77,8 @@ export const Navbar = () => {
                 <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
                   Sign In
                 </Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/auth')}>
-                  Get Started
+                <Button variant="default" size="sm" onClick={() => navigate('/contact')}>
+                  Contact Sales
                 </Button>
               </div>
             </div>
