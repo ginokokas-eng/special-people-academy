@@ -9,7 +9,7 @@ interface CourseCardProps {
   rating: number;
   progress?: number;
   image: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
+  level: "New Joiner" | "Enhanced" | "Complex";
   price: number;
 }
 
@@ -25,9 +25,9 @@ const CourseCard = ({
   price,
 }: CourseCardProps) => {
   const levelColors = {
-    Beginner: "bg-success/10 text-success",
-    Intermediate: "bg-warning/10 text-warning",
-    Advanced: "bg-destructive/10 text-destructive",
+    "New Joiner": "bg-success/10 text-success",
+    "Enhanced": "bg-warning/10 text-warning",
+    "Complex": "bg-destructive/10 text-destructive",
   };
 
   return (
@@ -108,7 +108,7 @@ export const CoursesSection = () => {
       rating: 4.8,
       progress: 75,
       image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=400&fit=crop",
-      level: "Beginner",
+      level: "New Joiner",
       price: 99,
     },
     {
@@ -118,7 +118,7 @@ export const CoursesSection = () => {
       students: 892,
       rating: 4.9,
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop",
-      level: "Intermediate",
+      level: "Enhanced",
       price: 199,
     },
     {
@@ -129,7 +129,7 @@ export const CoursesSection = () => {
       rating: 4.7,
       progress: 30,
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
-      level: "Advanced",
+      level: "Complex",
       price: 249,
     },
     {
@@ -139,7 +139,7 @@ export const CoursesSection = () => {
       students: 1567,
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1515169067868-5387ec356754?w=600&h=400&fit=crop",
-      level: "Beginner",
+      level: "New Joiner",
       price: 149,
     },
     {
@@ -149,7 +149,7 @@ export const CoursesSection = () => {
       students: 3421,
       rating: 4.8,
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop",
-      level: "Intermediate",
+      level: "Enhanced",
       price: 179,
     },
     {
@@ -160,7 +160,7 @@ export const CoursesSection = () => {
       rating: 4.5,
       progress: 100,
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=400&fit=crop",
-      level: "Beginner",
+      level: "New Joiner",
       price: 79,
     },
   ];

@@ -39,9 +39,9 @@ interface Course {
 }
 
 const levelColors: Record<string, string> = {
-  Beginner: 'bg-success/10 text-success border-success/20',
-  Intermediate: 'bg-warning/10 text-warning border-warning/20',
-  Advanced: 'bg-destructive/10 text-destructive border-destructive/20',
+  'New Joiner': 'bg-success/10 text-success border-success/20',
+  'Enhanced': 'bg-warning/10 text-warning border-warning/20',
+  'Complex': 'bg-destructive/10 text-destructive border-destructive/20',
 };
 
 export default function Courses() {
@@ -157,9 +157,9 @@ export default function Courses() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
+                <SelectItem value="New Joiner">New Joiner</SelectItem>
+                <SelectItem value="Enhanced">Enhanced</SelectItem>
+                <SelectItem value="Complex">Complex</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -206,7 +206,7 @@ export default function Courses() {
                   </div>
                   <Badge 
                     variant="outline" 
-                    className={`absolute top-3 left-3 ${levelColors[course.level || 'Beginner']}`}
+                    className={`absolute top-3 left-3 ${levelColors[course.level || 'New Joiner']}`}
                   >
                     {course.level}
                   </Badge>

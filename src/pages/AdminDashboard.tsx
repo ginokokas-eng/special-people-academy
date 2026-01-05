@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     title: '',
     description: '',
     category: '',
-    level: 'Beginner',
+    level: 'New Joiner',
     duration_minutes: 0,
     is_published: false,
   });
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
       title: '',
       description: '',
       category: '',
-      level: 'Beginner',
+      level: 'New Joiner',
       duration_minutes: 0,
       is_published: false,
     });
@@ -613,9 +613,9 @@ export default function AdminDashboard() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Beginner">Beginner</SelectItem>
-                              <SelectItem value="Intermediate">Intermediate</SelectItem>
-                              <SelectItem value="Advanced">Advanced</SelectItem>
+                              <SelectItem value="New Joiner">New Joiner</SelectItem>
+                              <SelectItem value="Enhanced">Enhanced</SelectItem>
+                              <SelectItem value="Complex">Complex</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
