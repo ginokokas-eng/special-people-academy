@@ -6,11 +6,13 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Award, Download, Share2, Loader2, GraduationCap } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Certificate {
   id: string;
   certificate_number: string;
   issued_at: string;
+  pdf_path: string | null;
   course: {
     id: string;
     title: string;
@@ -23,6 +25,7 @@ export default function Certificates() {
   const navigate = useNavigate();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -46,6 +49,7 @@ export default function Certificates() {
           id,
           certificate_number,
           issued_at,
+          pdf_path,
           course:courses(id, title, category)
         `)
         .eq('user_id', user.id)
@@ -71,6 +75,57 @@ export default function Certificates() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleDownload = async (cert: Certificate) => {
+    setDownloading(cert.id);
+    try {
+      // Call the edge function to generate/get the certificate
+      const { data, error } = await supabase.functions.invoke('generate-certificate', {
+        body: { certificate_id: cert.id },
+      });
+
+      if (error) {
+        console.error('Function error:', error);
+        toast.error('Failed to generate certificate');
+        return;
+      }
+
+      if (data?.url) {
+        // Open in new tab for download/print
+        window.open(data.url, '_blank');
+        toast.success('Certificate opened - use Print to save as PDF');
+      } else {
+        toast.error('Failed to get certificate URL');
+      }
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      toast.error('Failed to download certificate');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  const handleShare = async (cert: Certificate) => {
+    const shareText = `I've completed "${cert.course.title}" at Special People Academy! Certificate ID: ${cert.certificate_number}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Certificate of Completion',
+          text: shareText,
+        });
+      } catch (error) {
+        // User cancelled or share failed
+        if ((error as Error).name !== 'AbortError') {
+          toast.error('Failed to share');
+        }
+      }
+    } else {
+      // Fallback to clipboard
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Certificate details copied to clipboard!');
+    }
   };
 
   if (authLoading || loading) {
@@ -145,11 +200,26 @@ export default function Certificates() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
+                      <Button 
+                        variant="outline" 
+                        className="flex-1" 
+                        size="sm"
+                        onClick={() => handleDownload(cert)}
+                        disabled={downloading === cert.id}
+                      >
+                        {downloading === cert.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2" />
+                        )}
                         Download
                       </Button>
-                      <Button variant="outline" className="flex-1" size="sm">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1" 
+                        size="sm"
+                        onClick={() => handleShare(cert)}
+                      >
                         <Share2 className="h-4 w-4 mr-2" />
                         Share
                       </Button>
