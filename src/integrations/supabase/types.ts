@@ -20,6 +20,7 @@ export type Database = {
           course_id: string
           id: string
           issued_at: string
+          pdf_path: string | null
           user_id: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           course_id: string
           id?: string
           issued_at?: string
+          pdf_path?: string | null
           user_id: string
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           course_id?: string
           id?: string
           issued_at?: string
+          pdf_path?: string | null
           user_id?: string
         }
         Relationships: [
