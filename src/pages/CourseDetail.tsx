@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -109,6 +110,7 @@ export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { hasActiveSubscription, loading: subLoading } = useSubscription();
   
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -325,7 +327,12 @@ export default function CourseDetail() {
     course?.delivery_type === 'in-person' ||
     lessons.some(l => l.lesson_type === 'practical');
 
-  if (authLoading || loading) {
+  // Access control logic
+  const isInternal = course?.is_internal ?? true;
+  const requiresSubscription = !isInternal && !hasActiveSubscription;
+  const canAccessCourse = user && (isInternal ? !!enrollment : hasActiveSubscription);
+
+  if (authLoading || loading || subLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -394,6 +401,8 @@ export default function CourseDetail() {
               lessons={lessons}
               isEnrolled={!!enrollment}
               onLessonClick={handleLessonClick}
+              canAccessCourse={!!canAccessCourse}
+              requiresSubscription={requiresSubscription}
             />
 
             {/* F. Practical Session Details */}
@@ -439,6 +448,9 @@ export default function CourseDetail() {
               onStart={handleStart}
               onEnroll={handleEnroll}
               enrolling={enrolling}
+              canAccessCourse={!!canAccessCourse}
+              requiresSubscription={requiresSubscription}
+              hasActiveSubscription={hasActiveSubscription}
             />
           </div>
         </div>
@@ -453,6 +465,9 @@ export default function CourseDetail() {
         onStart={handleStart}
         onEnroll={handleEnroll}
         enrolling={enrolling}
+        canAccessCourse={!!canAccessCourse}
+        requiresSubscription={requiresSubscription}
+        hasActiveSubscription={hasActiveSubscription}
       />
 
       <div className="hidden lg:block">

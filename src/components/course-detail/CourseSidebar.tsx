@@ -9,8 +9,11 @@ import {
   CheckCircle, 
   Clock,
   Shield,
-  BookOpen
+  BookOpen,
+  Lock,
+  CreditCard
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CourseSidebarProps {
   isLoggedIn: boolean;
@@ -25,6 +28,10 @@ interface CourseSidebarProps {
   onStart: () => void;
   onEnroll: () => void;
   enrolling: boolean;
+  // Access control props
+  canAccessCourse: boolean;
+  requiresSubscription: boolean;
+  hasActiveSubscription: boolean;
 }
 
 export function CourseSidebar({
@@ -40,11 +47,22 @@ export function CourseSidebar({
   onStart,
   onEnroll,
   enrolling,
+  canAccessCourse,
+  requiresSubscription,
+  hasActiveSubscription,
 }: CourseSidebarProps) {
+  const navigate = useNavigate();
+
   const getButtonContent = () => {
     if (!isLoggedIn) {
-      return isInternal ? 'Sign in to access' : 'Subscribe to access';
+      return isInternal ? 'Sign in to access' : 'Sign in to subscribe';
     }
+    
+    // External course - needs subscription
+    if (!isInternal && !hasActiveSubscription) {
+      return 'Subscribe to access';
+    }
+    
     if (!isEnrolled) {
       return 'Start course';
     }
@@ -52,18 +70,49 @@ export function CourseSidebar({
   };
 
   const handleClick = () => {
-    if (!isLoggedIn || !isEnrolled) {
+    if (!isLoggedIn) {
+      navigate('/auth');
+      return;
+    }
+    
+    // External course without subscription - show subscribe action
+    if (!isInternal && !hasActiveSubscription) {
+      // For now, navigate to contact (will be replaced with Stripe checkout)
+      navigate('/contact?reason=subscription');
+      return;
+    }
+    
+    if (!isEnrolled) {
       onEnroll();
     } else {
       onStart();
     }
   };
 
+  const showSubscriptionCTA = !isInternal && !hasActiveSubscription && isLoggedIn;
+
   return (
     <Card className="sticky top-6 shadow-lg border-0">
       <CardContent className="p-6 space-y-6">
-        {/* Progress section for enrolled users */}
-        {isEnrolled && (
+        {/* Subscription required banner for external courses */}
+        {showSubscriptionCTA && (
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-lg p-4 space-y-3">
+            <div className="flex items-center gap-2 text-primary font-semibold">
+              <Lock className="h-4 w-4" />
+              <span>Subscription Required</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Get unlimited access to all external courses with a Basic or Pro subscription.
+            </p>
+            <div className="flex gap-2 text-xs">
+              <Badge variant="outline" className="bg-background">Basic - £9.99/mo</Badge>
+              <Badge variant="outline" className="bg-background">Pro - £19.99/mo</Badge>
+            </div>
+          </div>
+        )}
+
+        {/* Progress section for enrolled users with access */}
+        {isEnrolled && canAccessCourse && (
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">Your progress</span>
@@ -82,9 +131,12 @@ export function CourseSidebar({
         {/* Main CTA */}
         <Button 
           onClick={handleClick} 
-          className="w-full h-12 text-base font-semibold"
+          className={`w-full h-12 text-base font-semibold ${
+            showSubscriptionCTA ? 'bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90' : ''
+          }`}
           disabled={enrolling}
         >
+          {showSubscriptionCTA && <CreditCard className="h-4 w-4 mr-2" />}
           {enrolling ? 'Processing...' : getButtonContent()}
         </Button>
 
