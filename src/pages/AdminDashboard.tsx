@@ -45,8 +45,10 @@ import {
   EyeOff,
   Video,
   UserPlus,
-  GraduationCap
+  GraduationCap,
+  Calendar
 } from 'lucide-react';
+import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
@@ -553,6 +555,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="courses" className="w-full">
           <TabsList>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
@@ -777,6 +780,10 @@ export default function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="sessions" className="mt-6">
+            <PracticalSessionsManager />
           </TabsContent>
         </Tabs>
 

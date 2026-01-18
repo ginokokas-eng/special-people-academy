@@ -13,7 +13,8 @@ import {
   X,
   Search,
   Bell,
-  Settings
+  Settings,
+  ClipboardList
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -39,7 +40,7 @@ const navItems = [
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isTrainer } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -117,7 +118,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user?.email}</p>
-                      <p className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'Learner'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isAdmin ? 'Admin' : isTrainer ? 'Trainer' : 'Learner'}
+                      </p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
@@ -128,6 +131,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
+                    {isTrainer && (
+                      <DropdownMenuItem onClick={() => navigate('/trainer')}>
+                        <ClipboardList className="mr-2 h-4 w-4" />
+                        Trainer Portal
+                      </DropdownMenuItem>
+                    )}
                     {isAdmin && (
                       <DropdownMenuItem onClick={() => navigate('/admin')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />

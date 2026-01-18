@@ -294,6 +294,54 @@ export type Database = {
         }
         Relationships: []
       }
+      learner_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          related_course_id: string | null
+          related_session_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          related_course_id?: string | null
+          related_session_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          related_course_id?: string | null
+          related_session_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_notifications_related_course_id_fkey"
+            columns: ["related_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_notifications_related_session_id_fkey"
+            columns: ["related_session_id"]
+            isOneToOne: false
+            referencedRelation: "practical_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null
@@ -421,6 +469,50 @@ export type Database = {
           },
         ]
       }
+      practical_attendance: {
+        Row: {
+          attended: boolean | null
+          competency_outcome: string | null
+          created_at: string
+          id: string
+          marked_at: string | null
+          marked_by: string | null
+          notes: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          attended?: boolean | null
+          competency_outcome?: string | null
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_by?: string | null
+          notes?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          attended?: boolean | null
+          competency_outcome?: string | null
+          created_at?: string
+          id?: string
+          marked_at?: string | null
+          marked_by?: string | null
+          notes?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practical_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "practical_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practical_sessions: {
         Row: {
           course_id: string
@@ -430,6 +522,7 @@ export type Database = {
           max_attendees: number | null
           notes: string | null
           session_date: string | null
+          trainer_id: string | null
         }
         Insert: {
           course_id: string
@@ -439,6 +532,7 @@ export type Database = {
           max_attendees?: number | null
           notes?: string | null
           session_date?: string | null
+          trainer_id?: string | null
         }
         Update: {
           course_id?: string
@@ -448,6 +542,7 @@ export type Database = {
           max_attendees?: number | null
           notes?: string | null
           session_date?: string | null
+          trainer_id?: string | null
         }
         Relationships: [
           {
