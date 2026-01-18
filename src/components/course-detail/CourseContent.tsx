@@ -8,7 +8,8 @@ import {
   Users,
   CheckCircle2,
   Circle,
-  Clock
+  Clock,
+  Lock
 } from 'lucide-react';
 
 interface Lesson {
@@ -35,6 +36,9 @@ interface CourseContentProps {
   lessons: Lesson[];
   isEnrolled: boolean;
   onLessonClick: (lesson: Lesson) => void;
+  // Access control props
+  canAccessCourse: boolean;
+  requiresSubscription: boolean;
 }
 
 const lessonTypeIcons: Record<string, React.ReactNode> = {
@@ -51,7 +55,14 @@ const lessonTypeLabels: Record<string, string> = {
   practical: 'Practical',
 };
 
-export function CourseContent({ modules, lessons, isEnrolled, onLessonClick }: CourseContentProps) {
+export function CourseContent({ 
+  modules, 
+  lessons, 
+  isEnrolled, 
+  onLessonClick,
+  canAccessCourse,
+  requiresSubscription,
+}: CourseContentProps) {
   const formatDuration = (minutes: number) => {
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
@@ -67,46 +78,61 @@ export function CourseContent({ modules, lessons, isEnrolled, onLessonClick }: C
   const totalDuration = lessons.reduce((acc, l) => acc + (l.duration_minutes || 0), 0);
   const completedCount = lessons.filter(l => l.completed).length;
 
-  const renderLessonItem = (lesson: Lesson, index: number) => (
-    <div
-      key={lesson.id}
-      className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-        isEnrolled ? 'hover:bg-muted/50 cursor-pointer' : 'opacity-75'
-      }`}
-      onClick={() => isEnrolled && onLessonClick(lesson)}
-    >
-      {/* Completion status */}
-      <div className="flex-shrink-0">
-        {lesson.completed ? (
-          <CheckCircle2 className="h-5 w-5 text-success" />
-        ) : (
-          <Circle className="h-5 w-5 text-muted-foreground" />
-        )}
-      </div>
+  // Determine if lessons should appear locked
+  const showLockedState = requiresSubscription || (!isEnrolled && !canAccessCourse);
 
-      {/* Lesson info */}
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">
-          {index + 1}. {lesson.title}
-        </p>
-        <div className="flex items-center gap-2 mt-1">
-          <Badge variant="outline" className="text-xs px-2 py-0 h-5">
-            {lessonTypeIcons[lesson.lesson_type || 'video']}
-            <span className="ml-1">{lessonTypeLabels[lesson.lesson_type || 'video']}</span>
-          </Badge>
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {formatDuration(lesson.duration_minutes)}
-          </span>
+  const renderLessonItem = (lesson: Lesson, index: number) => {
+    const isLocked = showLockedState;
+    const isClickable = canAccessCourse && isEnrolled;
+
+    return (
+      <div
+        key={lesson.id}
+        className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
+          isClickable ? 'hover:bg-muted/50 cursor-pointer' : 'opacity-75'
+        } ${isLocked ? 'bg-muted/20' : ''}`}
+        onClick={() => isClickable && onLessonClick(lesson)}
+      >
+        {/* Completion status or lock icon */}
+        <div className="flex-shrink-0">
+          {isLocked ? (
+            <Lock className="h-5 w-5 text-muted-foreground" />
+          ) : lesson.completed ? (
+            <CheckCircle2 className="h-5 w-5 text-success" />
+          ) : (
+            <Circle className="h-5 w-5 text-muted-foreground" />
+          )}
         </div>
-      </div>
 
-      {/* Lock indicator for non-enrolled */}
-      {!isEnrolled && (
-        <Badge variant="secondary" className="text-xs">Preview</Badge>
-      )}
-    </div>
-  );
+        {/* Lesson info */}
+        <div className="flex-1 min-w-0">
+          <p className={`font-medium text-sm truncate ${isLocked ? 'text-muted-foreground' : ''}`}>
+            {index + 1}. {lesson.title}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge variant="outline" className="text-xs px-2 py-0 h-5">
+              {lessonTypeIcons[lesson.lesson_type || 'video']}
+              <span className="ml-1">{lessonTypeLabels[lesson.lesson_type || 'video']}</span>
+            </Badge>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {formatDuration(lesson.duration_minutes)}
+            </span>
+          </div>
+        </div>
+
+        {/* Lock/Preview indicator */}
+        {isLocked ? (
+          <Badge variant="secondary" className="text-xs bg-muted">
+            <Lock className="h-3 w-3 mr-1" />
+            Locked
+          </Badge>
+        ) : !isEnrolled ? (
+          <Badge variant="secondary" className="text-xs">Preview</Badge>
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -116,13 +142,19 @@ export function CourseContent({ modules, lessons, isEnrolled, onLessonClick }: C
           <div className="text-sm text-muted-foreground">
             {hasModules ? `${modules.length} modules • ` : ''}
             {totalLessons} lessons • {formatDuration(totalDuration)}
-            {isEnrolled && completedCount > 0 && (
+            {canAccessCourse && completedCount > 0 && (
               <span className="text-success ml-2">
                 ({completedCount}/{totalLessons} complete)
               </span>
             )}
           </div>
         </div>
+        {requiresSubscription && (
+          <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            Subscribe to unlock all lessons
+          </p>
+        )}
       </CardHeader>
       <CardContent className="pt-0">
         {hasModules ? (
@@ -144,7 +176,7 @@ export function CourseContent({ modules, lessons, isEnrolled, onLessonClick }: C
                         <h4 className="font-semibold">{module.title}</h4>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {moduleLessons.length} lessons • {formatDuration(moduleDuration)}
-                          {isEnrolled && moduleCompleted > 0 && (
+                          {canAccessCourse && moduleCompleted > 0 && (
                             <span className="text-success ml-2">
                               ({moduleCompleted}/{moduleLessons.length} complete)
                             </span>
