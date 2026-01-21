@@ -417,6 +417,8 @@ export default function CourseDetail() {
     course?.delivery_type === 'in-person' ||
     lessons.some(l => l.lesson_type === 'practical');
 
+  const hasScenarios = lessons.some(l => l.lesson_type === 'scenario');
+
   // Access control logic
   const isInternal = course?.is_internal ?? true;
   const requiresSubscription = !isInternal && !hasActiveSubscription;
@@ -571,6 +573,7 @@ export default function CourseDetail() {
               lessonCount={lessons.length}
               resourceCount={resources.length}
               hasPractical={hasPractical}
+              hasScenarios={hasScenarios}
               onStart={handleStart}
               onEnroll={handleEnroll}
               enrolling={enrolling}

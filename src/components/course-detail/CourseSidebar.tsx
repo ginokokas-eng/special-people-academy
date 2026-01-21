@@ -11,7 +11,9 @@ import {
   Shield,
   BookOpen,
   Lock,
-  CreditCard
+  CreditCard,
+  BarChart3,
+  Play
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,6 +27,7 @@ interface CourseSidebarProps {
   lessonCount: number;
   resourceCount: number;
   hasPractical: boolean;
+  hasScenarios?: boolean;
   onStart: () => void;
   onEnroll: () => void;
   enrolling: boolean;
@@ -44,6 +47,7 @@ export function CourseSidebar({
   lessonCount,
   resourceCount,
   hasPractical,
+  hasScenarios = false,
   onStart,
   onEnroll,
   enrolling,
@@ -145,7 +149,7 @@ export function CourseSidebar({
         {/* What's included */}
         <div className="space-y-4">
           <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            What's included
+            This course includes
           </h3>
           
           <ul className="space-y-3">
@@ -167,6 +171,13 @@ export function CourseSidebar({
                 <span>{resourceCount} downloadable resources</span>
               </li>
             )}
+
+            {hasScenarios && (
+              <li className="flex items-center gap-3 text-sm">
+                <Play className="h-5 w-5 text-primary flex-shrink-0" />
+                <span>Interactive scenarios</span>
+              </li>
+            )}
             
             {hasPractical && (
               <li className="flex items-center gap-3 text-sm">
@@ -174,6 +185,11 @@ export function CourseSidebar({
                 <span>Practical sign-off session</span>
               </li>
             )}
+            
+            <li className="flex items-center gap-3 text-sm">
+              <BarChart3 className="h-5 w-5 text-primary flex-shrink-0" />
+              <span>Progress tracking</span>
+            </li>
             
             {cpdHours > 0 && (
               <li className="flex items-center gap-3 text-sm">

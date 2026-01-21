@@ -10,7 +10,9 @@ import {
   Users,
   Laptop,
   Star,
-  Heart
+  Heart,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 
 interface CourseHeroProps {
@@ -33,6 +35,7 @@ interface CourseHeroProps {
   onStart: () => void;
   isEnrolled: boolean;
   progress: number;
+  isEssential?: boolean;
 }
 
 const levelColors: Record<string, string> = {
@@ -43,6 +46,7 @@ const levelColors: Record<string, string> = {
 
 const categoryIcons: Record<string, React.ReactNode> = {
   'Care & Support': <Heart className="h-3.5 w-3.5" />,
+  'Health & Safety': <ShieldCheck className="h-3.5 w-3.5" />,
 };
 
 export function CourseHero({
@@ -65,6 +69,7 @@ export function CourseHero({
   onStart,
   isEnrolled,
   progress,
+  isEssential = true,
 }: CourseHeroProps) {
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -116,19 +121,29 @@ export function CourseHero({
   };
 
   return (
-    <div className="gradient-hero text-primary-foreground">
-      <div className="container py-8 lg:py-12">
+    <div className="gradient-hero text-primary-foreground relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-60" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
+      
+      <div className="container py-8 lg:py-12 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left content */}
           <div className="space-y-6">
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30">
+              {isEssential && (
+                <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30 font-semibold">
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Essential
+                </Badge>
+              )}
+              <Badge variant="secondary" className="bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20">
                 {categoryIcons[category] || <Heart className="h-3.5 w-3.5" />}
                 <span className="ml-1.5">{category}</span>
               </Badge>
               {isMandatory && (
-                <Badge variant="secondary" className="bg-warning/20 text-warning border-warning/30">
+                <Badge variant="secondary" className="bg-warning/20 text-warning border-warning/30 font-semibold">
                   Mandatory {isInternal ? '(Internal)' : ''}
                 </Badge>
               )}
