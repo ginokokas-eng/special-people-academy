@@ -115,13 +115,16 @@ export const CoursesSection = () => {
   useEffect(() => {
     const fetchFeaturedCourses = async () => {
       try {
+        // Fetch featured, published courses
+        // Exclude seeded demo/template courses by their predictable UUID patterns
         const { data, error } = await supabase
           .from("courses")
           .select("id, title, category, duration_minutes, level, price, thumbnail_url, delivery_type")
           .eq("is_featured", true)
           .eq("is_published", true)
-          .in("delivery_type", ["practical", "blended"])
-          .order("featured_rank", { ascending: true })
+          .not("id", "like", "c1000001-%")  // Exclude seeded template
+          .not("id", "like", "c2000002-%")  // Exclude seeded template
+          .not("id", "like", "c3000003-%")  // Exclude seeded template
           .order("updated_at", { ascending: false })
           .limit(6);
 
@@ -189,7 +192,7 @@ export const CoursesSection = () => {
           <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
             <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground text-lg">
-              Featured practical courses will appear here once selected by an admin.
+              No featured practical courses yet.
             </p>
             <Button 
               variant="outline" 
