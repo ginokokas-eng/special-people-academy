@@ -5,6 +5,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// UUID validation to prevent database errors and information leakage
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return typeof uuid === 'string' && uuidRegex.test(uuid);
+}
+
 // Generate a unique certificate number
 function generateCertificateNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -25,8 +31,8 @@ Deno.serve(async (req) => {
 
     // Get user from auth header
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Missing or invalid authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -36,30 +42,51 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: authError } = await supabaseAnon.auth.getUser();
-    if (authError || !user) {
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseAnon.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { course_id } = await req.json();
-    
-    if (!course_id) {
-      return new Response(JSON.stringify({ error: 'course_id is required' }), {
+    const userId = claimsData.claims.sub as string;
+
+    // Parse and validate request body
+    let body: { course_id?: unknown };
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`Checking completion for user ${user.id} on course ${course_id}`);
+    const { course_id } = body;
+    
+    if (!course_id || typeof course_id !== 'string') {
+      return new Response(JSON.stringify({ error: 'course_id is required and must be a string' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!isValidUUID(course_id)) {
+      return new Response(JSON.stringify({ error: 'Invalid course_id format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Checking completion for user ${userId} on course ${course_id}`);
 
     // Check if already has certificate
     const { data: existingCert } = await supabaseAdmin
       .from('certificates')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('course_id', course_id)
       .maybeSingle();
 
@@ -92,7 +119,7 @@ Deno.serve(async (req) => {
     const { data: enrollment } = await supabaseAdmin
       .from('enrollments')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('course_id', course_id)
       .maybeSingle();
 
@@ -117,7 +144,7 @@ Deno.serve(async (req) => {
     const { data: progress } = await supabaseAdmin
       .from('lesson_progress')
       .select('lesson_id, completed')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .in('lesson_id', lessons?.map(l => l.id) || []);
 
     const completedLessons = progress?.filter(p => p.completed).length || 0;
@@ -149,7 +176,7 @@ Deno.serve(async (req) => {
         const { data: attempts } = await supabaseAdmin
           .from('quiz_attempts')
           .select('quiz_id, passed')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .in('quiz_id', quizzes.map(q => q.id))
           .eq('passed', true);
 
@@ -183,7 +210,7 @@ Deno.serve(async (req) => {
         const { data: attendance } = await supabaseAdmin
           .from('practical_attendance')
           .select('id, competency_outcome')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .in('session_id', sessions.map(s => s.id))
           .eq('attended', true)
           .eq('competency_outcome', 'pass');
@@ -210,7 +237,7 @@ Deno.serve(async (req) => {
     const { data: newCert, error: certError } = await supabaseAdmin
       .from('certificates')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         course_id: course_id,
         certificate_number: certificateNumber,
       })
@@ -229,7 +256,7 @@ Deno.serve(async (req) => {
     await supabaseAdmin
       .from('enrollments')
       .update({ completed_at: new Date().toISOString() })
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('course_id', course_id);
 
     console.log(`Certificate created: ${certificateNumber}`);
