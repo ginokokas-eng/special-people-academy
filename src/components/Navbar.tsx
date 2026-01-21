@@ -13,9 +13,33 @@ export const Navbar = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      fetchUnreadCount();
+    if (!user) {
+      setUnreadCount(0);
+      return;
     }
+
+    fetchUnreadCount();
+
+    // Subscribe to realtime changes for this user's notifications
+    const channel = supabase
+      .channel('navbar-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'learner_notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchUnreadCount = async () => {
