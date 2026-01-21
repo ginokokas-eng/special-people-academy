@@ -156,6 +156,22 @@ export function QuizContainer({
           });
 
         toast.success('Quiz passed! Lesson marked as complete.');
+
+        // Check if course is now complete and generate certificate
+        try {
+          const { data: completionData, error: completionError } = await supabase.functions.invoke(
+            'check-course-completion',
+            { body: { course_id: courseId } }
+          );
+
+          if (!completionError && completionData?.completed && completionData?.certificate_id) {
+            toast.success('🎉 Congratulations! You have completed the course and earned a certificate!', {
+              duration: 5000,
+            });
+          }
+        } catch (certError) {
+          console.log('Certificate check error (non-fatal):', certError);
+        }
       }
 
       // Refresh attempts
