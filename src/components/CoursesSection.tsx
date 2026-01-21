@@ -115,16 +115,12 @@ export const CoursesSection = () => {
   useEffect(() => {
     const fetchFeaturedCourses = async () => {
       try {
-        // Fetch featured, published courses
-        // Exclude seeded demo/template courses by their predictable UUID patterns
+        // Fetch featured, published courses sorted by most recently updated
         const { data, error } = await supabase
           .from("courses")
           .select("id, title, category, duration_minutes, level, price, thumbnail_url, delivery_type")
           .eq("is_featured", true)
           .eq("is_published", true)
-          .not("id", "like", "c1000001-%")  // Exclude seeded template
-          .not("id", "like", "c2000002-%")  // Exclude seeded template
-          .not("id", "like", "c3000003-%")  // Exclude seeded template
           .order("updated_at", { ascending: false })
           .limit(6);
 
