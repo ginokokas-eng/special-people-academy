@@ -52,6 +52,7 @@ import {
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
+import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
@@ -568,8 +569,9 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="courses" className="w-full">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="offerings">Offerings & Pricing</TabsTrigger>
             <TabsTrigger value="featured">Featured</TabsTrigger>
             <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
@@ -854,6 +856,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="certificates" className="mt-6">
             <CertificateReporting />
+          </TabsContent>
+
+          <TabsContent value="offerings" className="mt-6">
+            <CourseOfferingsManager />
           </TabsContent>
         </Tabs>
 
