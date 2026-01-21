@@ -22,6 +22,7 @@ import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
 import { CourseResources } from '@/components/course-detail/CourseResources';
 import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
+import { CoursePricing, BookingDetails } from '@/components/course-detail/CoursePricing';
 import { Button } from '@/components/ui/button';
 
 interface Lesson {
@@ -96,6 +97,13 @@ interface Course {
   assessment_details: string | null;
   certificate_details: string | null;
   instructor_id: string | null;
+  // Pricing fields
+  price_online: number;
+  price_face_to_face: number;
+  price_group: number;
+  group_max_participants: number;
+  regulated_cert_available: boolean;
+  regulated_cert_fee: number;
 }
 
 interface Enrollment {
@@ -175,6 +183,13 @@ export default function CourseDetail() {
         cpd_hours: courseData.cpd_hours || 0,
         pass_mark: courseData.pass_mark || 70,
         language: courseData.language || 'English',
+        // Pricing fields
+        price_online: courseData.price_online || 0,
+        price_face_to_face: courseData.price_face_to_face || 0,
+        price_group: courseData.price_group || 0,
+        group_max_participants: courseData.group_max_participants || 12,
+        regulated_cert_available: courseData.regulated_cert_available || false,
+        regulated_cert_fee: courseData.regulated_cert_fee || 15,
       };
       
       setCourse(parsedCourse);
@@ -562,7 +577,24 @@ export default function CourseDetail() {
           </div>
 
           {/* Right Column - Sticky Sidebar */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block space-y-6">
+            {/* Pricing Card - show for external courses */}
+            {!course.is_internal && (
+              <CoursePricing
+                priceOnline={course.price_online}
+                priceFaceToFace={course.price_face_to_face}
+                priceGroup={course.price_group}
+                groupMaxParticipants={course.group_max_participants}
+                regulatedCertAvailable={course.regulated_cert_available}
+                regulatedCertFee={course.regulated_cert_fee}
+                deliveryType={course.delivery_type}
+                onBookingRequest={(booking) => {
+                  toast.success(`Booking request submitted: ${booking.bookingType} - £${booking.totalPrice}`);
+                  // TODO: Integrate with contact form or booking system
+                }}
+              />
+            )}
+            
             <CourseSidebar
               isLoggedIn={!!user}
               isEnrolled={!!enrollment}
