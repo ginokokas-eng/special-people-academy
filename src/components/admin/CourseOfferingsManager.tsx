@@ -49,6 +49,7 @@ export function CourseOfferingsManager() {
   const { data: courses, isLoading } = useQuery({
     queryKey: ['admin-course-offerings'],
     queryFn: async () => {
+      // Fetch courses that have active offerings (our 3 core courses)
       const { data, error } = await supabase
         .from('courses')
         .select(`
@@ -66,7 +67,8 @@ export function CourseOfferingsManager() {
             active
           )
         `)
-        .in('title', ['Anaphylaxis & EpiPen Training', 'Epilepsy Training', 'Paediatric First Aid'])
+        .eq('is_published', true)
+        .eq('is_featured', true)
         .order('title');
 
       if (error) throw error;

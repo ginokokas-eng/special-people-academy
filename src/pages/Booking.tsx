@@ -79,7 +79,7 @@ export default function Booking() {
   const [includeRegulatedCert, setIncludeRegulatedCert] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Fetch courses that have offerings
+  // Fetch published & featured courses that have offerings
   const { data: courses = [], isLoading: coursesLoading } = useQuery({
     queryKey: ['booking-courses-with-offerings'],
     queryFn: async () => {
@@ -87,11 +87,7 @@ export default function Booking() {
         .from('courses')
         .select('id, title, description')
         .eq('is_published', true)
-        .in('title', [
-          'Anaphylaxis Awareness & Adrenaline Auto-Injector (EpiPen) Response',
-          'Epilepsy Awareness & Seizure Support', 
-          'Paediatric First Aid (Special People Academy)'
-        ])
+        .eq('is_featured', true)
         .order('title');
       
       if (error) throw error;
