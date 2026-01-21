@@ -62,6 +62,8 @@ interface Course {
   level: string;
   duration_minutes: number;
   is_published: boolean;
+  requires_practical_signoff: boolean;
+  delivery_type: string | null;
   created_at: string;
 }
 
@@ -130,6 +132,8 @@ export default function AdminDashboard() {
     level: 'New Joiner',
     duration_minutes: 0,
     is_published: false,
+    requires_practical_signoff: false,
+    delivery_type: 'online',
   });
 
   // Lesson form state
@@ -226,6 +230,8 @@ export default function AdminDashboard() {
       level: 'New Joiner',
       duration_minutes: 0,
       is_published: false,
+      requires_practical_signoff: false,
+      delivery_type: 'online',
     });
     setCourseDialogOpen(true);
   };
@@ -239,6 +245,8 @@ export default function AdminDashboard() {
       level: course.level,
       duration_minutes: course.duration_minutes,
       is_published: course.is_published,
+      requires_practical_signoff: course.requires_practical_signoff || false,
+      delivery_type: course.delivery_type || 'online',
     });
     setCourseDialogOpen(true);
   };
@@ -261,6 +269,8 @@ export default function AdminDashboard() {
             level: formData.level,
             duration_minutes: formData.duration_minutes,
             is_published: formData.is_published,
+            requires_practical_signoff: formData.requires_practical_signoff,
+            delivery_type: formData.delivery_type,
           })
           .eq('id', editingCourse.id);
 
@@ -276,6 +286,8 @@ export default function AdminDashboard() {
             level: formData.level,
             duration_minutes: formData.duration_minutes,
             is_published: formData.is_published,
+            requires_practical_signoff: formData.requires_practical_signoff,
+            delivery_type: formData.delivery_type,
             created_by: user?.id,
           });
 
@@ -626,15 +638,48 @@ export default function AdminDashboard() {
                           </Select>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="duration">Duration (minutes)</Label>
-                        <Input
-                          id="duration"
-                          type="number"
-                          value={formData.duration_minutes}
-                          onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 0 })}
-                        />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="duration">Duration (minutes)</Label>
+                          <Input
+                            id="duration"
+                            type="number"
+                            value={formData.duration_minutes}
+                            onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 0 })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="delivery_type">Delivery Type</Label>
+                          <Select
+                            value={formData.delivery_type}
+                            onValueChange={(value) => setFormData({ ...formData, delivery_type: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="online">Online Only</SelectItem>
+                              <SelectItem value="blended">Blended (Online + Practical)</SelectItem>
+                              <SelectItem value="classroom">Classroom Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
+                      {(formData.delivery_type === 'blended' || formData.delivery_type === 'classroom') && (
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div className="space-y-0.5">
+                            <Label htmlFor="practical_signoff">Require Practical Sign-off</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Learners must pass practical assessment to complete
+                            </p>
+                          </div>
+                          <Switch
+                            id="practical_signoff"
+                            checked={formData.requires_practical_signoff}
+                            onCheckedChange={(checked) => setFormData({ ...formData, requires_practical_signoff: checked })}
+                          />
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <Label htmlFor="published">Publish immediately</Label>
                         <Switch
@@ -663,7 +708,7 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableHead>Title</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead>Level</TableHead>
+                      <TableHead>Delivery</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -678,10 +723,22 @@ export default function AdminDashboard() {
                     ) : (
                       courses.map((course) => (
                         <TableRow key={course.id}>
-                          <TableCell className="font-medium">{course.title}</TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex flex-col gap-1">
+                              {course.title}
+                              {course.requires_practical_signoff && (
+                                <Badge variant="outline" className="w-fit text-xs bg-primary/10 text-primary border-primary/20">
+                                  <GraduationCap className="h-3 w-3 mr-1" />
+                                  Practical Required
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell>{course.category}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">{course.level}</Badge>
+                            <Badge variant="outline" className="capitalize">
+                              {course.delivery_type || 'online'}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant={course.is_published ? 'default' : 'secondary'}>

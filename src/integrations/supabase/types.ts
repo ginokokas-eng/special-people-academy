@@ -155,6 +155,7 @@ export type Database = {
           practical_details: string | null
           price: number | null
           requirements: Json | null
+          requires_practical_signoff: boolean | null
           subtitle: string | null
           target_audience: Json | null
           thumbnail_url: string | null
@@ -187,6 +188,7 @@ export type Database = {
           practical_details?: string | null
           price?: number | null
           requirements?: Json | null
+          requires_practical_signoff?: boolean | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
@@ -219,6 +221,7 @@ export type Database = {
           practical_details?: string | null
           price?: number | null
           requirements?: Json | null
+          requires_practical_signoff?: boolean | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
