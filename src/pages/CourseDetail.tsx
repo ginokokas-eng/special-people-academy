@@ -20,6 +20,7 @@ import { CourseReviews } from '@/components/course-detail/CourseReviews';
 import { CourseFirstAid } from '@/components/course-detail/CourseFirstAid';
 import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
 import { CourseResources } from '@/components/course-detail/CourseResources';
+import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { Button } from '@/components/ui/button';
 
@@ -128,7 +129,11 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
-
+  
+  // Progress tracking state
+  const [quizProgress, setQuizProgress] = useState({ total: 0, passed: 0 });
+  const [practicalProgress, setPracticalProgress] = useState({ required: false, completed: false });
+  const [certificateId, setCertificateId] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (id) {
       fetchCourseData();
@@ -255,6 +260,76 @@ export default function CourseDetail() {
           .maybeSingle();
 
         setEnrollment(enrollmentData);
+
+        // Fetch quiz progress - get quiz lessons and check attempts
+        const quizLessonIds = (lessonsData || [])
+          .filter(l => l.lesson_type === 'quiz')
+          .map(l => l.id);
+        
+        if (quizLessonIds.length > 0) {
+          // Get quizzes for these lessons
+          const { data: quizzesData } = await supabase
+            .from('quizzes')
+            .select('id, lesson_id')
+            .in('lesson_id', quizLessonIds);
+
+          const quizIds = (quizzesData || []).map(q => q.id);
+          
+          if (quizIds.length > 0) {
+            // Get passed attempts
+            const { data: attemptsData } = await supabase
+              .from('quiz_attempts')
+              .select('quiz_id, passed')
+              .eq('user_id', user.id)
+              .in('quiz_id', quizIds)
+              .eq('passed', true);
+
+            const passedQuizIds = new Set((attemptsData || []).map(a => a.quiz_id));
+            setQuizProgress({
+              total: quizIds.length,
+              passed: passedQuizIds.size,
+            });
+          } else {
+            setQuizProgress({ total: 0, passed: 0 });
+          }
+        } else {
+          setQuizProgress({ total: 0, passed: 0 });
+        }
+
+        // Check practical completion
+        const requiresPractical = parsedCourse.delivery_type === 'blended' || 
+          (parsedCourse as any).requires_practical_signoff;
+        
+        if (requiresPractical) {
+          const { data: attendanceData } = await supabase
+            .from('practical_attendance')
+            .select('competency_outcome, session_id')
+            .eq('user_id', user.id);
+          
+          // Check if any attendance is for this course's sessions
+          const sessionIds = (sessionsData || []).map(s => s.id);
+          const relevantAttendance = (attendanceData || []).filter(
+            a => sessionIds.includes(a.session_id) && a.competency_outcome === 'pass'
+          );
+          
+          setPracticalProgress({
+            required: true,
+            completed: relevantAttendance.length > 0,
+          });
+        } else {
+          setPracticalProgress({ required: false, completed: false });
+        }
+
+        // Check if user already has a certificate
+        const { data: certData } = await supabase
+          .from('certificates')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('course_id', id)
+          .maybeSingle();
+        
+        setCertificateId(certData?.id);
+
       } else {
         setLessons((lessonsData || []).map(lesson => ({ 
           ...lesson, 
@@ -262,6 +337,9 @@ export default function CourseDetail() {
           completed: false 
         })));
         setEnrollment(null);
+        setQuizProgress({ total: 0, passed: 0 });
+        setPracticalProgress({ required: false, completed: false });
+        setCertificateId(undefined);
       }
     } catch (error) {
       console.error('Error fetching course:', error);
@@ -402,6 +480,23 @@ export default function CourseDetail() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Progress Tracker - only show when enrolled */}
+            {enrollment && canAccessCourse && (
+              <CourseProgressTracker
+                courseId={course.id}
+                userId={user!.id}
+                lessonProgress={{
+                  total: lessons.length,
+                  completed: lessons.filter(l => l.completed).length,
+                }}
+                quizProgress={quizProgress}
+                practicalProgress={practicalProgress}
+                hasCertificate={course.has_certificate}
+                isCompleted={!!enrollment.completed_at}
+                certificateId={certificateId}
+              />
+            )}
+
             {/* A. Overview, What you'll learn, Who this is for, Requirements */}
             <CourseOverview
               overview={course.overview || undefined}
