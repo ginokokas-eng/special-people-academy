@@ -143,6 +143,7 @@ export type Database = {
           has_certificate: boolean | null
           id: string
           instructor_id: string | null
+          is_featured: boolean | null
           is_internal: boolean | null
           is_mandatory: boolean | null
           is_published: boolean | null
@@ -176,6 +177,7 @@ export type Database = {
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null
+          is_featured?: boolean | null
           is_internal?: boolean | null
           is_mandatory?: boolean | null
           is_published?: boolean | null
@@ -209,6 +211,7 @@ export type Database = {
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null
+          is_featured?: boolean | null
           is_internal?: boolean | null
           is_mandatory?: boolean | null
           is_published?: boolean | null
