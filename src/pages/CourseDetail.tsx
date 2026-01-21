@@ -17,6 +17,8 @@ import { CoursePractical } from '@/components/course-detail/CoursePractical';
 import { CourseAssessment } from '@/components/course-detail/CourseAssessment';
 import { CourseFAQs } from '@/components/course-detail/CourseFAQs';
 import { CourseReviews } from '@/components/course-detail/CourseReviews';
+import { CourseFirstAid } from '@/components/course-detail/CourseFirstAid';
+import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { Button } from '@/components/ui/button';
 
@@ -369,6 +371,7 @@ export default function CourseDetail() {
         subtitle={course.subtitle || undefined}
         level={course.level}
         deliveryType={course.delivery_type}
+        category={course.category}
         isMandatory={course.is_mandatory}
         isInternal={course.is_internal}
         hasCertificate={course.has_certificate}
@@ -376,6 +379,9 @@ export default function CourseDetail() {
         lastUpdated={course.last_updated || undefined}
         language={course.language}
         thumbnailUrl={course.thumbnail_url || undefined}
+        averageRating={averageRating}
+        reviewCount={reviews.length}
+        learnerCount={0}
         onStart={handleStart}
         isEnrolled={!!enrollment}
         progress={progress}
@@ -405,7 +411,13 @@ export default function CourseDetail() {
               requiresSubscription={requiresSubscription}
             />
 
-            {/* F. Practical Session Details */}
+            {/* F. Seizure First-Aid Summary (category-specific) */}
+            <CourseFirstAid category={course.category} />
+
+            {/* G. Individual Support & Care Plan Alignment */}
+            <CourseCarePlan category={course.category} />
+
+            {/* H. Practical Session Details */}
             {hasPractical && (
               <CoursePractical
                 practicalDetails={course.practical_details || undefined}
@@ -413,7 +425,7 @@ export default function CourseDetail() {
               />
             )}
 
-            {/* G & H. Assessment & Certificate */}
+            {/* I. Assessment & Certificate */}
             <CourseAssessment
               passMark={course.pass_mark}
               assessmentDetails={course.assessment_details || undefined}
