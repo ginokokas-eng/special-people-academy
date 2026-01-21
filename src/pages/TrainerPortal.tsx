@@ -246,6 +246,20 @@ export default function TrainerPortal() {
           });
       }
 
+      // If passed, send congratulations and trigger certificate check (via edge function)
+      if (attendanceForm.competency_outcome === 'pass') {
+        // Send success notification to learner
+        await supabase
+          .from('learner_notifications')
+          .insert({
+            user_id: selectedLearner.user_id,
+            title: 'Practical Assessment Passed!',
+            message: `Congratulations! You have successfully passed the practical assessment for "${selectedSession.course_title}". Your competency has been signed off.`,
+            related_session_id: selectedSession.id,
+            related_course_id: selectedSession.course_id,
+          });
+      }
+
       toast.success('Attendance updated successfully');
       setAttendanceDialogOpen(false);
       fetchLearners(selectedSession);

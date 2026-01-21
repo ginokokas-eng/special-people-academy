@@ -2,3 +2,6 @@ project_id = "qyroautvyzfsgtgwjcur"
 
 [functions.generate-certificate]
 verify_jwt = false
+
+[functions.check-course-completion]
+verify_jwt = false
