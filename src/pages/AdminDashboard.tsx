@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
+import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
@@ -569,6 +570,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="courses" className="w-full">
           <TabsList>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="featured">Featured</TabsTrigger>
             <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
@@ -791,6 +793,10 @@ export default function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="featured" className="mt-6">
+            <FeaturedCoursesManager />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
