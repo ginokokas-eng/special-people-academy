@@ -14,6 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_participants: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_participants_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          offering_id: string
+          organization_name: string | null
+          participants_count: number
+          regulated_certification: boolean | null
+          regulated_fee_per_person_gbp: number | null
+          regulated_fee_total_gbp: number | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          subtotal_gbp: number
+          total_gbp: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          offering_id: string
+          organization_name?: string | null
+          participants_count?: number
+          regulated_certification?: boolean | null
+          regulated_fee_per_person_gbp?: number | null
+          regulated_fee_total_gbp?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          subtotal_gbp: number
+          total_gbp: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_type?: Database["public"]["Enums"]["booking_type"]
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          offering_id?: string
+          organization_name?: string | null
+          participants_count?: number
+          regulated_certification?: boolean | null
+          regulated_fee_per_person_gbp?: number | null
+          regulated_fee_total_gbp?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          subtotal_gbp?: number
+          total_gbp?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -42,6 +161,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_offerings: {
+        Row: {
+          active: boolean | null
+          base_price_gbp: number
+          course_id: string
+          created_at: string | null
+          id: string
+          max_participants: number | null
+          offering_type: Database["public"]["Enums"]["booking_offering_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          base_price_gbp: number
+          course_id: string
+          created_at?: string | null
+          id?: string
+          max_participants?: number | null
+          offering_type: Database["public"]["Enums"]["booking_offering_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          base_price_gbp?: number
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          max_participants?: number | null
+          offering_type?: Database["public"]["Enums"]["booking_offering_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_offerings_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
@@ -800,6 +960,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "learner" | "trainer"
+      booking_offering_type:
+        | "individual_online"
+        | "individual_face_to_face"
+        | "individual_blended"
+        | "group_face_to_face"
+      booking_status: "draft" | "pending_payment" | "confirmed" | "cancelled"
+      booking_type: "individual" | "group"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -928,6 +1095,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "learner", "trainer"],
+      booking_offering_type: [
+        "individual_online",
+        "individual_face_to_face",
+        "individual_blended",
+        "group_face_to_face",
+      ],
+      booking_status: ["draft", "pending_payment", "confirmed", "cancelled"],
+      booking_type: ["individual", "group"],
     },
   },
 } as const
