@@ -141,6 +141,7 @@ export type Database = {
           duration_minutes: number | null
           faqs: Json | null
           featured_rank: number | null
+          group_max_participants: number | null
           has_certificate: boolean | null
           id: string
           instructor_id: string | null
@@ -156,6 +157,11 @@ export type Database = {
           pass_mark: number | null
           practical_details: string | null
           price: number | null
+          price_face_to_face: number | null
+          price_group: number | null
+          price_online: number | null
+          regulated_cert_available: boolean | null
+          regulated_cert_fee: number | null
           requirements: Json | null
           requires_practical_signoff: boolean | null
           subtitle: string | null
@@ -176,6 +182,7 @@ export type Database = {
           duration_minutes?: number | null
           faqs?: Json | null
           featured_rank?: number | null
+          group_max_participants?: number | null
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null
@@ -191,6 +198,11 @@ export type Database = {
           pass_mark?: number | null
           practical_details?: string | null
           price?: number | null
+          price_face_to_face?: number | null
+          price_group?: number | null
+          price_online?: number | null
+          regulated_cert_available?: boolean | null
+          regulated_cert_fee?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           subtitle?: string | null
@@ -211,6 +223,7 @@ export type Database = {
           duration_minutes?: number | null
           faqs?: Json | null
           featured_rank?: number | null
+          group_max_participants?: number | null
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null
@@ -226,6 +239,11 @@ export type Database = {
           pass_mark?: number | null
           practical_details?: string | null
           price?: number | null
+          price_face_to_face?: number | null
+          price_group?: number | null
+          price_online?: number | null
+          regulated_cert_available?: boolean | null
+          regulated_cert_fee?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           subtitle?: string | null
