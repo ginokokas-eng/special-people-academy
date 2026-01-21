@@ -26,6 +26,27 @@ const carePlanContent = {
         text: 'Know when and how to escalate concerns within your care team'
       }
     ]
+  },
+  'Health & Safety': {
+    title: 'Individual Action Plans & Care Plan Alignment',
+    description: 'This course supports allergy management protocols and ensures responses are tailored to individual care plans and risk assessments.',
+    points: [
+      {
+        icon: FileText,
+        title: 'Allergy Action Plans',
+        text: 'Understand how to read and follow individual allergy action plans and emergency protocols'
+      },
+      {
+        icon: Users,
+        title: 'Person-centred response',
+        text: 'Learn to adapt your response based on the individual\'s known triggers, medication, and preferences'
+      },
+      {
+        icon: ClipboardList,
+        title: 'Incident documentation',
+        text: 'Know how to accurately record allergic reactions and report according to your organisation\'s policy'
+      }
+    ]
   }
 };
 

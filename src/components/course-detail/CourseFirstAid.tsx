@@ -20,6 +20,20 @@ const firstAidContent = {
       'Call 999 if seizure lasts more than 5 minutes'
     ],
     emergency: 'Call emergency services if: first seizure, seizure over 5 mins, repeated seizures, injury, or breathing difficulties.'
+  },
+  'Health & Safety': {
+    title: 'Anaphylaxis Emergency Response',
+    icon: ShieldCheck,
+    steps: [
+      'Recognise signs: swelling, breathing difficulty, skin changes, collapse',
+      'Call 999 immediately and state "anaphylaxis"',
+      'Locate the person\'s adrenaline auto-injector (EpiPen)',
+      'Remove safety cap and firmly press into outer mid-thigh',
+      'Hold in place for 10 seconds',
+      'Position person correctly: sitting up if breathing difficulty, or lying with legs raised',
+      'Stay with them and monitor—give second dose after 5-15 mins if no improvement'
+    ],
+    emergency: 'Always call 999 for anaphylaxis. The person must go to hospital even if they feel better—a second reaction can occur hours later.'
   }
 };
 
