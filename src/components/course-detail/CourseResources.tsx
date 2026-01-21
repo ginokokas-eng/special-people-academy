@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,9 @@ import {
   Loader2,
   FileSpreadsheet,
   FileImage,
-  File
+  File,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,6 +39,7 @@ export function CourseResources({
   isEnrolled, 
   canAccess 
 }: CourseResourcesProps) {
+  const { user } = useAuth();
   const [downloading, setDownloading] = useState<string | null>(null);
 
   if (resources.length === 0) {
@@ -65,6 +69,11 @@ export function CourseResources({
   };
 
   const handleDownload = async (resource: Resource) => {
+    if (!user) {
+      toast.error('Please sign in to download resources');
+      return;
+    }
+
     if (!canAccess || !isEnrolled) {
       toast.error('Please enroll in this course to download resources');
       return;
@@ -73,34 +82,33 @@ export function CourseResources({
     setDownloading(resource.id);
 
     try {
-      // If resource has a direct URL, open it
-      if (resource.url) {
-        window.open(resource.url, '_blank');
-        return;
-      }
-
-      // Otherwise, try to get from storage
-      // File path format: {course_id}/{filename}
-      const fileName = `${resource.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`;
-      const filePath = `${courseId}/${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from('course-resources')
-        .createSignedUrl(filePath, 60); // 60 seconds expiry
+      // Call the secure download edge function
+      const { data, error } = await supabase.functions.invoke('download-resource', {
+        body: { 
+          resource_id: resource.id, 
+          course_id: courseId 
+        }
+      });
 
       if (error) {
-        // File might not exist yet in storage
-        toast.info('This resource is coming soon. Check back later.');
-        console.log('Storage error:', error);
+        throw error;
+      }
+
+      if (data.pending) {
+        toast.info(data.message || 'This resource is being prepared. Check back soon.');
         return;
       }
 
-      // Open the signed URL in a new tab
-      window.open(data.signedUrl, '_blank');
-      toast.success('Download started');
-    } catch (error) {
+      if (data.url) {
+        // Open the signed URL in a new tab
+        window.open(data.url, '_blank');
+        toast.success(`Downloading: ${data.title || resource.title}`);
+      } else {
+        toast.error('Unable to generate download link');
+      }
+    } catch (error: any) {
       console.error('Error downloading resource:', error);
-      toast.error('Failed to download resource');
+      toast.error(error.message || 'Failed to download resource');
     } finally {
       setDownloading(null);
     }
@@ -115,18 +123,22 @@ export function CourseResources({
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">
+          Download these resources to support your learning and practice.
+        </p>
+        
         <div className="space-y-3">
           {resources.map((resource) => (
             <div
               key={resource.id}
               className={`flex items-start gap-4 p-4 rounded-lg border transition-colors ${
                 canAccess && isEnrolled 
-                  ? 'hover:bg-muted/50 cursor-pointer' 
-                  : 'bg-muted/20'
+                  ? 'hover:bg-muted/50 cursor-pointer hover:border-primary/30' 
+                  : 'bg-muted/20 opacity-75'
               }`}
-              onClick={() => handleDownload(resource)}
+              onClick={() => canAccess && isEnrolled && handleDownload(resource)}
             >
-              <div className="flex-shrink-0 p-2 bg-muted rounded-lg">
+              <div className="flex-shrink-0 p-2.5 bg-muted rounded-lg">
                 {getResourceIcon(resource.resource_type)}
               </div>
               
@@ -152,6 +164,7 @@ export function CourseResources({
                       e.stopPropagation();
                       handleDownload(resource);
                     }}
+                    className="hover:bg-primary/10 hover:text-primary"
                   >
                     {downloading === resource.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -160,21 +173,39 @@ export function CourseResources({
                     )}
                   </Button>
                 ) : (
-                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <div className="p-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        {!canAccess || !isEnrolled ? (
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-sm text-muted-foreground">
-              <Lock className="h-4 w-4 inline-block mr-1 -mt-0.5" />
-              Enroll in this course to download resources
-            </p>
+        {(!canAccess || !isEnrolled) && (
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-dashed">
+            <div className="flex items-center gap-3">
+              <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Resources locked
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Enroll in this course to download these resources
+                </p>
+              </div>
+            </div>
           </div>
-        ) : null}
+        )}
+
+        {canAccess && isEnrolled && (
+          <div className="mt-4 p-3 bg-success/10 rounded-lg border border-success/20">
+            <div className="flex items-center gap-2 text-sm text-success">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+              <span>You have full access to all course resources</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
