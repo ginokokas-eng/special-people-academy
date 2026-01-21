@@ -140,6 +140,7 @@ export type Database = {
           description: string | null
           duration_minutes: number | null
           faqs: Json | null
+          featured_rank: number | null
           has_certificate: boolean | null
           id: string
           instructor_id: string | null
@@ -174,6 +175,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           faqs?: Json | null
+          featured_rank?: number | null
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null
@@ -208,6 +210,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           faqs?: Json | null
+          featured_rank?: number | null
           has_certificate?: boolean | null
           id?: string
           instructor_id?: string | null

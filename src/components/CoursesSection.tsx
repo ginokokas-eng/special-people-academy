@@ -121,6 +121,7 @@ export const CoursesSection = () => {
           .eq("is_featured", true)
           .eq("is_published", true)
           .in("delivery_type", ["practical", "blended"])
+          .order("featured_rank", { ascending: false })
           .limit(6);
 
         if (error) throw error;
