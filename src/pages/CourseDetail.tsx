@@ -317,6 +317,12 @@ export default function CourseDetail() {
     }
   };
 
+  const handleQuizClick = (lesson: Lesson) => {
+    if (enrollment) {
+      navigate(`/courses/${id}/quiz?lesson=${lesson.id}`);
+    }
+  };
+
   const progress = lessons.length > 0 
     ? Math.round((lessons.filter(l => l.completed).length / lessons.length) * 100)
     : 0;
@@ -407,6 +413,7 @@ export default function CourseDetail() {
               lessons={lessons}
               isEnrolled={!!enrollment}
               onLessonClick={handleLessonClick}
+              onQuizClick={handleQuizClick}
               canAccessCourse={!!canAccessCourse}
               requiresSubscription={requiresSubscription}
             />
