@@ -11,86 +11,126 @@ function isValidUUID(uuid: string): boolean {
   return typeof uuid === 'string' && uuidRegex.test(uuid);
 }
 
-// PDF generation using basic text/template approach
+// PDF generation using SVG template with Special People Academy branding
 function generateCertificatePDF(data: {
   learnerName: string;
   courseTitle: string;
   completionDate: string;
   certificateNumber: string;
   instructorName: string;
+  cpdHours?: number;
 }): string {
-  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName } = data;
+  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName, cpdHours } = data;
   
-  // Generate SVG certificate that can be embedded in HTML
+  // Generate SVG certificate with purple-led and green accent branding
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 842 595" width="842" height="595">
   <defs>
+    <!-- Background gradient - subtle purple to white -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f5f3ff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ecfdf5;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#faf5ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0fdf4;stop-opacity:1" />
     </linearGradient>
+    
+    <!-- Primary purple gradient -->
     <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
     </linearGradient>
+    
+    <!-- Accent green gradient -->
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34d399;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Corner decorative pattern -->
+    <pattern id="cornerPattern" patternUnits="userSpaceOnUse" width="40" height="40">
+      <circle cx="20" cy="20" r="2" fill="#7c3aed" opacity="0.1"/>
+    </pattern>
   </defs>
   
-  <!-- Background -->
+  <!-- Main background -->
   <rect width="842" height="595" fill="url(#bgGradient)"/>
   
-  <!-- Border -->
-  <rect x="20" y="20" width="802" height="555" fill="none" stroke="#7c3aed" stroke-width="3" rx="8"/>
-  <rect x="30" y="30" width="782" height="535" fill="none" stroke="#10b981" stroke-width="1" rx="6"/>
+  <!-- Decorative corner patterns -->
+  <rect x="0" y="0" width="150" height="150" fill="url(#cornerPattern)"/>
+  <rect x="692" y="0" width="150" height="150" fill="url(#cornerPattern)"/>
+  <rect x="0" y="445" width="150" height="150" fill="url(#cornerPattern)"/>
+  <rect x="692" y="445" width="150" height="150" fill="url(#cornerPattern)"/>
   
-  <!-- Top decorative bar -->
-  <rect x="20" y="20" width="802" height="60" fill="url(#purpleGradient)" rx="8"/>
-  <rect x="20" y="60" width="802" height="20" fill="url(#purpleGradient)"/>
+  <!-- Outer border frame -->
+  <rect x="25" y="25" width="792" height="545" fill="none" stroke="#7c3aed" stroke-width="3" rx="12"/>
   
-  <!-- Logo/Brand -->
-  <text x="421" y="55" font-family="Georgia, serif" font-size="24" fill="white" text-anchor="middle" font-weight="bold">Special People Academy</text>
+  <!-- Inner accent border -->
+  <rect x="35" y="35" width="772" height="525" fill="none" stroke="#10b981" stroke-width="1.5" rx="10"/>
   
-  <!-- Certificate of Completion -->
-  <text x="421" y="130" font-family="Georgia, serif" font-size="14" fill="#6b7280" text-anchor="middle" letter-spacing="4">CERTIFICATE OF COMPLETION</text>
+  <!-- Top header bar with gradient -->
+  <rect x="25" y="25" width="792" height="75" fill="url(#purpleGradient)" rx="12"/>
+  <rect x="25" y="85" width="792" height="15" fill="url(#purpleGradient)"/>
   
-  <!-- Decorative line -->
-  <line x1="271" y1="150" x2="571" y2="150" stroke="#10b981" stroke-width="2"/>
+  <!-- Green accent line below header -->
+  <rect x="25" y="100" width="792" height="4" fill="url(#greenGradient)"/>
   
-  <!-- This certifies that -->
-  <text x="421" y="190" font-family="Arial, sans-serif" font-size="14" fill="#4b5563" text-anchor="middle">This is to certify that</text>
+  <!-- Academy Logo/Name in header -->
+  <text x="421" y="55" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="white" text-anchor="middle" font-weight="bold" letter-spacing="1">Special People Academy</text>
+  <text x="421" y="80" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="rgba(255,255,255,0.9)" text-anchor="middle" letter-spacing="2">EXCELLENCE IN PROFESSIONAL TRAINING</text>
   
-  <!-- Learner Name -->
-  <text x="421" y="240" font-family="Georgia, serif" font-size="36" fill="#1f2937" text-anchor="middle" font-weight="bold">${escapeXml(learnerName)}</text>
+  <!-- Certificate Title -->
+  <text x="421" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#6b7280" text-anchor="middle" letter-spacing="6" font-weight="500">CERTIFICATE OF COMPLETION</text>
   
-  <!-- Decorative underline for name -->
-  <line x1="171" y1="255" x2="671" y2="255" stroke="#7c3aed" stroke-width="1"/>
+  <!-- Decorative divider -->
+  <line x1="300" y1="170" x2="542" y2="170" stroke="url(#greenGradient)" stroke-width="2"/>
+  <circle cx="421" cy="170" r="4" fill="#10b981"/>
   
-  <!-- has successfully completed -->
-  <text x="421" y="290" font-family="Arial, sans-serif" font-size="14" fill="#4b5563" text-anchor="middle">has successfully completed the course</text>
+  <!-- "This is to certify that" -->
+  <text x="421" y="210" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">This is to certify that</text>
+  
+  <!-- Learner Name (main focus) -->
+  <text x="421" y="265" font-family="Georgia, 'Times New Roman', serif" font-size="38" fill="#1f2937" text-anchor="middle" font-weight="bold">${escapeXml(learnerName)}</text>
+  
+  <!-- Decorative line under name -->
+  <line x1="150" y1="285" x2="692" y2="285" stroke="#7c3aed" stroke-width="1" opacity="0.5"/>
+  
+  <!-- "has successfully completed" -->
+  <text x="421" y="320" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">has successfully completed the course</text>
   
   <!-- Course Title -->
-  <text x="421" y="340" font-family="Georgia, serif" font-size="24" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(courseTitle)}</text>
+  <text x="421" y="365" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(courseTitle)}</text>
   
-  <!-- Date -->
-  <text x="421" y="390" font-family="Arial, sans-serif" font-size="14" fill="#4b5563" text-anchor="middle">Completed on ${escapeXml(completionDate)}</text>
+  <!-- Completion Date -->
+  <text x="421" y="405" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6b7280" text-anchor="middle">Completed on ${escapeXml(completionDate)}</text>
   
-  <!-- Instructor section -->
-  <text x="200" y="470" font-family="Georgia, serif" font-size="18" fill="#1f2937" text-anchor="middle" font-style="italic">${escapeXml(instructorName)}</text>
-  <line x1="100" y1="480" x2="300" y2="480" stroke="#4b5563" stroke-width="1"/>
-  <text x="200" y="500" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Course Instructor</text>
+  <!-- CPD Hours badge (if applicable) -->
+  ${cpdHours ? `
+  <rect x="370" y="420" width="102" height="28" rx="14" fill="#10b981" opacity="0.1"/>
+  <rect x="370" y="420" width="102" height="28" rx="14" fill="none" stroke="#10b981" stroke-width="1"/>
+  <text x="421" y="439" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#10b981" text-anchor="middle" font-weight="600">${cpdHours} CPD Hours</text>
+  ` : ''}
   
-  <!-- Certificate ID -->
-  <text x="642" y="470" font-family="monospace" font-size="12" fill="#6b7280" text-anchor="middle">${escapeXml(certificateNumber)}</text>
-  <line x1="542" y1="480" x2="742" y2="480" stroke="#4b5563" stroke-width="1"/>
-  <text x="642" y="500" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Certificate ID</text>
+  <!-- Bottom section with signatures -->
+  <!-- Instructor signature area -->
+  <text x="200" y="485" font-family="Georgia, 'Times New Roman', serif" font-size="18" fill="#1f2937" text-anchor="middle" font-style="italic">${escapeXml(instructorName)}</text>
+  <line x1="90" y1="495" x2="310" y2="495" stroke="#6b7280" stroke-width="1"/>
+  <text x="200" y="515" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">Course Instructor</text>
   
-  <!-- Footer -->
-  <rect x="20" y="535" width="802" height="40" fill="url(#purpleGradient)"/>
-  <rect x="20" y="535" width="802" height="5" fill="#10b981"/>
-  <text x="421" y="560" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle">Special People Academy • Excellence in Professional Training</text>
+  <!-- Certificate ID area -->
+  <text x="642" y="485" font-family="'Courier New', monospace" font-size="11" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(certificateNumber)}</text>
+  <line x1="532" y1="495" x2="752" y2="495" stroke="#6b7280" stroke-width="1"/>
+  <text x="642" y="515" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">Certificate ID</text>
   
-  <!-- Decorative elements -->
-  <circle cx="70" cy="100" r="20" fill="#10b981" opacity="0.2"/>
-  <circle cx="772" cy="100" r="20" fill="#7c3aed" opacity="0.2"/>
+  <!-- Footer bar -->
+  <rect x="25" y="545" width="792" height="25" fill="url(#purpleGradient)" rx="0"/>
+  <rect x="25" y="540" width="792" height="5" fill="url(#greenGradient)"/>
+  <text x="421" y="562" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="white" text-anchor="middle" letter-spacing="1">Special People Academy • Professional Training & Development • www.specialpeopleacademy.com</text>
+  
+  <!-- Bottom corners rounding fix -->
+  <rect x="25" y="545" width="12" height="25" fill="url(#purpleGradient)"/>
+  <rect x="805" y="545" width="12" height="25" fill="url(#purpleGradient)"/>
+  
+  <!-- Decorative seal/badge -->
+  <circle cx="421" cy="440" r="0" fill="none" stroke="#7c3aed" stroke-width="0"/>
 </svg>`;
 
   return svgContent;
@@ -172,7 +212,7 @@ Deno.serve(async (req) => {
 
     console.log(`Generating certificate PDF for certificate_id: ${certificate_id}`);
 
-    // Fetch certificate with course details
+    // Fetch certificate with course details including CPD hours
     const { data: certificate, error: certError } = await supabaseAdmin
       .from('certificates')
       .select(`
@@ -184,6 +224,7 @@ Deno.serve(async (req) => {
         course:courses(
           id,
           title,
+          cpd_hours,
           instructor:instructors(full_name)
         )
       `)
@@ -236,15 +277,17 @@ Deno.serve(async (req) => {
       .single();
 
     const learnerName = profile?.full_name || 'Learner';
-    const courseTitle = (certificate.course as any)?.title || 'Course';
-    const instructorName = (certificate.course as any)?.instructor?.full_name || 'Elisa Bianco';
+    const course = certificate.course as any;
+    const courseTitle = course?.title || 'Course';
+    const instructorName = course?.instructor?.full_name || 'Tamar Bartaia';
+    const cpdHours = course?.cpd_hours || undefined;
     const completionDate = new Date(certificate.issued_at).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
 
-    console.log(`Generating PDF for: ${learnerName}, ${courseTitle}`);
+    console.log(`Generating PDF for: ${learnerName}, ${courseTitle}, Instructor: ${instructorName}`);
 
     // Generate SVG certificate
     const svgContent = generateCertificatePDF({
@@ -253,6 +296,7 @@ Deno.serve(async (req) => {
       completionDate,
       certificateNumber: certificate.certificate_number,
       instructorName,
+      cpdHours,
     });
 
     // Store SVG as a file (can be viewed/printed as PDF)
