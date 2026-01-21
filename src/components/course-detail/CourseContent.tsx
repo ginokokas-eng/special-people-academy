@@ -9,7 +9,9 @@ import {
   CheckCircle2,
   Circle,
   Clock,
-  Lock
+  Lock,
+  BookOpen,
+  Gamepad2
 } from 'lucide-react';
 
 interface Lesson {
@@ -47,6 +49,8 @@ const lessonTypeIcons: Record<string, React.ReactNode> = {
   pdf: <FileText className="h-4 w-4" />,
   quiz: <HelpCircle className="h-4 w-4" />,
   practical: <Users className="h-4 w-4" />,
+  text: <BookOpen className="h-4 w-4" />,
+  scenario: <Gamepad2 className="h-4 w-4" />,
 };
 
 const lessonTypeLabels: Record<string, string> = {
@@ -54,6 +58,8 @@ const lessonTypeLabels: Record<string, string> = {
   pdf: 'PDF',
   quiz: 'Quiz',
   practical: 'Practical',
+  text: 'Text',
+  scenario: 'Scenario',
 };
 
 export function CourseContent({ 
