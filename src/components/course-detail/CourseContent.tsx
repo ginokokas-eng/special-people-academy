@@ -36,6 +36,7 @@ interface CourseContentProps {
   lessons: Lesson[];
   isEnrolled: boolean;
   onLessonClick: (lesson: Lesson) => void;
+  onQuizClick?: (lesson: Lesson) => void;
   // Access control props
   canAccessCourse: boolean;
   requiresSubscription: boolean;
@@ -60,6 +61,7 @@ export function CourseContent({
   lessons, 
   isEnrolled, 
   onLessonClick,
+  onQuizClick,
   canAccessCourse,
   requiresSubscription,
 }: CourseContentProps) {
@@ -84,14 +86,24 @@ export function CourseContent({
   const renderLessonItem = (lesson: Lesson, index: number) => {
     const isLocked = showLockedState;
     const isClickable = canAccessCourse && isEnrolled;
+    const isQuiz = lesson.lesson_type === 'quiz';
+
+    const handleClick = () => {
+      if (!isClickable) return;
+      if (isQuiz && onQuizClick) {
+        onQuizClick(lesson);
+      } else {
+        onLessonClick(lesson);
+      }
+    };
 
     return (
       <div
         key={lesson.id}
         className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
           isClickable ? 'hover:bg-muted/50 cursor-pointer' : 'opacity-75'
-        } ${isLocked ? 'bg-muted/20' : ''}`}
-        onClick={() => isClickable && onLessonClick(lesson)}
+        } ${isLocked ? 'bg-muted/20' : ''} ${isQuiz && isClickable ? 'hover:bg-primary/5 border border-transparent hover:border-primary/20' : ''}`}
+        onClick={handleClick}
       >
         {/* Completion status or lock icon */}
         <div className="flex-shrink-0">
