@@ -19,6 +19,7 @@ import { CourseFAQs } from '@/components/course-detail/CourseFAQs';
 import { CourseReviews } from '@/components/course-detail/CourseReviews';
 import { CourseFirstAid } from '@/components/course-detail/CourseFirstAid';
 import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
+import { CourseResources } from '@/components/course-detail/CourseResources';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { Button } from '@/components/ui/button';
 
@@ -105,7 +106,10 @@ interface Enrollment {
 interface Resource {
   id: string;
   title: string;
+  description: string | null;
   resource_type: string;
+  url: string | null;
+  order_index: number;
 }
 
 export default function CourseDetail() {
@@ -438,6 +442,14 @@ export default function CourseDetail() {
               assessmentDetails={course.assessment_details || undefined}
               certificateDetails={course.certificate_details || undefined}
               hasPractical={hasPractical}
+            />
+
+            {/* Resources Section */}
+            <CourseResources
+              resources={resources}
+              courseId={course.id}
+              isEnrolled={!!enrollment}
+              canAccess={!!canAccessCourse}
             />
 
             {/* I. Instructor */}
