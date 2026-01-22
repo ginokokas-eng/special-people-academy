@@ -279,7 +279,15 @@ Deno.serve(async (req) => {
     const learnerName = profile?.full_name || 'Learner';
     const course = certificate.course as any;
     const courseTitle = course?.title || 'Course';
-    const instructorName = course?.instructor?.full_name || 'Tamar Bartaia';
+    
+    // Determine instructor name - PBS courses default to Elisa Bianco
+    let instructorName = course?.instructor?.full_name;
+    if (!instructorName) {
+      const isPBSCourse = courseTitle.toLowerCase().includes('pbs') || 
+                          courseTitle.toLowerCase().includes('positive behaviour');
+      instructorName = isPBSCourse ? 'Elisa Bianco' : 'Special People Academy';
+    }
+    
     const cpdHours = course?.cpd_hours || undefined;
     const completionDate = new Date(certificate.issued_at).toLocaleDateString('en-GB', {
       day: 'numeric',
