@@ -3,95 +3,137 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { FAQSection } from "@/components/marketing/FAQSection";
 import { CTABanner } from "@/components/marketing/CTABanner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
-  Database, 
-  Users, 
+  ShieldCheck, 
+  Video, 
   Calendar, 
-  FileSpreadsheet, 
-  MessageSquare, 
-  Video,
-  Shield,
-  Zap,
-  Settings
+  FolderOpen, 
+  BarChart3, 
+  MessageSquare,
+  FileSpreadsheet,
+  Webhook,
+  Code,
+  Lock,
+  Phone,
+  Settings,
+  TestTube,
+  Rocket,
+  ArrowRight
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const integrations = [
+const integrationCategories = [
   {
-    icon: Users,
-    name: "HR Systems",
-    description: "Connect with popular HR platforms to automatically sync employee data, track training compliance, and streamline onboarding.",
-    examples: "BambooHR, Workday, SAP SuccessFactors"
-  },
-  {
-    icon: Calendar,
-    name: "Calendar Apps",
-    description: "Sync training schedules with learners' calendars for automated reminders and easy scheduling of practical sessions.",
-    examples: "Google Calendar, Outlook, Apple Calendar"
-  },
-  {
-    icon: Database,
-    name: "Learning Management Systems",
-    description: "Integrate with existing LMS platforms to centralize training records and provide a unified learning experience.",
-    examples: "Moodle, Canvas, Blackboard"
-  },
-  {
-    icon: FileSpreadsheet,
-    name: "Reporting & Analytics",
-    description: "Export data to your preferred analytics tools for custom reporting, compliance tracking, and insights.",
-    examples: "Power BI, Tableau, Google Data Studio"
-  },
-  {
-    icon: MessageSquare,
-    name: "Communication Tools",
-    description: "Send notifications and updates through the channels your team already uses for seamless communication.",
-    examples: "Slack, Microsoft Teams, Email"
+    icon: ShieldCheck,
+    title: "Authentication & SSO",
+    description: "Secure access with single sign-on using SAML or OIDC protocols. Simplify login for staff and reduce password fatigue.",
+    examples: "Google Workspace, Microsoft Entra ID, Okta, OneLogin"
   },
   {
     icon: Video,
-    name: "Video Conferencing",
-    description: "Launch virtual training sessions directly from the platform with integrated video conferencing tools.",
-    examples: "Zoom, Google Meet, Microsoft Teams"
+    title: "Video & Virtual Sessions",
+    description: "Connect live training sessions and embed video resources directly into learning plans.",
+    examples: "Zoom, Microsoft Teams, Google Meet"
+  },
+  {
+    icon: Calendar,
+    title: "Calendar & Scheduling",
+    description: "Keep training sessions consistent with calendar sync. Schedule reminders and track attendance.",
+    examples: "Google Calendar, Microsoft Outlook, Apple Calendar"
+  },
+  {
+    icon: FolderOpen,
+    title: "Storage & Content",
+    description: "Organize PDFs, videos, and resources in your existing cloud storage and link them to lessons.",
+    examples: "Google Drive, OneDrive, Dropbox, SharePoint"
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics & Reporting",
+    description: "Export progress data and visualize learner outcomes in your preferred business intelligence tools.",
+    examples: "Power BI, Google Data Studio, Tableau"
+  },
+  {
+    icon: MessageSquare,
+    title: "Messaging & Collaboration",
+    description: "Keep teams aligned with notifications and updates in the tools they already use daily.",
+    examples: "Slack, Microsoft Teams, Email"
   }
 ];
 
 const apiFeatures = [
   {
-    icon: Zap,
-    title: "RESTful API",
-    description: "A comprehensive API that allows you to manage users, courses, enrollments, and reporting programmatically."
+    icon: FileSpreadsheet,
+    title: "CSV Export",
+    description: "Download learner profiles, progress reports, and activity logs in standard CSV format for use in spreadsheets or other systems."
   },
   {
-    icon: Shield,
-    title: "Secure Authentication",
-    description: "OAuth 2.0 and API key authentication options to keep your integrations secure and compliant."
+    icon: Webhook,
+    title: "Webhooks",
+    description: "Receive real-time notifications when key events occur—like lesson completions or milestone achievements—to trigger workflows in external systems.",
+    badge: "Enterprise"
+  },
+  {
+    icon: Code,
+    title: "REST API",
+    description: "Programmatically access learner data, manage enrollments, and sync information with your existing systems through our documented API.",
+    badge: "Enterprise"
+  },
+  {
+    icon: Lock,
+    title: "Data Portability",
+    description: "You own your data. Export everything at any time in standard formats. We support full data portability and never lock you in."
+  }
+];
+
+const implementationSteps = [
+  {
+    icon: Phone,
+    step: "1",
+    title: "Discovery Call",
+    description: "We learn about your current systems, workflows, and integration requirements to plan the best approach."
   },
   {
     icon: Settings,
-    title: "Webhooks",
-    description: "Real-time notifications for course completions, certificate issuance, and other key events in your training program."
+    step: "2",
+    title: "Configuration & Setup",
+    description: "Our team configures connections, maps data fields, and sets up authentication in a staging environment."
+  },
+  {
+    icon: TestTube,
+    step: "3",
+    title: "Testing & Validation",
+    description: "We run thorough tests to ensure data flows correctly and meets your security requirements."
+  },
+  {
+    icon: Rocket,
+    step: "4",
+    title: "Go Live & Monitor",
+    description: "Launch with confidence and ongoing monitoring to ensure everything runs smoothly."
   }
 ];
 
 const faqs = [
   {
-    question: "How do I set up an integration?",
-    answer: "Most integrations can be configured directly from your admin dashboard. Navigate to Settings > Integrations, select the platform you want to connect, and follow the setup wizard. For enterprise integrations, our support team can assist with custom configurations."
+    question: "Do you support Single Sign-On (SSO)?",
+    answer: "Yes. Our Organization and Enterprise plans support SAML 2.0 and OIDC protocols, which work with most common identity providers. This allows your staff and caregivers to log in using their existing organizational credentials without managing separate passwords."
   },
   {
-    question: "Is there a cost for using integrations?",
-    answer: "Basic integrations are included in all plans at no additional cost. Some advanced integrations and custom API access may require a Team or Enterprise plan. Check our pricing page for details on what's included in each plan."
+    question: "Can we export progress reports?",
+    answer: "Absolutely. All plans include the ability to export progress data in PDF and CSV formats. You can generate reports for individual learners, groups, or your entire program. Enterprise plans also include scheduled automated exports."
   },
   {
-    question: "Can I build custom integrations?",
-    answer: "Yes! Enterprise customers have access to our full API and can build custom integrations to connect Special People Academy with any system. We also offer professional services for organizations that need help building custom solutions."
+    question: "Can we integrate with our existing LMS?",
+    answer: "We can work with many learning management systems through our API and export capabilities. During the discovery call, we'll assess compatibility with your specific LMS and recommend the best integration approach—whether that's data sync, embedded views, or complementary use."
   },
   {
-    question: "How is data synced between systems?",
-    answer: "Data syncs happen in real-time for most integrations. When a learner completes a course, that information is immediately available in connected systems. For bulk data operations, we offer scheduled syncs to minimize system load."
+    question: "Do you have an API?",
+    answer: "Yes. Our REST API is available on Enterprise plans and provides programmatic access to learner data, progress tracking, and enrollment management. We provide comprehensive documentation and support during implementation."
   },
   {
-    question: "What security measures protect integrated data?",
-    answer: "All data transfers use TLS encryption. We follow the principle of least privilege, only requesting access to the data needed for each integration. Our platform is SOC 2 compliant and undergoes regular security audits."
+    question: "How long does integration setup take?",
+    answer: "Most standard integrations (SSO, calendar sync) can be configured within 1–2 weeks. More complex setups involving custom API work or multiple systems typically take 3–4 weeks. We'll provide a timeline estimate during your discovery call."
   }
 ];
 
@@ -99,89 +141,172 @@ export default function Integrations() {
   return (
     <MarketingLayout
       title="Integrations"
-      description="Connect Special People Academy with your existing tools. Integrate with HR systems, calendars, LMS platforms, and more for seamless training management."
+      description="Connect SPA with the tools you already use—SSO, video conferencing, calendars, storage, and reporting."
     >
       <PageHero
-        badge="Integrations"
-        title="Connect Your Entire Training Ecosystem"
-        subtitle="Special People Academy works seamlessly with the tools you already use. Automate workflows, sync data, and create a unified training experience."
+        badge="Connect Your Tools"
+        title="Integrations that fit into your workflow"
+        subtitle="Bring Special People Academy into the tools your team already uses—so adoption is easier and reporting is smoother."
         primaryCTA={{ text: "Request a Demo", href: "/contact" }}
-        secondaryCTA={{ text: "View API Docs", href: "/help-center" }}
+        secondaryCTA={{ text: "Contact Us", href: "/contact" }}
       />
 
-      {/* Integrations Grid */}
+      {/* Integration Categories */}
       <section className="py-16 md:py-24 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Popular Integrations
+              Integration Categories
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Connect with the platforms your organization already relies on for a seamless experience.
+              Connect SPA with the systems your organization relies on. We focus on compatibility with widely-used platforms.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {integrations.map((integration, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <integration.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>{integration.name}</CardTitle>
-                  <CardDescription>{integration.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium">Examples: </span>
-                    {integration.examples}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {integrationCategories.map((category, index) => {
+              const Icon = category.icon;
+              return (
+                <Card key={index} className="h-full">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{category.title}</CardTitle>
+                    <CardDescription className="text-base">
+                      {category.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">Common examples include:</span>{" "}
+                      {category.examples}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            Specific vendor compatibility depends on your plan and requirements. Contact us to confirm options for your setup.
+          </p>
+        </div>
+      </section>
+
+      {/* API & Data Export */}
+      <section className="py-16 md:py-24 px-6 bg-muted/30">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              API & Data Export
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Your data belongs to you. We make it easy to export, connect, and integrate with your existing systems.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {apiFeatures.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={index} className="relative">
+                  {feature.badge && (
+                    <div className="absolute top-4 right-4">
+                      <span className="text-xs font-medium px-2 py-1 bg-primary/10 text-primary rounded-full">
+                        {feature.badge}
+                      </span>
+                    </div>
+                  )}
+                  <CardHeader>
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5 text-accent" />
+                    </div>
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 p-6 bg-background rounded-xl border text-center">
+            <p className="text-foreground font-medium mb-2">
+              Data Ownership Commitment
+            </p>
+            <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+              We believe in data portability and transparency. You can export your complete data—learner profiles, 
+              progress records, and resources—at any time in standard formats. No lock-in, no hidden restrictions.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* API Section */}
-      <section className="py-16 md:py-24 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+      {/* Implementation Support */}
+      <section className="py-16 md:py-24 px-6">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Build Custom Integrations
+              Implementation Support
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our developer-friendly API gives you full control to create custom workflows and integrations.
+              Our team guides you through every step of the integration process, from initial planning to go-live and beyond.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {apiFeatures.map((feature, index) => (
-              <div key={index} className="text-center p-6">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <feature.icon className="h-8 w-8 text-primary" />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {implementationSteps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <div key={index} className="text-center">
+                  <div className="relative mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon className="h-7 w-7 text-primary" />
+                    <span className="absolute -top-1 -right-1 w-6 h-6 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                      {step.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {feature.title}
+              );
+            })}
+          </div>
+
+          <div className="mt-12 p-6 bg-muted/50 rounded-xl border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">
+                  Security Review Support
                 </h3>
-                <p className="text-muted-foreground">
-                  {feature.description}
+                <p className="text-muted-foreground text-sm">
+                  For organizations with security requirements, we provide documentation and support for your IT and compliance review process.
                 </p>
               </div>
-            ))}
+              <Button asChild variant="outline" className="flex-shrink-0">
+                <Link to="/contact">
+                  Request Security Info
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      <FAQSection 
+      <FAQSection
         title="Integration FAQs"
-        faqs={faqs} 
+        subtitle="Common questions about connecting SPA with your existing tools."
+        faqs={faqs}
       />
 
       <CTABanner
-        title="Need a Custom Integration?"
-        subtitle="Our team can help you connect Special People Academy with any system your organization uses."
-        primaryCTA={{ text: "Talk to Our Team", href: "/contact" }}
+        title="Need a specific integration?"
+        subtitle="Tell us what tools you use—we'll confirm options and recommend the best path for your organization."
+        primaryCTA={{ text: "Contact Integrations Team", href: "/contact" }}
       />
     </MarketingLayout>
   );
