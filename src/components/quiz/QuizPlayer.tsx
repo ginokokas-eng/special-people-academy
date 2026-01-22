@@ -228,9 +228,27 @@ export function QuizPlayer({
         <CardTitle className="text-lg mt-4">{quizTitle}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Scenario indicator */}
+        {currentQuestion.question.startsWith('SCENARIO:') && (
+          <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/30">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Scenario Question
+          </Badge>
+        )}
+
         {/* Question */}
-        <div className="p-4 bg-muted/30 rounded-lg">
-          <p className="font-medium text-lg">{currentQuestion.question}</p>
+        <div className={cn(
+          "p-4 rounded-lg",
+          currentQuestion.question.startsWith('SCENARIO:') 
+            ? "bg-accent/5 border border-accent/20" 
+            : "bg-muted/30"
+        )}>
+          <p className="font-medium text-lg">
+            {currentQuestion.question.startsWith('SCENARIO:') 
+              ? currentQuestion.question.replace('SCENARIO:', '').trim()
+              : currentQuestion.question
+            }
+          </p>
         </div>
 
         {/* Options */}
