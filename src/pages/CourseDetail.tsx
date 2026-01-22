@@ -19,6 +19,7 @@ import { CourseFAQs } from '@/components/course-detail/CourseFAQs';
 import { CourseReviews } from '@/components/course-detail/CourseReviews';
 import { CourseFirstAid } from '@/components/course-detail/CourseFirstAid';
 import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
+import { CourseSafetyGovernance } from '@/components/course-detail/CourseSafetyGovernance';
 import { CourseResources } from '@/components/course-detail/CourseResources';
 import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
@@ -534,7 +535,14 @@ export default function CourseDetail() {
               requiresSubscription={requiresSubscription}
             />
 
-            {/* F. Seizure First-Aid Summary (category-specific) */}
+            {/* F. Safety & Governance (PBS courses) */}
+            <CourseSafetyGovernance 
+              category={course.category}
+              deliveryType={course.delivery_type}
+              courseTitle={course.title}
+            />
+
+            {/* F2. Seizure First-Aid Summary (category-specific) */}
             <CourseFirstAid category={course.category} />
 
             {/* G. Individual Support & Care Plan Alignment */}
