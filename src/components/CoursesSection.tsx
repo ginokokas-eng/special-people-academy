@@ -4,15 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Clock, Users, Star, Play, BookOpen, ArrowRight, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+interface CourseOffering {
+  base_price_gbp: number;
+  active: boolean;
+}
+
 interface Course {
   id: string;
   title: string;
   category: string;
   duration_minutes: number;
   level: string;
-  price: number;
   thumbnail_url: string | null;
   delivery_type: string;
+  course_offerings: CourseOffering[];
 }
 
 interface CourseCardProps {
@@ -21,7 +26,7 @@ interface CourseCardProps {
   category: string;
   duration: string;
   level: "New Joiner" | "Enhanced" | "Complex";
-  price: number;
+  priceDisplay: string;
   image: string;
   deliveryType: string;
 }
@@ -32,7 +37,7 @@ const CourseCard = ({
   category,
   duration,
   level,
-  price,
+  priceDisplay,
   image,
   deliveryType,
 }: CourseCardProps) => {
@@ -93,10 +98,9 @@ const CourseCard = ({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-foreground">
-              {price === 0 ? "Free" : `£${price}`}
+            <span className="text-xl font-bold text-foreground">
+              {priceDisplay}
             </span>
-            {price === 0 && <span className="text-sm text-success font-medium">Internal</span>}
           </div>
           <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             View Course
@@ -115,17 +119,17 @@ export const CoursesSection = () => {
   useEffect(() => {
     const fetchFeaturedCourses = async () => {
       try {
-        // Fetch featured, published courses sorted by most recently updated
+        // Fetch featured, published courses with their offerings
         const { data, error } = await supabase
           .from("courses")
-          .select("id, title, category, duration_minutes, level, price, thumbnail_url, delivery_type")
+          .select("id, title, category, duration_minutes, level, thumbnail_url, delivery_type, course_offerings(base_price_gbp, active)")
           .eq("is_featured", true)
           .eq("is_published", true)
           .order("updated_at", { ascending: false })
           .limit(6);
 
         if (error) throw error;
-        setCourses(data || []);
+        setCourses((data as Course[]) || []);
       } catch (err) {
         console.error("Error fetching featured courses:", err);
       } finally {
@@ -142,6 +146,14 @@ export const CoursesSection = () => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  };
+
+  const getPriceDisplay = (offerings: CourseOffering[]) => {
+    const activeOfferings = offerings?.filter(o => o.active) || [];
+    if (activeOfferings.length === 0) return "Pricing TBC";
+    const minPrice = Math.min(...activeOfferings.map(o => o.base_price_gbp));
+    if (minPrice === 0) return "Free";
+    return `From £${minPrice}`;
   };
 
   return (
@@ -212,7 +224,7 @@ export const CoursesSection = () => {
                   category={course.category}
                   duration={formatDuration(course.duration_minutes)}
                   level={(course.level as "New Joiner" | "Enhanced" | "Complex") || "New Joiner"}
-                  price={course.price || 0}
+                  priceDisplay={getPriceDisplay(course.course_offerings)}
                   image={course.thumbnail_url || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop"}
                   deliveryType={course.delivery_type}
                 />
