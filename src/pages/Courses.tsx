@@ -25,6 +25,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CourseOffering {
+  base_price_gbp: number;
+  active: boolean;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -34,7 +39,7 @@ interface Course {
   duration_minutes: number;
   level: string;
   is_published: boolean;
-  price: number;
+  course_offerings: CourseOffering[];
   enrollmentCount?: number;
 }
 
@@ -63,7 +68,7 @@ export default function Courses() {
     try {
       const { data, error } = await supabase
         .from('courses')
-        .select('*')
+        .select('*, course_offerings(base_price_gbp, active)')
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
@@ -107,6 +112,14 @@ export default function Courses() {
     if (hours === 0) return `${mins}m`;
     if (mins === 0) return `${hours}h`;
     return `${hours}h ${mins}m`;
+  };
+
+  const getPriceDisplay = (offerings: CourseOffering[]) => {
+    const activeOfferings = offerings?.filter(o => o.active) || [];
+    if (activeOfferings.length === 0) return "Pricing TBC";
+    const minPrice = Math.min(...activeOfferings.map(o => o.base_price_gbp));
+    if (minPrice === 0) return "Free";
+    return `From £${minPrice}`;
   };
 
   if (loading) {
@@ -223,7 +236,7 @@ export default function Courses() {
                   </p>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xl font-bold text-foreground">
-                      {(course.price ?? 0) > 0 ? `£${course.price}` : 'Free'}
+                      {getPriceDisplay(course.course_offerings)}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
