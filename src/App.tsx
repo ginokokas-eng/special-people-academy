@@ -24,6 +24,7 @@ import Pricing from "./pages/Pricing";
 import Integrations from "./pages/Integrations";
 import Enterprise from "./pages/Enterprise";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import HelpCenter from "./pages/HelpCenter";
 import Webinars from "./pages/Webinars";
 import CaseStudies from "./pages/CaseStudies";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/integrations" element={<Integrations />} />
               <Route path="/enterprise" element={<Enterprise />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/help-center" element={<HelpCenter />} />
               <Route path="/webinars" element={<Webinars />} />
               <Route path="/case-studies" element={<CaseStudies />} />
