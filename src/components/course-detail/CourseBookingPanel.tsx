@@ -138,9 +138,27 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
   const handleParticipantsChange = (value: string) => {
     const num = parseInt(value) || 1;
     // Hard validation: 1-12 for groups
+    if (num > maxParticipants) {
+      toast.error(`Group bookings are capped at ${maxParticipants} participants.`);
+    }
     const validated = Math.min(Math.max(1, num), maxParticipants);
     setParticipantsCount(validated);
   };
+
+  // Validation error state
+  const getValidationError = () => {
+    if (!selectedOffering) return null;
+    
+    if (!isGroupOffering && participantsCount !== 1) {
+      return 'Individual bookings are limited to 1 participant.';
+    }
+    if (isGroupOffering && (participantsCount < 1 || participantsCount > maxParticipants)) {
+      return `Group bookings are capped at ${maxParticipants} participants.`;
+    }
+    return null;
+  };
+
+  const validationError = getValidationError();
 
   const handleBookNow = async () => {
     if (!user) {
@@ -151,6 +169,16 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
 
     if (!selectedOffering) {
       toast.error('Please select a training option');
+      return;
+    }
+
+    // App-level validation with clear messages
+    if (!isGroupOffering && participantsCount !== 1) {
+      toast.error('Individual bookings are limited to 1 participant.');
+      return;
+    }
+    if (isGroupOffering && participantsCount > maxParticipants) {
+      toast.error(`Group bookings are capped at ${maxParticipants} participants.`);
       return;
     }
 
