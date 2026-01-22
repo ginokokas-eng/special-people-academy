@@ -1,82 +1,96 @@
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
-import { CTABanner } from "@/components/marketing/CTABanner";
+import { FAQSection } from "@/components/marketing/FAQSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Video, ArrowRight } from "lucide-react";
+import { Calendar, Clock, User, Video, Play, ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Webinar data structure
 const upcomingWebinars = [
   {
     id: "1",
-    title: "Designing Accessible Training: A Masterclass",
-    description: "Join our lead instructional designer for a deep dive into creating training content that works for everyone. Learn practical techniques for accessibility that go beyond compliance.",
-    host: "Dr. Sarah Mitchell",
-    date: "2026-02-15",
-    time: "2:00 PM GMT",
-    duration: "60 minutes",
+    title: "Setting Up a Skill Plan in 20 Minutes",
+    description: "A fast, practical walkthrough of creating a learner's first skill plan—from goal setting to milestone tracking. Perfect for new users.",
+    host: "[Host Name]",
+    date: "[Date TBD]",
+    time: "[Time TBD]",
+    duration: "20 minutes",
     registrationLink: "#"
   },
   {
     id: "2",
-    title: "Measuring Training ROI for Care Organizations",
-    description: "Discover how to demonstrate the value of your training investment. We'll cover metrics that matter, data collection strategies, and presenting results to stakeholders.",
-    host: "James Thompson",
-    date: "2026-02-22",
-    time: "11:00 AM GMT",
-    duration: "45 minutes",
+    title: "Progress Tracking That's Kind and Useful",
+    description: "Learn how to collect meaningful data without creating pressure. We'll cover what to measure, how often, and how to share progress constructively.",
+    host: "[Host Name]",
+    date: "[Date TBD]",
+    time: "[Time TBD]",
+    duration: "30 minutes",
     registrationLink: "#"
   },
   {
     id: "3",
-    title: "Supporting Neurodivergent Learners in the Workplace",
-    description: "Practical strategies for creating training programs that support learners with autism, ADHD, dyslexia, and other neurodivergent conditions.",
-    host: "Emily Chen",
-    date: "2026-03-05",
-    time: "3:00 PM GMT",
-    duration: "60 minutes",
+    title: "Making Lessons Accessible for Different Learning Styles",
+    description: "Practical strategies for creating content that works for visual, auditory, and kinesthetic learners—plus tips for supporting diverse needs.",
+    host: "[Host Name]",
+    date: "[Date TBD]",
+    time: "[Time TBD]",
+    duration: "30 minutes",
     registrationLink: "#"
   }
 ];
 
-const pastWebinars = [
+const onDemandWebinars = [
   {
     id: "4",
-    title: "Introduction to Special People Academy",
-    description: "A comprehensive overview of our platform, features, and how organizations can get the most from our training solutions.",
-    host: "Maria Garcia",
-    date: "2026-01-10",
-    duration: "45 minutes",
+    title: "Intro to Special People Academy",
+    description: "A comprehensive overview of the platform, core features, and how organizations use SPA to deliver inclusive training.",
+    host: "SPA Team",
+    duration: "25 minutes",
     watchLink: "#"
   },
   {
     id: "5",
-    title: "First Aid Training Best Practices for Care Settings",
-    description: "Expert guidance on delivering effective first aid training in care environments, with a focus on practical skills and confidence building.",
-    host: "James Thompson",
-    date: "2025-12-15",
-    duration: "60 minutes",
+    title: "Templates for Life Skills Programs",
+    description: "Explore our pre-built templates for daily living, social skills, and community participation. Learn how to customize them for your learners.",
+    host: "SPA Team",
+    duration: "20 minutes",
     watchLink: "#"
   },
   {
     id: "6",
-    title: "Building a Culture of Continuous Learning",
-    description: "How to foster engagement with training and create an organizational culture where learning is valued and supported.",
-    host: "Dr. Sarah Mitchell",
-    date: "2025-12-01",
-    duration: "45 minutes",
+    title: "Collaboration Between Home and School",
+    description: "Best practices for sharing progress, aligning goals, and maintaining consistency across home and educational settings.",
+    host: "SPA Team",
+    duration: "30 minutes",
     watchLink: "#"
   },
   {
     id: "7",
-    title: "Compliance Training That Actually Works",
-    description: "Move beyond checkbox compliance to create training that genuinely changes behavior and protects your organization.",
-    host: "Emily Chen",
-    date: "2025-11-20",
-    duration: "50 minutes",
+    title: "Reporting for Program Leaders",
+    description: "How to generate, interpret, and present progress reports to stakeholders—from weekly summaries to board-level overviews.",
+    host: "SPA Team",
+    duration: "25 minutes",
     watchLink: "#"
+  }
+];
+
+const faqs = [
+  {
+    question: "Are webinars free?",
+    answer: "Yes, all webinars are free to attend. We offer them as a resource for educators, caregivers, and program leaders—whether or not you're a current SPA customer."
+  },
+  {
+    question: "Will I get a recording?",
+    answer: "Yes. All registrants receive a recording within 48 hours of the live session. If you can't attend live, register anyway and we'll send you the replay. On-demand webinars are available immediately."
+  },
+  {
+    question: "Can my team attend?",
+    answer: "Absolutely. You can share the registration link with colleagues, or register multiple people from your organization. For large groups, consider scheduling a private session—contact us to arrange."
+  },
+  {
+    question: "Do you provide certificates of attendance?",
+    answer: "We can provide a certificate of attendance upon request for those who attend live sessions in full. Contact us after the webinar with your name and email, and we'll send a certificate for your records."
   }
 ];
 
@@ -84,35 +98,33 @@ export default function Webinars() {
   return (
     <MarketingLayout
       title="Webinars"
-      description="Join live webinars and watch on-demand sessions from Special People Academy. Expert insights on inclusive training, accessibility, and workforce development."
+      description="Live and on-demand sessions on inclusive training, progress tracking, and program setup."
     >
       <PageHero
         badge="Webinars"
-        title="Learn from the Experts"
-        subtitle="Join our live webinars or watch on-demand sessions covering inclusive training, accessibility best practices, and effective learning strategies."
-        primaryCTA={{ text: "Request a Demo", href: "/contact" }}
+        title="Learn together—live or on demand"
+        subtitle="Short, practical sessions for caregivers, educators, and program leaders."
       />
 
       {/* Upcoming Webinars */}
       <section className="py-16 md:py-24 px-6">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-5xl">
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Upcoming Webinars</h2>
-            <p className="text-muted-foreground">Register now to join our live sessions.</p>
+            <div className="flex items-center gap-3 mb-2">
+              <Calendar className="h-6 w-6 text-primary" />
+              <h2 className="text-3xl font-bold text-foreground">Upcoming Webinars</h2>
+            </div>
+            <p className="text-muted-foreground">Register now to join live. Can't make it? We'll send you the recording.</p>
           </div>
           
           <div className="space-y-6">
             {upcomingWebinars.map((webinar) => (
               <Card key={webinar.id} className="overflow-hidden">
                 <div className="md:flex">
-                  <div className="md:w-48 bg-primary/10 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="text-4xl font-bold text-primary">
-                      {new Date(webinar.date).getDate()}
-                    </div>
-                    <div className="text-sm text-primary font-medium">
-                      {new Date(webinar.date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
-                    </div>
-                    <Badge className="mt-2">Live</Badge>
+                  <div className="md:w-52 bg-primary/10 flex flex-col items-center justify-center p-6 text-center">
+                    <Badge className="mb-3">Live Session</Badge>
+                    <div className="text-sm text-primary font-medium mb-1">{webinar.date}</div>
+                    <div className="text-sm text-muted-foreground">{webinar.time}</div>
                   </div>
                   <div className="flex-1 p-6">
                     <CardTitle className="text-xl mb-2">{webinar.title}</CardTitle>
@@ -120,20 +132,16 @@ export default function Webinars() {
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        <span>{webinar.host}</span>
+                        <span>Host: {webinar.host}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span>{webinar.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
                         <span>{webinar.duration}</span>
                       </div>
                     </div>
                     <Button asChild>
                       <Link to={webinar.registrationLink}>
-                        Register Now
+                        Register
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
@@ -145,18 +153,21 @@ export default function Webinars() {
         </div>
       </section>
 
-      {/* Past Webinars */}
+      {/* On-Demand Webinars */}
       <section className="py-16 md:py-24 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-5xl">
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">On-Demand Webinars</h2>
-            <p className="text-muted-foreground">Watch previous sessions at your convenience.</p>
+            <div className="flex items-center gap-3 mb-2">
+              <Play className="h-6 w-6 text-primary" />
+              <h2 className="text-3xl font-bold text-foreground">On-Demand Webinars</h2>
+            </div>
+            <p className="text-muted-foreground">Watch anytime. No registration required.</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-6">
-            {pastWebinars.map((webinar) => (
-              <Card key={webinar.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
+            {onDemandWebinars.map((webinar) => (
+              <Card key={webinar.id} className="hover:shadow-md transition-shadow flex flex-col">
+                <CardHeader className="flex-grow">
                   <div className="flex items-center gap-2 mb-2">
                     <Video className="h-4 w-4 text-primary" />
                     <Badge variant="secondary">On-Demand</Badge>
@@ -173,8 +184,8 @@ export default function Webinars() {
                     </div>
                     <Button variant="outline" size="sm" asChild>
                       <Link to={webinar.watchLink}>
+                        <Play className="mr-1 h-3 w-3" />
                         Watch Now
-                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
@@ -185,27 +196,32 @@ export default function Webinars() {
         </div>
       </section>
 
-      {/* Host a Webinar */}
-      <section className="py-16 md:py-20 px-6">
+      <FAQSection
+        title="Webinar FAQs"
+        subtitle="Common questions about our live and on-demand sessions."
+        faqs={faqs}
+      />
+
+      {/* Private Sessions CTA */}
+      <section className="py-16 md:py-20 px-6 bg-primary text-primary-foreground">
         <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            Want to Host a Webinar?
+          <div className="w-16 h-16 rounded-full bg-primary-foreground/10 flex items-center justify-center mx-auto mb-6">
+            <Users className="h-8 w-8" />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            Want a session for your organization?
           </h2>
-          <p className="text-muted-foreground mb-8">
-            We're always looking for experts to share their knowledge with our community. If you have insights on inclusive training, accessibility, or workforce development, we'd love to hear from you.
+          <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">
+            We offer private webinars and training sessions tailored to your team's needs. Perfect for onboarding, professional development, or introducing SPA to stakeholders.
           </p>
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/contact">Submit a Topic</Link>
+          <Button asChild size="lg" variant="secondary">
+            <Link to="/contact">
+              Request a Private Session
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </section>
-
-      <CTABanner
-        title="Ready to Experience Special People Academy?"
-        subtitle="See how our platform can transform your organization's training program."
-        primaryCTA={{ text: "Request a Demo", href: "/contact" }}
-        secondaryCTA={{ text: "Start Free Trial", href: "/auth" }}
-      />
     </MarketingLayout>
   );
 }
