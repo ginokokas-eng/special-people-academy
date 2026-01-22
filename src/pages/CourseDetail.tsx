@@ -23,7 +23,7 @@ import { CourseSafetyGovernance } from '@/components/course-detail/CourseSafetyG
 import { CourseResources } from '@/components/course-detail/CourseResources';
 import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
-import { CoursePricing, BookingDetails } from '@/components/course-detail/CoursePricing';
+import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
 
 interface Lesson {
@@ -586,20 +586,11 @@ export default function CourseDetail() {
 
           {/* Right Column - Sticky Sidebar */}
           <div className="hidden lg:block space-y-6">
-            {/* Pricing Card - show for external courses */}
+            {/* Booking Panel - show for external courses with offerings */}
             {!course.is_internal && (
-              <CoursePricing
-                priceOnline={course.price_online}
-                priceFaceToFace={course.price_face_to_face}
-                priceGroup={course.price_group}
-                groupMaxParticipants={course.group_max_participants}
-                regulatedCertAvailable={course.regulated_cert_available}
-                regulatedCertFee={course.regulated_cert_fee}
-                deliveryType={course.delivery_type}
-                onBookingRequest={(booking) => {
-                  toast.success(`Booking request submitted: ${booking.bookingType} - £${booking.totalPrice}`);
-                  // TODO: Integrate with contact form or booking system
-                }}
+              <CourseBookingPanel
+                courseId={course.id}
+                courseTitle={course.title}
               />
             )}
             
