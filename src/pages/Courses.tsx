@@ -43,11 +43,6 @@ interface Course {
   enrollmentCount?: number;
 }
 
-const levelColors: Record<string, string> = {
-  'New Joiner': 'bg-success/10 text-success border-success/20',
-  'Enhanced': 'bg-warning/10 text-warning border-warning/20',
-  'Complex': 'bg-destructive/10 text-destructive border-destructive/20',
-};
 
 export default function Courses() {
   const { user, loading: authLoading } = useAuth();
@@ -217,12 +212,6 @@ export default function Courses() {
                       <Play className="h-6 w-6 text-foreground ml-0.5" />
                     </div>
                   </div>
-                  <Badge 
-                    variant="outline" 
-                    className={`absolute top-3 left-3 ${levelColors[course.level || 'New Joiner']}`}
-                  >
-                    {course.level}
-                  </Badge>
                 </div>
                 <CardHeader className="pb-2">
                   <p className="text-xs font-medium text-primary">{course.category}</p>

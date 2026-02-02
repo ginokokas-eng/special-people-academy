@@ -43,12 +43,6 @@ const CourseCard = ({
 }: CourseCardProps) => {
   const navigate = useNavigate();
   
-  const levelColors = {
-    "New Joiner": "bg-success/10 text-success",
-    "Enhanced": "bg-warning/10 text-warning",
-    "Complex": "bg-destructive/10 text-destructive",
-  };
-
   const deliveryLabels: Record<string, string> = {
     practical: "Face-to-Face",
     blended: "Blended Learning",
@@ -71,9 +65,6 @@ const CourseCard = ({
             <Play className="h-6 w-6 text-foreground ml-0.5" />
           </div>
         </div>
-        <span className={`absolute top-3 left-3 px-2 py-1 rounded-md text-xs font-medium ${levelColors[level] || levelColors["New Joiner"]}`}>
-          {level}
-        </span>
         <span className="absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-medium bg-primary/90 text-primary-foreground">
           {deliveryLabels[deliveryType] || deliveryType}
         </span>
