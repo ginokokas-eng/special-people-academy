@@ -165,7 +165,7 @@ export default function MyLearning() {
             <Clock className="h-4 w-4" />
             {formatDuration(course.duration_minutes)}
           </span>
-          <Badge variant="outline" className="text-xs">{course.level}</Badge>
+          
         </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">

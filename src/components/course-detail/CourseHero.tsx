@@ -38,11 +38,6 @@ interface CourseHeroProps {
   isEssential?: boolean;
 }
 
-const levelColors: Record<string, string> = {
-  'New Joiner': 'bg-success/10 text-success border-success/20',
-  'Enhanced': 'bg-warning/10 text-warning border-warning/20',
-  'Complex': 'bg-destructive/10 text-destructive border-destructive/20',
-};
 
 const categoryIcons: Record<string, React.ReactNode> = {
   'Care & Support': <Heart className="h-3.5 w-3.5" />,
@@ -167,13 +162,6 @@ export function CourseHero({
               )}
             </div>
 
-            {/* Level badge */}
-            <Badge 
-              variant="outline" 
-              className={`text-sm px-3 py-1 ${levelColors[level] || levelColors['New Joiner']}`}
-            >
-              {level} Level
-            </Badge>
 
             {/* Rating & learner count */}
             {(averageRating || learnerCount > 0) && (
