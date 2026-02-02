@@ -1,143 +1,352 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Bell } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Menu, X, ChevronDown, User, LogOut, Settings, BookOpen, Award, GraduationCap } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
+
+const forOrganisationsLinks = [
+  { label: "Enterprise", href: "/enterprise", description: "Tailored solutions for large organisations" },
+  { label: "Partners", href: "/partners", description: "Join our partner network" },
+  { label: "Case Studies", href: "/case-studies", description: "Success stories from our clients" },
+];
+
+const resourcesLinks = [
+  { label: "Blog", href: "/blog", description: "Insights and industry updates" },
+  { label: "Help Center", href: "/help-center", description: "FAQs and support articles" },
+  { label: "Webinars", href: "/webinars", description: "Free educational sessions" },
+];
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [orgOpen, setOrgOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    if (!user) {
-      setUnreadCount(0);
-      return;
-    }
-
-    fetchUnreadCount();
-
-    // Subscribe to realtime changes for this user's notifications
-    const channel = supabase
-      .channel('navbar-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'learner_notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchUnreadCount();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  const fetchUnreadCount = async () => {
-    if (!user) return;
-    const { count } = await supabase
-      .from('learner_notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('is_read', false);
-    setUnreadCount(count || 0);
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
-  const navLinks = [
-    { label: "Courses", href: "/courses" },
-    { label: "My Learning", href: "/my-learning" },
-    { label: "Certifications", href: "/certificates" },
-    { label: "Resources", href: "#resources" },
-  ];
-
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto max-w-6xl px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2 font-bold text-xl">
-            <img src={logo} alt="Special People Academy" className="h-10 w-10 object-contain" />
-            <span className="text-foreground">Special People Academy</span>
-          </a>
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16 lg:h-[72px]">
+          {/* Logo - Left */}
+          <Link to="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
+            <img src={logo} alt="Special People Academy" className="h-9 w-9 object-contain" />
+            <span className="text-foreground hidden sm:inline">Special People Academy</span>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
+          {/* Desktop Navigation - Center */}
+          <div className="hidden lg:flex items-center justify-center flex-1">
+            <NavigationMenu>
+              <NavigationMenuList className="gap-1">
+                {/* Courses */}
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                  >
+                    <Link to="/courses">Courses</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                {/* For Organisations Dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent">
+                    For Organisations
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[280px] gap-1 p-2">
+                      {forOrganisationsLinks.map((link) => (
+                        <li key={link.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={link.href}
+                              className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                            >
+                              <div className="text-sm font-medium leading-none">{link.label}</div>
+                              <p className="line-clamp-2 text-xs leading-snug text-muted-foreground mt-1">
+                                {link.description}
+                              </p>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* Resources Dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent">
+                    Resources
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[280px] gap-1 p-2">
+                      {resourcesLinks.map((link) => (
+                        <li key={link.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={link.href}
+                              className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                            >
+                              <div className="text-sm font-medium leading-none">{link.label}</div>
+                              <p className="line-clamp-2 text-xs leading-snug text-muted-foreground mt-1">
+                                {link.description}
+                              </p>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-3">
-            {user && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate('/notifications')}
-                className="relative"
-              >
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Button>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {user ? (
+              <>
+                {/* Logged-in: My Learning, Certifications, User Menu */}
+                <Link
+                  to="/my-learning"
+                  className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  My Learning
+                </Link>
+                <Link
+                  to="/certificates"
+                  className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                >
+                  <Award className="h-4 w-4" />
+                  Certifications
+                </Link>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="rounded-full"
+                      aria-label="User menu"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                        <User className="h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <GraduationCap className="h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => navigate('/courses')}
+                  className="hidden lg:flex"
+                >
+                  Explore Courses
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Logged-out: Sign In + Start Free Trial */}
+                <Link
+                  to="/auth"
+                  className="hidden lg:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                >
+                  Sign In
+                </Link>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => navigate('/pricing')}
+                  className="hidden lg:flex"
+                >
+                  Start Free Trial
+                </Button>
+              </>
             )}
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="hidden md:flex">
-              {user ? 'Dashboard' : 'Sign In'}
-            </Button>
-            <Button variant="default" size="sm" onClick={() => navigate('/contact')} className="hidden md:flex">
-              Contact Sales
-            </Button>
 
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="lg:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
             >
-              <Menu className="h-5 w-5" />
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <div className="flex flex-col gap-2 mt-2 px-4">
-                <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
-                  Sign In
-                </Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/contact')}>
-                  Contact Sales
-                </Button>
+          <div className="lg:hidden py-4 border-t border-border animate-fade-in">
+            <div className="flex flex-col gap-1">
+              {/* Courses */}
+              <Link
+                to="/courses"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+              >
+                Courses
+              </Link>
+
+              {/* For Organisations Accordion */}
+              <Collapsible open={orgOpen} onOpenChange={setOrgOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors">
+                  For Organisations
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", orgOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-4">
+                  {forOrganisationsLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Resources Accordion */}
+              <Collapsible open={resourcesOpen} onOpenChange={setResourcesOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors">
+                  Resources
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", resourcesOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-4">
+                  {resourcesLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Mobile Auth Section */}
+              <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2 px-4">
+                {user ? (
+                  <>
+                    <Link
+                      to="/my-learning"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-foreground"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      My Learning
+                    </Link>
+                    <Link
+                      to="/certificates"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-foreground"
+                    >
+                      <Award className="h-4 w-4" />
+                      Certifications
+                    </Link>
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-foreground"
+                    >
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="mt-2"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        navigate('/auth');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => {
+                        navigate('/pricing');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Start Free Trial
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
