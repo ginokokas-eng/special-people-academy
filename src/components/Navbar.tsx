@@ -202,14 +202,14 @@ export const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Contact Support for logged-in users */}
+                {/* Contact Sales - always visible */}
                 <Button 
                   variant="default" 
                   size="sm" 
                   onClick={() => navigate('/contact')}
                   className="hidden lg:flex"
                 >
-                  Contact Support
+                  Contact Sales
                 </Button>
               </>
             ) : (
@@ -371,7 +371,7 @@ export const Navbar = () => {
                       }}
                       className="mt-2"
                     >
-                      Contact Support
+                      Contact Sales
                     </Button>
                   </>
                 ) : (
