@@ -17,7 +17,7 @@ export const MarketingLayout = ({ children, title, description }: MarketingLayou
       </Helmet>
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-20">
+        <main>
           {children}
         </main>
         <Footer />
