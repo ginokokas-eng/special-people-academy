@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, Settings, BookOpen, Award, GraduationCap } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, Settings, BookOpen, Award, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +44,9 @@ export const Navbar = () => {
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  // Placeholder for cart item count - replace with actual cart state/context
+  const cartItemCount = 0;
 
   const handleSignOut = async () => {
     await signOut();
@@ -131,30 +134,31 @@ export const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Basket/Cart Icon - Always visible */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/cart')}
+              className="relative"
+              aria-label={`Shopping cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ''}`}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                  {cartItemCount > 9 ? '9+' : cartItemCount}
+                </span>
+              )}
+            </Button>
+
             {user ? (
               <>
-                {/* Logged-in: My Learning, Certifications, User Menu */}
-                <Link
-                  to="/my-learning"
-                  className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  My Learning
-                </Link>
-                <Link
-                  to="/certificates"
-                  className="hidden lg:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
-                >
-                  <Award className="h-4 w-4" />
-                  Certifications
-                </Link>
-                
+                {/* Logged-in: User Menu Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="rounded-full"
+                      className="rounded-full hidden lg:flex"
                       aria-label="User menu"
                     >
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -164,6 +168,18 @@ export const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
+                      <Link to="/my-learning" className="flex items-center gap-2 cursor-pointer">
+                        <BookOpen className="h-4 w-4" />
+                        My Learning
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/certificates" className="flex items-center gap-2 cursor-pointer">
+                        <Award className="h-4 w-4" />
+                        Certifications
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                         <User className="h-4 w-4" />
                         Profile
@@ -171,8 +187,8 @@ export const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                        <GraduationCap className="h-4 w-4" />
-                        Dashboard
+                        <Settings className="h-4 w-4" />
+                        Settings
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -186,18 +202,19 @@ export const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
+                {/* Contact Support for logged-in users */}
                 <Button 
                   variant="default" 
                   size="sm" 
-                  onClick={() => navigate('/courses')}
+                  onClick={() => navigate('/contact')}
                   className="hidden lg:flex"
                 >
-                  Explore Courses
+                  Contact Support
                 </Button>
               </>
             ) : (
               <>
-                {/* Logged-out: Sign In + Start Free Trial */}
+                {/* Logged-out: Sign In + Contact Sales */}
                 <Link
                   to="/auth"
                   className="hidden lg:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
@@ -207,10 +224,10 @@ export const Navbar = () => {
                 <Button 
                   variant="default" 
                   size="sm" 
-                  onClick={() => navigate('/pricing')}
+                  onClick={() => navigate('/contact')}
                   className="hidden lg:flex"
                 >
-                  Start Free Trial
+                  Contact Sales
                 </Button>
               </>
             )}
@@ -282,6 +299,21 @@ export const Navbar = () => {
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* Basket / Cart */}
+              <Link
+                to="/cart"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Basket
+                {cartItemCount > 0 && (
+                  <span className="ml-auto h-5 w-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                    {cartItemCount > 9 ? '9+' : cartItemCount}
+                  </span>
+                )}
+              </Link>
+
               {/* Mobile Auth Section */}
               <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2 px-4">
                 {user ? (
@@ -310,6 +342,14 @@ export const Navbar = () => {
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 py-2 text-sm font-medium text-foreground"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -321,6 +361,17 @@ export const Navbar = () => {
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => {
+                        navigate('/contact');
+                        setIsMenuOpen(false);
+                      }}
+                      className="mt-2"
+                    >
+                      Contact Support
                     </Button>
                   </>
                 ) : (
@@ -339,11 +390,11 @@ export const Navbar = () => {
                       variant="default" 
                       size="sm"
                       onClick={() => {
-                        navigate('/pricing');
+                        navigate('/contact');
                         setIsMenuOpen(false);
                       }}
                     >
-                      Start Free Trial
+                      Contact Sales
                     </Button>
                   </>
                 )}
