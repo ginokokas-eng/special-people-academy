@@ -382,6 +382,17 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
         <p className="text-xs text-center text-muted-foreground">
           Secure checkout powered by Stripe
         </p>
+        
+        {/* Contact Sales for organisation bookings */}
+        <div className="pt-4 border-t">
+          <Button 
+            variant="ghost" 
+            className="w-full text-muted-foreground hover:text-primary"
+            onClick={() => navigate('/contact?reason=organisation-booking')}
+          >
+            Contact Sales for organisation bookings
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

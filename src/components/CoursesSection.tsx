@@ -97,7 +97,7 @@ const CourseCard = ({
             </span>
           </div>
           <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            View Course
+            Add to Basket
           </Button>
         </div>
       </div>
