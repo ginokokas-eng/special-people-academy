@@ -66,8 +66,8 @@ interface PracticalSession {
   trainer_id: string | null;
   course_title: string;
   trainer_name: string | null;
-  google_event_id: string | null;
-  google_calendar_id: string | null;
+  outlook_event_id: string | null;
+  outlook_calendar_owner: string | null;
   calendar_sync_status: string | null;
   last_synced_at: string | null;
 }
@@ -133,8 +133,8 @@ export function PracticalSessionsManager() {
           max_attendees,
           notes,
           trainer_id,
-          google_event_id,
-          google_calendar_id,
+          outlook_event_id,
+          outlook_calendar_owner,
           calendar_sync_status,
           last_synced_at,
           courses(title)
@@ -163,8 +163,8 @@ export function PracticalSessionsManager() {
             trainer_id: session.trainer_id,
             course_title: (session.courses as any)?.title || 'Unknown',
             trainer_name: trainerName,
-            google_event_id: session.google_event_id,
-            google_calendar_id: session.google_calendar_id,
+            outlook_event_id: session.outlook_event_id,
+            outlook_calendar_owner: session.outlook_calendar_owner,
             calendar_sync_status: session.calendar_sync_status,
             last_synced_at: session.last_synced_at,
           };
@@ -214,7 +214,7 @@ export function PracticalSessionsManager() {
     try {
       const endTime = new Date(new Date(sessionDate).getTime() + 3 * 60 * 60 * 1000).toISOString();
       
-      const { data, error } = await supabase.functions.invoke('calendar-create-event', {
+      const { data, error } = await supabase.functions.invoke('outlook-create-event', {
         body: {
           sessionId,
           title: `Training: ${courseTitle}`,
@@ -222,7 +222,6 @@ export function PracticalSessionsManager() {
           location: location || 'TBC',
           startTime: sessionDate,
           endTime,
-          calendarId: 'primary',
         },
       });
 
@@ -290,12 +289,12 @@ export function PracticalSessionsManager() {
 
         // If sync is enabled and session has a date, trigger update
         if (formData.sync_to_calendar && formData.session_date) {
-          if (editingSession.google_event_id) {
+          if (editingSession.outlook_event_id) {
             // Update existing event
-            await supabase.functions.invoke('calendar-update-event', {
+            await supabase.functions.invoke('outlook-update-event', {
               body: {
                 sessionId: savedSessionId,
-                googleEventId: editingSession.google_event_id,
+                outlookEventId: editingSession.outlook_event_id,
                 title: `Training: ${courseTitle}`,
                 description: formData.notes || `Practical training session for ${courseTitle}`,
                 location: formData.location || 'TBC',
@@ -342,12 +341,11 @@ export function PracticalSessionsManager() {
       const session = sessions.find(s => s.id === sessionId);
       
       // If there's a calendar event, try to cancel it
-      if (session?.google_event_id) {
-        await supabase.functions.invoke('calendar-cancel-event', {
+      if (session?.outlook_event_id) {
+        await supabase.functions.invoke('outlook-cancel-event', {
           body: {
             sessionId,
-            googleEventId: session.google_event_id,
-            googleCalendarId: session.google_calendar_id,
+            outlookEventId: session.outlook_event_id,
           },
         });
       }
@@ -506,8 +504,7 @@ export function PracticalSessionsManager() {
               {editingSession && editingSession.calendar_sync_status && (
                 <CalendarSyncStatus
                   status={editingSession.calendar_sync_status}
-                  googleEventId={editingSession.google_event_id}
-                  googleCalendarId={editingSession.google_calendar_id}
+                  outlookEventId={editingSession.outlook_event_id}
                   lastSyncedAt={editingSession.last_synced_at}
                   onRetry={() => handleRetrySync(editingSession)}
                   isRetrying={syncingSessionId === editingSession.id}
@@ -586,8 +583,7 @@ export function PracticalSessionsManager() {
                     <TableCell>
                       <CalendarSyncStatus
                         status={session.calendar_sync_status}
-                        googleEventId={session.google_event_id}
-                        googleCalendarId={session.google_calendar_id}
+                        outlookEventId={session.outlook_event_id}
                         lastSyncedAt={session.last_synced_at}
                         onRetry={() => handleRetrySync(session)}
                         isRetrying={syncingSessionId === session.id}

@@ -1051,13 +1051,13 @@ export type Database = {
           calendar_sync_status: string | null
           course_id: string
           created_at: string
-          google_calendar_id: string | null
-          google_event_id: string | null
           id: string
           last_synced_at: string | null
           location: string | null
           max_attendees: number | null
           notes: string | null
+          outlook_calendar_owner: string | null
+          outlook_event_id: string | null
           session_date: string | null
           trainer_id: string | null
         }
@@ -1065,13 +1065,13 @@ export type Database = {
           calendar_sync_status?: string | null
           course_id: string
           created_at?: string
-          google_calendar_id?: string | null
-          google_event_id?: string | null
           id?: string
           last_synced_at?: string | null
           location?: string | null
           max_attendees?: number | null
           notes?: string | null
+          outlook_calendar_owner?: string | null
+          outlook_event_id?: string | null
           session_date?: string | null
           trainer_id?: string | null
         }
@@ -1079,13 +1079,13 @@ export type Database = {
           calendar_sync_status?: string | null
           course_id?: string
           created_at?: string
-          google_calendar_id?: string | null
-          google_event_id?: string | null
           id?: string
           last_synced_at?: string | null
           location?: string | null
           max_attendees?: number | null
           notes?: string | null
+          outlook_calendar_owner?: string | null
+          outlook_event_id?: string | null
           session_date?: string | null
           trainer_id?: string | null
         }
