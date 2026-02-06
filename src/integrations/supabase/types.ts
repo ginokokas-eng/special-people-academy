@@ -391,6 +391,9 @@ export type Database = {
           available_delivery_types: string[] | null
           category: string
           certificate_details: string | null
+          certificate_expiry_months: number | null
+          cpd_certified: boolean | null
+          cpd_eligible: boolean | null
           cpd_hours: number | null
           created_at: string
           created_by: string | null
@@ -424,6 +427,8 @@ export type Database = {
           requirements: Json | null
           requires_practical_signoff: boolean | null
           scope_notes: string | null
+          slug: string | null
+          status: string | null
           subtitle: string | null
           target_audience: Json | null
           thumbnail_url: string | null
@@ -435,6 +440,9 @@ export type Database = {
           available_delivery_types?: string[] | null
           category: string
           certificate_details?: string | null
+          certificate_expiry_months?: number | null
+          cpd_certified?: boolean | null
+          cpd_eligible?: boolean | null
           cpd_hours?: number | null
           created_at?: string
           created_by?: string | null
@@ -468,6 +476,8 @@ export type Database = {
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
+          slug?: string | null
+          status?: string | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
@@ -479,6 +489,9 @@ export type Database = {
           available_delivery_types?: string[] | null
           category?: string
           certificate_details?: string | null
+          certificate_expiry_months?: number | null
+          cpd_certified?: boolean | null
+          cpd_eligible?: boolean | null
           cpd_hours?: number | null
           created_at?: string
           created_by?: string | null
@@ -512,6 +525,8 @@ export type Database = {
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
+          slug?: string | null
+          status?: string | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
@@ -666,6 +681,82 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_resources: {
+        Row: {
+          created_at: string | null
+          file_type: string
+          file_url: string
+          id: string
+          lesson_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_type: string
+          file_url: string
+          id?: string
+          lesson_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          lesson_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_resources_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_steps: {
+        Row: {
+          created_at: string | null
+          id: string
+          instruction: string | null
+          lesson_id: string
+          order_index: number
+          safety_note: string | null
+          step_title: string
+          what_to_record: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instruction?: string | null
+          lesson_id: string
+          order_index?: number
+          safety_note?: string | null
+          step_title: string
+          what_to_record?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instruction?: string | null
+          lesson_id?: string
+          order_index?: number
+          safety_note?: string | null
+          step_title?: string
+          what_to_record?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_steps_lesson_id_fkey"
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
@@ -925,28 +1016,34 @@ export type Database = {
         Row: {
           correct_answer: number
           created_at: string
+          explanation: string | null
           id: string
           options: Json
           order_index: number
           question: string
+          question_type: string | null
           quiz_id: string
         }
         Insert: {
           correct_answer: number
           created_at?: string
+          explanation?: string | null
           id?: string
           options?: Json
           order_index?: number
           question: string
+          question_type?: string | null
           quiz_id: string
         }
         Update: {
           correct_answer?: number
           created_at?: string
+          explanation?: string | null
           id?: string
           options?: Json
           order_index?: number
           question?: string
+          question_type?: string | null
           quiz_id?: string
         }
         Relationships: [
@@ -961,6 +1058,7 @@ export type Database = {
       }
       quizzes: {
         Row: {
+          attempts_allowed: number | null
           created_at: string
           id: string
           lesson_id: string
@@ -968,6 +1066,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          attempts_allowed?: number | null
           created_at?: string
           id?: string
           lesson_id: string
@@ -975,6 +1074,7 @@ export type Database = {
           title: string
         }
         Update: {
+          attempts_allowed?: number | null
           created_at?: string
           id?: string
           lesson_id?: string
