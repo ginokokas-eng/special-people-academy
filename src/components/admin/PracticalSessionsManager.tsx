@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -36,10 +37,13 @@ import {
   Calendar,
   MapPin,
   Users,
-  UserCheck
+  UserCheck,
+  Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { CalendarSyncStatus } from './CalendarSyncStatus';
+import { downloadICSFile, createSessionEventData } from '@/lib/ics-generator';
 
 interface Course {
   id: string;
@@ -62,6 +66,10 @@ interface PracticalSession {
   trainer_id: string | null;
   course_title: string;
   trainer_name: string | null;
+  google_event_id: string | null;
+  google_calendar_id: string | null;
+  calendar_sync_status: string | null;
+  last_synced_at: string | null;
 }
 
 export function PracticalSessionsManager() {
@@ -72,6 +80,7 @@ export function PracticalSessionsManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<PracticalSession | null>(null);
   const [saving, setSaving] = useState(false);
+  const [syncingSessionId, setSyncingSessionId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     course_id: '',
@@ -80,6 +89,7 @@ export function PracticalSessionsManager() {
     max_attendees: 20,
     notes: '',
     trainer_id: '',
+    sync_to_calendar: false,
   });
 
   useEffect(() => {
@@ -123,6 +133,10 @@ export function PracticalSessionsManager() {
           max_attendees,
           notes,
           trainer_id,
+          google_event_id,
+          google_calendar_id,
+          calendar_sync_status,
+          last_synced_at,
           courses(title)
         `)
         .order('session_date', { ascending: true });
@@ -149,6 +163,10 @@ export function PracticalSessionsManager() {
             trainer_id: session.trainer_id,
             course_title: (session.courses as any)?.title || 'Unknown',
             trainer_name: trainerName,
+            google_event_id: session.google_event_id,
+            google_calendar_id: session.google_calendar_id,
+            calendar_sync_status: session.calendar_sync_status,
+            last_synced_at: session.last_synced_at,
           };
         })
       );
@@ -171,6 +189,7 @@ export function PracticalSessionsManager() {
       max_attendees: 20,
       notes: '',
       trainer_id: '',
+      sync_to_calendar: false,
     });
     setDialogOpen(true);
   };
@@ -186,8 +205,57 @@ export function PracticalSessionsManager() {
       max_attendees: session.max_attendees || 20,
       notes: session.notes || '',
       trainer_id: session.trainer_id || '',
+      sync_to_calendar: session.calendar_sync_status === 'synced' || session.calendar_sync_status === 'pending',
     });
     setDialogOpen(true);
+  };
+
+  const triggerCalendarSync = async (sessionId: string, courseTitle: string, sessionDate: string, location: string | null, notes: string | null) => {
+    try {
+      const endTime = new Date(new Date(sessionDate).getTime() + 3 * 60 * 60 * 1000).toISOString();
+      
+      const { data, error } = await supabase.functions.invoke('calendar-create-event', {
+        body: {
+          sessionId,
+          title: `Training: ${courseTitle}`,
+          description: notes || `Practical training session for ${courseTitle}`,
+          location: location || 'TBC',
+          startTime: sessionDate,
+          endTime,
+          calendarId: 'primary',
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Calendar sync error:', error);
+      throw error;
+    }
+  };
+
+  const handleRetrySync = async (session: PracticalSession) => {
+    if (!session.session_date) {
+      toast.error('Cannot sync session without a date');
+      return;
+    }
+
+    setSyncingSessionId(session.id);
+    try {
+      await triggerCalendarSync(
+        session.id,
+        session.course_title,
+        session.session_date,
+        session.location,
+        session.notes
+      );
+      toast.success('Calendar sync initiated');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to sync to calendar');
+    } finally {
+      setSyncingSessionId(null);
+    }
   };
 
   const handleSave = async () => {
@@ -207,6 +275,9 @@ export function PracticalSessionsManager() {
         trainer_id: formData.trainer_id || null,
       };
 
+      let savedSessionId: string;
+      const courseTitle = courses.find(c => c.id === formData.course_id)?.title || 'Training Session';
+
       if (editingSession) {
         const { error } = await supabase
           .from('practical_sessions')
@@ -214,14 +285,44 @@ export function PracticalSessionsManager() {
           .eq('id', editingSession.id);
 
         if (error) throw error;
+        savedSessionId = editingSession.id;
         toast.success('Session updated');
+
+        // If sync is enabled and session has a date, trigger update
+        if (formData.sync_to_calendar && formData.session_date) {
+          if (editingSession.google_event_id) {
+            // Update existing event
+            await supabase.functions.invoke('calendar-update-event', {
+              body: {
+                sessionId: savedSessionId,
+                googleEventId: editingSession.google_event_id,
+                title: `Training: ${courseTitle}`,
+                description: formData.notes || `Practical training session for ${courseTitle}`,
+                location: formData.location || 'TBC',
+                startTime: formData.session_date,
+                endTime: new Date(new Date(formData.session_date).getTime() + 3 * 60 * 60 * 1000).toISOString(),
+              },
+            });
+          } else {
+            // Create new event
+            await triggerCalendarSync(savedSessionId, courseTitle, formData.session_date, formData.location, formData.notes);
+          }
+        }
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('practical_sessions')
-          .insert(sessionData);
+          .insert(sessionData)
+          .select('id')
+          .single();
 
         if (error) throw error;
+        savedSessionId = data.id;
         toast.success('Session created');
+
+        // If sync is enabled and session has a date, trigger sync
+        if (formData.sync_to_calendar && formData.session_date) {
+          await triggerCalendarSync(savedSessionId, courseTitle, formData.session_date, formData.location, formData.notes);
+        }
       }
 
       setDialogOpen(false);
@@ -238,6 +339,19 @@ export function PracticalSessionsManager() {
     if (!confirm('Are you sure you want to delete this session?')) return;
 
     try {
+      const session = sessions.find(s => s.id === sessionId);
+      
+      // If there's a calendar event, try to cancel it
+      if (session?.google_event_id) {
+        await supabase.functions.invoke('calendar-cancel-event', {
+          body: {
+            sessionId,
+            googleEventId: session.google_event_id,
+            googleCalendarId: session.google_calendar_id,
+          },
+        });
+      }
+
       const { error } = await supabase
         .from('practical_sessions')
         .delete()
@@ -250,6 +364,24 @@ export function PracticalSessionsManager() {
       console.error('Error deleting session:', error);
       toast.error('Failed to delete session');
     }
+  };
+
+  const handleDownloadICS = (session: PracticalSession) => {
+    if (!session.session_date) {
+      toast.error('Cannot download calendar file - session has no date');
+      return;
+    }
+
+    const eventData = createSessionEventData(
+      session.course_title,
+      session.session_date,
+      session.location || undefined,
+      180, // 3 hours default
+      session.notes || undefined
+    );
+
+    downloadICSFile(eventData);
+    toast.success('Calendar file downloaded');
   };
 
   if (loading) {
@@ -318,7 +450,7 @@ export function PracticalSessionsManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>Date & Time</Label>
+                <Label>Date & Time (Europe/London)</Label>
                 <Input
                   type="datetime-local"
                   value={formData.session_date}
@@ -356,6 +488,32 @@ export function PracticalSessionsManager() {
                 />
               </div>
 
+              {/* Calendar Sync Toggle */}
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Sync to Admin Calendar</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Add to SPA Training Delivery calendar
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.sync_to_calendar}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sync_to_calendar: checked }))}
+                  disabled={!formData.session_date}
+                />
+              </div>
+
+              {editingSession && editingSession.calendar_sync_status && (
+                <CalendarSyncStatus
+                  status={editingSession.calendar_sync_status}
+                  googleEventId={editingSession.google_event_id}
+                  googleCalendarId={editingSession.google_calendar_id}
+                  lastSyncedAt={editingSession.last_synced_at}
+                  onRetry={() => handleRetrySync(editingSession)}
+                  isRetrying={syncingSessionId === editingSession.id}
+                />
+              )}
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
@@ -389,6 +547,7 @@ export function PracticalSessionsManager() {
                   <TableHead>Location</TableHead>
                   <TableHead>Trainer</TableHead>
                   <TableHead>Capacity</TableHead>
+                  <TableHead>Calendar</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -424,8 +583,29 @@ export function PracticalSessionsManager() {
                         {session.max_attendees}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <CalendarSyncStatus
+                        status={session.calendar_sync_status}
+                        googleEventId={session.google_event_id}
+                        googleCalendarId={session.google_calendar_id}
+                        lastSyncedAt={session.last_synced_at}
+                        onRetry={() => handleRetrySync(session)}
+                        isRetrying={syncingSessionId === session.id}
+                        compact
+                      />
+                    </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
+                        {session.session_date && (
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => handleDownloadICS(session)}
+                            title="Download .ics file"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button size="sm" variant="ghost" onClick={() => handleEdit(session)}>
                           <Edit className="h-4 w-4" />
                         </Button>
