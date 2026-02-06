@@ -172,23 +172,23 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-12">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Track your learning progress</p>
+          <h1 className="text-3xl font-heading font-bold text-foreground">My Dashboard</h1>
+          <p className="text-muted-foreground mt-2">Track your learning progress</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((stat) => (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
-              <CardContent className="pt-6">
+            <Card key={stat.title} className="bg-card border-border/50 hover:shadow-md transition-shadow">
+              <CardContent className="pt-6 pb-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold">{stat.value}</p>
+                    <p className="text-3xl font-heading font-bold text-foreground">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-lg bg-muted ${stat.color}`}>
+                  <div className={`p-3 rounded-lg bg-secondary ${stat.color}`}>
                     <stat.icon className="h-6 w-6" />
                   </div>
                 </div>
@@ -199,8 +199,8 @@ export default function Dashboard() {
 
         {/* Continue Learning */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Continue Learning</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-heading font-semibold text-foreground">Continue Learning</h2>
             <Button variant="outline" size="sm" onClick={() => navigate('/courses')}>
               View All Courses
               <ArrowRight className="h-4 w-4 ml-1" />
@@ -208,22 +208,22 @@ export default function Dashboard() {
           </div>
 
           {enrolledCourses.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
+            <Card className="bg-card border-border/50">
+              <CardContent className="py-16 text-center">
                 <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No courses yet</h3>
-                <p className="text-muted-foreground mb-4">Start your learning journey by enrolling in a course</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-2">No courses yet</h3>
+                <p className="text-muted-foreground mb-6">Start your learning journey by enrolling in a course</p>
                 <Button onClick={() => navigate('/courses')}>
                   Browse Courses
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {enrolledCourses.slice(0, 3).map((course) => (
                 <Card 
                   key={course.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-card border-border/50 hover:shadow-md transition-shadow cursor-pointer group"
                   onClick={() => navigate(`/courses/${course.id}`)}
                 >
                   <div className="relative aspect-video bg-muted overflow-hidden rounded-t-lg">
@@ -231,28 +231,28 @@ export default function Dashboard() {
                       <img 
                         src={course.thumbnail_url} 
                         alt={course.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent-green/20">
                         <BookOpen className="h-12 w-12 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-12 h-12 rounded-full bg-card/90 flex items-center justify-center">
                         <Play className="h-5 w-5 text-foreground ml-0.5" />
                       </div>
                     </div>
                   </div>
                   <CardHeader className="pb-2">
                     <p className="text-xs text-primary font-medium">{course.category}</p>
-                    <CardTitle className="text-base line-clamp-2">{course.title}</CardTitle>
+                    <CardTitle className="text-base font-heading line-clamp-2">{course.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Progress</span>
-                        <span className="font-medium">{course.progress}%</span>
+                        <span className="font-medium text-foreground">{course.progress}%</span>
                       </div>
                       <Progress value={course.progress} className="h-2" />
                     </div>

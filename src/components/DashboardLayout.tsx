@@ -66,8 +66,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
+      <header className="sticky top-0 z-50 bg-card border-b border-neutral-grey/20 shadow-sm">
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6 max-w-[1400px] mx-auto">
           {/* Left side */}
           <div className="flex items-center gap-4">
             <Button
@@ -79,8 +79,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             
-            <a href="/" className="flex items-center gap-2 font-bold text-lg">
-              <div className="p-1.5 rounded-lg gradient-primary">
+            <a href="/" className="flex items-center gap-2 font-heading font-bold text-lg">
+              <div className="p-1.5 rounded-lg bg-primary">
                 <GraduationCap className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="hidden sm:inline text-foreground">Special People Academy</span>
@@ -193,7 +193,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         {user && (
           <aside className={`
             fixed lg:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 
-            bg-background border-r border-border
+            bg-card border-r border-neutral-grey/20
             transform transition-transform duration-200 ease-in-out
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}>
@@ -228,7 +228,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 lg:p-8 min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 p-4 lg:p-8 min-h-[calc(100vh-4rem)] max-w-[1200px] mx-auto w-full">
           {children}
         </main>
       </div>
