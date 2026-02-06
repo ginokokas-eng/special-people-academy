@@ -47,7 +47,8 @@ import {
   UserPlus,
   GraduationCap,
   Calendar,
-  Award
+  Award,
+  Shield
 } from 'lucide-react';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
@@ -541,11 +542,15 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground mt-1">Manage courses, users, and platform settings</p>
           </div>
+          <Button onClick={() => navigate('/staff-management')} variant="outline">
+            <Shield className="h-4 w-4 mr-2" />
+            Staff Management
+          </Button>
         </div>
 
         {/* Stats */}

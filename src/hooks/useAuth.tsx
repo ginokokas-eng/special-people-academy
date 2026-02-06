@@ -8,6 +8,8 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isTrainer: boolean;
+  isSuperAdmin: boolean;
+  isOpsTrainingAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -21,6 +23,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTrainer, setIsTrainer] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isOpsTrainingAdmin, setIsOpsTrainingAdmin] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -38,6 +42,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setIsAdmin(false);
           setIsTrainer(false);
+          setIsSuperAdmin(false);
+          setIsOpsTrainingAdmin(false);
         }
       }
     );
@@ -63,8 +69,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq('user_id', userId);
     
     const roles = data?.map(r => r.role) || [];
-    setIsAdmin(roles.includes('admin'));
-    setIsTrainer(roles.includes('trainer') || roles.includes('admin'));
+    setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
+    setIsTrainer(roles.includes('trainer') || roles.includes('admin') || roles.includes('super_admin') || roles.includes('ops_training_admin'));
+    setIsSuperAdmin(roles.includes('super_admin') || roles.includes('admin'));
+    setIsOpsTrainingAdmin(roles.includes('ops_training_admin') || roles.includes('super_admin') || roles.includes('admin') || roles.includes('trainer'));
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -97,10 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setIsAdmin(false);
     setIsTrainer(false);
+    setIsSuperAdmin(false);
+    setIsOpsTrainingAdmin(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isTrainer, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
