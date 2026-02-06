@@ -885,6 +885,48 @@ export type Database = {
           },
         ]
       }
+      staff_profiles: {
+        Row: {
+          created_at: string | null
+          delivery_types: string[] | null
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean | null
+          job_title: string | null
+          notes: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_types?: string[] | null
+          email: string
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          notes?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_types?: string[] | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          notes?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -957,6 +999,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_ops_training_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
