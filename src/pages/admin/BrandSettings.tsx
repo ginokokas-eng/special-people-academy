@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 
 const colorTokens = [
   { name: "Primary (Deep Teal)", cssVar: "--primary", hex: "#124145", usage: "Headings, buttons, links, key UI elements" },
-  { name: "Background (Cream)", cssVar: "--background", hex: "#F5E8DC", usage: "Page backgrounds, subtle fills" },
+  { name: "Background (Neutral Grey)", cssVar: "--background", hex: "#A7A9AC", usage: "Page backgrounds, subtle fills" },
   { name: "Surface (White)", cssVar: "--card", hex: "#FFFFFF", usage: "Cards, modals, elevated surfaces" },
   { name: "Accent Green", cssVar: "--accent-green", hex: "#C4D14F", usage: "Active states, success, focus rings, 'Blended' badge" },
   { name: "Accent Peach", cssVar: "--accent-peach", hex: "#FF988C", usage: "Warnings, important callouts, cart badge" },
