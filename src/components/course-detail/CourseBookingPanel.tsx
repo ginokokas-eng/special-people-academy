@@ -13,9 +13,10 @@ import {
   GraduationCap,
   Award,
   Info,
-  CheckCircle2,
+  ShoppingCart,
   Loader2,
-  Layers
+  Layers,
+  Check
 } from 'lucide-react';
 import {
   Tooltip,
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -59,6 +61,7 @@ const REGULATED_CERT_FEE = 15;
 
 export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanelProps) {
   const { user } = useAuth();
+  const { addToCart, items } = useCart();
   const navigate = useNavigate();
   
   const [offerings, setOfferings] = useState<CourseOffering[]>([]);
@@ -67,6 +70,11 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
   const [participantsCount, setParticipantsCount] = useState(1);
   const [includeRegulatedCert, setIncludeRegulatedCert] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Check if course is already in cart
+  const isInCart = useMemo(() => {
+    return items.some(item => item.course_id === courseId);
+  }, [items, courseId]);
 
   // Fetch offerings on mount
   useEffect(() => {
@@ -137,7 +145,6 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
 
   const handleParticipantsChange = (value: string) => {
     const num = parseInt(value) || 1;
-    // Hard validation: 1-12 for groups
     if (num > maxParticipants) {
       toast.error(`Group bookings are capped at ${maxParticipants} participants.`);
     }
@@ -145,24 +152,9 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
     setParticipantsCount(validated);
   };
 
-  // Validation error state
-  const getValidationError = () => {
-    if (!selectedOffering) return null;
-    
-    if (!isGroupOffering && participantsCount !== 1) {
-      return 'Individual bookings are limited to 1 participant.';
-    }
-    if (isGroupOffering && (participantsCount < 1 || participantsCount > maxParticipants)) {
-      return `Group bookings are capped at ${maxParticipants} participants.`;
-    }
-    return null;
-  };
-
-  const validationError = getValidationError();
-
-  const handleBookNow = async () => {
+  const handleAddToCart = async () => {
     if (!user) {
-      toast.error('Please sign in to book');
+      toast.error('Please sign in to add to basket');
       navigate('/auth');
       return;
     }
@@ -172,11 +164,7 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
       return;
     }
 
-    // App-level validation with clear messages
-    if (!isGroupOffering && participantsCount !== 1) {
-      toast.error('Individual bookings are limited to 1 participant.');
-      return;
-    }
+    // Validation for group offerings
     if (isGroupOffering && participantsCount > maxParticipants) {
       toast.error(`Group bookings are capped at ${maxParticipants} participants.`);
       return;
@@ -184,35 +172,28 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
 
     setSubmitting(true);
     try {
-      const bookingType = selectedOffering.offering_type.startsWith('individual') 
-        ? 'individual' as const
-        : 'group' as const;
+      const success = await addToCart({
+        courseId,
+        offeringId: selectedOffering.id,
+        participantsCount,
+        regulatedCertification: includeRegulatedCert,
+      });
 
-      const { error } = await supabase
-        .from('bookings')
-        .insert([{
-          user_id: user.id,
-          course_id: courseId,
-          offering_id: selectedOffering.id,
-          booking_type: bookingType,
-          participants_count: participantsCount,
-          regulated_certification: includeRegulatedCert,
-          regulated_fee_per_person_gbp: REGULATED_CERT_FEE,
-          subtotal_gbp: pricing.basePrice,
-          regulated_fee_total_gbp: pricing.regulatedFee,
-          total_gbp: pricing.total,
-          status: 'draft' as const,
-        }]);
-
-      if (error) throw error;
-
-      toast.success('Booking request submitted! Our team will contact you shortly.');
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      toast.error('Failed to submit booking. Please try again.');
+      if (success) {
+        toast.success('Added to basket', {
+          action: {
+            label: 'View Basket',
+            onClick: () => navigate('/cart'),
+          },
+        });
+      }
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleGoToCart = () => {
+    navigate('/cart');
   };
 
   if (loading) {
@@ -366,28 +347,40 @@ export function CourseBookingPanel({ courseId, courseTitle }: CourseBookingPanel
           </div>
         </div>
 
-        {/* CTA Button */}
-        <Button 
-          className="w-full" 
-          size="lg"
-          onClick={handleBookNow}
-          disabled={submitting || !selectedOffering}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Book Now
-            </>
-          )}
-        </Button>
+        {/* CTA Button - Add to Cart or Go to Cart */}
+        {isInCart ? (
+          <Button 
+            className="w-full" 
+            size="lg"
+            variant="secondary"
+            onClick={handleGoToCart}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            In Basket - View Cart
+          </Button>
+        ) : (
+          <Button 
+            className="w-full" 
+            size="lg"
+            onClick={handleAddToCart}
+            disabled={submitting || !selectedOffering}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Add to Basket
+              </>
+            )}
+          </Button>
+        )}
 
         <p className="text-xs text-center text-muted-foreground">
-          Our team will contact you to confirm availability and complete your booking.
+          Secure checkout powered by Stripe
         </p>
       </CardContent>
     </Card>

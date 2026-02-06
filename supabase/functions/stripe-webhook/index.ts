@@ -34,14 +34,67 @@ async function logWebhookEvent(eventId: string, eventType: string, status: strin
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   const userId = session.client_reference_id || session.metadata?.user_id;
-  const planId = session.metadata?.plan_id;
-  const planName = session.metadata?.plan_name;
+  const checkoutType = session.metadata?.type;
   
   if (!userId) {
     throw new Error("No user_id found in session");
   }
 
-  console.log(`[WEBHOOK] Processing checkout for user ${userId}, plan: ${planId}`);
+  console.log(`[WEBHOOK] Processing checkout for user ${userId}, type: ${checkoutType}`);
+
+  // Handle course purchase
+  if (checkoutType === "course_purchase") {
+    const cartItemsJson = session.metadata?.cart_items;
+    if (cartItemsJson) {
+      const cartItems = JSON.parse(cartItemsJson) as Array<{
+        course_id: string;
+        offering_id: string;
+        offering_type: string;
+        participants_count: number;
+        regulated_certification: boolean;
+      }>;
+
+      console.log(`[WEBHOOK] Processing ${cartItems.length} course purchases`);
+
+      // Create enrollments for each course
+      for (const item of cartItems) {
+        // Check if enrollment already exists
+        const { data: existingEnrollment } = await supabase
+          .from("enrollments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("course_id", item.course_id)
+          .maybeSingle();
+
+        if (!existingEnrollment) {
+          const { error: enrollError } = await supabase
+            .from("enrollments")
+            .insert({
+              user_id: userId,
+              course_id: item.course_id,
+            });
+
+          if (enrollError) {
+            console.error(`[WEBHOOK] Failed to create enrollment for course ${item.course_id}:`, enrollError);
+          } else {
+            console.log(`[WEBHOOK] Created enrollment for course ${item.course_id}`);
+          }
+        } else {
+          console.log(`[WEBHOOK] Enrollment already exists for course ${item.course_id}`);
+        }
+      }
+
+      // Clear user's cart
+      const { error: cartError } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq("user_id", userId);
+
+      if (cartError) {
+        console.error("[WEBHOOK] Failed to clear cart:", cartError);
+      }
+    }
+  }
 
   // Create or update order
   const { error: orderError } = await supabase
@@ -54,8 +107,13 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       status: "completed",
       amount_total: session.amount_total || 0,
       currency: session.currency || "gbp",
-      plan: planId,
-      metadata: { plan_name: planName, subscription_id: session.subscription },
+      plan: session.metadata?.plan_id || null,
+      metadata: { 
+        plan_name: session.metadata?.plan_name,
+        subscription_id: session.subscription,
+        type: checkoutType,
+        cart_items: session.metadata?.cart_items,
+      },
     }, { onConflict: "stripe_session_id" });
 
   if (orderError) {
@@ -63,22 +121,24 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     throw orderError;
   }
 
-  // Update user subscription
-  const { error: subError } = await supabase
-    .from("user_subscriptions")
-    .upsert({
-      user_id: userId,
-      stripe_customer_id: session.customer as string,
-      stripe_subscription_id: session.subscription as string,
-      plan: planId || "basic",
-      status: "active",
-      current_period_start: new Date().toISOString(),
-      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-    }, { onConflict: "user_id" });
+  // Only update subscription if this is a subscription checkout
+  if (session.mode === "subscription" && session.subscription) {
+    const { error: subError } = await supabase
+      .from("user_subscriptions")
+      .upsert({
+        user_id: userId,
+        stripe_customer_id: session.customer as string,
+        stripe_subscription_id: session.subscription as string,
+        plan: session.metadata?.plan_id || "basic",
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }, { onConflict: "user_id" });
 
-  if (subError) {
-    console.error("[WEBHOOK] Failed to update subscription:", subError);
-    throw subError;
+    if (subError) {
+      console.error("[WEBHOOK] Failed to update subscription:", subError);
+      throw subError;
+    }
   }
 
   console.log(`[WEBHOOK] Successfully processed checkout for user ${userId}`);

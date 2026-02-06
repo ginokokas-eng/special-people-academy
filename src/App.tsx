@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -43,6 +44,8 @@ import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import Cart from "./pages/Cart";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 const queryClient = new QueryClient();
 
@@ -51,51 +54,55 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/courses/:id" element={<CourseDetail />} />
-              <Route path="/courses/:courseId/quiz" element={<QuizPage />} />
-              <Route path="/my-learning" element={<MyLearning />} />
-              <Route path="/certificates" element={<Certificates />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/trainer" element={<TrainerPortal />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/booking" element={<Booking />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/integrations" element={<Integrations />} />
-              <Route path="/enterprise" element={<Enterprise />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/help-center" element={<HelpCenter />} />
-              <Route path="/webinars" element={<Webinars />} />
-              <Route path="/case-studies" element={<CaseStudies />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/careers" element={<Careers />} />
-              <Route path="/partners" element={<Partners />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
-              <Route path="/access-denied" element={<AccessDenied />} />
-              <Route path="/staff-management" element={<StaffManagement />} />
-              <Route path="/career-applications" element={<CareerApplications />} />
-              <Route path="/app/admin/courses" element={<CourseBuilder />} />
-              <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
-              <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
-              <Route path="/payment-canceled" element={<PaymentCanceled />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:id" element={<CourseDetail />} />
+                <Route path="/courses/:courseId/quiz" element={<QuizPage />} />
+                <Route path="/my-learning" element={<MyLearning />} />
+                <Route path="/certificates" element={<Certificates />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/trainer" element={<TrainerPortal />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/booking" element={<Booking />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/integrations" element={<Integrations />} />
+                <Route path="/enterprise" element={<Enterprise />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/help-center" element={<HelpCenter />} />
+                <Route path="/webinars" element={<Webinars />} />
+                <Route path="/case-studies" element={<CaseStudies />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/partners" element={<Partners />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="/access-denied" element={<AccessDenied />} />
+                <Route path="/staff-management" element={<StaffManagement />} />
+                <Route path="/career-applications" element={<CareerApplications />} />
+                <Route path="/app/admin/courses" element={<CourseBuilder />} />
+                <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
+                <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout-success" element={<CheckoutSuccess />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </CartProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

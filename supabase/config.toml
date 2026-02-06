@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.customer-portal]
 verify_jwt = false
+
+[functions.create-cart-checkout]
+verify_jwt = false
