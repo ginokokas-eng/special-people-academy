@@ -30,8 +30,32 @@ export const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground py-16 px-6">
-      <div className="container mx-auto max-w-6xl">
+    <footer className="relative bg-primary text-primary-foreground pt-16 pb-16 px-6 overflow-hidden">
+      {/* Decorative Arc Motif - Top Border */}
+      <svg 
+        className="absolute top-0 left-0 w-full h-16 pointer-events-none" 
+        preserveAspectRatio="none"
+        viewBox="0 0 1440 60"
+        aria-hidden="true"
+      >
+        {/* Flowing arc at top of footer */}
+        <path
+          d="M0 30 Q 360 5, 720 25 T 1440 15"
+          fill="none"
+          stroke="hsl(var(--accent-green))"
+          strokeWidth="1.5"
+          opacity="0.25"
+        />
+        <path
+          d="M0 45 Q 480 20, 960 40 T 1440 30"
+          fill="none"
+          stroke="hsl(var(--primary-foreground))"
+          strokeWidth="1"
+          opacity="0.1"
+        />
+      </svg>
+
+      <div className="container mx-auto max-w-6xl relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 font-heading font-bold text-xl mb-4">

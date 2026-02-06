@@ -117,8 +117,33 @@ export const FeaturesSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 px-6 bg-secondary/30">
-      <div className="container mx-auto max-w-6xl">
+    <section className="relative py-20 px-6 bg-secondary/30 overflow-hidden">
+      {/* Decorative Arc - Section Background */}
+      <svg 
+        className="absolute inset-0 w-full h-full pointer-events-none" 
+        preserveAspectRatio="none"
+        viewBox="0 0 1440 600"
+        aria-hidden="true"
+      >
+        {/* Subtle arc behind heading */}
+        <path
+          d="M200 100 Q 720 0, 1240 100"
+          fill="none"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          opacity="0.08"
+        />
+        {/* Lower flowing arc */}
+        <path
+          d="M-50 450 Q 400 350, 800 420 T 1500 380"
+          fill="none"
+          stroke="hsl(var(--accent-green))"
+          strokeWidth="1"
+          opacity="0.1"
+        />
+      </svg>
+
+      <div className="container mx-auto max-w-6xl relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Why Choose Special People Academy

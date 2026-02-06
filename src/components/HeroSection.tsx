@@ -7,7 +7,40 @@ export const HeroSection = () => {
   
   return (
     <section className="relative gradient-hero text-primary-foreground overflow-hidden">
-      {/* Background Pattern */}
+      {/* Decorative Arc Shapes - Brand Identity */}
+      <svg 
+        className="absolute inset-0 w-full h-full pointer-events-none" 
+        preserveAspectRatio="none"
+        viewBox="0 0 1440 800"
+        aria-hidden="true"
+      >
+        {/* Top arc - sweeping from left */}
+        <path
+          d="M-100 200 Q 400 50, 900 150 T 1600 100"
+          fill="none"
+          stroke="hsl(var(--primary-foreground))"
+          strokeWidth="1.5"
+          opacity="0.08"
+        />
+        {/* Middle arc - gentle curve */}
+        <path
+          d="M-50 400 Q 300 300, 700 380 T 1500 350"
+          fill="none"
+          stroke="hsl(var(--accent))"
+          strokeWidth="1"
+          opacity="0.12"
+        />
+        {/* Bottom arc - flowing right */}
+        <path
+          d="M0 600 Q 500 500, 1000 580 T 1600 520"
+          fill="none"
+          stroke="hsl(var(--primary-foreground))"
+          strokeWidth="1"
+          opacity="0.06"
+        />
+      </svg>
+
+      {/* Background Glow Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
