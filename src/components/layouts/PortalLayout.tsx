@@ -6,11 +6,9 @@ import { Button } from '@/components/ui/button';
 import { 
   GraduationCap, 
   LayoutDashboard, 
-  BookOpen, 
   Menu, 
   X,
   Bell,
-  Settings,
   ClipboardList,
   Users,
   Briefcase,
@@ -18,7 +16,8 @@ import {
   User,
   LogOut,
   ChevronLeft,
-  Home
+  Home,
+  Settings2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -69,6 +68,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
     ...(isSuperAdmin ? [
       { label: 'Staff Management', href: '/staff-management', icon: Users },
       { label: 'Career Applications', href: '/career-applications', icon: Briefcase },
+      { label: 'Integrations', href: '/app/admin/integrations-status', icon: Settings2 },
     ] : []),
   ];
 
