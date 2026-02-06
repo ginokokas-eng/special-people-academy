@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
 import { FAQSection } from "@/components/marketing/FAQSection";
@@ -15,11 +16,15 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Check, X, ArrowRight, Clock, Users, Rocket, HeartHandshake } from "lucide-react";
+import { Check, X, ArrowRight, Clock, Users, Rocket, HeartHandshake, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const plans = [
   {
+    id: "individual",
     name: "Individual",
     description: "For a caregiver or single learner plan",
     monthlyPrice: 29,
@@ -32,11 +37,12 @@ const plans = [
       "Mobile-friendly access",
       "Downloadable resources"
     ],
-    cta: "Start Free Trial",
-    href: "/auth",
-    popular: false
+    cta: "Subscribe Now",
+    popular: false,
+    isContact: false
   },
   {
+    id: "team",
     name: "Team",
     description: "For small teams and care organizations",
     monthlyPrice: 99,
@@ -50,11 +56,12 @@ const plans = [
       "Priority email support",
       "Custom branding basics"
     ],
-    cta: "Start Free Trial",
-    href: "/auth",
-    popular: true
+    cta: "Subscribe Now",
+    popular: true,
+    isContact: false
   },
   {
+    id: "organization",
     name: "Organization",
     description: "For schools, centers, and programs",
     monthlyPrice: 249,
@@ -68,11 +75,12 @@ const plans = [
       "Dedicated onboarding session",
       "Phone & chat support"
     ],
-    cta: "Request a Demo",
-    href: "/contact",
-    popular: false
+    cta: "Subscribe Now",
+    popular: false,
+    isContact: false
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     description: "For large organizations with advanced needs",
     monthlyPrice: null,
@@ -88,8 +96,8 @@ const plans = [
       "On-site training options"
     ],
     cta: "Talk to Sales",
-    href: "/contact",
-    popular: false
+    popular: false,
+    isContact: true
   }
 ];
 
@@ -170,7 +178,41 @@ const faqs = [
 
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const annualSavings = 20;
+
+  const handleSubscribe = async (planId: string, isContact: boolean) => {
+    if (isContact) {
+      navigate("/contact");
+      return;
+    }
+
+    if (!user) {
+      toast.info("Please sign in to subscribe");
+      navigate("/auth");
+      return;
+    }
+
+    setLoadingPlan(planId);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { planId },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   const renderFeatureValue = (value: boolean | string) => {
     if (value === true) {
@@ -266,14 +308,16 @@ export default function Pricing() {
                     ))}
                   </ul>
                   <Button 
-                    asChild 
+                    onClick={() => handleSubscribe(plan.id, plan.isContact)}
+                    disabled={loadingPlan === plan.id}
                     className="w-full mt-auto" 
                     variant={plan.popular ? "default" : "outline"}
                   >
-                    <Link to={plan.href}>
-                      {plan.cta}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
+                    {loadingPlan === plan.id ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : null}
+                    {plan.cta}
+                    {loadingPlan !== plan.id && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                 </CardContent>
               </Card>

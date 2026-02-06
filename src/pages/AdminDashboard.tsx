@@ -54,6 +54,7 @@ import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsMa
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
+import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
@@ -580,6 +581,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="featured">Featured</TabsTrigger>
             <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
@@ -804,6 +806,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="featured" className="mt-6">
             <FeaturedCoursesManager />
+          </TabsContent>
+
+          <TabsContent value="payments" className="mt-6">
+            <PaymentsHealthPanel />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
