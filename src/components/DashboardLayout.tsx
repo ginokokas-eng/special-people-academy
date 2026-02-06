@@ -34,9 +34,10 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
+// Learner navigation items - "My Courses" shows only enrolled/assigned courses
+const learnerNavItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Courses', href: '/courses', icon: BookOpen },
+  { label: 'My Courses', href: '/my-courses', icon: BookOpen },
   { label: 'My Learning', href: '/my-learning', icon: GraduationCap },
   { label: 'Certificates', href: '/certificates', icon: Trophy },
 ];
@@ -202,7 +203,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}>
             <nav className="p-4 space-y-1">
-              {navItems.map((item) => {
+              {learnerNavItems.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <Button
