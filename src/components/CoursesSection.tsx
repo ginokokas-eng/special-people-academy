@@ -47,6 +47,9 @@ const CourseCard = ({
     practical: "Face-to-Face",
     blended: "Blended Learning",
     online: "Online",
+    online_self_paced: "Online (Self-paced)",
+    live_online: "Live Online",
+    in_person_practical: "In-Person Practical",
   };
 
   return (

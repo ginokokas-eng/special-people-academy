@@ -87,7 +87,12 @@ export function CourseHero({
       case 'blended':
         return <Users className="h-3.5 w-3.5" />;
       case 'in-person':
+      case 'in_person_practical':
         return <Users className="h-3.5 w-3.5" />;
+      case 'live_online':
+        return <Laptop className="h-3.5 w-3.5" />;
+      case 'online':
+      case 'online_self_paced':
       default:
         return <Laptop className="h-3.5 w-3.5" />;
     }
@@ -98,9 +103,14 @@ export function CourseHero({
       case 'blended':
         return 'Blended Learning';
       case 'in-person':
-        return 'In-Person';
+      case 'in_person_practical':
+        return 'In-Person Practical';
+      case 'live_online':
+        return 'Live Online';
+      case 'online':
+      case 'online_self_paced':
       default:
-        return 'Online';
+        return 'Online (Self-paced)';
     }
   };
 
