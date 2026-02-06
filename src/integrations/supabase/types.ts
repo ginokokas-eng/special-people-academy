@@ -133,6 +133,48 @@ export type Database = {
           },
         ]
       }
+      career_applications: {
+        Row: {
+          created_at: string | null
+          cv_file_url: string | null
+          email: string
+          full_name: string
+          id: string
+          message: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role_applied_for: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_file_url?: string | null
+          email: string
+          full_name: string
+          id?: string
+          message?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_applied_for: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_file_url?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_applied_for?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -951,6 +993,7 @@ export type Database = {
       }
       staff_profiles: {
         Row: {
+          can_sign_off_competency: boolean | null
           created_at: string | null
           delivery_types: string[] | null
           email: string
@@ -964,6 +1007,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          can_sign_off_competency?: boolean | null
           created_at?: string | null
           delivery_types?: string[] | null
           email: string
@@ -977,6 +1021,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          can_sign_off_competency?: boolean | null
           created_at?: string | null
           delivery_types?: string[] | null
           email?: string
