@@ -1,0 +1,463 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { GripVertical, Plus, Trash2, Edit, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Module {
+  id: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+}
+
+interface Lesson {
+  id: string;
+  module_id: string | null;
+  title: string;
+  description: string | null;
+  lesson_type: string;
+  order_index: number;
+  duration_minutes: number | null;
+}
+
+interface CourseModulesTabProps {
+  courseId: string;
+}
+
+const LESSON_TYPES = [
+  { value: 'video', label: 'Video' },
+  { value: 'text', label: 'Text/Article' },
+  { value: 'step_by_step', label: 'Step by Step Guide' },
+  { value: 'quiz', label: 'Quiz' },
+  { value: 'resource', label: 'Resource/Download' },
+  { value: 'practical', label: 'Practical Session' },
+];
+
+export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
+  const [modules, setModules] = useState<Module[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [moduleDialog, setModuleDialog] = useState<{ open: boolean; module: Module | null }>({ open: false, module: null });
+  const [lessonDialog, setLessonDialog] = useState<{ open: boolean; lesson: Lesson | null; moduleId: string | null }>({ open: false, lesson: null, moduleId: null });
+  const [saving, setSaving] = useState(false);
+
+  // Form states
+  const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
+  const [lessonForm, setLessonForm] = useState({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+
+  useEffect(() => {
+    fetchData();
+  }, [courseId]);
+
+  const fetchData = async () => {
+    try {
+      const [modulesRes, lessonsRes] = await Promise.all([
+        supabase.from('modules').select('*').eq('course_id', courseId).order('order_index'),
+        supabase.from('lessons').select('*').eq('course_id', courseId).order('order_index'),
+      ]);
+
+      if (modulesRes.error) throw modulesRes.error;
+      if (lessonsRes.error) throw lessonsRes.error;
+
+      setModules(modulesRes.data || []);
+      setLessons(lessonsRes.data || []);
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+      toast.error('Failed to load modules');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateModule = async () => {
+    if (!moduleForm.title.trim()) {
+      toast.error('Module title is required');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('modules').insert({
+        course_id: courseId,
+        title: moduleForm.title,
+        description: moduleForm.description || null,
+        order_index: modules.length,
+      });
+
+      if (error) throw error;
+      toast.success('Module created');
+      setModuleDialog({ open: false, module: null });
+      setModuleForm({ title: '', description: '' });
+      fetchData();
+    } catch (error) {
+      console.error('Error creating module:', error);
+      toast.error('Failed to create module');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateModule = async () => {
+    if (!moduleDialog.module || !moduleForm.title.trim()) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('modules')
+        .update({ title: moduleForm.title, description: moduleForm.description || null })
+        .eq('id', moduleDialog.module.id);
+
+      if (error) throw error;
+      toast.success('Module updated');
+      setModuleDialog({ open: false, module: null });
+      fetchData();
+    } catch (error) {
+      console.error('Error updating module:', error);
+      toast.error('Failed to update module');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteModule = async (moduleId: string) => {
+    if (!confirm('Delete this module and all its lessons?')) return;
+
+    try {
+      const { error } = await supabase.from('modules').delete().eq('id', moduleId);
+      if (error) throw error;
+      toast.success('Module deleted');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      toast.error('Failed to delete module');
+    }
+  };
+
+  const handleCreateLesson = async () => {
+    if (!lessonForm.title.trim()) {
+      toast.error('Lesson title is required');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const moduleLessons = lessons.filter(l => l.module_id === lessonDialog.moduleId);
+      const { error } = await supabase.from('lessons').insert({
+        course_id: courseId,
+        module_id: lessonDialog.moduleId,
+        title: lessonForm.title,
+        description: lessonForm.description || null,
+        lesson_type: lessonForm.lesson_type,
+        duration_minutes: lessonForm.duration_minutes || 0,
+        order_index: moduleLessons.length,
+      });
+
+      if (error) throw error;
+      toast.success('Lesson created');
+      setLessonDialog({ open: false, lesson: null, moduleId: null });
+      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+      fetchData();
+    } catch (error) {
+      console.error('Error creating lesson:', error);
+      toast.error('Failed to create lesson');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateLesson = async () => {
+    if (!lessonDialog.lesson || !lessonForm.title.trim()) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .update({
+          title: lessonForm.title,
+          description: lessonForm.description || null,
+          lesson_type: lessonForm.lesson_type,
+          duration_minutes: lessonForm.duration_minutes || 0,
+        })
+        .eq('id', lessonDialog.lesson.id);
+
+      if (error) throw error;
+      toast.success('Lesson updated');
+      setLessonDialog({ open: false, lesson: null, moduleId: null });
+      fetchData();
+    } catch (error) {
+      console.error('Error updating lesson:', error);
+      toast.error('Failed to update lesson');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    if (!confirm('Delete this lesson?')) return;
+
+    try {
+      const { error } = await supabase.from('lessons').delete().eq('id', lessonId);
+      if (error) throw error;
+      toast.success('Lesson deleted');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      toast.error('Failed to delete lesson');
+    }
+  };
+
+  const openEditModule = (module: Module) => {
+    setModuleForm({ title: module.title, description: module.description || '' });
+    setModuleDialog({ open: true, module });
+  };
+
+  const openEditLesson = (lesson: Lesson) => {
+    setLessonForm({
+      title: lesson.title,
+      description: lesson.description || '',
+      lesson_type: lesson.lesson_type || 'video',
+      duration_minutes: lesson.duration_minutes || 0,
+    });
+    setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
+  };
+
+  const openAddLesson = (moduleId: string) => {
+    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+    setLessonDialog({ open: true, lesson: null, moduleId });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Modules & Lessons</CardTitle>
+              <CardDescription>Organize your course content</CardDescription>
+            </div>
+            <Button onClick={() => {
+              setModuleForm({ title: '', description: '' });
+              setModuleDialog({ open: true, module: null });
+            }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Module
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {modules.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No modules yet. Create your first module to get started.</p>
+            </div>
+          ) : (
+            <Accordion type="multiple" className="space-y-4">
+              {modules.map((module, index) => {
+                const moduleLessons = lessons.filter(l => l.module_id === module.id);
+                return (
+                  <AccordionItem key={module.id} value={module.id} className="border rounded-lg px-4">
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Module {index + 1}: {module.title}</span>
+                        <span className="text-sm text-muted-foreground">({moduleLessons.length} lessons)</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-muted-foreground">{module.description || 'No description'}</p>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openEditModule(module)}>
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteModule(module.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {moduleLessons.map((lesson, lessonIndex) => (
+                            <div
+                              key={lesson.id}
+                              className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                            >
+                              <div className="flex items-center gap-3">
+                                <GripVertical className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">
+                                  {lessonIndex + 1}. {lesson.title}
+                                </span>
+                                <span className="text-xs px-2 py-1 bg-background rounded">
+                                  {LESSON_TYPES.find(t => t.value === lesson.lesson_type)?.label || lesson.lesson_type}
+                                </span>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => openEditLesson(lesson)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleDeleteLesson(lesson.id)}>
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <Button variant="outline" size="sm" onClick={() => openAddLesson(module.id)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Lesson
+                        </Button>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Module Dialog */}
+      <Dialog open={moduleDialog.open} onOpenChange={(open) => setModuleDialog({ ...moduleDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{moduleDialog.module ? 'Edit Module' : 'Add Module'}</DialogTitle>
+            <DialogDescription>
+              {moduleDialog.module ? 'Update the module details' : 'Create a new module for this course'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="module-title">Title</Label>
+              <Input
+                id="module-title"
+                value={moduleForm.title}
+                onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })}
+                placeholder="Module title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="module-description">Description</Label>
+              <Textarea
+                id="module-description"
+                value={moduleForm.description}
+                onChange={(e) => setModuleForm({ ...moduleForm, description: e.target.value })}
+                placeholder="Brief description of this module"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModuleDialog({ open: false, module: null })}>
+              Cancel
+            </Button>
+            <Button onClick={moduleDialog.module ? handleUpdateModule : handleCreateModule} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {moduleDialog.module ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lesson Dialog */}
+      <Dialog open={lessonDialog.open} onOpenChange={(open) => setLessonDialog({ ...lessonDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{lessonDialog.lesson ? 'Edit Lesson' : 'Add Lesson'}</DialogTitle>
+            <DialogDescription>
+              {lessonDialog.lesson ? 'Update the lesson details' : 'Create a new lesson'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="lesson-title">Title</Label>
+              <Input
+                id="lesson-title"
+                value={lessonForm.title}
+                onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                placeholder="Lesson title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lesson-type">Type</Label>
+              <Select
+                value={lessonForm.lesson_type}
+                onValueChange={(value) => setLessonForm({ ...lessonForm, lesson_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LESSON_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lesson-duration">Duration (minutes)</Label>
+              <Input
+                id="lesson-duration"
+                type="number"
+                value={lessonForm.duration_minutes}
+                onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lesson-description">Description</Label>
+              <Textarea
+                id="lesson-description"
+                value={lessonForm.description}
+                onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })}
+                placeholder="Brief description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLessonDialog({ open: false, lesson: null, moduleId: null })}>
+              Cancel
+            </Button>
+            <Button onClick={lessonDialog.lesson ? handleUpdateLesson : handleCreateLesson} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {lessonDialog.lesson ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

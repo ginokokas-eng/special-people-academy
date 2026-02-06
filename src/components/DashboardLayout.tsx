@@ -17,7 +17,8 @@ import {
   Settings,
   ClipboardList,
   Users,
-  Briefcase
+  Briefcase,
+  PenTool
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -44,7 +45,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isAdmin, isTrainer } = useAuth();
-  const { isSuperAdmin } = useRoles();
+  const { isSuperAdmin, isOpsTrainingAdmin } = useRoles();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -158,6 +159,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                           Career Applications
                         </DropdownMenuItem>
                       </>
+                    )}
+                    {(isSuperAdmin || isOpsTrainingAdmin) && (
+                      <DropdownMenuItem onClick={() => navigate('/app/admin/courses')}>
+                        <PenTool className="mr-2 h-4 w-4" />
+                        Course Builder
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive">

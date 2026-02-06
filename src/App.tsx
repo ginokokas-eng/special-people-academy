@@ -38,6 +38,9 @@ import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import StaffManagement from "./pages/StaffManagement";
 import CareerApplications from "./pages/CareerApplications";
+import CourseBuilder from "./pages/admin/CourseBuilder";
+import CourseEditor from "./pages/admin/CourseEditor";
+import CoursePreview from "./pages/admin/CoursePreview";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +85,9 @@ const App = () => (
               <Route path="/access-denied" element={<AccessDenied />} />
               <Route path="/staff-management" element={<StaffManagement />} />
               <Route path="/career-applications" element={<CareerApplications />} />
+              <Route path="/app/admin/courses" element={<CourseBuilder />} />
+              <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
+              <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
