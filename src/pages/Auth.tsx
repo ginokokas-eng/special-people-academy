@@ -37,9 +37,32 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !loading) {
+      // User is already logged in, redirect based on role
+      redirectBasedOnRole();
+    }
+  }, [user, loading]);
+
+  const redirectBasedOnRole = async () => {
+    if (!user) return;
+    
+    // Check roles in database
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    
+    const roles = rolesData?.map(r => r.role) || [];
+    
+    if (roles.includes('super_admin') || roles.includes('admin')) {
+      navigate('/admin');
+    } else if (roles.includes('ops_training_admin')) {
+      navigate('/app/admin/courses');
+    } else if (roles.includes('trainer')) {
+      navigate('/trainer');
+    } else {
       navigate('/dashboard');
     }
-  }, [user, loading, navigate]);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +78,7 @@ export default function Auth() {
     }
 
     setIsSubmitting(true);
-    const { error } = await signIn(loginEmail, loginPassword);
+    const { error, roles } = await signIn(loginEmail, loginPassword);
     setIsSubmitting(false);
 
     if (error) {
@@ -66,7 +89,16 @@ export default function Auth() {
       }
     } else {
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      // Redirect based on roles returned from signIn
+      if (roles?.includes('super_admin') || roles?.includes('admin')) {
+        navigate('/admin');
+      } else if (roles?.includes('ops_training_admin')) {
+        navigate('/app/admin/courses');
+      } else if (roles?.includes('trainer')) {
+        navigate('/trainer');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
@@ -114,12 +146,32 @@ export default function Auth() {
 
     if (!result.redirected) {
       // Check if user needs role assignment based on email
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        await assignRoleByEmail(user.email, user.id);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser?.email) {
+        await assignRoleByEmail(authUser.email, authUser.id);
+        
+        // Now fetch the roles and redirect
+        const { data: rolesData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', authUser.id);
+        
+        const roles = rolesData?.map(r => r.role) || [];
+        
+        toast.success('Welcome!');
+        
+        if (roles.includes('super_admin') || roles.includes('admin')) {
+          navigate('/admin');
+        } else if (roles.includes('ops_training_admin')) {
+          navigate('/app/admin/courses');
+        } else if (roles.includes('trainer')) {
+          navigate('/trainer');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        navigate('/dashboard');
       }
-      toast.success('Welcome!');
-      navigate('/dashboard');
     }
     setIsSubmitting(false);
   };
