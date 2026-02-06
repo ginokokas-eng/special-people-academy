@@ -6,106 +6,117 @@ export const HeroSection = () => {
   const navigate = useNavigate();
   
   return (
-    <section className="relative gradient-hero text-primary-foreground overflow-hidden">
-      {/* Decorative Arc Shapes - Brand Identity */}
+    <section className="relative bg-background overflow-hidden">
+      {/* Decorative Arc Lines - Brand Identity (matching reference) */}
       <svg 
-        className="absolute inset-0 w-full h-full pointer-events-none" 
-        preserveAspectRatio="none"
-        viewBox="0 0 1440 800"
+        className="absolute right-0 top-0 h-full w-1/2 pointer-events-none" 
+        preserveAspectRatio="xMaxYMid slice"
+        viewBox="0 0 400 600"
         aria-hidden="true"
       >
-        {/* Top arc - sweeping from left */}
+        {/* Outer arc - Teal */}
         <path
-          d="M-100 200 Q 400 50, 900 150 T 1600 100"
+          d="M 350 50 Q 450 300, 350 550"
           fill="none"
-          stroke="hsl(var(--primary-foreground))"
-          strokeWidth="1.5"
-          opacity="0.08"
+          stroke="hsl(var(--primary))"
+          strokeWidth="3"
+          opacity="0.3"
         />
-        {/* Middle arc - gentle curve */}
+        {/* Middle arc - Yellow */}
         <path
-          d="M-50 400 Q 300 300, 700 380 T 1500 350"
+          d="M 320 80 Q 400 300, 320 520"
           fill="none"
-          stroke="hsl(var(--accent))"
-          strokeWidth="1"
-          opacity="0.12"
+          stroke="hsl(var(--accent-yellow))"
+          strokeWidth="3"
+          opacity="0.5"
         />
-        {/* Bottom arc - flowing right */}
+        {/* Inner arc - Coral/Peach */}
         <path
-          d="M0 600 Q 500 500, 1000 580 T 1600 520"
+          d="M 290 110 Q 360 300, 290 490"
           fill="none"
-          stroke="hsl(var(--primary-foreground))"
-          strokeWidth="1"
-          opacity="0.06"
+          stroke="hsl(var(--accent-peach))"
+          strokeWidth="3"
+          opacity="0.5"
         />
       </svg>
 
-      {/* Background Glow Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto max-w-6xl px-6 py-24 lg:py-32 relative z-10">
+      <div className="container mx-auto max-w-6xl px-6 py-20 lg:py-28 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
           <div className="space-y-8 animate-fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-sm">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-sm text-foreground">
+              <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
               <span>New courses added weekly</span>
             </div>
 
-            <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-heading font-bold leading-tight text-foreground">
               Transform Your Skills with{" "}
-              <span className="text-gradient-primary">
+              <span className="text-foreground">
                 Special People Academy
               </span>
             </h1>
 
-            <p className="text-lg text-primary-foreground/80 max-w-lg leading-relaxed">
+            <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
               Build skills that matter. Our comprehensive training platform helps your workforce stay ahead with interactive courses, certifications, and progress tracking.
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="xl" onClick={() => navigate('/contact')}>
+              <Button 
+                size="lg" 
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8"
+                onClick={() => navigate('/contact')}
+              >
                 Contact Sales
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
-              <Button variant="heroOutline" size="xl">
-                <Play className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="lg"
+                className="text-foreground hover:bg-transparent gap-2"
+              >
+                <Play className="h-5 w-5 fill-current" />
                 Watch Demo
               </Button>
             </div>
 
-            <div className="flex items-center gap-6 pt-4">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
+            <div className="flex items-center gap-4 pt-4">
+              <div className="flex -space-x-2">
+                {['A', 'B', 'C', 'D'].map((letter, i) => (
                   <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background flex items-center justify-center text-xs font-semibold"
+                    key={letter}
+                    className="w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-xs font-bold text-foreground"
+                    style={{
+                      backgroundColor: i === 0 ? 'hsl(var(--primary))' : 
+                                      i === 1 ? 'hsl(68 55% 50%)' : 
+                                      i === 2 ? 'hsl(68 55% 60%)' : 
+                                      'hsl(68 55% 70%)',
+                      color: i === 0 ? 'white' : 'hsl(var(--foreground))'
+                    }}
                   >
-                    {String.fromCharCode(64 + i)}
+                    {letter}
                   </div>
                 ))}
               </div>
-              <div className="text-sm">
+              <div className="text-sm text-foreground">
                 <span className="font-semibold">1,200+</span>
-                <span className="text-primary-foreground/70"> employees trained this month</span>
+                <span className="text-muted-foreground"> employees trained this month</span>
               </div>
             </div>
           </div>
 
+          {/* Right Visual Card */}
           <div className="relative lg:pl-8 animate-fade-up" style={{ animationDelay: "200ms" }}>
-            <div className="relative bg-card/10 backdrop-blur-sm rounded-2xl p-6 border border-primary-foreground/10">
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center">
-                <div className="w-20 h-20 rounded-full bg-primary-foreground/20 backdrop-blur flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-                  <Play className="h-8 w-8 text-primary-foreground ml-1" />
+            <div className="relative bg-gradient-to-br from-[hsl(180_20%_90%)] to-[hsl(68_40%_85%)] rounded-2xl p-6 shadow-lg">
+              <div className="aspect-video bg-gradient-to-br from-[hsl(180_25%_85%)] to-[hsl(68_50%_80%)] rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-white/60 backdrop-blur flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-md">
+                  <Play className="h-6 w-6 text-foreground ml-1 fill-foreground/20" />
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {["Safety", "Leadership", "Technical"].map((category) => (
                   <div
                     key={category}
-                    className="px-3 py-2 rounded-lg bg-primary-foreground/10 text-center text-sm font-medium"
+                    className="px-3 py-2 rounded-lg bg-white/50 text-center text-sm font-medium text-foreground"
                   >
                     {category}
                   </div>
