@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { StatsSection } from "@/components/StatsSection";
@@ -8,15 +9,23 @@ import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <HeroSection />
-      <StatsSection />
-      <CoursesSection />
-      <FeaturesSection />
-      <CTASection />
-      <Footer />
-    </div>
+    <>
+      <Helmet>
+        <title>Special People Academy | Inclusive Training & CPD Courses</title>
+        <meta name="description" content="Special People Academy provides inclusive, CPD-certified training courses for care professionals. Build essential skills with step-by-step lessons and progress tracking." />
+      </Helmet>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navbar />
+        <main className="flex-1">
+          <HeroSection />
+          <StatsSection />
+          <CoursesSection />
+          <FeaturesSection />
+          <CTASection />
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 };
 

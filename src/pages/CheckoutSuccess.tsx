@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
+import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +15,6 @@ import {
   ArrowRight,
   BookOpen
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 
 interface PurchasedCourse {
   id: string;
@@ -81,23 +80,20 @@ export default function CheckoutSuccess() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
+      <PublicLayout title="Processing Order" description="Processing your order">
+        <div className="container py-12 flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">Processing your order...</p>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </PublicLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow container py-12">
+    <PublicLayout title="Payment Successful" description="Your payment was successful">
+      <div className="container py-12">
         <div className="max-w-2xl mx-auto text-center">
           {/* Success Header */}
           <div className="mb-8">
@@ -173,8 +169,7 @@ export default function CheckoutSuccess() {
             </Button>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </PublicLayout>
   );
 }

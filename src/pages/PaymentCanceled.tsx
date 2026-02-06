@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom";
 import { XCircle, ArrowLeft, HelpCircle } from "lucide-react";
+import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 
 export default function PaymentCanceled() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center p-6">
+    <PublicLayout title="Payment Canceled" description="Your payment was not completed">
+      <div className="container py-12 flex items-center justify-center min-h-[50vh]">
         <Card className="max-w-md w-full text-center">
           <CardHeader className="pb-4">
             <XCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -38,8 +36,7 @@ export default function PaymentCanceled() {
             </div>
           </CardContent>
         </Card>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </PublicLayout>
   );
 }

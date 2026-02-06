@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -119,135 +119,137 @@ export default function Courses() {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+      <PublicLayout title="Courses" description="Browse our CPD-certified training courses">
+        <div className="container py-12 flex items-center justify-center min-h-[50vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </PublicLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Course Catalog</h1>
-          <p className="text-muted-foreground mt-1">Explore and enroll in courses</p>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+    <PublicLayout title="Courses" description="Browse our CPD-certified training courses">
+      <div className="container py-8 md:py-12">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Course Catalog</h1>
+            <p className="text-muted-foreground mt-1">Explore and enroll in courses</p>
           </div>
-          <div className="flex gap-2">
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[160px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={levelFilter} onValueChange={setLevelFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="New Joiner">New Joiner</SelectItem>
-                <SelectItem value="Enhanced">Enhanced</SelectItem>
-                <SelectItem value="Complex">Complex</SelectItem>
-              </SelectContent>
-            </Select>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={levelFilter} onValueChange={setLevelFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="New Joiner">New Joiner</SelectItem>
+                  <SelectItem value="Enhanced">Enhanced</SelectItem>
+                  <SelectItem value="Complex">Complex</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        {/* Results count */}
-        <p className="text-sm text-muted-foreground">
-          Showing {filteredCourses.length} of {courses.length} courses
-        </p>
+          {/* Results count */}
+          <p className="text-sm text-muted-foreground">
+            Showing {filteredCourses.length} of {courses.length} courses
+          </p>
 
-        {/* Courses grid */}
-        {filteredCourses.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No courses found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filters</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <Card 
-                key={course.id} 
-                className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
-                onClick={() => navigate(`/courses/${course.id}`)}
-              >
-                <div className="relative aspect-video bg-muted overflow-hidden">
-                  {course.thumbnail_url ? (
-                    <img 
-                      src={course.thumbnail_url} 
-                      alt={course.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                      <BookOpen className="h-12 w-12 text-muted-foreground" />
+          {/* Courses grid */}
+          {filteredCourses.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No courses found</h3>
+                <p className="text-muted-foreground">Try adjusting your search or filters</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => (
+                <Card 
+                  key={course.id} 
+                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+                  onClick={() => navigate(`/courses/${course.id}`)}
+                >
+                  <div className="relative aspect-video bg-muted overflow-hidden">
+                    {course.thumbnail_url ? (
+                      <img 
+                        src={course.thumbnail_url} 
+                        alt={course.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                        <BookOpen className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
+                        <Play className="h-6 w-6 text-foreground ml-0.5" />
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
-                      <Play className="h-6 w-6 text-foreground ml-0.5" />
+                  </div>
+                  <CardHeader className="pb-2">
+                    <p className="text-xs font-medium text-primary">{course.category}</p>
+                    <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                      {course.title}
+                    </h3>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                      {course.description}
+                    </p>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xl font-bold text-foreground">
+                        {getPriceDisplay(course.course_offerings)}
+                      </span>
                     </div>
-                  </div>
-                </div>
-                <CardHeader className="pb-2">
-                  <p className="text-xs font-medium text-primary">{course.category}</p>
-                  <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                    {course.title}
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                    {course.description}
-                  </p>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xl font-bold text-foreground">
-                      {getPriceDisplay(course.course_offerings)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {formatDuration(course.duration_minutes || 0)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {course.enrollmentCount}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-warning fill-warning" />
-                      4.8
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {formatDuration(course.duration_minutes || 0)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        {course.enrollmentCount}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-warning fill-warning" />
+                        4.8
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </DashboardLayout>
+    </PublicLayout>
   );
 }
