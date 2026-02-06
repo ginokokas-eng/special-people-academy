@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Star, Play, BookOpen, ArrowRight, GraduationCap } from "lucide-react";
+import { Clock, Users, Star, Play, BookOpen, ArrowRight, GraduationCap, ShoppingCart } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CourseOffering {
+  id: string;
   base_price_gbp: number;
   active: boolean;
 }
@@ -29,6 +33,7 @@ interface CourseCardProps {
   priceDisplay: string;
   image: string;
   deliveryType: string;
+  defaultOfferingId: string | null;
 }
 
 const CourseCard = ({
@@ -40,8 +45,12 @@ const CourseCard = ({
   priceDisplay,
   image,
   deliveryType,
+  defaultOfferingId,
 }: CourseCardProps) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { user } = useAuth();
+  const [isAdding, setIsAdding] = useState(false);
   
   const deliveryLabels: Record<string, string> = {
     practical: "Face-to-Face",
@@ -50,6 +59,39 @@ const CourseCard = ({
     online_self_paced: "Online (Self-paced)",
     live_online: "Live Online",
     in_person_practical: "In-Person Practical",
+  };
+
+  const handleAddToBasket = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please sign in to add items to basket");
+      navigate('/auth');
+      return;
+    }
+
+    if (!defaultOfferingId) {
+      toast.error("This course is not available for purchase yet");
+      return;
+    }
+
+    setIsAdding(true);
+    const success = await addToCart({
+      courseId: id,
+      offeringId: defaultOfferingId,
+      participantsCount: 1,
+      regulatedCertification: false,
+    });
+    setIsAdding(false);
+
+    if (success) {
+      toast.success("Added to basket", {
+        action: {
+          label: "View Basket",
+          onClick: () => navigate('/cart'),
+        },
+      });
+    }
   };
 
   return (
@@ -96,8 +138,15 @@ const CourseCard = ({
               {priceDisplay}
             </span>
           </div>
-          <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            Add to Basket
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+            onClick={handleAddToBasket}
+            disabled={isAdding || !defaultOfferingId}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            {isAdding ? "Adding..." : "Add to Basket"}
           </Button>
         </div>
       </div>
@@ -116,7 +165,7 @@ export const CoursesSection = () => {
         // Fetch featured, published courses with their offerings
         const { data, error } = await supabase
           .from("courses")
-          .select("id, title, category, duration_minutes, level, thumbnail_url, delivery_type, course_offerings(base_price_gbp, active)")
+          .select("id, title, category, duration_minutes, level, thumbnail_url, delivery_type, course_offerings(id, base_price_gbp, active)")
           .eq("is_featured", true)
           .eq("is_published", true)
           .order("updated_at", { ascending: false })
@@ -148,6 +197,14 @@ export const CoursesSection = () => {
     const minPrice = Math.min(...activeOfferings.map(o => o.base_price_gbp));
     if (minPrice === 0) return "Free";
     return `From £${minPrice}`;
+  };
+
+  const getDefaultOfferingId = (offerings: CourseOffering[]): string | null => {
+    const activeOfferings = offerings?.filter(o => o.active) || [];
+    if (activeOfferings.length === 0) return null;
+    // Return the cheapest active offering as the default
+    const sorted = [...activeOfferings].sort((a, b) => a.base_price_gbp - b.base_price_gbp);
+    return sorted[0]?.id || null;
   };
 
   return (
@@ -221,6 +278,7 @@ export const CoursesSection = () => {
                   priceDisplay={getPriceDisplay(course.course_offerings)}
                   image={course.thumbnail_url || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop"}
                   deliveryType={course.delivery_type}
+                  defaultOfferingId={getDefaultOfferingId(course.course_offerings)}
                 />
               </div>
             ))}
