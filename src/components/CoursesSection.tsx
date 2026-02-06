@@ -62,6 +62,7 @@ const CourseCard = ({
   };
 
   const handleAddToBasket = async (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     
     if (!user) {
@@ -95,60 +96,65 @@ const CourseCard = ({
   };
 
   return (
-    <div 
-      className="group bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden cursor-pointer"
-      onClick={() => navigate(`/courses/${id}`)}
-    >
-      <div className="relative aspect-video bg-muted overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-          style={{ backgroundImage: `url(${image})` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-14 h-14 rounded-full bg-primary-foreground/90 flex items-center justify-center hover:scale-110 transition-transform">
-            <Play className="h-6 w-6 text-foreground ml-0.5" />
+    <div className="group bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+      {/* Clickable area for course navigation */}
+      <div 
+        className="cursor-pointer"
+        onClick={() => navigate(`/courses/${id}`)}
+      >
+        <div className="relative aspect-video bg-muted overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+            style={{ backgroundImage: `url(${image})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-14 h-14 rounded-full bg-primary-foreground/90 flex items-center justify-center hover:scale-110 transition-transform">
+              <Play className="h-6 w-6 text-foreground ml-0.5" />
+            </div>
           </div>
-        </div>
-        <span className="absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-medium bg-primary/90 text-primary-foreground">
-          {deliveryLabels[deliveryType] || deliveryType}
-        </span>
-      </div>
-
-      <div className="p-5">
-        <p className="text-xs font-medium text-primary mb-2">{category}</p>
-        <h3 className="font-semibold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-          {title}
-        </h3>
-
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {duration}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            Practical
+          <span className="absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-medium bg-primary/90 text-primary-foreground">
+            {deliveryLabels[deliveryType] || deliveryType}
           </span>
         </div>
 
-        <div className="space-y-3">
+        <div className="p-5 pb-2">
+          <p className="text-xs font-medium text-primary mb-2">{category}</p>
+          <h3 className="font-semibold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+            {title}
+          </h3>
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {duration}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              Practical
+            </span>
+          </div>
+
           <div className="flex items-center justify-between">
             <span className="text-xl font-bold text-foreground">
               {priceDisplay}
             </span>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-            onClick={handleAddToBasket}
-            disabled={isAdding || !defaultOfferingId}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            {isAdding ? "Adding..." : "Add to Basket"}
-          </Button>
         </div>
+      </div>
+
+      {/* Non-clickable button area - separate from navigation */}
+      <div className="px-5 pb-5">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+          onClick={handleAddToBasket}
+          disabled={isAdding || !defaultOfferingId}
+        >
+          <ShoppingCart className="h-4 w-4 mr-2" />
+          {isAdding ? "Adding..." : "Add to Basket"}
+        </Button>
       </div>
     </div>
   );
