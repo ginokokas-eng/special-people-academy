@@ -494,10 +494,10 @@ export default function CourseDetail() {
       />
 
       {/* Main Content */}
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="container py-8 lg:py-12">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+          <div className="lg:col-span-2 space-y-8">
             {/* Progress Tracker - only show when enrolled */}
             {enrollment && canAccessCourse && (
               <CourseProgressTracker
@@ -585,8 +585,7 @@ export default function CourseDetail() {
           </div>
 
           {/* Right Column - Sticky Sidebar */}
-          <div className="hidden lg:block">
-            <div className="sticky top-6 space-y-6">
+          <div className="hidden lg:block space-y-6">
             {/* Booking Panel - show for external courses with offerings */}
             {!course.is_internal && (
               <CourseBookingPanel
@@ -613,7 +612,6 @@ export default function CourseDetail() {
               requiresSubscription={requiresSubscription}
               hasActiveSubscription={hasActiveSubscription}
             />
-            </div>
           </div>
         </div>
       </div>

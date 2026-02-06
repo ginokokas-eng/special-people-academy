@@ -9,13 +9,13 @@ export default {
   		center: true,
   		padding: '2rem',
   		screens: {
-  			'2xl': '1200px'
+  			'2xl': '1400px'
   		}
   	},
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Poppins',
+  				'Work Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -27,14 +27,8 @@ export default {
   				'Noto Sans',
   				'sans-serif'
   			],
-  			heading: [
-  				'Baloo 2"',
-  				'ui-rounded',
-  				'system-ui',
-  				'sans-serif'
-  			],
   			serif: [
-  				'Merriweather',
+  				'Lora',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -43,7 +37,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'JetBrains Mono',
+  				'Inconsolata',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
@@ -53,88 +47,6 @@ export default {
   				'Courier New',
   				'monospace'
   			]
-  		},
-  		fontSize: {
-  			xs: [
-  				'0.75rem',
-  				{
-  					lineHeight: '1rem'
-  				}
-  			],
-  			sm: [
-  				'0.875rem',
-  				{
-  					lineHeight: '1.25rem'
-  				}
-  			],
-  			base: [
-  				'1rem',
-  				{
-  					lineHeight: '1.5rem'
-  				}
-  			],
-  			lg: [
-  				'1.125rem',
-  				{
-  					lineHeight: '1.75rem'
-  				}
-  			],
-  			xl: [
-  				'1.25rem',
-  				{
-  					lineHeight: '1.75rem'
-  				}
-  			],
-  			'2xl': [
-  				'1.5rem',
-  				{
-  					lineHeight: '2rem'
-  				}
-  			],
-  			'3xl': [
-  				'1.75rem',
-  				{
-  					lineHeight: '2.25rem'
-  				}
-  			],
-  			'4xl': [
-  				'2rem',
-  				{
-  					lineHeight: '2.5rem'
-  				}
-  			],
-  			'5xl': [
-  				'2.25rem',
-  				{
-  					lineHeight: '2.5rem'
-  				}
-  			],
-  			'6xl': [
-  				'2.75rem',
-  				{
-  					lineHeight: '1.1'
-  				}
-  			],
-  			'7xl': [
-  				'3rem',
-  				{
-  					lineHeight: '1.1'
-  				}
-  			]
-  		},
-  		spacing: {
-  			'1': '0.25rem',
-  			'2': '0.5rem',
-  			'3': '0.75rem',
-  			'4': '1rem',
-  			'5': '1.25rem',
-  			'6': '1.5rem',
-  			'8': '2rem',
-  			'10': '2.5rem',
-  			'12': '3rem',
-  			'16': '4rem',
-  			'20': '5rem',
-  			'24': '6rem'
   		},
   		colors: {
   			border: 'hsl(var(--border))',
@@ -177,11 +89,7 @@ export default {
   			warning: {
   				DEFAULT: 'hsl(var(--warning))',
   				foreground: 'hsl(var(--warning-foreground))'
-  			},
-  			'accent-green': 'hsl(var(--accent-green))',
-  			'accent-peach': 'hsl(var(--accent-peach))',
-  			'accent-yellow': 'hsl(var(--accent-yellow))',
-  			'neutral-grey': 'hsl(var(--neutral-grey))'
+  			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -217,9 +125,7 @@ export default {
   			md: 'var(--shadow-md)',
   			lg: 'var(--shadow-lg)',
   			xl: 'var(--shadow-xl)',
-  			'2xl': 'var(--shadow-2xl)',
-  			card: 'var(--shadow-card)',
-  			'card-hover': 'var(--shadow-card-hover)'
+  			'2xl': 'var(--shadow-2xl)'
   		}
   	}
   },

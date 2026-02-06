@@ -9,32 +9,7 @@ export const CTASection = () => {
     <section className="py-20 px-6 bg-background">
       <div className="container mx-auto max-w-4xl">
         <div className="relative gradient-hero rounded-3xl p-10 lg:p-16 text-center overflow-hidden">
-          {/* Decorative Arc Shapes */}
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none" 
-            preserveAspectRatio="none"
-            viewBox="0 0 800 400"
-            aria-hidden="true"
-          >
-            {/* Upper arc */}
-            <path
-              d="M-50 80 Q 200 20, 400 60 T 850 40"
-              fill="none"
-              stroke="hsl(var(--primary-foreground))"
-              strokeWidth="1"
-              opacity="0.1"
-            />
-            {/* Lower arc */}
-            <path
-              d="M-30 320 Q 250 380, 500 340 T 850 360"
-              fill="none"
-              stroke="hsl(var(--accent))"
-              strokeWidth="1"
-              opacity="0.15"
-            />
-          </svg>
-
-          {/* Background glow decorations */}
+          {/* Background decorations */}
           <div className="absolute top-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
           
