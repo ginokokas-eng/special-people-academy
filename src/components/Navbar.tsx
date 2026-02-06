@@ -53,7 +53,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
+    <nav className="sticky top-0 z-50 bg-card border-b border-neutral-grey/20 shadow-sm">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 lg:h-[72px]">
           {/* Logo - Left */}
@@ -138,12 +138,12 @@ export const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/cart')}
-              className="relative"
+              className="relative text-foreground hover:bg-secondary"
               aria-label={`Shopping cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ''}`}
             >
               <ShoppingCart className="h-5 w-5" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-accent-peach text-white text-xs rounded-full flex items-center justify-center font-medium">
                   {cartItemCount > 9 ? '9+' : cartItemCount}
                 </span>
               )}
@@ -307,7 +307,7 @@ export const Navbar = () => {
                 <ShoppingCart className="h-4 w-4" />
                 Basket
                 {cartItemCount > 0 && (
-                  <span className="ml-auto h-5 w-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="ml-auto h-5 w-5 bg-accent-peach text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {cartItemCount > 9 ? '9+' : cartItemCount}
                   </span>
                 )}
