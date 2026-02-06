@@ -29,8 +29,8 @@
     --popover: 240 5% 90%;
     --popover-foreground: 240 5% 10%;
 
-    --primary: 333 71% 50%;             /* #124145 Deep Teal */
-    --primary-foreground: 327 73% 97%;
+    --primary: 183 59% 17%;             /* #124145 Deep Teal */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 240 5% 33%;             /* Slightly darker grey */
     --secondary-foreground: 0 0% 98%;
@@ -46,7 +46,7 @@
 
     --border: 240 4% 83%;
     --input: 240 4% 83%;
-    --ring: 333 71% 50%;                 /* Green focus ring */
+    --ring: 183 59% 17%;                 /* Teal focus ring */
 
     --radius: 1.5rem;
 
@@ -83,12 +83,12 @@
     /* Sidebar */
     --sidebar: 0 0% 98%;
     --sidebar-foreground: 240 5% 10%;
-    --sidebar-primary: 333 71% 50%;
-    --sidebar-primary-foreground: 327 73% 97%;
+    --sidebar-primary: 183 59% 17%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 5% 33%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 4% 83%;
-    --sidebar-ring: 333 71% 50%;
+    --sidebar-ring: 183 59% 17%;
     --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Merriweather', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
