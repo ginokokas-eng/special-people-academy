@@ -7,7 +7,8 @@ interface CTABannerProps {
   subtitle?: string;
   primaryCTA?: {
     text: string;
-    href: string;
+    href?: string;
+    onClick?: () => void;
   };
   secondaryCTA?: {
     text: string;
@@ -27,12 +28,19 @@ export const CTABanner = ({
         <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
         {subtitle && <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">{subtitle}</p>}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg" variant="secondary" className="text-base">
-            <Link to={primaryCTA.href}>
+          {primaryCTA.onClick ? (
+            <Button size="lg" variant="secondary" className="text-base" onClick={primaryCTA.onClick}>
               {primaryCTA.text}
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          ) : (
+            <Button asChild size="lg" variant="secondary" className="text-base">
+              <Link to={primaryCTA.href || '/contact'}>
+                {primaryCTA.text}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
           {secondaryCTA && (
             <Button asChild size="lg" variant="outline" className="text-base border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
               <Link to={secondaryCTA.href}>{secondaryCTA.text}</Link>

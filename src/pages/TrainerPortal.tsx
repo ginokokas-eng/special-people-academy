@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -67,6 +68,7 @@ interface EnrolledLearner {
 
 export default function TrainerPortal() {
   const { user, loading: authLoading, isTrainer } = useAuth();
+  const { canSignOffCompetency, loading: rolesLoading } = useRoles();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<PracticalSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -204,13 +206,20 @@ export default function TrainerPortal() {
       return;
     }
 
+    // Backend validation: Block competency sign-off if user doesn't have permission
+    if (attendanceForm.competency_outcome === 'pass' && !canSignOffCompetency) {
+      toast.error('You do not have permission to sign off competency. Please contact an authorized trainer.');
+      return;
+    }
+
     setSaving(true);
     try {
       const attendanceData = {
         session_id: selectedSession.id,
         user_id: selectedLearner.user_id,
         attended: attendanceForm.attended === 'yes' ? true : attendanceForm.attended === 'no' ? false : null,
-        competency_outcome: attendanceForm.competency_outcome || null,
+        // Only set competency outcome if user has permission to sign off
+        competency_outcome: canSignOffCompetency ? (attendanceForm.competency_outcome || null) : null,
         notes: attendanceForm.notes || null,
         marked_by: user?.id,
         marked_at: new Date().toISOString(),
@@ -295,7 +304,7 @@ export default function TrainerPortal() {
     return <Badge variant="outline" className="text-muted-foreground">Not marked</Badge>;
   };
 
-  if (authLoading || loading) {
+  if (authLoading || rolesLoading || loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
@@ -481,7 +490,7 @@ export default function TrainerPortal() {
               </Select>
             </div>
 
-            {attendanceForm.attended === 'yes' && (
+            {attendanceForm.attended === 'yes' && canSignOffCompetency && (
               <div className="space-y-2">
                 <Label>Competency Outcome</Label>
                 <Select
@@ -510,6 +519,13 @@ export default function TrainerPortal() {
                   </SelectContent>
                 </Select>
               </div>
+            )}
+
+            {attendanceForm.attended === 'yes' && !canSignOffCompetency && (
+              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                You can mark attendance, but you do not have permission to sign off competency. 
+                An authorized trainer will need to complete the competency assessment.
+              </p>
             )}
 
             <div className="space-y-2">

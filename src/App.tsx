@@ -37,6 +37,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import StaffManagement from "./pages/StaffManagement";
+import CareerApplications from "./pages/CareerApplications";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/access-denied" element={<AccessDenied />} />
               <Route path="/staff-management" element={<StaffManagement />} />
+              <Route path="/career-applications" element={<CareerApplications />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
