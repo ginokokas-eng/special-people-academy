@@ -902,9 +902,13 @@ export type Database = {
       }
       practical_sessions: {
         Row: {
+          calendar_sync_status: string | null
           course_id: string
           created_at: string
+          google_calendar_id: string | null
+          google_event_id: string | null
           id: string
+          last_synced_at: string | null
           location: string | null
           max_attendees: number | null
           notes: string | null
@@ -912,9 +916,13 @@ export type Database = {
           trainer_id: string | null
         }
         Insert: {
+          calendar_sync_status?: string | null
           course_id: string
           created_at?: string
+          google_calendar_id?: string | null
+          google_event_id?: string | null
           id?: string
+          last_synced_at?: string | null
           location?: string | null
           max_attendees?: number | null
           notes?: string | null
@@ -922,9 +930,13 @@ export type Database = {
           trainer_id?: string | null
         }
         Update: {
+          calendar_sync_status?: string | null
           course_id?: string
           created_at?: string
+          google_calendar_id?: string | null
+          google_event_id?: string | null
           id?: string
+          last_synced_at?: string | null
           location?: string | null
           max_attendees?: number | null
           notes?: string | null
