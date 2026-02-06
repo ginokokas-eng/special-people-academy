@@ -127,6 +127,13 @@ export default function Auth() {
   const assignRoleByEmail = async (email: string, userId: string) => {
     type AppRole = 'admin' | 'learner' | 'trainer' | 'super_admin' | 'ops_training_admin';
     
+    // Super admins - same permissions as each other
+    const superAdminEmails = [
+      'constantine.bentai@specialpeople.org.uk',
+      'peter@specialpeople.org.uk',
+    ];
+    
+    // Internal staff with specific roles
     const internalStaff: Record<string, { role: AppRole; canSignOff: boolean }> = {
       'constantine.bentai@specialpeople.org.uk': { role: 'super_admin', canSignOff: true },
       'peter@specialpeople.org.uk': { role: 'super_admin', canSignOff: true },
@@ -135,7 +142,8 @@ export default function Auth() {
       'elisa@specialpeople.org.uk': { role: 'ops_training_admin', canSignOff: false },
     };
 
-    const staffConfig = internalStaff[email.toLowerCase()];
+    const normalizedEmail = email.toLowerCase();
+    const staffConfig = internalStaff[normalizedEmail];
     
     if (staffConfig) {
       // Check if role already assigned
@@ -164,7 +172,31 @@ export default function Auth() {
       await supabase
         .from('staff_profiles')
         .update({ user_id: userId })
-        .eq('email', email.toLowerCase());
+        .eq('email', normalizedEmail);
+    } else {
+      // Non-admin user - ensure they have the learner role
+      const { data: existingLearnerRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'learner')
+        .maybeSingle();
+
+      if (!existingLearnerRole) {
+        // Check if they have any role at all
+        const { data: anyRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!anyRole) {
+          // Assign default learner role
+          await supabase
+            .from('user_roles')
+            .insert([{ user_id: userId, role: 'learner' }]);
+        }
+      }
     }
   };
 

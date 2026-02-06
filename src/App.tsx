@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -74,8 +75,21 @@ const App = () => (
                 <Route path="/certificates" element={<Certificates />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/trainer" element={<TrainerPortal />} />
+                {/* Admin routes - require admin role */}
+                <Route path="/admin" element={<ProtectedRoute requiredRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/staff-management" element={<ProtectedRoute requiredRoles={['admin']}><StaffManagement /></ProtectedRoute>} />
+                <Route path="/career-applications" element={<ProtectedRoute requiredRoles={['admin']}><CareerApplications /></ProtectedRoute>} />
+                
+                {/* /app/admin/* routes - require admin role */}
+                <Route path="/app/admin/courses" element={<ProtectedRoute requiredRoles={['admin']}><CourseBuilder /></ProtectedRoute>} />
+                <Route path="/app/admin/courses/:id/edit" element={<ProtectedRoute requiredRoles={['admin']}><CourseEditor /></ProtectedRoute>} />
+                <Route path="/app/admin/courses/:id/preview" element={<ProtectedRoute requiredRoles={['admin']}><CoursePreview /></ProtectedRoute>} />
+                <Route path="/app/admin/integrations-status" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
+                
+                {/* Trainer routes - require trainer role */}
+                <Route path="/trainer" element={<ProtectedRoute requiredRoles={['trainer']}><TrainerPortal /></ProtectedRoute>} />
+                
+                {/* Public routes */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/booking" element={<Booking />} />
                 <Route path="/features" element={<Features />} />
@@ -94,12 +108,6 @@ const App = () => (
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
-                <Route path="/staff-management" element={<StaffManagement />} />
-                <Route path="/career-applications" element={<CareerApplications />} />
-                <Route path="/app/admin/courses" element={<CourseBuilder />} />
-                <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
-                <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
-                <Route path="/app/admin/integrations-status" element={<IntegrationsStatus />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/cart" element={<Cart />} />
