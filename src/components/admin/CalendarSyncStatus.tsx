@@ -12,8 +12,7 @@ import { cn } from '@/lib/utils';
 
 interface CalendarSyncStatusProps {
   status: string | null;
-  googleEventId: string | null;
-  googleCalendarId: string | null;
+  outlookEventId: string | null;
   lastSyncedAt: string | null;
   onRetry?: () => void;
   isRetrying?: boolean;
@@ -22,8 +21,7 @@ interface CalendarSyncStatusProps {
 
 export function CalendarSyncStatus({
   status,
-  googleEventId,
-  googleCalendarId,
+  outlookEventId,
   lastSyncedAt,
   onRetry,
   isRetrying,
@@ -65,10 +63,9 @@ export function CalendarSyncStatus({
   const config = getStatusConfig();
   const Icon = config.icon;
 
-  const googleCalendarUrl = googleEventId && googleCalendarId
-    ? `https://calendar.google.com/calendar/event?eid=${btoa(`${googleEventId} ${googleCalendarId}`)}`
-    : googleEventId
-    ? `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(googleEventId)}`
+  // Outlook Web deep link - opens the event in Outlook on the web
+  const outlookWebUrl = outlookEventId
+    ? `https://outlook.office.com/calendar/item/${encodeURIComponent(outlookEventId)}`
     : null;
 
   if (compact) {
@@ -125,15 +122,15 @@ export function CalendarSyncStatus({
           </Button>
         )}
 
-        {googleCalendarUrl && status === 'synced' && (
+        {outlookWebUrl && status === 'synced' && (
           <Button
             size="sm"
             variant="outline"
             asChild
           >
-            <a href={googleCalendarUrl} target="_blank" rel="noopener noreferrer">
+            <a href={outlookWebUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 mr-1" />
-              Open in Google Calendar
+              Open in Outlook
             </a>
           </Button>
         )}

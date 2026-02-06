@@ -20,3 +20,12 @@ verify_jwt = false
 
 [functions.create-cart-checkout]
 verify_jwt = false
+
+[functions.outlook-create-event]
+verify_jwt = false
+
+[functions.outlook-update-event]
+verify_jwt = false
+
+[functions.outlook-cancel-event]
+verify_jwt = false
