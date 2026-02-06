@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
+import { PublicLayout } from '@/components/layouts/PublicLayout';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -18,8 +19,12 @@ const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signIn, signUp, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Determine initial tab based on route
+  const initialTab = location.pathname === '/sign-up' ? 'signup' : 'login';
   
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
@@ -165,27 +170,25 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <PublicLayout title="Sign In">
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </PublicLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <a href="/" className="inline-flex items-center gap-2 font-bold text-2xl">
-            <div className="p-2 rounded-lg gradient-primary">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-foreground">Special People Academy</span>
-          </a>
-          <p className="text-muted-foreground mt-2">Your journey to learning starts here</p>
-        </div>
+    <PublicLayout title={initialTab === 'signup' ? 'Sign Up' : 'Sign In'}>
+      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-foreground">Welcome to Special People Academy</h1>
+            <p className="text-muted-foreground mt-2">Your journey to learning starts here</p>
+          </div>
 
-        <Card className="shadow-lg">
-          <Tabs defaultValue="login" className="w-full">
+          <Card className="shadow-lg">
+            <Tabs defaultValue={initialTab} className="w-full">
             <CardHeader className="pb-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
@@ -367,5 +370,6 @@ export default function Auth() {
         </Card>
       </div>
     </div>
+    </PublicLayout>
   );
 }
