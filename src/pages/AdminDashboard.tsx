@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,10 +34,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { 
-  Users, 
-  BookOpen, 
-  Trophy, 
-  TrendingUp, 
   Plus, 
   Edit, 
   Trash2, 
@@ -47,8 +43,6 @@ import {
   Video,
   UserPlus,
   GraduationCap,
-  Calendar,
-  Award,
   Shield
 } from 'lucide-react';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
@@ -56,6 +50,8 @@ import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
+import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
+import { AdminTableControls } from '@/components/admin/AdminTableControls';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
@@ -94,10 +90,10 @@ interface User {
 }
 
 interface Stats {
-  totalUsers: number;
-  totalCourses: number;
-  totalEnrollments: number;
-  completionRate: number;
+  totalLearners: number;
+  activeEnrollments: number;
+  upcomingSessions: number;
+  certificatesIssued: number;
 }
 
 export default function AdminDashboard() {
@@ -106,11 +102,20 @@ export default function AdminDashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats>({
-    totalUsers: 0,
-    totalCourses: 0,
-    totalEnrollments: 0,
-    completionRate: 0,
+    totalLearners: 0,
+    activeEnrollments: 0,
+    upcomingSessions: 0,
+    certificatesIssued: 0,
   });
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Table controls state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [dataLoading, setDataLoading] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [courseDialogOpen, setCourseDialogOpen] = useState(false);
@@ -175,6 +180,7 @@ export default function AdminDashboard() {
   }, [user, authLoading, rolesLoading, isAdmin, navigate, initialLoadDone]);
 
   const fetchData = async () => {
+    setIsRefreshing(true);
     try {
       // Fetch courses
       const { data: coursesData } = await supabase
@@ -210,30 +216,92 @@ export default function AdminDashboard() {
       }
       setUsers(usersWithEnrollments);
 
-      // Calculate stats
+      // Calculate enhanced stats
       const { count: totalEnrollments } = await supabase
         .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .is('completed_at', null); // Active (not completed) enrollments
+
+      const { count: upcomingSessions } = await supabase
+        .from('practical_sessions')
+        .select('*', { count: 'exact', head: true })
+        .gte('session_date', new Date().toISOString());
+
+      const { count: certificatesCount } = await supabase
+        .from('certificates')
         .select('*', { count: 'exact', head: true });
 
-      const { count: completedEnrollments } = await supabase
-        .from('enrollments')
-        .select('*', { count: 'exact', head: true })
-        .not('completed_at', 'is', null);
-
       setStats({
-        totalUsers: profilesData?.length || 0,
-        totalCourses: coursesData?.length || 0,
-        totalEnrollments: totalEnrollments || 0,
-        completionRate: totalEnrollments 
-          ? Math.round((completedEnrollments || 0) / totalEnrollments * 100)
-          : 0,
+        totalLearners: profilesData?.length || 0,
+        activeEnrollments: totalEnrollments || 0,
+        upcomingSessions: upcomingSessions || 0,
+        certificatesIssued: certificatesCount || 0,
       });
+      
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setDataLoading(false);
+      setIsRefreshing(false);
     }
   };
+  
+  const handleRefresh = () => {
+    fetchData();
+  };
+
+  // Filter and sort courses
+  const filteredCourses = useMemo(() => {
+    let result = [...courses];
+    
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (course) =>
+          course.title.toLowerCase().includes(query) ||
+          course.category.toLowerCase().includes(query) ||
+          course.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Category filter
+    if (categoryFilter && categoryFilter !== 'all') {
+      result = result.filter((course) => course.category === categoryFilter);
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'newest':
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'title':
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'category':
+        result.sort((a, b) => a.category.localeCompare(b.category));
+        break;
+    }
+    
+    return result;
+  }, [courses, searchQuery, categoryFilter, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+  const paginatedCourses = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredCourses.slice(start, start + itemsPerPage);
+  }, [filteredCourses, currentPage, itemsPerPage]);
+
+  // Get unique categories for filter
+  const categoryOptions = useMemo(() => {
+    const categories = [...new Set(courses.map((c) => c.category))];
+    return categories.map((cat) => ({ label: cat, value: cat }));
+  }, [courses]);
 
   const handleCreateCourse = () => {
     setEditingCourse(null);
@@ -574,13 +642,6 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const statCards = [
-    { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-primary' },
-    { title: 'Total Courses', value: stats.totalCourses, icon: BookOpen, color: 'text-accent' },
-    { title: 'Enrollments', value: stats.totalEnrollments, icon: Trophy, color: 'text-success' },
-    { title: 'Completion Rate', value: `${stats.completionRate}%`, icon: TrendingUp, color: 'text-warning' },
-  ];
-
   return (
     <PortalLayout title="Admin Dashboard">
       <div className="space-y-6">
@@ -595,24 +656,14 @@ export default function AdminDashboard() {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((stat) => (
-            <Card key={stat.title}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold">{stat.value}</p>
-                  </div>
-                  <div className={`p-3 rounded-lg bg-muted ${stat.color}`}>
-                    <stat.icon className="h-6 w-6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Overview Stats Cards */}
+        <AdminOverviewCards
+          totalLearners={stats.totalLearners}
+          activeEnrollments={stats.activeEnrollments}
+          upcomingSessions={stats.upcomingSessions}
+          certificatesIssued={stats.certificatesIssued}
+          loading={dataLoading}
+        />
 
         {/* Tabs */}
         <Tabs defaultValue="courses" className="w-full">
@@ -754,7 +805,40 @@ export default function AdminDashboard() {
                   </DialogContent>
                 </Dialog>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {/* Table Controls */}
+                <AdminTableControls
+                  searchValue={searchQuery}
+                  onSearchChange={(value) => {
+                    setSearchQuery(value);
+                    setCurrentPage(1);
+                  }}
+                  searchPlaceholder="Search courses..."
+                  filterOptions={categoryOptions}
+                  filterValue={categoryFilter}
+                  onFilterChange={(value) => {
+                    setCategoryFilter(value);
+                    setCurrentPage(1);
+                  }}
+                  filterPlaceholder="Category"
+                  sortOptions={[
+                    { label: 'Newest', value: 'newest' },
+                    { label: 'Oldest', value: 'oldest' },
+                    { label: 'Title A-Z', value: 'title' },
+                    { label: 'Category', value: 'category' },
+                  ]}
+                  sortValue={sortBy}
+                  onSortChange={setSortBy}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  totalItems={filteredCourses.length}
+                  itemsPerPage={itemsPerPage}
+                  lastUpdated={lastUpdated}
+                  onRefresh={handleRefresh}
+                  isRefreshing={isRefreshing}
+                />
+
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -766,14 +850,27 @@ export default function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {courses.length === 0 ? (
+                    {dataLoading ? (
+                      // Loading skeletons
+                      [...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : paginatedCourses.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          No courses yet. Create your first course.
+                          {searchQuery || categoryFilter !== 'all' 
+                            ? 'No courses match your search criteria.' 
+                            : 'No courses yet. Create your first course.'}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      courses.map((course) => (
+                      paginatedCourses.map((course) => (
                         <TableRow key={course.id}>
                           <TableCell className="font-medium">
                             <div className="flex flex-col gap-1">
