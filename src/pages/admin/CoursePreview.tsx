@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ArrowLeft, Clock, BookOpen, Award, Users, Play, FileText, HelpCircle, Loader2 } from 'lucide-react';
+import { Clock, BookOpen, Award, Users, Play, FileText, HelpCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Course {
@@ -117,31 +117,28 @@ export default function CoursePreview() {
 
   if (rolesLoading || loading) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Course Preview" backHref={`/app/admin/courses/${id}/edit`} backLabel="Edit Course">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   if (!course) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Course Preview" backHref="/app/admin/courses" backLabel="All Courses">
         <div className="text-center py-12">
           <p className="text-muted-foreground">Course not found</p>
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <PortalLayout title={`Preview: ${course.title}`} backHref={`/app/admin/courses/${course.id}/edit`} backLabel="Edit Course">
+      <div className="space-y-6 p-4 lg:p-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/app/admin/courses/${course.id}/edit`)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
           <div>
             <Badge variant="outline">Preview Mode</Badge>
             <h1 className="text-2xl font-bold mt-1">{course.title}</h1>
@@ -324,6 +321,6 @@ export default function CoursePreview() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }
