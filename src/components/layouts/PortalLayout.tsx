@@ -48,7 +48,11 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
+    const { error } = await signOut();
+    if (error) {
+      console.error('Sign out failed:', error);
+      // Still navigate to home even if there's an error
+    }
     navigate('/');
   };
 

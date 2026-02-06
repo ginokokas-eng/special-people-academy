@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -13,7 +14,7 @@ interface AuthContextType {
   isOpsTrainingAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; roles?: string[] }>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ error: Error | null }>;
   refreshRoles: () => Promise<string[]>;
 }
 
@@ -28,6 +29,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isTrainer, setIsTrainer] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOpsTrainingAdmin, setIsOpsTrainingAdmin] = useState(false);
+  
+  // Get query client for cache clearing on logout
+  const queryClient = useQueryClient();
 
   const checkUserRoles = useCallback(async (userId: string): Promise<string[]> => {
     setRolesLoading(true);
@@ -88,10 +92,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         if (!isMounted) return;
         
+        console.log('[Auth] State change:', event, session?.user?.email);
+        
         setSession(session);
         setUser(session?.user ?? null);
 
-        if (session?.user) {
+        if (event === 'SIGNED_OUT') {
+          // Clear all cached data on logout
+          clearRoles();
+          queryClient.clear();
+          console.log('[Auth] User signed out, cache cleared');
+        } else if (session?.user) {
           // Use setTimeout to avoid potential deadlock
           setTimeout(() => {
             if (isMounted) {
@@ -110,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [checkUserRoles, clearRoles]);
+  }, [checkUserRoles, clearRoles, queryClient]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -143,9 +154,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    clearRoles();
+  const signOut = async (): Promise<{ error: Error | null }> => {
+    try {
+      console.log('[Auth] Signing out...');
+      
+      // Clear roles immediately
+      clearRoles();
+      
+      // Clear React Query cache
+      queryClient.clear();
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[Auth] Sign out error:', error);
+        return { error: error as Error };
+      }
+      
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      
+      console.log('[Auth] Sign out successful');
+      return { error: null };
+    } catch (err) {
+      console.error('[Auth] Unexpected sign out error:', err);
+      return { error: err as Error };
+    }
   };
 
   const refreshRoles = async (): Promise<string[]> => {
