@@ -2,138 +2,150 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap");
-
-@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap");
-
-@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap");
+/* 
+ * Special People Academy Brand Tokens
+ * ====================================
+ * Primary: #124145 (Deep Teal)
+ * Background: #F6E5D4 (Beige)
+ * Surface: #FFFFFF (White)
+ * Accent Green: #C4D14F
+ * Accent Peach: #FF988C
+ * Accent Yellow: #F9D37A
+ * Neutral Grey: #A7A9AC
+ */
 
 @layer base {
   :root {
-    --background: 270 15% 98%;
-    --foreground: 270 25% 15%;
+    /* Brand Colors - converted to HSL */
+    --background: 28 55% 90%;           /* #F6E5D4 Beige */
+    --foreground: 183 57% 17%;          /* #124145 Deep Teal */
 
-    --card: 0 0% 100%;
-    --card-foreground: 270 25% 15%;
+    --card: 0 0% 100%;                  /* #FFFFFF White */
+    --card-foreground: 183 57% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 25% 15%;
+    --popover-foreground: 183 57% 17%;
 
-    /* Purple-led primary for Special People Academy */
-    --primary: 268 55% 50%;
+    --primary: 183 57% 17%;             /* #124145 Deep Teal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 12% 92%;
-    --secondary-foreground: 270 25% 25%;
+    --secondary: 28 55% 90%;            /* Beige background */
+    --secondary-foreground: 183 57% 17%;
 
-    --muted: 270 8% 85%;
-    --muted-foreground: 270 12% 45%;
+    --muted: 28 30% 85%;
+    --muted-foreground: 183 30% 35%;
 
-    /* Green accent */
-    --accent: 152 55% 42%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 68 55% 56%;               /* #C4D14F Green */
+    --accent-foreground: 183 57% 17%;
 
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 8 100% 77%;          /* #FF988C Peach for warnings */
+    --destructive-foreground: 183 57% 17%;
 
-    --border: 270 12% 88%;
-    --input: 270 12% 88%;
-    --ring: 268 55% 50%;
+    --border: 183 20% 80%;
+    --input: 183 20% 80%;
+    --ring: 68 55% 56%;                 /* Green focus ring */
 
     --radius: 0.5rem;
 
-    --success: 152 55% 40%;
-    --success-foreground: 0 0% 100%;
+    /* Brand accent tokens */
+    --accent-green: 68 55% 56%;         /* #C4D14F */
+    --accent-peach: 8 100% 77%;         /* #FF988C */
+    --accent-yellow: 42 91% 73%;        /* #F9D37A */
+    --neutral-grey: 210 3% 67%;         /* #A7A9AC */
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --success: 68 55% 56%;              /* Green for success */
+    --success-foreground: 183 57% 17%;
 
-    /* Purple to green gradient */
-    --gradient-primary: linear-gradient(135deg, hsl(268 55% 50%) 0%, hsl(268 45% 60%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(152 55% 42%) 0%, hsl(160 50% 38%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(268 40% 18%) 0%, hsl(268 35% 25%) 50%, hsl(270 30% 20%) 100%);
+    --warning: 42 91% 73%;              /* Yellow for warnings */
+    --warning-foreground: 183 57% 17%;
 
-    --shadow-sm: 0 1px 2px 0px hsl(270 25% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(270 25% 15% / 0.08), 0 2px 4px -1px hsl(270 25% 15% / 0.04);
-    --shadow-lg: 0 10px 15px -3px hsl(270 25% 15% / 0.08), 0 4px 6px -2px hsl(270 25% 15% / 0.04);
-    --shadow-xl: 0 20px 25px -5px hsl(270 25% 15% / 0.08), 0 10px 10px -5px hsl(270 25% 15% / 0.04);
-    --shadow-card: 0 2px 8px -2px hsl(270 25% 15% / 0.06);
-    --shadow-card-hover: 0 8px 24px -4px hsl(270 25% 15% / 0.12);
-    --chart-1: 268 55% 50%;
-    --chart-2: 152 55% 42%;
-    --chart-3: 268 40% 60%;
-    --chart-4: 160 50% 38%;
-    --chart-5: 270 15% 50%;
+    /* Shadows */
+    --shadow-2xs: 0 1px 2px 0px hsl(183 57% 17% / 0.03);
+    --shadow-xs: 0 1px 2px 0px hsl(183 57% 17% / 0.04);
+    --shadow-sm: 0 1px 3px 0px hsl(183 57% 17% / 0.06), 0 1px 2px -1px hsl(183 57% 17% / 0.04);
+    --shadow-md: 0 4px 6px -1px hsl(183 57% 17% / 0.08), 0 2px 4px -1px hsl(183 57% 17% / 0.04);
+    --shadow-lg: 0 10px 15px -3px hsl(183 57% 17% / 0.08), 0 4px 6px -2px hsl(183 57% 17% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(183 57% 17% / 0.08), 0 10px 10px -5px hsl(183 57% 17% / 0.04);
+    --shadow-2xl: 0 25px 50px -12px hsl(183 57% 17% / 0.2);
+    --shadow-card: 0 2px 8px -2px hsl(183 57% 17% / 0.08);
+    --shadow-card-hover: 0 8px 24px -4px hsl(183 57% 17% / 0.12);
+
+    /* Chart colors */
+    --chart-1: 183 57% 17%;
+    --chart-2: 68 55% 56%;
+    --chart-3: 8 100% 77%;
+    --chart-4: 42 91% 73%;
+    --chart-5: 210 3% 67%;
+
+    /* Sidebar */
     --sidebar: 0 0% 100%;
-    --sidebar-foreground: 270 25% 15%;
-    --sidebar-primary: 268 55% 50%;
+    --sidebar-foreground: 183 57% 17%;
+    --sidebar-primary: 183 57% 17%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 152 55% 42%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 270 12% 88%;
-    --sidebar-ring: 268 55% 50%;
-    --font-sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-    --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-    --font-mono: 'Inconsolata', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --shadow-2xs: 0 1px 2px 0px hsl(270 25% 15% / 0.03);
-    --shadow-xs: 0 1px 2px 0px hsl(270 25% 15% / 0.04);
-    --shadow: 0 1px 3px 0px hsl(270 25% 15% / 0.08), 0 1px 2px -1px hsl(270 25% 15% / 0.06);
-    --shadow-2xl: 0 25px 50px -12px hsl(270 25% 15% / 0.2);
-    --tracking-normal: 0em;
-    --spacing: 0.25rem;
+    --sidebar-accent: 68 55% 56%;
+    --sidebar-accent-foreground: 183 57% 17%;
+    --sidebar-border: 183 20% 85%;
+    --sidebar-ring: 68 55% 56%;
   }
 
   .dark {
-    --background: 270 20% 10%;
-    --foreground: 270 10% 95%;
+    --background: 183 40% 10%;
+    --foreground: 28 55% 95%;
 
-    --card: 270 18% 14%;
-    --card-foreground: 270 10% 95%;
+    --card: 183 35% 14%;
+    --card-foreground: 28 55% 95%;
 
-    --popover: 270 18% 16%;
-    --popover-foreground: 270 10% 95%;
+    --popover: 183 35% 16%;
+    --popover-foreground: 28 55% 95%;
 
-    --primary: 268 50% 60%;
-    --primary-foreground: 270 20% 10%;
+    --primary: 68 55% 56%;
+    --primary-foreground: 183 57% 10%;
 
-    --secondary: 270 15% 22%;
-    --secondary-foreground: 270 10% 90%;
+    --secondary: 183 25% 22%;
+    --secondary-foreground: 28 40% 90%;
 
-    --muted: 270 12% 28%;
-    --muted-foreground: 270 8% 70%;
+    --muted: 183 20% 28%;
+    --muted-foreground: 28 15% 70%;
 
-    --accent: 152 45% 55%;
-    --accent-foreground: 270 20% 10%;
+    --accent: 68 55% 56%;
+    --accent-foreground: 183 57% 10%;
 
-    --destructive: 0 70% 55%;
+    --destructive: 8 90% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 270 15% 25%;
-    --input: 270 15% 25%;
-    --ring: 268 50% 60%;
-    --chart-1: 268 50% 60%;
-    --chart-2: 152 50% 55%;
-    --chart-3: 268 40% 65%;
-    --chart-4: 160 45% 50%;
-    --chart-5: 270 15% 55%;
-    --sidebar: 270 18% 14%;
-    --sidebar-foreground: 270 10% 95%;
-    --sidebar-primary: 268 50% 60%;
-    --sidebar-primary-foreground: 270 20% 10%;
-    --sidebar-accent: 152 45% 55%;
-    --sidebar-accent-foreground: 270 20% 10%;
-    --sidebar-border: 270 15% 25%;
-    --sidebar-ring: 268 50% 60%;
+    --border: 183 20% 25%;
+    --input: 183 20% 25%;
+    --ring: 68 55% 56%;
+
+    --accent-green: 68 55% 56%;
+    --accent-peach: 8 90% 70%;
+    --accent-yellow: 42 85% 65%;
+    --neutral-grey: 210 5% 55%;
+
     --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
     --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.18);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
     --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2), 0 2px 4px -1px hsl(0 0% 0% / 0.15);
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.2), 0 4px 6px -2px hsl(0 0% 0% / 0.15);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.2), 0 10px 10px -5px hsl(0 0% 0% / 0.15);
     --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.15);
+    --shadow-card-hover: 0 8px 24px -4px hsl(0 0% 0% / 0.25);
+
+    --chart-1: 68 55% 56%;
+    --chart-2: 8 90% 70%;
+    --chart-3: 42 85% 65%;
+    --chart-4: 183 40% 50%;
+    --chart-5: 210 5% 55%;
+
+    --sidebar: 183 35% 14%;
+    --sidebar-foreground: 28 55% 95%;
+    --sidebar-primary: 68 55% 56%;
+    --sidebar-primary-foreground: 183 57% 10%;
+    --sidebar-accent: 68 55% 56%;
+    --sidebar-accent-foreground: 183 57% 10%;
+    --sidebar-border: 183 20% 25%;
+    --sidebar-ring: 68 55% 56%;
   }
 }
 
@@ -144,42 +156,90 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 
+  /* Typography hierarchy using Baloo 2 for headings */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-heading font-semibold tracking-tight text-foreground;
+  }
+
+  h1 {
+    @apply text-6xl md:text-7xl font-bold;
+  }
+
+  h2 {
+    @apply text-4xl md:text-5xl font-semibold;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  /* Accessible focus states using accent green */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-accent;
+  }
+
+  /* Links styling */
+  a:not([class]) {
+    @apply text-foreground hover:underline;
+  }
+}
+
+@layer components {
+  /* Primary button - Deep Teal with white text */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 
+           rounded-lg px-6 py-3 font-medium transition-colors shadow-sm;
+  }
+
+  /* Secondary button - Outline style */
+  .btn-secondary {
+    @apply border-2 border-primary text-primary bg-transparent
+           hover:bg-secondary rounded-lg px-6 py-3 font-medium transition-colors;
+  }
+
+  /* Card styling with brand shadow */
+  .card-brand {
+    @apply bg-card rounded-lg shadow-card p-6 border border-border/50;
+  }
+
+  .card-brand:hover {
+    @apply shadow-card-hover;
   }
 }
 
 @layer utilities {
-  .gradient-primary {
-    background: var(--gradient-primary);
+  /* Accent highlights */
+  .highlight-green {
+    @apply bg-accent-green/20 text-foreground;
   }
 
-  .gradient-accent {
-    background: var(--gradient-accent);
+  .highlight-peach {
+    @apply bg-accent-peach/20 text-foreground;
   }
 
-  .gradient-hero {
-    background: var(--gradient-hero);
+  .highlight-yellow {
+    @apply bg-accent-yellow/30 text-foreground;
   }
 
-  .text-gradient-primary {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Active state using green */
+  .state-active {
+    @apply bg-accent-green text-foreground;
   }
 
-  .shadow-card {
-    box-shadow: var(--shadow-card);
+  /* Warning callout using peach */
+  .callout-warning {
+    @apply bg-accent-peach/20 border-l-4 border-accent-peach text-foreground;
   }
 
-  .shadow-card-hover {
-    box-shadow: var(--shadow-card-hover);
+  /* Friendly emphasis using yellow */
+  .emphasis-friendly {
+    @apply bg-accent-yellow/30;
   }
 
+  /* Animation utilities */
   .animate-fade-up {
     animation: fadeUp 0.5s ease-out forwards;
   }
