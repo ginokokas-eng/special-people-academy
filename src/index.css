@@ -17,7 +17,7 @@
 @layer base {
   :root {
     /* Brand Colors - converted to HSL */
-    --background: 30 33% 98%;            /* #FDFBF9 Soft Warm White */
+    --background: 150 25% 97%;           /* #F5FAF8 Soft Mint */
     --foreground: 183 57% 17%;          /* #124145 Deep Teal */
 
     --card: 0 0% 100%;                  /* #FFFFFF White */
@@ -29,10 +29,10 @@
     --primary: 183 57% 17%;             /* #124145 Deep Teal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 20% 95%;             /* Soft secondary */
+    --secondary: 150 15% 94%;            /* Light mint secondary */
     --secondary-foreground: 183 57% 17%;
 
-    --muted: 30 15% 92%;
+    --muted: 150 12% 90%;
     --muted-foreground: 183 30% 40%;
 
     --accent: 68 55% 56%;               /* #C4D14F Green */
