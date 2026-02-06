@@ -3,9 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { PageShell } from '@/components/layout/PageShell';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -19,11 +20,10 @@ import {
   User,
   Users,
   Layers,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 
 const REGULATED_CERT_FEE = 15;
 
@@ -72,7 +72,6 @@ export default function Cart() {
 
     setCheckingOut(true);
     try {
-      // Create line items for checkout
       const cartData = items.map(item => ({
         course_id: item.course_id,
         offering_id: item.offering_id,
@@ -105,72 +104,65 @@ export default function Cart() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow container py-12">
-          <div className="text-center py-16">
-            <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Your Basket</h1>
-            <p className="text-muted-foreground mb-6">Please sign in to view your basket</p>
-            <Button onClick={() => navigate('/auth')}>Sign In</Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <PageShell>
+        <EmptyState
+          icon={<ShoppingCart className="h-16 w-16" />}
+          title="Your Basket"
+          description="Please sign in to view your basket"
+          action={{
+            label: 'Sign In',
+            onClick: () => navigate('/auth'),
+          }}
+        />
+      </PageShell>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow container py-12 flex items-center justify-center">
+      <PageShell>
+        <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow container py-8 md:py-12">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+    <PageShell>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 -ml-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Button>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-3xl font-heading font-bold text-foreground flex items-center gap-3">
             <ShoppingCart className="h-8 w-8 text-primary" />
             Your Basket
           </h1>
         </div>
 
         {items.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Your basket is empty</h2>
-              <p className="text-muted-foreground mb-6">
-                Browse our courses and add some to your basket
-              </p>
-              <Button onClick={() => navigate('/courses')}>
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Browse Courses
-              </Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={<ShoppingCart className="h-16 w-16" />}
+            title="Your basket is empty"
+            description="Browse our courses and add some to your basket"
+            action={{
+              label: 'Browse Courses',
+              onClick: () => navigate('/courses'),
+            }}
+          />
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="p-4">
-                    <div className="flex gap-4">
+                <Card key={item.id} className="bg-card border-border/50">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       {/* Course Thumbnail */}
-                      <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <div className="w-full sm:w-32 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                         {item.course?.thumbnail_url ? (
                           <img
                             src={item.course.thumbnail_url}
@@ -188,7 +180,7 @@ export default function Cart() {
                       <div className="flex-grow min-w-0">
                         <Link 
                           to={`/courses/${item.course_id}`}
-                          className="font-semibold text-lg hover:text-primary transition-colors line-clamp-1"
+                          className="font-heading font-semibold text-lg hover:text-primary transition-colors line-clamp-1"
                         >
                           {item.course?.title || 'Course'}
                         </Link>
@@ -203,7 +195,7 @@ export default function Cart() {
                         </div>
 
                         {/* Regulated Cert Toggle */}
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-2 mt-4">
                           <Switch
                             id={`cert-${item.id}`}
                             checked={item.regulated_certification}
@@ -212,16 +204,16 @@ export default function Cart() {
                             }
                           />
                           <Label htmlFor={`cert-${item.id}`} className="text-sm cursor-pointer flex items-center gap-1">
-                            <Award className="h-3 w-3" />
+                            <Award className="h-3 w-3 text-accent-yellow" />
                             Regulated Certificate (+{formatPrice(REGULATED_CERT_FEE)})
                           </Label>
                         </div>
                       </div>
 
                       {/* Price & Actions */}
-                      <div className="text-right flex flex-col items-end justify-between">
+                      <div className="text-right flex flex-row sm:flex-col items-center sm:items-end justify-between">
                         <div>
-                          <p className="font-bold text-lg">
+                          <p className="font-bold text-xl text-foreground">
                             {formatPrice(
                               (item.offering?.base_price_gbp || 0) +
                                 (item.regulated_certification
@@ -239,7 +231,7 @@ export default function Cart() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeFromCart(item.id)}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -252,12 +244,12 @@ export default function Cart() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 bg-card border-border/50">
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle className="font-heading">Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
                         Courses ({items.length})
@@ -297,16 +289,16 @@ export default function Cart() {
                     )}
                   </Button>
 
-                  <p className="text-xs text-center text-muted-foreground">
-                    Secure checkout powered by Stripe
-                  </p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>Secure checkout powered by Stripe</span>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </PageShell>
   );
 }
