@@ -288,9 +288,49 @@ export type Database = {
           },
         ]
       }
+      course_trainers: {
+        Row: {
+          can_sign_off: boolean | null
+          course_id: string
+          created_at: string | null
+          id: string
+          staff_id: string
+        }
+        Insert: {
+          can_sign_off?: boolean | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          staff_id: string
+        }
+        Update: {
+          can_sign_off?: boolean | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_trainers_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_trainers_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           assessment_details: string | null
+          available_delivery_types: string[] | null
           category: string
           certificate_details: string | null
           cpd_hours: number | null
@@ -308,6 +348,7 @@ export type Database = {
           is_featured: boolean | null
           is_internal: boolean | null
           is_mandatory: boolean | null
+          is_public_purchase: boolean | null
           is_published: boolean | null
           language: string | null
           last_updated: string | null
@@ -324,6 +365,7 @@ export type Database = {
           regulated_cert_fee: number | null
           requirements: Json | null
           requires_practical_signoff: boolean | null
+          scope_notes: string | null
           subtitle: string | null
           target_audience: Json | null
           thumbnail_url: string | null
@@ -332,6 +374,7 @@ export type Database = {
         }
         Insert: {
           assessment_details?: string | null
+          available_delivery_types?: string[] | null
           category: string
           certificate_details?: string | null
           cpd_hours?: number | null
@@ -349,6 +392,7 @@ export type Database = {
           is_featured?: boolean | null
           is_internal?: boolean | null
           is_mandatory?: boolean | null
+          is_public_purchase?: boolean | null
           is_published?: boolean | null
           language?: string | null
           last_updated?: string | null
@@ -365,6 +409,7 @@ export type Database = {
           regulated_cert_fee?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
+          scope_notes?: string | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
@@ -373,6 +418,7 @@ export type Database = {
         }
         Update: {
           assessment_details?: string | null
+          available_delivery_types?: string[] | null
           category?: string
           certificate_details?: string | null
           cpd_hours?: number | null
@@ -390,6 +436,7 @@ export type Database = {
           is_featured?: boolean | null
           is_internal?: boolean | null
           is_mandatory?: boolean | null
+          is_public_purchase?: boolean | null
           is_published?: boolean | null
           language?: string | null
           last_updated?: string | null
@@ -406,6 +453,7 @@ export type Database = {
           regulated_cert_fee?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
+          scope_notes?: string | null
           subtitle?: string | null
           target_audience?: Json | null
           thumbnail_url?: string | null
@@ -1016,6 +1064,11 @@ export type Database = {
         | "group_face_to_face"
       booking_status: "draft" | "pending_payment" | "confirmed" | "cancelled"
       booking_type: "individual" | "group"
+      course_delivery_type:
+        | "online_self_paced"
+        | "live_online"
+        | "in_person_practical"
+        | "blended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1158,6 +1211,12 @@ export const Constants = {
       ],
       booking_status: ["draft", "pending_payment", "confirmed", "cancelled"],
       booking_type: ["individual", "group"],
+      course_delivery_type: [
+        "online_self_paced",
+        "live_online",
+        "in_person_practical",
+        "blended",
+      ],
     },
   },
 } as const
