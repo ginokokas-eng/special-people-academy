@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,8 +23,6 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 
 const REGULATED_CERT_FEE = 15;
 
@@ -105,37 +104,32 @@ export default function Cart() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow container py-12">
+      <PublicLayout title="Your Basket" description="View and manage your course basket">
+        <div className="container py-12">
           <div className="text-center py-16">
             <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
             <h1 className="text-2xl font-bold mb-2">Your Basket</h1>
             <p className="text-muted-foreground mb-6">Please sign in to view your basket</p>
             <Button onClick={() => navigate('/auth')}>Sign In</Button>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </PublicLayout>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow container py-12 flex items-center justify-center">
+      <PublicLayout title="Your Basket" description="View and manage your course basket">
+        <div className="container py-12 flex items-center justify-center min-h-[50vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </PublicLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow container py-8 md:py-12">
+    <PublicLayout title="Your Basket" description="View and manage your course basket">
+      <div className="container py-8 md:py-12">
         <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -305,8 +299,7 @@ export default function Cart() {
             </div>
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </PublicLayout>
   );
 }
