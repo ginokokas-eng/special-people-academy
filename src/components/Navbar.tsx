@@ -3,6 +3,7 @@ import { Menu, X, ChevronDown, User, LogOut, Settings, BookOpen, Award, Shopping
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import logo from "@/assets/logo.png";
 import {
   DropdownMenu,
@@ -44,9 +45,7 @@ export const Navbar = () => {
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-
-  // Placeholder for cart item count - replace with actual cart state/context
-  const cartItemCount = 0;
+  const { itemCount: cartItemCount } = useCart();
 
   const handleSignOut = async () => {
     await signOut();

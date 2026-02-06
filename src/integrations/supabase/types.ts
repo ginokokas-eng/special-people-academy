@@ -175,6 +175,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cart_items: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          offering_id: string
+          participants_count: number
+          regulated_certification: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          offering_id: string
+          participants_count?: number
+          regulated_certification?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          offering_id?: string
+          participants_count?: number
+          regulated_certification?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
           certificate_number: string
