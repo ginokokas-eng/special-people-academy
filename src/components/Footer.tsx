@@ -42,11 +42,40 @@ export const Footer = () => {
               Empowering special individuals to develop essential skills through personalized, inclusive training programs.
             </p>
             <div className="flex gap-3">
-              {[Twitter, Linkedin, Youtube, Mail].map((Icon, index) => (
-                <a key={index} href="#" className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
+              <a 
+                href="https://x.com/YOUR_X_URL" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Twitter/X"
+                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+              >
+                <Twitter className="h-4 w-4" />
+              </a>
+              <a 
+                href="https://linkedin.com/company/YOUR_LINKEDIN_URL" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+              >
+                <Linkedin className="h-4 w-4" />
+              </a>
+              <a 
+                href="https://youtube.com/@YOUR_YOUTUBE_URL" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+              >
+                <Youtube className="h-4 w-4" />
+              </a>
+              <a 
+                href="mailto:academy@specialpeople.org.uk"
+                aria-label="Email"
+                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
             </div>
           </div>
           {Object.entries(footerLinks).map(([title, links]) => (
