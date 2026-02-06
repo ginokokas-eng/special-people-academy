@@ -19,8 +19,16 @@ function generateCertificatePDF(data: {
   certificateNumber: string;
   instructorName: string;
   cpdHours?: number;
+  certificateType: 'completion' | 'competency';
+  competencySignedBy?: string;
 }): string {
-  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName, cpdHours } = data;
+  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName, cpdHours, certificateType, competencySignedBy } = data;
+  
+  const isCompetency = certificateType === 'competency';
+  const certTitle = isCompetency ? 'CERTIFICATE OF COMPETENCY' : 'CERTIFICATE OF COMPLETION';
+  const certSubtext = isCompetency 
+    ? 'has demonstrated competency in' 
+    : 'has successfully completed the course';
   
   // Generate SVG certificate with purple-led and green accent branding
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -78,7 +86,7 @@ function generateCertificatePDF(data: {
   <text x="421" y="80" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="rgba(255,255,255,0.9)" text-anchor="middle" letter-spacing="2">EXCELLENCE IN PROFESSIONAL TRAINING</text>
   
   <!-- Certificate Title -->
-  <text x="421" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#6b7280" text-anchor="middle" letter-spacing="6" font-weight="500">CERTIFICATE OF COMPLETION</text>
+  <text x="421" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="13" fill="#6b7280" text-anchor="middle" letter-spacing="6" font-weight="500">${isCompetency ? 'CERTIFICATE OF COMPETENCY' : 'CERTIFICATE OF COMPLETION'}</text>
   
   <!-- Decorative divider -->
   <line x1="300" y1="170" x2="542" y2="170" stroke="url(#greenGradient)" stroke-width="2"/>
@@ -88,13 +96,13 @@ function generateCertificatePDF(data: {
   <text x="421" y="210" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">This is to certify that</text>
   
   <!-- Learner Name (main focus) -->
-  <text x="421" y="265" font-family="Georgia, 'Times New Roman', serif" font-size="38" fill="#1f2937" text-anchor="middle" font-weight="bold">${escapeXml(learnerName)}</text>
+  <text x="421" y="265" font-family="Georgia, 'Times New Roman', serif" font-size="38" fill="#1f2937" text-anchor="middle" font-weight="bold">\${escapeXml(learnerName)}</text>
   
   <!-- Decorative line under name -->
   <line x1="150" y1="285" x2="692" y2="285" stroke="#7c3aed" stroke-width="1" opacity="0.5"/>
   
-  <!-- "has successfully completed" -->
-  <text x="421" y="320" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">has successfully completed the course</text>
+  <!-- "has successfully completed" or "has demonstrated competency" -->
+  <text x="421" y="320" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#6b7280" text-anchor="middle">${isCompetency ? 'has demonstrated competency in' : 'has successfully completed the course'}</text>
   
   <!-- Course Title -->
   <text x="421" y="365" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(courseTitle)}</text>
@@ -110,10 +118,10 @@ function generateCertificatePDF(data: {
   ` : ''}
   
   <!-- Bottom section with signatures -->
-  <!-- Instructor signature area -->
-  <text x="200" y="485" font-family="Georgia, 'Times New Roman', serif" font-size="18" fill="#1f2937" text-anchor="middle" font-style="italic">${escapeXml(instructorName)}</text>
+  <!-- Instructor/Assessor signature area -->
+  <text x="200" y="485" font-family="Georgia, 'Times New Roman', serif" font-size="18" fill="#1f2937" text-anchor="middle" font-style="italic">\${escapeXml(isCompetency && competencySignedBy ? competencySignedBy : instructorName)}</text>
   <line x1="90" y1="495" x2="310" y2="495" stroke="#6b7280" stroke-width="1"/>
-  <text x="200" y="515" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">Course Instructor</text>
+  <text x="200" y="515" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">${isCompetency ? 'Competency Assessor' : 'Course Instructor'}</text>
   
   <!-- Certificate ID area -->
   <text x="642" y="485" font-family="'Courier New', monospace" font-size="11" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(certificateNumber)}</text>
@@ -212,7 +220,7 @@ Deno.serve(async (req) => {
 
     console.log(`Generating certificate PDF for certificate_id: ${certificate_id}`);
 
-    // Fetch certificate with course details including CPD hours
+    // Fetch certificate with course details including CPD hours and certificate type
     const { data: certificate, error: certError } = await supabaseAdmin
       .from('certificates')
       .select(`
@@ -221,6 +229,8 @@ Deno.serve(async (req) => {
         issued_at,
         user_id,
         pdf_path,
+        certificate_type,
+        competency_signed_by,
         course:courses(
           id,
           title,
@@ -295,7 +305,19 @@ Deno.serve(async (req) => {
       year: 'numeric',
     });
 
-    console.log(`Generating PDF for: ${learnerName}, ${courseTitle}, Instructor: ${instructorName}`);
+    // Get certificate type and competency signer name if applicable
+    const certificateType = (certificate as any).certificate_type || 'completion';
+    let competencySignedBy: string | undefined;
+    if (certificateType === 'competency' && (certificate as any).competency_signed_by) {
+      const { data: signerProfile } = await supabaseAdmin
+        .from('staff_profiles')
+        .select('full_name')
+        .eq('id', (certificate as any).competency_signed_by)
+        .single();
+      competencySignedBy = signerProfile?.full_name;
+    }
+
+    console.log(`Generating PDF for: ${learnerName}, ${courseTitle}, Instructor: ${instructorName}, Type: ${certificateType}`);
 
     // Generate SVG certificate
     const svgContent = generateCertificatePDF({
@@ -305,6 +327,8 @@ Deno.serve(async (req) => {
       certificateNumber: certificate.certificate_number,
       instructorName,
       cpdHours,
+      certificateType: certificateType as 'completion' | 'competency',
+      competencySignedBy,
     });
 
     // Store SVG as a file (can be viewed/printed as PDF)
