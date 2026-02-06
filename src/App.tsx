@@ -43,6 +43,7 @@ import CareerApplications from "./pages/CareerApplications";
 import CourseBuilder from "./pages/admin/CourseBuilder";
 import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
+import IntegrationsStatus from "./pages/admin/IntegrationsStatus";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
@@ -98,6 +99,7 @@ const App = () => (
                 <Route path="/app/admin/courses" element={<CourseBuilder />} />
                 <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
                 <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
+                <Route path="/app/admin/integrations-status" element={<IntegrationsStatus />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/cart" element={<Cart />} />
