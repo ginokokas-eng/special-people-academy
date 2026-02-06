@@ -136,6 +136,9 @@ export type Database = {
       certificates: {
         Row: {
           certificate_number: string
+          certificate_type: string | null
+          competency_signed_at: string | null
+          competency_signed_by: string | null
           course_id: string
           id: string
           issued_at: string
@@ -144,6 +147,9 @@ export type Database = {
         }
         Insert: {
           certificate_number: string
+          certificate_type?: string | null
+          competency_signed_at?: string | null
+          competency_signed_by?: string | null
           course_id: string
           id?: string
           issued_at?: string
@@ -152,6 +158,9 @@ export type Database = {
         }
         Update: {
           certificate_number?: string
+          certificate_type?: string | null
+          competency_signed_at?: string | null
+          competency_signed_by?: string | null
           course_id?: string
           id?: string
           issued_at?: string
@@ -159,6 +168,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "certificates_competency_signed_by_fkey"
+            columns: ["competency_signed_by"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "certificates_course_id_fkey"
             columns: ["course_id"]
