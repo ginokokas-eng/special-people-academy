@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { 
   GraduationCap, 
@@ -14,7 +15,9 @@ import {
   Search,
   Bell,
   Settings,
-  ClipboardList
+  ClipboardList,
+  Users,
+  Briefcase
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -41,6 +44,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isAdmin, isTrainer } = useAuth();
+  const { isSuperAdmin } = useRoles();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -142,6 +146,18 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Admin Dashboard
                       </DropdownMenuItem>
+                    )}
+                    {isSuperAdmin && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/staff-management')}>
+                          <Users className="mr-2 h-4 w-4" />
+                          Staff Management
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/career-applications')}>
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          Career Applications
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
 import { CTABanner } from "@/components/marketing/CTABanner";
@@ -23,7 +24,7 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ApplicationForm } from "@/components/careers/ApplicationForm";
 
 const whyWorkHere = [
   {
@@ -169,6 +170,14 @@ const openRoles = [
 ];
 
 export default function Careers() {
+  const [applicationOpen, setApplicationOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('General Application');
+
+  const openApplication = (roleTitle: string) => {
+    setSelectedRole(roleTitle);
+    setApplicationOpen(true);
+  };
+
   return (
     <MarketingLayout 
       title="Careers" 
@@ -328,11 +337,9 @@ export default function Careers() {
                       <p className="text-sm text-muted-foreground italic mb-4">
                         We welcome accommodations throughout the hiring process. Let us know what you need.
                       </p>
-                      <Button asChild>
-                        <Link to="/contact">
-                          Apply Now
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
+                      <Button onClick={() => openApplication(role.title)}>
+                        Apply Now
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -346,7 +353,13 @@ export default function Careers() {
       <CTABanner 
         title="Don't see the right role?" 
         subtitle="We're always interested in hearing from talented people who share our mission. Reach out and introduce yourself."
-        primaryCTA={{ text: "Contact Us", href: "/contact" }}
+        primaryCTA={{ text: "Send General Application", onClick: () => openApplication('General Application') }}
+      />
+
+      <ApplicationForm 
+        open={applicationOpen} 
+        onOpenChange={setApplicationOpen} 
+        roleTitle={selectedRole} 
       />
     </MarketingLayout>
   );

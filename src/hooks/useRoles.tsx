@@ -10,6 +10,7 @@ interface UseRolesReturn {
   isOpsTrainingAdmin: boolean;
   isAdmin: boolean;
   isTrainer: boolean;
+  canSignOffCompetency: boolean;
   hasRole: (role: AppRole) => boolean;
   loading: boolean;
 }
@@ -17,28 +18,41 @@ interface UseRolesReturn {
 export function useRoles(): UseRolesReturn {
   const { user, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [canSignOffCompetency, setCanSignOffCompetency] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchRoles() {
+    async function fetchRolesAndPermissions() {
       if (!user) {
         setRoles([]);
+        setCanSignOffCompetency(false);
         setLoading(false);
         return;
       }
 
-      const { data } = await supabase
+      // Fetch user roles
+      const { data: rolesData } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id);
 
-      const userRoles = (data?.map(r => r.role) || []) as AppRole[];
+      const userRoles = (rolesData?.map(r => r.role) || []) as AppRole[];
       setRoles(userRoles);
+
+      // Fetch staff profile for can_sign_off_competency permission
+      // Match by user_id if linked, otherwise we don't have permission
+      const { data: staffProfile } = await supabase
+        .from('staff_profiles')
+        .select('can_sign_off_competency')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setCanSignOffCompetency(staffProfile?.can_sign_off_competency ?? false);
       setLoading(false);
     }
 
     if (!authLoading) {
-      fetchRoles();
+      fetchRolesAndPermissions();
     }
   }, [user, authLoading]);
 
@@ -55,6 +69,7 @@ export function useRoles(): UseRolesReturn {
     isOpsTrainingAdmin,
     isAdmin,
     isTrainer,
+    canSignOffCompetency,
     hasRole,
     loading: authLoading || loading,
   };
