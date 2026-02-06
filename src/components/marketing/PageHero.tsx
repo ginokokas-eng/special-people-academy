@@ -17,8 +17,33 @@ interface PageHeroProps {
 
 export const PageHero = ({ badge, title, subtitle, primaryCTA, secondaryCTA }: PageHeroProps) => {
   return (
-    <section className="relative py-20 md:py-28 px-6 bg-gradient-to-b from-primary/5 to-background">
-      <div className="container mx-auto max-w-4xl text-center">
+    <section className="relative py-20 md:py-28 px-6 bg-gradient-to-b from-primary/5 to-background overflow-hidden">
+      {/* Decorative Arc Shapes - Brand Identity */}
+      <svg 
+        className="absolute inset-0 w-full h-full pointer-events-none" 
+        preserveAspectRatio="none"
+        viewBox="0 0 1440 400"
+        aria-hidden="true"
+      >
+        {/* Subtle sweeping arc */}
+        <path
+          d="M-100 150 Q 400 50, 900 120 T 1600 80"
+          fill="none"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          opacity="0.06"
+        />
+        {/* Lower accent arc */}
+        <path
+          d="M0 300 Q 360 250, 720 280 T 1440 260"
+          fill="none"
+          stroke="hsl(var(--accent))"
+          strokeWidth="1"
+          opacity="0.08"
+        />
+      </svg>
+
+      <div className="container mx-auto max-w-4xl text-center relative z-10">
         {badge && (
           <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium bg-primary/10 text-primary rounded-full">
             {badge}
