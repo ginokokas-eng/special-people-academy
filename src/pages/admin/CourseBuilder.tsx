@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -133,17 +133,17 @@ export default function CourseBuilder() {
 
   if (rolesLoading || loading) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Course Builder">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <PortalLayout title="Course Builder">
+      <div className="space-y-6 p-4 lg:p-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Course Builder</h1>
@@ -231,6 +231,6 @@ export default function CourseBuilder() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }

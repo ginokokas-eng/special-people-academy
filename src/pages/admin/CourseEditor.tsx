@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Eye, Loader2, Save } from 'lucide-react';
+import { Eye, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { CourseOverviewTab } from '@/components/admin/course-builder/CourseOverviewTab';
 import { CourseModulesTab } from '@/components/admin/course-builder/CourseModulesTab';
@@ -137,36 +137,31 @@ export default function CourseEditor() {
 
   if (rolesLoading || loading) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Course Editor" backHref="/app/admin/courses" backLabel="All Courses">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   if (!course) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Course Editor" backHref="/app/admin/courses" backLabel="All Courses">
         <div className="text-center py-12">
           <p className="text-muted-foreground">Course not found</p>
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <PortalLayout title={course.title} backHref="/app/admin/courses" backLabel="All Courses">
+      <div className="space-y-6 p-4 lg:p-8">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/app/admin/courses')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">{course.title}</h1>
-              <p className="text-muted-foreground">Course Editor</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold">{course.title}</h1>
+            <p className="text-muted-foreground">Course Editor</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate(`/app/admin/courses/${course.id}/preview`)}>
@@ -224,6 +219,6 @@ export default function CourseEditor() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }
