@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -67,11 +68,12 @@ interface EnrolledLearner {
 }
 
 export default function TrainerPortal() {
-  const { user, loading: authLoading, isTrainer } = useAuth();
-  const { canSignOffCompetency, loading: rolesLoading } = useRoles();
+  const { user, loading: authLoading, rolesLoading, isTrainer } = useAuth();
+  const { canSignOffCompetency, loading: permissionsLoading } = useRoles();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<PracticalSession[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [selectedSession, setSelectedSession] = useState<PracticalSession | null>(null);
   const [learners, setLearners] = useState<EnrolledLearner[]>([]);
   const [learnersLoading, setLearnersLoading] = useState(false);
@@ -86,20 +88,26 @@ export default function TrainerPortal() {
     notes: '',
   });
 
+  // Auth guard - wait for both auth and roles to be resolved
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authLoading || rolesLoading) return;
+    
+    if (!user) {
       navigate('/auth');
-    } else if (!authLoading && user && !isTrainer) {
+      return;
+    }
+    
+    if (!isTrainer) {
       navigate('/dashboard');
       toast.error('Access denied. Trainers only.');
+      return;
     }
-  }, [user, authLoading, isTrainer, navigate]);
-
-  useEffect(() => {
-    if (user && isTrainer) {
+    
+    if (!initialLoadDone) {
+      setInitialLoadDone(true);
       fetchSessions();
     }
-  }, [user, isTrainer]);
+  }, [user, authLoading, rolesLoading, isTrainer, navigate, initialLoadDone]);
 
   const fetchSessions = async () => {
     try {
@@ -135,7 +143,7 @@ export default function TrainerPortal() {
       console.error('Error fetching sessions:', error);
       toast.error('Failed to load sessions');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
@@ -304,18 +312,46 @@ export default function TrainerPortal() {
     return <Badge variant="outline" className="text-muted-foreground">Not marked</Badge>;
   };
 
-  if (authLoading || rolesLoading || loading) {
+  if (authLoading || rolesLoading || permissionsLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <PortalLayout title="Trainer Portal">
+        <div className="p-6 space-y-6">
+          {/* Skeleton for sessions */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1 space-y-4">
+              <Skeleton className="h-6 w-40" />
+              {[1, 2, 3].map((i) => (
+                <Card key={i}>
+                  <CardContent className="p-4 space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <PortalLayout title="Trainer Portal">
       <div className="space-y-8">
         {/* Header */}
         <div>
@@ -563,6 +599,6 @@ export default function TrainerPortal() {
           </div>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }

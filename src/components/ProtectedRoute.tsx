@@ -25,11 +25,33 @@ export function ProtectedRoute({
   requiredRoles = [], 
   redirectTo = '/access-denied' 
 }: ProtectedRouteProps) {
-  const { user, loading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin } = useAuth();
+  const { user, loading, rolesLoading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin } = useAuth();
   const navigate = useNavigate();
 
+  const checkHasRequiredRole = () => {
+    if (requiredRoles.length === 0) return true;
+    
+    return requiredRoles.some(role => {
+      switch (role) {
+        case 'super_admin':
+          return isSuperAdmin;
+        case 'admin':
+          return isAdmin;
+        case 'ops_training_admin':
+          return isOpsTrainingAdmin;
+        case 'trainer':
+          return isTrainer;
+        case 'learner':
+          return true;
+        default:
+          return false;
+      }
+    });
+  };
+
   useEffect(() => {
-    if (loading) return;
+    // Wait for both auth and roles to be fully loaded
+    if (loading || rolesLoading) return;
 
     // Not authenticated - redirect to auth
     if (!user) {
@@ -37,36 +59,14 @@ export function ProtectedRoute({
       return;
     }
 
-    // No role requirements - just needs to be authenticated
-    if (requiredRoles.length === 0) {
-      return;
-    }
-
-    // Check role requirements
-    const hasRequiredRole = requiredRoles.some(role => {
-      switch (role) {
-        case 'super_admin':
-          return isSuperAdmin;
-        case 'admin':
-          return isAdmin;
-        case 'ops_training_admin':
-          return isOpsTrainingAdmin;
-        case 'trainer':
-          return isTrainer;
-        case 'learner':
-          // Everyone authenticated has at least learner access
-          return true;
-        default:
-          return false;
-      }
-    });
-
-    if (!hasRequiredRole) {
+    // Check role requirements after roles are loaded
+    if (!checkHasRequiredRole()) {
       navigate(redirectTo, { replace: true });
     }
-  }, [user, loading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin, requiredRoles, navigate, redirectTo]);
+  }, [user, loading, rolesLoading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin, requiredRoles, navigate, redirectTo]);
 
-  if (loading) {
+  // Show loading while auth or roles are being determined
+  if (loading || rolesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -74,33 +74,14 @@ export function ProtectedRoute({
     );
   }
 
-  // Still checking or not authorized
+  // Not authenticated
   if (!user) {
     return null;
   }
 
-  // Check roles inline for immediate feedback
-  if (requiredRoles.length > 0) {
-    const hasRequiredRole = requiredRoles.some(role => {
-      switch (role) {
-        case 'super_admin':
-          return isSuperAdmin;
-        case 'admin':
-          return isAdmin;
-        case 'ops_training_admin':
-          return isOpsTrainingAdmin;
-        case 'trainer':
-          return isTrainer;
-        case 'learner':
-          return true;
-        default:
-          return false;
-      }
-    });
-
-    if (!hasRequiredRole) {
-      return null;
-    }
+  // Check roles - don't render if not authorized
+  if (!checkHasRequiredRole()) {
+    return null;
   }
 
   return <>{children}</>;

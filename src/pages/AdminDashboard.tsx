@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -100,7 +101,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -110,7 +111,8 @@ export default function AdminDashboard() {
     totalEnrollments: 0,
     completionRate: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [courseDialogOpen, setCourseDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [saving, setSaving] = useState(false);
@@ -149,20 +151,28 @@ export default function AdminDashboard() {
     order_index: 0,
   });
 
+  // Auth guard - wait for both auth and roles to be resolved
   useEffect(() => {
-    if (!authLoading && !user) {
+    // Wait until both auth and roles are loaded before redirecting
+    if (authLoading || rolesLoading) return;
+    
+    if (!user) {
       navigate('/auth');
-    } else if (!authLoading && user && !isAdmin) {
+      return;
+    }
+    
+    if (!isAdmin) {
       navigate('/dashboard');
       toast.error('Access denied. Admin only.');
+      return;
     }
-  }, [user, authLoading, isAdmin, navigate]);
-
-  useEffect(() => {
-    if (user && isAdmin) {
+    
+    // Only fetch data once auth and roles are confirmed
+    if (!initialLoadDone) {
+      setInitialLoadDone(true);
       fetchData();
     }
-  }, [user, isAdmin]);
+  }, [user, authLoading, rolesLoading, isAdmin, navigate, initialLoadDone]);
 
   const fetchData = async () => {
     try {
@@ -221,7 +231,7 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
@@ -519,13 +529,44 @@ export default function AdminDashboard() {
     }
   };
 
-  if (authLoading || loading) {
+  // Show skeleton while auth/roles are loading
+  if (authLoading || rolesLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <PortalLayout title="Admin Dashboard">
+        <div className="p-6 space-y-6">
+          {/* Skeleton for stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-8 w-16" />
+                    </div>
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {/* Skeleton for tabs */}
+          <Skeleton className="h-10 w-full max-w-2xl" />
+          {/* Skeleton for table */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
@@ -541,7 +582,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <DashboardLayout>
+    <PortalLayout title="Admin Dashboard">
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
@@ -1064,6 +1105,6 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }
