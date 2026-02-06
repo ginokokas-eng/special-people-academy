@@ -8,7 +8,6 @@ const corsHeaders = {
 
 interface CancelEventRequest {
   sessionId: string;
-  outlookEventId: string;
 }
 
 interface GraphTokenResponse {
@@ -56,55 +55,74 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { sessionId }: CancelEventRequest = await req.json();
 
-    const calendarOwner = Deno.env.get('OUTLOOK_CALENDAR_OWNER_EMAIL');
-
-    const { sessionId, outlookEventId }: CancelEventRequest = await req.json();
-
-    if (!sessionId || !outlookEventId) {
+    if (!sessionId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: sessionId, outlookEventId' }),
+        JSON.stringify({ error: 'Missing required field: sessionId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log('Outlook cancel event called for session:', sessionId);
-    console.log('Event ID to cancel:', outlookEventId);
+
+    // Fetch session
+    const { data: session, error: sessionError } = await supabase
+      .from('practical_sessions')
+      .select('id, outlook_event_id, outlook_calendar_owner')
+      .eq('id', sessionId)
+      .single();
+
+    if (sessionError || !session) {
+      console.error('Session not found:', sessionError);
+      return new Response(
+        JSON.stringify({ error: 'Session not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If no event exists, nothing to cancel
+    if (!session.outlook_event_id) {
+      console.log('No event to cancel');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'No calendar event to cancel',
+          status: 'ok'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const calendarOwner = session.outlook_calendar_owner || Deno.env.get('OUTLOOK_CALENDAR_OWNER_EMAIL') || 'training@specialpeople.org.uk';
 
     // Check if Microsoft credentials are configured
     const tenantId = Deno.env.get('MS_TENANT_ID');
     const clientId = Deno.env.get('MS_CLIENT_ID');
     const clientSecret = Deno.env.get('MS_CLIENT_SECRET');
 
-    if (!tenantId || !clientId || !clientSecret || !calendarOwner) {
+    if (!tenantId || !clientId || !clientSecret) {
       // Credentials not configured - just clear the sync fields
-      const { error: updateError } = await supabase
+      await supabase
         .from('practical_sessions')
         .update({
           outlook_event_id: null,
-          outlook_calendar_owner: null,
-          calendar_sync_status: 'not_synced',
+          calendar_sync_status: 'not_configured',
           last_synced_at: null,
+          calendar_last_error: 'Microsoft Graph credentials not configured - event not deleted from Outlook',
         })
         .eq('id', sessionId);
-
-      if (updateError) {
-        console.error('Error updating session:', updateError);
-        return new Response(
-          JSON.stringify({ error: 'Failed to clear session sync status' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'Calendar event cancellation pending - Microsoft Graph credentials not yet configured',
-          status: 'not_synced'
+          message: 'Calendar sync cleared (Graph not configured)',
+          status: 'not_configured'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -113,7 +131,7 @@ serve(async (req) => {
     // Get access token
     const accessToken = await getGraphAccessToken();
 
-    const graphUrl = `https://graph.microsoft.com/v1.0/users/${calendarOwner}/events/${outlookEventId}`;
+    const graphUrl = `https://graph.microsoft.com/v1.0/users/${calendarOwner}/events/${session.outlook_event_id}`;
     
     const graphResponse = await fetch(graphUrl, {
       method: 'DELETE',
@@ -127,11 +145,11 @@ serve(async (req) => {
       const errorText = await graphResponse.text();
       console.error('Graph API error:', errorText);
       
-      // Mark as failed but clear the event ID since we can't delete it
       await supabase
         .from('practical_sessions')
         .update({
           calendar_sync_status: 'failed',
+          calendar_last_error: `Failed to delete event: ${graphResponse.status} - ${errorText.slice(0, 500)}`,
         })
         .eq('id', sessionId);
 
@@ -152,9 +170,9 @@ serve(async (req) => {
       .from('practical_sessions')
       .update({
         outlook_event_id: null,
-        outlook_calendar_owner: null,
-        calendar_sync_status: 'not_synced',
-        last_synced_at: null,
+        calendar_sync_status: 'ok',
+        last_synced_at: new Date().toISOString(),
+        calendar_last_error: null,
       })
       .eq('id', sessionId);
 
@@ -170,13 +188,29 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Event cancelled successfully',
-        status: 'not_synced'
+        status: 'ok'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in outlook-cancel-event:', error);
+    
+    try {
+      const { sessionId } = await req.clone().json();
+      if (sessionId) {
+        await supabase
+          .from('practical_sessions')
+          .update({
+            calendar_sync_status: 'failed',
+            calendar_last_error: error.message,
+          })
+          .eq('id', sessionId);
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+
     return new Response(
       JSON.stringify({ error: error.message, status: 'failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

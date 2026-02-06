@@ -1048,6 +1048,7 @@ export type Database = {
       }
       practical_sessions: {
         Row: {
+          calendar_last_error: string | null
           calendar_sync_status: string | null
           course_id: string
           created_at: string
@@ -1062,6 +1063,7 @@ export type Database = {
           trainer_id: string | null
         }
         Insert: {
+          calendar_last_error?: string | null
           calendar_sync_status?: string | null
           course_id: string
           created_at?: string
@@ -1076,6 +1078,7 @@ export type Database = {
           trainer_id?: string | null
         }
         Update: {
+          calendar_last_error?: string | null
           calendar_sync_status?: string | null
           course_id?: string
           created_at?: string

@@ -70,6 +70,7 @@ interface PracticalSession {
   outlook_calendar_owner: string | null;
   calendar_sync_status: string | null;
   last_synced_at: string | null;
+  calendar_last_error: string | null;
 }
 
 export function PracticalSessionsManager() {
@@ -137,6 +138,7 @@ export function PracticalSessionsManager() {
           outlook_calendar_owner,
           calendar_sync_status,
           last_synced_at,
+          calendar_last_error,
           courses(title)
         `)
         .order('session_date', { ascending: true });
@@ -167,6 +169,7 @@ export function PracticalSessionsManager() {
             outlook_calendar_owner: session.outlook_calendar_owner,
             calendar_sync_status: session.calendar_sync_status,
             last_synced_at: session.last_synced_at,
+            calendar_last_error: session.calendar_last_error,
           };
         })
       );
@@ -210,19 +213,10 @@ export function PracticalSessionsManager() {
     setDialogOpen(true);
   };
 
-  const triggerCalendarSync = async (sessionId: string, courseTitle: string, sessionDate: string, location: string | null, notes: string | null) => {
+  const triggerCalendarSync = async (sessionId: string) => {
     try {
-      const endTime = new Date(new Date(sessionDate).getTime() + 3 * 60 * 60 * 1000).toISOString();
-      
       const { data, error } = await supabase.functions.invoke('outlook-create-event', {
-        body: {
-          sessionId,
-          title: `Training: ${courseTitle}`,
-          description: notes || `Practical training session for ${courseTitle}`,
-          location: location || 'TBC',
-          startTime: sessionDate,
-          endTime,
-        },
+        body: { sessionId },
       });
 
       if (error) throw error;
@@ -241,17 +235,12 @@ export function PracticalSessionsManager() {
 
     setSyncingSessionId(session.id);
     try {
-      await triggerCalendarSync(
-        session.id,
-        session.course_title,
-        session.session_date,
-        session.location,
-        session.notes
-      );
+      await triggerCalendarSync(session.id);
       toast.success('Calendar sync initiated');
       fetchData();
     } catch (error) {
       toast.error('Failed to sync to calendar');
+      fetchData(); // Refresh to show error
     } finally {
       setSyncingSessionId(null);
     }
@@ -289,23 +278,10 @@ export function PracticalSessionsManager() {
 
         // If sync is enabled and session has a date, trigger update
         if (formData.sync_to_calendar && formData.session_date) {
-          if (editingSession.outlook_event_id) {
-            // Update existing event
-            await supabase.functions.invoke('outlook-update-event', {
-              body: {
-                sessionId: savedSessionId,
-                outlookEventId: editingSession.outlook_event_id,
-                title: `Training: ${courseTitle}`,
-                description: formData.notes || `Practical training session for ${courseTitle}`,
-                location: formData.location || 'TBC',
-                startTime: formData.session_date,
-                endTime: new Date(new Date(formData.session_date).getTime() + 3 * 60 * 60 * 1000).toISOString(),
-              },
-            });
-          } else {
-            // Create new event
-            await triggerCalendarSync(savedSessionId, courseTitle, formData.session_date, formData.location, formData.notes);
-          }
+          // Both create and update functions handle idempotency
+          await supabase.functions.invoke('outlook-update-event', {
+            body: { sessionId: savedSessionId },
+          });
         }
       } else {
         const { data, error } = await supabase
@@ -320,7 +296,7 @@ export function PracticalSessionsManager() {
 
         // If sync is enabled and session has a date, trigger sync
         if (formData.sync_to_calendar && formData.session_date) {
-          await triggerCalendarSync(savedSessionId, courseTitle, formData.session_date, formData.location, formData.notes);
+          await triggerCalendarSync(savedSessionId);
         }
       }
 
@@ -343,10 +319,7 @@ export function PracticalSessionsManager() {
       // If there's a calendar event, try to cancel it
       if (session?.outlook_event_id) {
         await supabase.functions.invoke('outlook-cancel-event', {
-          body: {
-            sessionId,
-            outlookEventId: session.outlook_event_id,
-          },
+          body: { sessionId },
         });
       }
 
@@ -506,6 +479,7 @@ export function PracticalSessionsManager() {
                   status={editingSession.calendar_sync_status}
                   outlookEventId={editingSession.outlook_event_id}
                   lastSyncedAt={editingSession.last_synced_at}
+                  lastError={editingSession.calendar_last_error}
                   onRetry={() => handleRetrySync(editingSession)}
                   isRetrying={syncingSessionId === editingSession.id}
                 />
@@ -585,6 +559,7 @@ export function PracticalSessionsManager() {
                         status={session.calendar_sync_status}
                         outlookEventId={session.outlook_event_id}
                         lastSyncedAt={session.last_synced_at}
+                        lastError={session.calendar_last_error}
                         onRetry={() => handleRetrySync(session)}
                         isRetrying={syncingSessionId === session.id}
                         compact

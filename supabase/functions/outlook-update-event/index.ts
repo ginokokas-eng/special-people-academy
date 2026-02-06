@@ -8,12 +8,6 @@ const corsHeaders = {
 
 interface UpdateEventRequest {
   sessionId: string;
-  outlookEventId: string;
-  title?: string;
-  description?: string;
-  location?: string;
-  startTime?: string;
-  endTime?: string;
 }
 
 interface GraphTokenResponse {
@@ -56,95 +50,160 @@ async function getGraphAccessToken(): Promise<string> {
   return data.access_token;
 }
 
+function buildEventBody(session: any, course: any, trainerName: string | null, bookedCount: number): string {
+  return `
+    <h2>${course.title} — Practical Session</h2>
+    <table style="border-collapse: collapse; margin: 10px 0;">
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Course:</td><td>${course.title}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Delivery Type:</td><td>${course.delivery_type || 'In-person Practical'}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Trainer:</td><td>${trainerName || 'TBC'}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Capacity:</td><td>Booked: ${bookedCount}/${session.max_attendees || 20}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Location:</td><td>${session.location || 'TBC'}</td></tr>
+    </table>
+    ${session.notes ? `<p><strong>Notes:</strong> ${session.notes}</p>` : ''}
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;" />
+    <p style="font-size: 12px; color: #666;">
+      This is an internal admin calendar event. Do not share externally.<br/>
+      <em>Managed by SPA Training Platform</em>
+    </p>
+  `.trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { sessionId }: UpdateEventRequest = await req.json();
 
-    const calendarOwner = Deno.env.get('OUTLOOK_CALENDAR_OWNER_EMAIL');
-
-    const { sessionId, outlookEventId, title, description, location, startTime, endTime }: UpdateEventRequest = await req.json();
-
-    if (!sessionId || !outlookEventId) {
+    if (!sessionId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: sessionId, outlookEventId' }),
+        JSON.stringify({ error: 'Missing required field: sessionId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log('Outlook update event called for session:', sessionId);
-    console.log('Event ID:', outlookEventId);
-    console.log('Updates:', { title, description, location, startTime, endTime });
+
+    // Fetch session with course details
+    const { data: session, error: sessionError } = await supabase
+      .from('practical_sessions')
+      .select(`
+        id,
+        course_id,
+        session_date,
+        location,
+        max_attendees,
+        notes,
+        trainer_id,
+        outlook_event_id,
+        outlook_calendar_owner,
+        courses(id, title, delivery_type)
+      `)
+      .eq('id', sessionId)
+      .single();
+
+    if (sessionError || !session) {
+      console.error('Session not found:', sessionError);
+      return new Response(
+        JSON.stringify({ error: 'Session not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If no event exists yet, create one instead
+    if (!session.outlook_event_id) {
+      console.log('No event exists, redirecting to create');
+      const createResponse = await fetch(`${supabaseUrl}/functions/v1/outlook-create-event`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': req.headers.get('Authorization') || '',
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+      const createData = await createResponse.json();
+      return new Response(JSON.stringify(createData), {
+        status: createResponse.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const calendarOwner = session.outlook_calendar_owner || Deno.env.get('OUTLOOK_CALENDAR_OWNER_EMAIL') || 'training@specialpeople.org.uk';
+    const course = session.courses as any;
 
     // Check if Microsoft credentials are configured
     const tenantId = Deno.env.get('MS_TENANT_ID');
     const clientId = Deno.env.get('MS_CLIENT_ID');
     const clientSecret = Deno.env.get('MS_CLIENT_SECRET');
 
-    if (!tenantId || !clientId || !clientSecret || !calendarOwner) {
-      // Credentials not configured - mark as pending
-      const { error: updateError } = await supabase
+    if (!tenantId || !clientId || !clientSecret) {
+      await supabase
         .from('practical_sessions')
         .update({
-          calendar_sync_status: 'pending',
+          calendar_sync_status: 'not_configured',
+          calendar_last_error: 'Microsoft Graph credentials not configured',
         })
         .eq('id', sessionId);
 
-      if (updateError) {
-        console.error('Error updating session:', updateError);
-      }
-
       return new Response(
         JSON.stringify({ 
-          success: true, 
-          message: 'Calendar update pending - Microsoft Graph credentials not yet configured',
-          status: 'pending'
+          success: false, 
+          message: 'Microsoft Graph credentials not configured',
+          status: 'not_configured'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Get trainer name
+    let trainerName = null;
+    if (session.trainer_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', session.trainer_id)
+        .maybeSingle();
+      trainerName = profile?.full_name || null;
+    }
+
+    // Get booked count
+    const { count: bookedCount } = await supabase
+      .from('practical_attendance')
+      .select('*', { count: 'exact', head: true })
+      .eq('session_id', sessionId);
+
     // Get access token
     const accessToken = await getGraphAccessToken();
 
-    // Build update payload (only include fields that are provided)
-    const eventPayload: Record<string, unknown> = {};
-    
-    if (title) {
-      eventPayload.subject = title;
-    }
-    
-    if (description !== undefined) {
-      eventPayload.body = {
-        contentType: 'HTML',
-        content: description || '',
-      };
-    }
-    
-    if (startTime) {
-      eventPayload.start = {
-        dateTime: startTime,
-        timeZone: 'Europe/London',
-      };
-    }
-    
-    if (endTime) {
-      eventPayload.end = {
-        dateTime: endTime,
-        timeZone: 'Europe/London',
-      };
-    }
-    
-    if (location !== undefined) {
-      eventPayload.location = location ? { displayName: location } : null;
-    }
+    // Calculate end time (3 hours after start)
+    const startDate = new Date(session.session_date);
+    const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
 
-    const graphUrl = `https://graph.microsoft.com/v1.0/users/${calendarOwner}/events/${outlookEventId}`;
+    // Build update payload
+    const eventPayload = {
+      subject: `${course?.title || 'Training'} — Practical Session`,
+      body: {
+        contentType: 'HTML',
+        content: buildEventBody(session, course || { title: 'Training', delivery_type: 'In-person' }, trainerName, bookedCount || 0),
+      },
+      start: {
+        dateTime: startDate.toISOString().slice(0, -1),
+        timeZone: 'Europe/London',
+      },
+      end: {
+        dateTime: endDate.toISOString().slice(0, -1),
+        timeZone: 'Europe/London',
+      },
+      location: session.location ? { displayName: session.location } : null,
+    };
+
+    const graphUrl = `https://graph.microsoft.com/v1.0/users/${calendarOwner}/events/${session.outlook_event_id}`;
     
     const graphResponse = await fetch(graphUrl, {
       method: 'PATCH',
@@ -159,11 +218,11 @@ serve(async (req) => {
       const errorText = await graphResponse.text();
       console.error('Graph API error:', errorText);
       
-      // Mark as failed
       await supabase
         .from('practical_sessions')
         .update({
           calendar_sync_status: 'failed',
+          calendar_last_error: `Microsoft Graph API error: ${graphResponse.status} - ${errorText.slice(0, 500)}`,
         })
         .eq('id', sessionId);
 
@@ -184,8 +243,9 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('practical_sessions')
       .update({
-        calendar_sync_status: 'synced',
+        calendar_sync_status: 'ok',
         last_synced_at: new Date().toISOString(),
+        calendar_last_error: null,
       })
       .eq('id', sessionId);
 
@@ -198,13 +258,29 @@ serve(async (req) => {
         success: true, 
         eventId: eventData.id,
         webLink: eventData.webLink,
-        status: 'synced'
+        status: 'ok'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in outlook-update-event:', error);
+    
+    try {
+      const { sessionId } = await req.clone().json();
+      if (sessionId) {
+        await supabase
+          .from('practical_sessions')
+          .update({
+            calendar_sync_status: 'failed',
+            calendar_last_error: error.message,
+          })
+          .eq('id', sessionId);
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+
     return new Response(
       JSON.stringify({ error: error.message, status: 'failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
