@@ -98,17 +98,19 @@ interface FeatureCardProps {
 const FeatureCard = ({ feature, onClick }: FeatureCardProps) => (
   <button
     onClick={onClick}
-    className="group p-6 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+    className="group p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 relative overflow-hidden"
     aria-label={`Learn more about ${feature.title}`}
   >
-    <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center text-primary-foreground mb-4 group-hover:scale-110 transition-transform">
-      {feature.icon}
+    {/* Teal gradient accent at top */}
+    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/70 to-primary/40 opacity-60 group-hover:opacity-100 transition-opacity" />
+    
+    <div className="pt-4">
+      <h3 className="font-semibold text-primary text-base mb-3 leading-snug">{feature.title}</h3>
+      <p className="text-muted-foreground text-sm leading-relaxed">{feature.shortText}</p>
+      <span className="inline-flex items-center text-primary text-sm font-medium mt-4 group-hover:underline">
+        Learn more →
+      </span>
     </div>
-    <h3 className="font-semibold text-foreground text-lg mb-2">{feature.title}</h3>
-    <p className="text-muted-foreground text-sm leading-relaxed">{feature.shortText}</p>
-    <span className="inline-flex items-center text-primary text-sm font-medium mt-3 group-hover:underline">
-      Learn more →
-    </span>
   </button>
 );
 
@@ -117,35 +119,26 @@ export const FeaturesSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-20 px-6 bg-secondary/30 overflow-hidden">
-      {/* Decorative Arc - Section Background */}
+    <section className="relative py-20 px-6 bg-background overflow-hidden">
+      {/* Subtle decorative arc line */}
       <svg 
-        className="absolute inset-0 w-full h-full pointer-events-none" 
+        className="absolute top-0 left-0 right-0 w-full h-24 pointer-events-none" 
         preserveAspectRatio="none"
-        viewBox="0 0 1440 600"
+        viewBox="0 0 1440 100"
         aria-hidden="true"
       >
-        {/* Subtle arc behind heading */}
         <path
-          d="M200 100 Q 720 0, 1240 100"
+          d="M0 80 Q 720 20, 1440 80"
           fill="none"
           stroke="hsl(var(--primary))"
           strokeWidth="1"
-          opacity="0.08"
-        />
-        {/* Lower flowing arc */}
-        <path
-          d="M-50 450 Q 400 350, 800 420 T 1500 380"
-          fill="none"
-          stroke="hsl(var(--accent-green))"
-          strokeWidth="1"
-          opacity="0.1"
+          opacity="0.15"
         />
       </svg>
 
       <div className="container mx-auto max-w-6xl relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-primary mb-4">
             Why Choose Special People Academy
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -175,10 +168,10 @@ export const FeaturesSection = () => {
           {selectedFeature && (
             <>
               <DialogHeader>
-                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center text-primary-foreground mb-4">
+                <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground mb-4">
                   {selectedFeature.icon}
                 </div>
-                <DialogTitle className="text-xl">{selectedFeature.modalHeading}</DialogTitle>
+                <DialogTitle className="text-xl text-primary">{selectedFeature.modalHeading}</DialogTitle>
                 <DialogDescription className="sr-only">
                   Details about {selectedFeature.title}
                 </DialogDescription>
