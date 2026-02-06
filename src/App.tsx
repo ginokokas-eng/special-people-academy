@@ -42,6 +42,7 @@ import CareerApplications from "./pages/CareerApplications";
 import CourseBuilder from "./pages/admin/CourseBuilder";
 import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
+import BrandSettings from "./pages/admin/BrandSettings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
@@ -94,6 +95,7 @@ const App = () => (
                 <Route path="/app/admin/courses" element={<CourseBuilder />} />
                 <Route path="/app/admin/courses/:id/edit" element={<CourseEditor />} />
                 <Route path="/app/admin/courses/:id/preview" element={<CoursePreview />} />
+                <Route path="/app/admin/brand-settings" element={<BrandSettings />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 <Route path="/cart" element={<Cart />} />
