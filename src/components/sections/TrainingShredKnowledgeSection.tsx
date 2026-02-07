@@ -137,20 +137,14 @@ export default function TrainingShredKnowledgeSection() {
         </div>
 
         {/* Knowledge panel (readable, accessible) */}
-        <div
-          className="rounded-xl p-6 md:p-8"
-          style={{ backgroundColor: "#124145" }}
-        >
-          <span
-            className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: "#C4D14F" }}
-          >
+        <div className="rounded-xl p-6 md:p-8 bg-primary text-primary-foreground">
+          <span className="text-xs font-semibold uppercase tracking-wider text-accent">
             Knowledge base
           </span>
-          <h3 className="text-xl md:text-2xl font-bold text-white mt-2">
+          <h3 className="text-xl md:text-2xl font-bold mt-2">
             {active.kb.title}
           </h3>
-          <p className="text-sm md:text-base mt-3" style={{ color: "#F6E5D4" }}>
+          <p className="text-sm md:text-base mt-3 opacity-90">
             {active.kb.summary}
           </p>
 
@@ -158,23 +152,22 @@ export default function TrainingShredKnowledgeSection() {
             {active.kb.bullets.map((b, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-sm"
-                style={{ color: "#F6E5D4" }}
+                className="flex items-start gap-2 text-sm opacity-90"
               >
-                <span style={{ color: "#C4D14F" }}>•</span>
+                <span className="text-accent">•</span>
                 {b}
               </li>
             ))}
           </ul>
 
           <div className="flex flex-wrap gap-3 mt-6">
-            <Button asChild style={{ backgroundColor: "#C4D14F", color: "#124145" }}>
+            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/courses">View courses</Link>
             </Button>
             <Button
               variant="outline"
               asChild
-              className="border-white/30 text-white hover:bg-white/10"
+              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
             >
               <Link to={active.kb.ctaHref ?? "/help-center"}>
                 {active.kb.ctaLabel ?? "Open Help Center"}

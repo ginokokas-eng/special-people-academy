@@ -206,24 +206,21 @@ export function TrainingKnowledgeShredStream({
 
       <div
         ref={containerRef}
-        className="relative w-full h-[320px] overflow-hidden rounded-xl"
-        style={{ backgroundColor: "#F6E5D4" }}
+        className="relative w-full h-[320px] overflow-hidden rounded-xl bg-secondary/50"
       >
-        {/* Scanner beam */}
+        {/* Scanner beam - using theme colors */}
         <div className="absolute left-1/2 top-0 bottom-0 w-[10px] -translate-x-1/2 z-40 pointer-events-none">
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent"
             style={{
-              background:
-                "linear-gradient(90deg, transparent, #C4D14F 40%, #fff 50%, #C4D14F 60%, transparent)",
-              boxShadow: "0 0 30px 8px rgba(196, 209, 79, 0.5)",
+              boxShadow: "0 0 30px 8px hsl(var(--primary) / 0.5)",
             }}
           />
           <div
             className="absolute inset-0 opacity-60"
             style={{
               background:
-                "repeating-linear-gradient(0deg, transparent 0px, transparent 4px, rgba(18, 65, 69, 0.15) 4px, rgba(18, 65, 69, 0.15) 6px)",
+                "repeating-linear-gradient(0deg, transparent 0px, transparent 4px, hsl(var(--muted-foreground) / 0.15) 4px, hsl(var(--muted-foreground) / 0.15) 6px)",
             }}
           />
         </div>
@@ -243,35 +240,25 @@ export function TrainingKnowledgeShredStream({
                   className="absolute inset-0 shred-back z-10"
                   style={{ "--back-reveal": "0%" } as React.CSSProperties}
                 >
-                  <div
-                    className="h-full p-5 flex flex-col"
-                    style={{ backgroundColor: "#124145" }}
-                  >
+                  <div className="h-full p-5 flex flex-col bg-primary text-primary-foreground">
                     <div className="shred-lines absolute inset-0 pointer-events-none" />
                     <div className="relative z-10 flex flex-col h-full">
-                      <span
-                        className="text-[10px] font-semibold uppercase tracking-wider"
-                        style={{ color: "#C4D14F" }}
-                      >
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-accent">
                         Knowledge base
                       </span>
-                      <h4 className="text-white font-semibold mt-1 text-sm line-clamp-2">
+                      <h4 className="font-semibold mt-1 text-sm line-clamp-2">
                         {item.kb.title}
                       </h4>
-                      <p
-                        className="text-xs mt-2 line-clamp-2"
-                        style={{ color: "#F6E5D4" }}
-                      >
+                      <p className="text-xs mt-2 line-clamp-2 opacity-80">
                         {item.kb.summary}
                       </p>
                       <ul className="mt-3 space-y-1 flex-1">
                         {item.kb.bullets.slice(0, 3).map((b, i) => (
                           <li
                             key={i}
-                            className="text-xs flex items-start gap-1.5"
-                            style={{ color: "#F6E5D4" }}
+                            className="text-xs flex items-start gap-1.5 opacity-90"
                           >
-                            <span style={{ color: "#C4D14F" }}>•</span>
+                            <span className="text-accent">•</span>
                             <span className="line-clamp-1">{b}</span>
                           </li>
                         ))}
@@ -280,8 +267,7 @@ export function TrainingKnowledgeShredStream({
                       {item.kb.ctaHref && (
                         <a
                           href={item.kb.ctaHref}
-                          className="mt-auto text-xs font-medium underline"
-                          style={{ color: "#FF988C" }}
+                          className="mt-auto text-xs font-medium underline text-accent hover:text-accent/80"
                         >
                           {item.kb.ctaLabel ?? "Read more"}
                         </a>
@@ -297,13 +283,7 @@ export function TrainingKnowledgeShredStream({
                   style={{ "--front-clip": "0%" } as React.CSSProperties}
                 >
                   <div className="h-full bg-card border border-border flex flex-col">
-                    <div
-                      className="flex-1 p-5 flex flex-col justify-between"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, hsl(var(--primary)/0.08) 0%, transparent 100%)",
-                      }}
-                    >
+                    <div className="flex-1 p-5 flex flex-col justify-between bg-gradient-to-br from-primary/5 to-transparent">
                       <div>
                         <span className="text-[10px] font-medium text-primary uppercase tracking-wide">
                           {item.category}
@@ -315,10 +295,7 @@ export function TrainingKnowledgeShredStream({
 
                       {item.practicalSignOff && (
                         <div className="flex items-center gap-1.5 mt-3">
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: "#FF988C" }}
-                          />
+                          <span className="w-2 h-2 rounded-full bg-accent" />
                           <span className="text-[10px] text-muted-foreground">
                             Practical sign-off
                           </span>
@@ -326,10 +303,7 @@ export function TrainingKnowledgeShredStream({
                       )}
                     </div>
 
-                    <div
-                      className="px-5 py-3 border-t border-border flex items-center justify-between"
-                      style={{ backgroundColor: "hsl(var(--secondary)/0.5)" }}
-                    >
+                    <div className="px-5 py-3 border-t border-border flex items-center justify-between bg-secondary/50">
                       <span className="text-xs font-medium text-muted-foreground">
                         {item.delivery}
                       </span>

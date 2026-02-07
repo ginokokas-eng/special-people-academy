@@ -241,9 +241,9 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(196, 209, 79, 0.35),
-      rgba(255, 255, 255, 0.35),
-      rgba(255, 152, 140, 0.35),
+      hsl(var(--primary) / 0.35),
+      hsl(var(--primary-foreground) / 0.35),
+      hsl(var(--accent) / 0.35),
       transparent
     );
     animation: scanFlash 600ms ease-out;
@@ -260,8 +260,8 @@
   .shred-lines {
     background: repeating-linear-gradient(
       90deg,
-      rgba(18, 65, 69, 0.10) 0px,
-      rgba(18, 65, 69, 0.10) 2px,
+      hsl(var(--muted-foreground) / 0.10) 0px,
+      hsl(var(--muted-foreground) / 0.10) 2px,
       transparent 2px,
       transparent 7px
     );
