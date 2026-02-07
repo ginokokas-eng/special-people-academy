@@ -12,6 +12,7 @@ const trainings: TrainingShredItem[] = [
   {
     id: "paediatric-first-aid",
     title: "Paediatric First Aid",
+    slug: "paediatric-first-aid",
     category: "Clinical & Emergency Care",
     delivery: "In-person / Blended",
     duration: "6h",
@@ -25,13 +26,12 @@ const trainings: TrainingShredItem[] = [
         "Choking: back blows + chest thrusts (age-appropriate)",
         "Record incident details and outcomes clearly",
       ],
-      ctaLabel: "Open Help Center article",
-      ctaHref: "/help-center",
     },
   },
   {
     id: "epilepsy-rescue-meds",
     title: "Epilepsy Awareness & Emergency Seizure Support",
+    slug: "epilepsy-awareness-emergency-seizure-support",
     category: "Clinical & Emergency Care",
     delivery: "In-person / Blended",
     duration: "3h",
@@ -45,13 +45,12 @@ const trainings: TrainingShredItem[] = [
         "Protect from injury; recovery position when safe",
         "Escalate when thresholds/red flags are met",
       ],
-      ctaLabel: "Open Help Center article",
-      ctaHref: "/help-center",
     },
   },
   {
     id: "anaphylaxis-epipen",
     title: "Anaphylaxis Awareness & Adrenaline Auto-Injector (EpiPen)",
+    slug: "anaphylaxis-awareness-adrenaline-auto-injector",
     category: "Clinical & Emergency Care",
     delivery: "In-person / Blended",
     duration: "2–3h",
@@ -65,13 +64,12 @@ const trainings: TrainingShredItem[] = [
         "Administer auto-injector per training & care plan",
         "Call emergency services; document actions taken",
       ],
-      ctaLabel: "Open Help Center article",
-      ctaHref: "/help-center",
     },
   },
   {
     id: "ipc",
     title: "Infection Prevention & Control",
+    slug: "infection-prevention-control",
     category: "Clinical & Emergency Care",
     delivery: "Online (Self-paced)",
     duration: "60–90m",
@@ -85,13 +83,12 @@ const trainings: TrainingShredItem[] = [
         "Hand hygiene moments and technique",
         "Cleaning routines and escalation pathways",
       ],
-      ctaLabel: "Open Help Center article",
-      ctaHref: "/help-center",
     },
   },
   {
     id: "enteral-feeding",
     title: "Enteral Feeding Awareness (PEG/PEJ/NG)",
+    slug: "enteral-feeding-awareness",
     category: "Complex Needs & Specialist Care",
     delivery: "In-person / Blended",
     duration: "3–4h",
@@ -105,8 +102,6 @@ const trainings: TrainingShredItem[] = [
         "Observe tolerance and recognise red flags",
         "Escalate promptly and record accurately",
       ],
-      ctaLabel: "Open Help Center article",
-      ctaHref: "/help-center",
     },
   },
 ];
@@ -136,15 +131,15 @@ export default function TrainingShredKnowledgeSection() {
           />
         </div>
 
-        {/* Knowledge panel (readable, accessible) */}
-        <div className="rounded-xl p-6 md:p-8 bg-primary text-primary-foreground">
-          <span className="text-xs font-semibold uppercase tracking-wider text-accent">
+        {/* Key guidance panel - lighter styling */}
+        <div className="rounded-xl p-6 md:p-8 bg-card border border-border/50 shadow-sm">
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
             Key guidance
           </span>
-          <h3 className="text-xl md:text-2xl font-bold mt-2">
+          <h3 className="text-xl md:text-2xl font-bold mt-2 text-foreground">
             {active.kb.title}
           </h3>
-          <p className="text-sm md:text-base mt-3 opacity-90">
+          <p className="text-sm md:text-base mt-3 text-muted-foreground">
             {active.kb.summary}
           </p>
 
@@ -152,26 +147,17 @@ export default function TrainingShredKnowledgeSection() {
             {active.kb.bullets.map((b, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2 text-sm opacity-90"
+                className="flex items-start gap-2 text-sm text-foreground"
               >
-                <span className="text-accent">•</span>
+                <span className="text-primary">•</span>
                 {b}
               </li>
             ))}
           </ul>
 
-          <div className="flex flex-wrap gap-3 mt-6">
-            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-              <Link to="/courses">View courses</Link>
-            </Button>
-            <Button
-              variant="outline"
-              asChild
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              <Link to={active.kb.ctaHref ?? "/help-center"}>
-                {active.kb.ctaLabel ?? "Open Help Center"}
-              </Link>
+          <div className="mt-6">
+            <Button asChild>
+              <Link to={`/courses/${active.slug || active.id}`}>View this course</Link>
             </Button>
           </div>
         </div>

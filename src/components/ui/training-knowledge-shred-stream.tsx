@@ -7,19 +7,19 @@ export type KnowledgeBaseInfo = {
   title: string;
   summary: string;
   bullets: string[];
-  ctaLabel?: string;
-  ctaHref?: string;
 };
 
 export type TrainingShredItem = {
   id: string;
   title: string;
+  slug?: string;
   category: string;
   delivery: string;
   duration?: string;
   practicalSignOff?: boolean;
   kb: KnowledgeBaseInfo;
 };
+
 
 type Props = {
   items: TrainingShredItem[];
@@ -264,14 +264,6 @@ export function TrainingKnowledgeShredStream({
                         ))}
                       </ul>
 
-                      {item.kb.ctaHref && (
-                        <a
-                          href={item.kb.ctaHref}
-                          className="mt-auto text-xs font-medium underline text-accent hover:text-accent/80"
-                        >
-                          {item.kb.ctaLabel ?? "Read more"}
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
