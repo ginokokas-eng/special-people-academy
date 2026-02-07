@@ -6,7 +6,8 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
+import { useScannerOverlay } from "@/hooks/useScannerOverlay";
+import { ScannerOverlay } from "@/components/ui/scanner-overlay";
 interface CourseOffering {
   id: string;
   base_price_gbp: number;
@@ -52,6 +53,11 @@ const CourseCard = ({
   const { user } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
   
+  const { elementRef, isScanning, reduceMotion, startScan } = useScannerOverlay({
+    duration: 1.4,
+    runOnce: true,
+  });
+  
   const deliveryLabels: Record<string, string> = {
     practical: "Face-to-Face",
     blended: "Blended Learning",
@@ -96,7 +102,13 @@ const CourseCard = ({
   };
 
   return (
-    <div className="group bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+    <div 
+      ref={elementRef}
+      className="group relative bg-card rounded-xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden"
+      onMouseEnter={startScan}
+    >
+      {/* Scanner overlay */}
+      {!reduceMotion && <ScannerOverlay isScanning={isScanning} duration={1.4} />}
       {/* Clickable area for course navigation */}
       <div 
         className="cursor-pointer"
