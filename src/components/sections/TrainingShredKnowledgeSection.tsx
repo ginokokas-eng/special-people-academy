@@ -119,11 +119,11 @@ export default function TrainingShredKnowledgeSection() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-10">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground">
-            Training that turns into practical guidance
+            Explore our training in action
           </h2>
           <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-            As each course is "verified," the platform reveals the knowledge-base
-            guidance teams use day-to-day.
+            As each training passes through the scanner, you'll see the key guidance
+            and knowledge-base notes that support real practice.
           </p>
         </div>
 
