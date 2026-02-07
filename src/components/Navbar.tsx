@@ -62,7 +62,7 @@ export const Navbar = () => {
           {/* Logo + Title - Left */}
           <Link 
             to="/" 
-            className="flex items-center gap-2 font-bold text-lg shrink-0 min-w-0"
+            className="flex items-center gap-2 font-bold shrink-0 min-w-0"
             aria-label="Special People Academy Home"
           >
             <img src={logo} alt="" className="h-9 w-9 object-contain flex-shrink-0" />
@@ -70,8 +70,7 @@ export const Navbar = () => {
               className="text-foreground text-sm sm:text-base truncate"
               title="Special People Academy"
             >
-              <span className="hidden xs:inline">Special People Academy</span>
-              <span className="inline xs:hidden">Special People</span>
+              Special People Academy
             </span>
           </Link>
 
