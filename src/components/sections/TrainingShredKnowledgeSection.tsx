@@ -112,6 +112,36 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
       "Physical intervention: last resort, proportionate, documented",
     ],
   },
+  "basic-life-support": {
+    title: "Basic Life Support: recognition and response",
+    summary:
+      "Essential life-saving skills for recognising cardiac arrest and performing effective CPR.",
+    bullets: [
+      "Recognise signs of cardiac arrest: unresponsive, not breathing normally",
+      "Call for help immediately and start chest compressions",
+      "Use AED as soon as available; continue until help arrives",
+    ],
+  },
+  "emergency-first-aid-at-work": {
+    title: "Emergency First Aid at Work: workplace response",
+    summary:
+      "Key skills for managing workplace emergencies safely and effectively.",
+    bullets: [
+      "Assess the scene for hazards before providing aid",
+      "Manage common workplace injuries: cuts, burns, falls",
+      "Know when to call emergency services and what to report",
+    ],
+  },
+  "medication-administration-competency": {
+    title: "Medication Administration: safe practice essentials",
+    summary:
+      "Core principles for safe medication administration and accurate documentation.",
+    bullets: [
+      "The 6 Rs: Right person, drug, dose, route, time, documentation",
+      "Check MAR and care plan before every administration",
+      "Report and document any errors or refusals immediately",
+    ],
+  },
 };
 
 // Fallback KB for courses without specific content
