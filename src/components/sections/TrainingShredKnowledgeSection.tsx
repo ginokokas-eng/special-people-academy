@@ -132,7 +132,7 @@ export default function TrainingShredKnowledgeSection() {
             items={trainings}
             onActiveChange={setActive}
             showControls={false}
-            speed={100}
+            speed={60}
           />
         </div>
 
