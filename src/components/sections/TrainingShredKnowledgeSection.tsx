@@ -139,7 +139,7 @@ export default function TrainingShredKnowledgeSection() {
         {/* Knowledge panel (readable, accessible) */}
         <div className="rounded-xl p-6 md:p-8 bg-primary text-primary-foreground">
           <span className="text-xs font-semibold uppercase tracking-wider text-accent">
-            Knowledge base
+            Key guidance
           </span>
           <h3 className="text-xl md:text-2xl font-bold mt-2">
             {active.kb.title}

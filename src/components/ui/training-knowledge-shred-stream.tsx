@@ -244,7 +244,7 @@ export function TrainingKnowledgeShredStream({
                     <div className="shred-lines absolute inset-0 pointer-events-none" />
                     <div className="relative z-10 flex flex-col h-full">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-accent">
-                        Knowledge base
+                        Key guidance
                       </span>
                       <h4 className="font-semibold mt-1 text-sm line-clamp-2">
                         {item.kb.title}
