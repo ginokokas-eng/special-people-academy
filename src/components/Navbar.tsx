@@ -59,10 +59,20 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 lg:h-[72px]">
-          {/* Logo - Left */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-lg shrink-0">
-            <img src={logo} alt="Special People Academy" className="h-9 w-9 object-contain" />
-            <span className="text-foreground hidden sm:inline">Special People Academy</span>
+          {/* Logo + Title - Left */}
+          <Link 
+            to="/" 
+            className="flex items-center gap-2 font-bold text-lg shrink-0 min-w-0"
+            aria-label="Special People Academy Home"
+          >
+            <img src={logo} alt="" className="h-9 w-9 object-contain flex-shrink-0" />
+            <span 
+              className="text-foreground text-sm sm:text-base truncate"
+              title="Special People Academy"
+            >
+              <span className="hidden xs:inline">Special People Academy</span>
+              <span className="inline xs:hidden">Special People</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation - Center */}
