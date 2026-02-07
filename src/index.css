@@ -223,3 +223,49 @@
     }
   }
 }
+
+@layer components {
+  .shred-front {
+    clip-path: inset(0 0 0 var(--front-clip, 0%));
+    will-change: clip-path;
+  }
+
+  .shred-back {
+    clip-path: inset(0 calc(100% - var(--back-reveal, 0%)) 0 0);
+    will-change: clip-path;
+  }
+
+  .scan-flash {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(196, 209, 79, 0.35),
+      rgba(255, 255, 255, 0.35),
+      rgba(255, 152, 140, 0.35),
+      transparent
+    );
+    animation: scanFlash 600ms ease-out;
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  @keyframes scanFlash {
+    0% { transform: translateX(-100%); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+  }
+
+  .shred-lines {
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(18, 65, 69, 0.10) 0px,
+      rgba(18, 65, 69, 0.10) 2px,
+      transparent 2px,
+      transparent 7px
+    );
+    opacity: 0.25;
+    mix-blend-mode: multiply;
+  }
+}
