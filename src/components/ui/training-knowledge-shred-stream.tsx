@@ -3,10 +3,16 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+export type KnowledgeBaseSection = {
+  heading: string;
+  content: string;
+};
+
 export type KnowledgeBaseInfo = {
   title: string;
   summary: string;
   bullets: string[];
+  sections?: KnowledgeBaseSection[];
 };
 
 export type TrainingShredItem = {
