@@ -166,8 +166,6 @@ export default function Courses() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="New Joiner">New Joiner</SelectItem>
-                  <SelectItem value="Enhanced">Enhanced</SelectItem>
                   <SelectItem value="Complex">Complex</SelectItem>
                 </SelectContent>
               </Select>
