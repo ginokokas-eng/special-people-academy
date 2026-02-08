@@ -35,6 +35,11 @@ interface CourseProgressTrackerProps {
   hasCertificate: boolean;
   isCompleted: boolean;
   certificateId?: string;
+  // New: Two-stage certificate support
+  completionCertificateId?: string;
+  competencyCertificateId?: string;
+  requiresCompetencySignoff?: boolean;
+  competencySignedOff?: boolean;
 }
 
 export function CourseProgressTracker({
@@ -46,6 +51,10 @@ export function CourseProgressTracker({
   hasCertificate,
   isCompleted,
   certificateId,
+  completionCertificateId,
+  competencyCertificateId,
+  requiresCompetencySignoff = false,
+  competencySignedOff = false,
 }: CourseProgressTrackerProps) {
   const navigate = useNavigate();
   const [claiming, setClaiming] = useState(false);
@@ -203,38 +212,81 @@ export function CourseProgressTracker({
           })}
         </div>
 
-        {/* Claim Certificate Button */}
+        {/* Claim Certificate Button - Stage A: Completion */}
         {hasCertificate && (
-          <div className="pt-2">
-            {allComplete ? (
-              <Button 
-                onClick={handleClaimCertificate}
-                disabled={claiming}
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-              >
-                {claiming ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : certificateId ? (
-                  <>
-                    <Award className="h-4 w-4 mr-2" />
-                    View Certificate
-                  </>
+          <div className="pt-2 space-y-4">
+            {/* Stage A: Certificate of Completion */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Award className="h-4 w-4" />
+                Stage A: Certificate of Completion
+              </div>
+              {allComplete ? (
+                <Button 
+                  onClick={handleClaimCertificate}
+                  disabled={claiming}
+                  className="w-full h-12 text-base font-semibold"
+                  variant={completionCertificateId ? "outline" : "default"}
+                >
+                  {claiming ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : completionCertificateId ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2 text-success" />
+                      View Completion Certificate
+                    </>
+                  ) : (
+                    <>
+                      <Award className="h-4 w-4 mr-2" />
+                      Claim Completion Certificate
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="text-center p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30">
+                  <p className="text-sm text-muted-foreground">
+                    Complete all modules and pass the final quiz to claim
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Stage B: Competency Sign-off Certificate (only for blended courses) */}
+            {requiresCompetencySignoff && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  Stage B: Competency Sign-off Certificate
+                </div>
+                {competencySignedOff && competencyCertificateId ? (
+                  <Button 
+                    onClick={() => navigate('/certificates')}
+                    className="w-full h-12 text-base font-semibold bg-success hover:bg-success/90"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    View Competency Certificate
+                  </Button>
+                ) : practicalProgress.completed ? (
+                  <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <ClipboardCheck className="h-6 w-6 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-primary">
+                      Practical session attended
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Awaiting competency sign-off from assessor
+                    </p>
+                  </div>
                 ) : (
-                  <>
-                    <Award className="h-4 w-4 mr-2" />
-                    Claim Certificate
-                  </>
+                  <div className="text-center p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30">
+                    <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      Complete your practical session to be assessed
+                    </p>
+                  </div>
                 )}
-              </Button>
-            ) : (
-              <div className="text-center p-4 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30">
-                <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Complete all requirements to claim your certificate
-                </p>
               </div>
             )}
           </div>

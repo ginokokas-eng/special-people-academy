@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CompetencySignoffDialog } from '@/components/trainer/CompetencySignoffDialog';
 import { 
   Calendar, 
   MapPin, 
@@ -40,7 +41,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  ClipboardList
+  ClipboardList,
+  ShieldCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -78,6 +80,7 @@ export default function TrainerPortal() {
   const [learners, setLearners] = useState<EnrolledLearner[]>([]);
   const [learnersLoading, setLearnersLoading] = useState(false);
   const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false);
+  const [competencyDialogOpen, setCompetencyDialogOpen] = useState(false);
   const [selectedLearner, setSelectedLearner] = useState<EnrolledLearner | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -87,6 +90,11 @@ export default function TrainerPortal() {
     competency_outcome: '' as '' | 'pass' | 'needs_practice',
     notes: '',
   });
+
+  const openCompetencyDialog = (learner: EnrolledLearner) => {
+    setSelectedLearner(learner);
+    setCompetencyDialogOpen(true);
+  };
 
   // Auth guard - wait for both auth and roles to be resolved
   useEffect(() => {
@@ -457,7 +465,7 @@ export default function TrainerPortal() {
                             <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
                               {learner.attendance?.notes || '-'}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right space-x-2">
                               <Button 
                                 size="sm" 
                                 variant="outline"
@@ -465,6 +473,16 @@ export default function TrainerPortal() {
                               >
                                 Mark Attendance
                               </Button>
+                              {learner.attendance?.attended === true && (
+                                <Button 
+                                  size="sm" 
+                                  variant={canSignOffCompetency ? "default" : "outline"}
+                                  onClick={() => openCompetencyDialog(learner)}
+                                >
+                                  <ShieldCheck className="h-4 w-4 mr-1" />
+                                  {canSignOffCompetency ? 'Competency Sign-off' : 'View Checklist'}
+                                </Button>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -599,6 +617,19 @@ export default function TrainerPortal() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Competency Sign-off Dialog */}
+      {selectedLearner && selectedSession && (
+        <CompetencySignoffDialog
+          open={competencyDialogOpen}
+          onOpenChange={setCompetencyDialogOpen}
+          learnerId={selectedLearner.user_id}
+          learnerName={selectedLearner.full_name || 'Unknown Learner'}
+          courseId={selectedSession.course_id}
+          courseTitle={selectedSession.course_title}
+          onSuccess={() => fetchLearners(selectedSession)}
+        />
+      )}
     </PortalLayout>
   );
 }
