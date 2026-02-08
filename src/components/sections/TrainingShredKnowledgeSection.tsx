@@ -54,69 +54,83 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
     ],
   },
   "enteral-feeding-tubes-management-competency-guide": {
-    title: "Enteral feeding: scope, safety, and competency essentials",
+    title: "Enteral Feeding Tubes — Key Guidance (Quick Reference)",
     summary:
-      "A comprehensive guide covering tube types, daily safety checks, feed and medication support, troubleshooting, and documentation for enteral feeding.",
+      "Essential safety, technique, and troubleshooting guidance for enteral feeding tube management including NG, NJ, PEG, PEG-J, and PEJ tubes.",
     bullets: [
-      "Scope of practice: follow care plans, escalate concerns to healthcare professionals",
-      "Tube types: PEG (stomach), PEJ (jejunum), NG (nasogastric)",
-      "Daily safety checks: tube position, site observation, equipment readiness",
-      "Feed support: positioning (30-45°), monitor tolerance and red flags",
-      "Medicines via tube: policy-led, flush before/after, document on MAR",
-      "Troubleshooting: blockages, leakage – stop and escalate immediately",
-      "Red flags: vomiting, breathing difficulty, severe pain, tube migration",
-      "Documentation: feed charts, handover notes, accurate records",
+      "Safety: Never use 'whoosh test' – only pH testing for verification",
+      "Gastric tubes (NG/PEG): bolus or pump; Jejunal (NJ/PEJ/PEG-J): pump-only",
+      "Universal flush: before and after feeds, between each medication",
+      "Routine care: clean/dry site; rotate PEG; never rotate PEJ or PEG-J",
+      "Blockage: stop, aspirate gently, escalate – never force-flush",
+      "Red flags: aspiration symptoms, infection signs – escalate immediately",
     ],
     sections: [
       {
-        heading: "Overview & Scope of Practice",
-        content: "Enteral feeding provides nutrition directly to the stomach or intestine when oral intake is unsafe or insufficient. Support workers assist individuals safely by following their care plan, maintaining hygiene, observing for concerns, and escalating appropriately to healthcare professionals."
+        heading: "1. Safety Non-Negotiables",
+        content: "Never use the 'whoosh test' to confirm tube placement – it is unreliable and dangerous. Always use pH testing (pH ≤5.5 for gastric tubes) to verify position before feeding. If verification fails or position is uncertain, do not feed – escalate immediately to a healthcare professional. Always check tube length markers match the care plan."
       },
       {
-        heading: "Tube Types (PEG/PEJ/NG)",
-        content: "PEG (Percutaneous Endoscopic Gastrostomy) tubes are placed directly into the stomach through the abdominal wall. PEJ (Percutaneous Endoscopic Jejunostomy) tubes bypass the stomach and enter the jejunum. NG (Nasogastric) tubes are passed through the nose into the stomach."
+        heading: "2. Tube Type → Feeding Method Rules",
+        content: "Gastric tubes (NG, PEG): Can use bolus (gravity/syringe) OR pump feeding. Post-pyloric/jejunal tubes (NJ, PEJ, PEG-J): Pump-only – never bolus feed. The jejunum cannot tolerate bolus volumes; only continuous pump feeding is safe. Always check the care plan to confirm tube type and prescribed method."
       },
       {
-        heading: "Daily Safety Checks & What to Report",
-        content: "Before each feed: verify correct person, check care plan, confirm tube position marker hasn't changed, inspect the site for redness/swelling/discharge, ensure equipment is in date and clean. Report immediately: tube appears shorter/longer, site inflammation, equipment concerns."
+        heading: "3. Universal Flush Rules",
+        content: "Flush with water before every feed to check patency. Flush after every feed to clear residue. When giving medications: flush before, between each medication, and after the final medication. Minimum flush volume is typically 30ml (or as specified in care plan). Use cooled boiled water or sterile water as directed."
       },
       {
-        heading: "Supporting Feed Administration",
-        content: "Position the person upright (30-45 degrees minimum). Check feed type, volume, and expiry. Prime giving set and connect securely. Monitor throughout for signs of discomfort, nausea, or breathing changes. Maintain upright position for 30-60 minutes post-feed."
+        heading: "4. Routine Care",
+        content: "Keep the stoma site clean and dry at all times. PEG tubes: rotate 360° daily (unless contraindicated) and gently push in/out to prevent buried bumper syndrome. PEJ and PEG-J tubes: NEVER rotate – the jejunal portion is fixed and rotation can cause displacement or injury. Check external tube length daily and document."
       },
       {
-        heading: "Supporting Medicines via Tube",
-        content: "Only administer medications as prescribed and per organisational policy. Flush the tube with water before and after administration. Never crush tablets without explicit guidance from pharmacy. Document accurately on the MAR."
+        heading: "5. Troubleshooting: Blockage & Dislodgement",
+        content: "Blockage: Stop feeding, try gentle aspiration with a syringe, attempt warm water flush with gentle pressure. Never use force. If unresolved, escalate to healthcare professional. Dislodgement: Stop all feeding immediately, cover the site with a clean dressing, and escalate urgently – the stoma can close within hours."
       },
       {
-        heading: "Troubleshooting, Red Flags & Escalation",
-        content: "Common issues include tube blockages, site leakage, and equipment concerns. Never attempt to force-flush a blocked tube or reposition a displaced tube. Red flags requiring immediate escalation: vomiting, severe pain, difficulty breathing, tube migration."
-      },
-      {
-        heading: "Documentation & Handover Essentials",
-        content: "Complete feed charts after every feed. Document site observations, equipment changes, and incidents. Handover must include: feeds given, next feed due, any concerns, tube position status, and outstanding actions."
-      },
-      {
-        heading: "Competency Checklist Summary",
-        content: "Practical sign-off covers 7 key areas: Pre-support checks, Hygiene and PPE, Equipment setup, Safe positioning, Flushing principles, Red flags and escalation, Documentation and handover."
+        heading: "6. Red Flags: When to Escalate Immediately",
+        content: "Aspiration symptoms: coughing, choking, wet/gurgling voice, breathing difficulty during or after feeding, unexplained respiratory distress. Infection signs: redness, swelling, warmth, discharge (especially purulent), fever, increasing pain at stoma site. Other emergencies: tube migration (longer/shorter than usual), severe abdominal pain, vomiting, significant bleeding. Stop feeding and escalate immediately."
       }
     ]
   },
-  // Also add the new course slug without the "-guide" suffix for flexibility
+  // Also support the alternative slug
   "enteral-feeding-tubes-management-competency": {
-    title: "Enteral feeding: scope, safety, and competency essentials",
+    title: "Enteral Feeding Tubes — Key Guidance (Quick Reference)",
     summary:
-      "A comprehensive guide covering tube types, daily safety checks, feed and medication support, troubleshooting, and documentation for enteral feeding.",
+      "Essential safety, technique, and troubleshooting guidance for enteral feeding tube management including NG, NJ, PEG, PEG-J, and PEJ tubes.",
     bullets: [
-      "Scope of practice: follow care plans, escalate concerns to healthcare professionals",
-      "Tube types: PEG (stomach), PEJ (jejunum), NG (nasogastric)",
-      "Daily safety checks: tube position, site observation, equipment readiness",
-      "Feed support: positioning (30-45°), monitor tolerance and red flags",
-      "Medicines via tube: policy-led, flush before/after, document on MAR",
-      "Troubleshooting: blockages, leakage – stop and escalate immediately",
-      "Red flags: vomiting, breathing difficulty, severe pain, tube migration",
-      "Documentation: feed charts, handover notes, accurate records",
+      "Safety: Never use 'whoosh test' – only pH testing for verification",
+      "Gastric tubes (NG/PEG): bolus or pump; Jejunal (NJ/PEJ/PEG-J): pump-only",
+      "Universal flush: before and after feeds, between each medication",
+      "Routine care: clean/dry site; rotate PEG; never rotate PEJ or PEG-J",
+      "Blockage: stop, aspirate gently, escalate – never force-flush",
+      "Red flags: aspiration symptoms, infection signs – escalate immediately",
     ],
+    sections: [
+      {
+        heading: "1. Safety Non-Negotiables",
+        content: "Never use the 'whoosh test' to confirm tube placement – it is unreliable and dangerous. Always use pH testing (pH ≤5.5 for gastric tubes) to verify position before feeding. If verification fails or position is uncertain, do not feed – escalate immediately to a healthcare professional. Always check tube length markers match the care plan."
+      },
+      {
+        heading: "2. Tube Type → Feeding Method Rules",
+        content: "Gastric tubes (NG, PEG): Can use bolus (gravity/syringe) OR pump feeding. Post-pyloric/jejunal tubes (NJ, PEJ, PEG-J): Pump-only – never bolus feed. The jejunum cannot tolerate bolus volumes; only continuous pump feeding is safe. Always check the care plan to confirm tube type and prescribed method."
+      },
+      {
+        heading: "3. Universal Flush Rules",
+        content: "Flush with water before every feed to check patency. Flush after every feed to clear residue. When giving medications: flush before, between each medication, and after the final medication. Minimum flush volume is typically 30ml (or as specified in care plan). Use cooled boiled water or sterile water as directed."
+      },
+      {
+        heading: "4. Routine Care",
+        content: "Keep the stoma site clean and dry at all times. PEG tubes: rotate 360° daily (unless contraindicated) and gently push in/out to prevent buried bumper syndrome. PEJ and PEG-J tubes: NEVER rotate – the jejunal portion is fixed and rotation can cause displacement or injury. Check external tube length daily and document."
+      },
+      {
+        heading: "5. Troubleshooting: Blockage & Dislodgement",
+        content: "Blockage: Stop feeding, try gentle aspiration with a syringe, attempt warm water flush with gentle pressure. Never use force. If unresolved, escalate to healthcare professional. Dislodgement: Stop all feeding immediately, cover the site with a clean dressing, and escalate urgently – the stoma can close within hours."
+      },
+      {
+        heading: "6. Red Flags: When to Escalate Immediately",
+        content: "Aspiration symptoms: coughing, choking, wet/gurgling voice, breathing difficulty during or after feeding, unexplained respiratory distress. Infection signs: redness, swelling, warmth, discharge (especially purulent), fever, increasing pain at stoma site. Other emergencies: tube migration (longer/shorter than usual), severe abdominal pain, vomiting, significant bleeding. Stop feeding and escalate immediately."
+      }
+    ]
   },
   "positive-behaviour-support-safe-physical-intervention": {
     title: "PBS & Safe Physical Intervention: principles and practice",
