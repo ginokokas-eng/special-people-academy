@@ -941,6 +941,117 @@ export type Database = {
           },
         ]
       }
+      medication_competency_signoffs: {
+        Row: {
+          action_plan: string | null
+          admin_process: boolean | null
+          admin_process_comments: string | null
+          assessed_at: string | null
+          assessor_id: string
+          assessor_notes: string | null
+          attempt_number: number | null
+          communication: boolean | null
+          communication_comments: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          incident_escalation: boolean | null
+          incident_escalation_comments: string | null
+          location: string | null
+          mar_documentation: boolean | null
+          mar_documentation_comments: string | null
+          outcome: string | null
+          pre_admin_checks: boolean | null
+          pre_admin_checks_comments: string | null
+          prn_handling: boolean | null
+          prn_handling_comments: string | null
+          reassessment_date: string | null
+          refusal_handling: boolean | null
+          refusal_handling_comments: string | null
+          storage_awareness: boolean | null
+          storage_awareness_comments: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_plan?: string | null
+          admin_process?: boolean | null
+          admin_process_comments?: string | null
+          assessed_at?: string | null
+          assessor_id: string
+          assessor_notes?: string | null
+          attempt_number?: number | null
+          communication?: boolean | null
+          communication_comments?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          incident_escalation?: boolean | null
+          incident_escalation_comments?: string | null
+          location?: string | null
+          mar_documentation?: boolean | null
+          mar_documentation_comments?: string | null
+          outcome?: string | null
+          pre_admin_checks?: boolean | null
+          pre_admin_checks_comments?: string | null
+          prn_handling?: boolean | null
+          prn_handling_comments?: string | null
+          reassessment_date?: string | null
+          refusal_handling?: boolean | null
+          refusal_handling_comments?: string | null
+          storage_awareness?: boolean | null
+          storage_awareness_comments?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_plan?: string | null
+          admin_process?: boolean | null
+          admin_process_comments?: string | null
+          assessed_at?: string | null
+          assessor_id?: string
+          assessor_notes?: string | null
+          attempt_number?: number | null
+          communication?: boolean | null
+          communication_comments?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          incident_escalation?: boolean | null
+          incident_escalation_comments?: string | null
+          location?: string | null
+          mar_documentation?: boolean | null
+          mar_documentation_comments?: string | null
+          outcome?: string | null
+          pre_admin_checks?: boolean | null
+          pre_admin_checks_comments?: string | null
+          prn_handling?: boolean | null
+          prn_handling_comments?: string | null
+          reassessment_date?: string | null
+          refusal_handling?: boolean | null
+          refusal_handling_comments?: string | null
+          storage_awareness?: boolean | null
+          storage_awareness_comments?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_competency_signoffs_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_competency_signoffs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           course_id: string
