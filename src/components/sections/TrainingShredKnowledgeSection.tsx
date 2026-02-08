@@ -102,6 +102,22 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
       }
     ]
   },
+  // Also add the new course slug without the "-guide" suffix for flexibility
+  "enteral-feeding-tubes-management-competency": {
+    title: "Enteral feeding: scope, safety, and competency essentials",
+    summary:
+      "A comprehensive guide covering tube types, daily safety checks, feed and medication support, troubleshooting, and documentation for enteral feeding.",
+    bullets: [
+      "Scope of practice: follow care plans, escalate concerns to healthcare professionals",
+      "Tube types: PEG (stomach), PEJ (jejunum), NG (nasogastric)",
+      "Daily safety checks: tube position, site observation, equipment readiness",
+      "Feed support: positioning (30-45°), monitor tolerance and red flags",
+      "Medicines via tube: policy-led, flush before/after, document on MAR",
+      "Troubleshooting: blockages, leakage – stop and escalate immediately",
+      "Red flags: vomiting, breathing difficulty, severe pain, tube migration",
+      "Documentation: feed charts, handover notes, accurate records",
+    ],
+  },
   "positive-behaviour-support-safe-physical-intervention": {
     title: "PBS & Safe Physical Intervention: principles and practice",
     summary:
