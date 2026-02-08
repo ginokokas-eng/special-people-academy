@@ -163,14 +163,47 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
     ],
   },
   "medication-administration-competency": {
-    title: "Medication Administration: safe practice essentials",
+    title: "Medication Administration – Key Guidance (Care Settings)",
     summary:
-      "Core principles for safe medication administration and accurate documentation.",
+      "Essential policy-led guidance for safe medication administration, accurate MAR recording, and incident escalation in care settings.",
     bullets: [
-      "The 6 Rs: Right person, drug, dose, route, time, documentation",
-      "Check MAR and care plan before every administration",
-      "Report and document any errors or refusals immediately",
+      "Follow the 6 Rs: Right person, drug, dose, route, time, documentation – always policy-led",
+      "MAR recording: document refusals, omissions, and late doses with clear reasons",
+      "PRN: verify criteria met, record reason given and outcome observed",
+      "Controlled drugs: double-locked storage, witnessed administration, accurate register",
+      "Covert medicines: only with MCA capacity assessment and best-interest decision",
+      "Incidents: report immediately, document factually, escalate per policy",
     ],
+    sections: [
+      {
+        heading: "1. Safe Administration Principles (Policy-Led)",
+        content: "Always follow the 6 Rs: Right person, Right medication, Right dose, Right route, Right time, Right documentation. This is policy-led – you do not give dosing advice or make clinical decisions. Check the MAR chart and care plan before every administration. Verify identity using approved methods. Check expiry dates, allergies, and any special instructions. Maintain hand hygiene and appropriate PPE throughout."
+      },
+      {
+        heading: "2. MAR Recording Essentials",
+        content: "Record immediately after administration – never pre-sign. For refusals: record 'R' and document the reason in notes, inform the person of potential consequences, and escalate as required. For omissions: record the appropriate code and reason (e.g., person asleep, medication unavailable, clinical decision). Late doses: record actual time given, not scheduled time, with explanation. All entries must be legible, signed, and dated."
+      },
+      {
+        heading: "3. PRN Medication",
+        content: "PRN means 'as required' – only give when the specified criteria are met. Before administering: check when last given, verify minimum interval has passed, confirm maximum daily dose not exceeded. Record the reason for giving (e.g., 'headache reported by individual'). Observe and document the effect within the timeframe specified. If PRN is frequently needed or ineffective, escalate for review."
+      },
+      {
+        heading: "4. Controlled Drugs: Governance Overview",
+        content: "Controlled drugs require double-locked storage (cupboard within cupboard or separate cabinet). Two signatories required for administration in most settings – check local policy. Maintain the CD register accurately: record every administration, disposal, and balance check. Never leave CDs unattended during administration. Report any discrepancy immediately – do not attempt to correct or cover up. Keys must be held by authorised staff only."
+      },
+      {
+        heading: "5. Covert Medicines: MCA/Best Interest Pathway",
+        content: "Covert administration (hiding medication in food/drink) is only lawful when: 1) The person lacks capacity to make this specific decision (MCA capacity assessment required), 2) A best-interest decision has been made involving appropriate professionals, 3) A pharmacist has confirmed the medication can be safely modified/crushed, 4) The decision is documented and regularly reviewed. Never administer covertly without these safeguards in place."
+      },
+      {
+        heading: "6. Storage and Disposal",
+        content: "Store all medications securely – locked trolley or cupboard. Maintain fridge temperatures (2-8°C) and record daily. Check stock for expired medications regularly. Dispose of unwanted or expired medications via authorised pharmaceutical waste routes only – never in domestic waste. Return medications of deceased/discharged individuals promptly following your organisation's procedure."
+      },
+      {
+        heading: "7. Incident Reporting and Escalation",
+        content: "Report ALL medication incidents: wrong medication, wrong dose, wrong person, wrong time, wrong route, omission, near miss. First action: ensure the person is safe and seek medical advice if needed. Then: inform your manager/senior immediately. Complete an incident report factually – what happened, when, who was involved, actions taken, any harm. This is about learning, not blame. Escalation contacts should be clearly displayed in your setting."
+      }
+    ]
   },
 };
 
