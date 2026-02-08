@@ -55,7 +55,6 @@ export interface ChecklistState {
   communication: boolean;
   admin_process: boolean;
   mar_documentation: boolean;
-  refusal_handling: boolean;
   prn_handling: boolean;
   storage_awareness: boolean;
   incident_escalation: boolean;
@@ -66,7 +65,6 @@ export interface CommentsState {
   communication_comments: string;
   admin_process_comments: string;
   mar_documentation_comments: string;
-  refusal_handling_comments: string;
   prn_handling_comments: string;
   storage_awareness_comments: string;
   incident_escalation_comments: string;
@@ -76,56 +74,49 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
   {
     id: 'pre_admin_checks',
     label: '1. Pre-Administration Checks',
-    description: 'Right person verified, MAR match confirmed, allergies noted, expiry checked, hygiene/PPE appropriate',
+    description: '• Identity confirmed using service process\n• Allergies/special instructions checked\n• Label matches MAR exactly\n• Expiry date verified\n• Hygiene/PPE followed',
     checkField: 'pre_admin_checks',
     commentField: 'pre_admin_checks_comments',
   },
   {
     id: 'communication',
-    label: '2. Communication with the Person',
-    description: 'Obtained consent, maintained dignity, identified and accommodated support needs',
+    label: '2. Communication and Consent',
+    description: '• Explains what is being given\n• Supports dignity and choice\n• Responds appropriately to questions/refusal',
     checkField: 'communication',
     commentField: 'communication_comments',
   },
   {
     id: 'admin_process',
-    label: '3. Administration Process',
-    description: 'Policy-led approach, no dosing advice given, follows MAR exactly, safe technique appropriate to setting',
+    label: '3. Administration (Within Scope)',
+    description: '• Follows MAR exactly\n• Does not crush/split/alter without authorisation\n• Safe handling and avoids contamination',
     checkField: 'admin_process',
     commentField: 'admin_process_comments',
   },
   {
     id: 'mar_documentation',
-    label: '4. MAR Documentation',
-    description: 'Completed correctly with time, initials/signature, and appropriate notes',
+    label: '4. Documentation',
+    description: '• Records immediately after administration\n• Refusal recorded correctly (not signed as given)\n• Omission recorded correctly with reason',
     checkField: 'mar_documentation',
     commentField: 'mar_documentation_comments',
   },
   {
-    id: 'refusal_handling',
-    label: '5. Refusal/Omission Scenario',
-    description: 'Handled correctly – does not conceal, records accurately, and escalates as required',
-    checkField: 'refusal_handling',
-    commentField: 'refusal_handling_comments',
-  },
-  {
     id: 'prn_handling',
-    label: '6. PRN Scenario',
-    description: 'Checks criteria met, records reason and outcome, observes for effect',
+    label: '5. PRN Scenario',
+    description: '• Checks PRN criteria + limits\n• Records reason and outcome\n• Escalates appropriately if repeated use',
     checkField: 'prn_handling',
     commentField: 'prn_handling_comments',
   },
   {
     id: 'storage_awareness',
-    label: '7. Storage/Keys/Fridge Awareness',
-    description: 'Demonstrates understanding of secure storage principles and temperature requirements',
+    label: '6. Storage/Governance Awareness',
+    description: '• Secure storage principles demonstrated\n• Fridge/temperature checks if applicable\n• Knows key/authorisation rules',
     checkField: 'storage_awareness',
     commentField: 'storage_awareness_comments',
   },
   {
     id: 'incident_escalation',
-    label: '8. Incident/Escalation Scenario',
-    description: 'Knows who to contact and what to document in an incident or emergency',
+    label: '7. Incident Scenario',
+    description: '• Demonstrates correct escalation/reporting steps\n• Knows what to document for an error/near miss\n• Safety-first approach shown',
     checkField: 'incident_escalation',
     commentField: 'incident_escalation_comments',
   },
@@ -153,7 +144,6 @@ export function MedicationSignoffDialog({
     communication: false,
     admin_process: false,
     mar_documentation: false,
-    refusal_handling: false,
     prn_handling: false,
     storage_awareness: false,
     incident_escalation: false,
@@ -164,7 +154,6 @@ export function MedicationSignoffDialog({
     communication_comments: '',
     admin_process_comments: '',
     mar_documentation_comments: '',
-    refusal_handling_comments: '',
     prn_handling_comments: '',
     storage_awareness_comments: '',
     incident_escalation_comments: '',
@@ -242,7 +231,6 @@ export function MedicationSignoffDialog({
           communication: signoffData.communication || false,
           admin_process: signoffData.admin_process || false,
           mar_documentation: signoffData.mar_documentation || false,
-          refusal_handling: signoffData.refusal_handling || false,
           prn_handling: signoffData.prn_handling || false,
           storage_awareness: signoffData.storage_awareness || false,
           incident_escalation: signoffData.incident_escalation || false,
@@ -252,7 +240,6 @@ export function MedicationSignoffDialog({
           communication_comments: signoffData.communication_comments || '',
           admin_process_comments: signoffData.admin_process_comments || '',
           mar_documentation_comments: signoffData.mar_documentation_comments || '',
-          refusal_handling_comments: signoffData.refusal_handling_comments || '',
           prn_handling_comments: signoffData.prn_handling_comments || '',
           storage_awareness_comments: signoffData.storage_awareness_comments || '',
           incident_escalation_comments: signoffData.incident_escalation_comments || '',
@@ -280,7 +267,6 @@ export function MedicationSignoffDialog({
       communication: false,
       admin_process: false,
       mar_documentation: false,
-      refusal_handling: false,
       prn_handling: false,
       storage_awareness: false,
       incident_escalation: false,
@@ -290,7 +276,6 @@ export function MedicationSignoffDialog({
       communication_comments: '',
       admin_process_comments: '',
       mar_documentation_comments: '',
-      refusal_handling_comments: '',
       prn_handling_comments: '',
       storage_awareness_comments: '',
       incident_escalation_comments: '',

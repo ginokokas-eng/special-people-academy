@@ -51,9 +51,9 @@ export function MedicationChecklistSection({
               <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
             )}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground whitespace-pre-line">
             {section.description}
-          </p>
+          </div>
           <Textarea
             value={comment}
             onChange={(e) => onCommentChange(e.target.value)}
