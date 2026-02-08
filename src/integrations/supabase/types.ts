@@ -274,6 +274,78 @@ export type Database = {
           },
         ]
       }
+      competency_signoffs: {
+        Row: {
+          assessor_id: string
+          assessor_notes: string | null
+          bolus_method: boolean | null
+          course_id: string
+          created_at: string | null
+          documentation_standard: boolean | null
+          flushing_medication: boolean | null
+          id: string
+          outcome: string | null
+          pump_setup: boolean | null
+          routine_care: boolean | null
+          signed_off_at: string | null
+          troubleshooting: boolean | null
+          tube_identification: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assessor_id: string
+          assessor_notes?: string | null
+          bolus_method?: boolean | null
+          course_id: string
+          created_at?: string | null
+          documentation_standard?: boolean | null
+          flushing_medication?: boolean | null
+          id?: string
+          outcome?: string | null
+          pump_setup?: boolean | null
+          routine_care?: boolean | null
+          signed_off_at?: string | null
+          troubleshooting?: boolean | null
+          tube_identification?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assessor_id?: string
+          assessor_notes?: string | null
+          bolus_method?: boolean | null
+          course_id?: string
+          created_at?: string | null
+          documentation_standard?: boolean | null
+          flushing_medication?: boolean | null
+          id?: string
+          outcome?: string | null
+          pump_setup?: boolean | null
+          routine_care?: boolean | null
+          signed_off_at?: string | null
+          troubleshooting?: boolean | null
+          tube_identification?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_signoffs_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_signoffs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_offerings: {
         Row: {
           active: boolean | null
