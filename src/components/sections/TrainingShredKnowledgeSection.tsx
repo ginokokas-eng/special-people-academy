@@ -163,45 +163,46 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
     ],
   },
   "medication-administration-competency": {
-    title: "Medication Administration – Key Guidance (Care Settings)",
+    title: "Medication Administration – Key Guidance (Care/Support Staff)",
     summary:
-      "Essential policy-led guidance for safe medication administration, accurate MAR recording, and incident escalation in care settings.",
+      "Essential policy-led guidance covering stop-and-escalate rules, MAR documentation, PRN protocols, controlled drugs, covert medicines, safe storage, and incident escalation.",
     bullets: [
-      "Follow the 6 Rs: Right person, drug, dose, route, time, documentation – always policy-led",
-      "MAR recording: document refusals, omissions, and late doses with clear reasons",
-      "PRN: verify criteria met, record reason given and outcome observed",
-      "Controlled drugs: double-locked storage, witnessed administration, accurate register",
-      "Covert medicines: only with MCA capacity assessment and best-interest decision",
-      "Incidents: report immediately, document factually, escalate per policy",
+      "Stop & escalate: discrepancy, allergy concern, or unclear instructions = hard stop",
+      "MAR essentials: record admin, refusal, omission, and late doses immediately with reason",
+      "PRN: check criteria + limits, document reason given and outcome observed",
+      "Controlled drugs: authorised staff only, double-locked, witnessed, register accurate",
+      "Covert medicines: formal MCA/best-interest pathway only – never informal",
+      "Storage: secure, fridge 2-8°C daily check, dispose via authorised routes only",
+      "Incidents: safety first, escalate, document factually – learning not blame",
     ],
     sections: [
       {
-        heading: "1. Safe Administration Principles (Policy-Led)",
-        content: "Always follow the 6 Rs: Right person, Right medication, Right dose, Right route, Right time, Right documentation. This is policy-led – you do not give dosing advice or make clinical decisions. Check the MAR chart and care plan before every administration. Verify identity using approved methods. Check expiry dates, allergies, and any special instructions. Maintain hand hygiene and appropriate PPE throughout."
+        heading: "1. Stop-and-Escalate Rules",
+        content: "Any discrepancy between label and MAR is a hard stop – do not administer, isolate the medication, and escalate per policy. Allergy concerns are a hard stop – do not give and escalate urgently. Unclear or ambiguous instructions are a hard stop – seek clarification before proceeding. Non-nurse support staff do not interpret changes or make clinical decisions. When in doubt, always stop and escalate."
       },
       {
-        heading: "2. MAR Recording Essentials",
-        content: "Record immediately after administration – never pre-sign. For refusals: record 'R' and document the reason in notes, inform the person of potential consequences, and escalate as required. For omissions: record the appropriate code and reason (e.g., person asleep, medication unavailable, clinical decision). Late doses: record actual time given, not scheduled time, with explanation. All entries must be legible, signed, and dated."
+        heading: "2. MAR Documentation Essentials",
+        content: "Record immediately after administration – never pre-sign or backdate. For administration: sign/initial with time. For refusal: record 'R', document reason in notes, escalate if required. For omission: record appropriate code with reason (e.g., person asleep, stock unavailable). For late doses: record actual time given (not scheduled time) with explanation. All entries must be legible, signed, and dated. Accurate records prevent double dosing and protect the person."
       },
       {
-        heading: "3. PRN Medication",
-        content: "PRN means 'as required' – only give when the specified criteria are met. Before administering: check when last given, verify minimum interval has passed, confirm maximum daily dose not exceeded. Record the reason for giving (e.g., 'headache reported by individual'). Observe and document the effect within the timeframe specified. If PRN is frequently needed or ineffective, escalate for review."
+        heading: "3. PRN Rules",
+        content: "PRN means 'as required' – only give when specified criteria are met and within limits. Before administering: check when last given, verify minimum interval has passed, confirm maximum daily dose not exceeded. Always record: reason for giving (indication), time administered, and outcome/effect observed. If PRN is frequently needed or ineffective, escalate for clinical review. PRN is not routine – each administration requires assessment and documentation."
       },
       {
-        heading: "4. Controlled Drugs: Governance Overview",
-        content: "Controlled drugs require double-locked storage (cupboard within cupboard or separate cabinet). Two signatories required for administration in most settings – check local policy. Maintain the CD register accurately: record every administration, disposal, and balance check. Never leave CDs unattended during administration. Report any discrepancy immediately – do not attempt to correct or cover up. Keys must be held by authorised staff only."
+        heading: "4. Controlled Drugs (Overview)",
+        content: "Controlled drugs require strict governance – only handle or administer if you are authorised and trained under your service's process. Double-locked storage is mandatory (cupboard within cupboard or separate cabinet). Two signatories typically required for administration – check local policy. Maintain the CD register accurately: record every administration, disposal, and balance check. Report any discrepancy immediately – do not attempt to correct or cover up. Keys must be held by authorised staff only. If in doubt about your authorisation level, escalate."
       },
       {
-        heading: "5. Covert Medicines: MCA/Best Interest Pathway",
-        content: "Covert administration (hiding medication in food/drink) is only lawful when: 1) The person lacks capacity to make this specific decision (MCA capacity assessment required), 2) A best-interest decision has been made involving appropriate professionals, 3) A pharmacist has confirmed the medication can be safely modified/crushed, 4) The decision is documented and regularly reviewed. Never administer covertly without these safeguards in place."
+        heading: "5. Covert Medicines (Formal Process Only)",
+        content: "Covert administration (hiding medication in food/drink) requires a formal documented process – it is not a workaround for refusal. It is only lawful when: 1) The person lacks capacity for this specific decision (MCA capacity assessment completed), 2) A best-interest decision has been made involving appropriate professionals, 3) A pharmacist has confirmed the medication can be safely modified/crushed, 4) The decision is documented and regularly reviewed. Never administer covertly without these safeguards in place."
       },
       {
-        heading: "6. Storage and Disposal",
-        content: "Store all medications securely – locked trolley or cupboard. Maintain fridge temperatures (2-8°C) and record daily. Check stock for expired medications regularly. Dispose of unwanted or expired medications via authorised pharmaceutical waste routes only – never in domestic waste. Return medications of deceased/discharged individuals promptly following your organisation's procedure."
+        heading: "6. Safe Storage and Disposal",
+        content: "Store all medications securely in a locked trolley or cupboard. Fridge medications: maintain 2-8°C and record temperature daily. Check stock regularly for expired medications. Dispose of unwanted or expired medications via authorised pharmaceutical waste routes only – never in domestic waste. Return medications of deceased/discharged individuals promptly following your organisation's procedure. Know where keys are held and who is authorised to access."
       },
       {
-        heading: "7. Incident Reporting and Escalation",
-        content: "Report ALL medication incidents: wrong medication, wrong dose, wrong person, wrong time, wrong route, omission, near miss. First action: ensure the person is safe and seek medical advice if needed. Then: inform your manager/senior immediately. Complete an incident report factually – what happened, when, who was involved, actions taken, any harm. This is about learning, not blame. Escalation contacts should be clearly displayed in your setting."
+        heading: "7. Incident/Near Miss Escalation",
+        content: "Report ALL medication incidents and near misses: wrong medication, wrong dose, wrong person, wrong time, wrong route, omission, or anything that could have caused harm. First action: ensure the person is safe and seek medical advice if needed. Then: inform your manager/senior immediately. Complete an incident report factually – what happened, when, who was involved, actions taken, any harm observed. This is about learning, not blame. Escalation contacts should be clearly displayed in your setting."
       }
     ]
   },
