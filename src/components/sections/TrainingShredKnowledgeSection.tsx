@@ -142,15 +142,93 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
       "Physical intervention: last resort, proportionate, documented",
     ],
   },
-  "basic-life-support": {
-    title: "Basic Life Support: recognition and response",
+  "basic-life-support-bls": {
+    title: "Basic Life Support (BLS) — Key Guidance",
     summary:
-      "Essential life-saving skills for recognising cardiac arrest and performing effective CPR.",
+      "Essential recognition, response, and post-incident guidance for managing cardiac arrest and choking emergencies.",
     bullets: [
-      "Recognise signs of cardiac arrest: unresponsive, not breathing normally",
-      "Call for help immediately and start chest compressions",
-      "Use AED as soon as available; continue until help arrives",
+      "Recognition: unresponsive + not breathing normally = treat as cardiac arrest",
+      "Call 999/112 + start CPR immediately",
+      "Adult CPR: 30:2 ratio; compression-only if unable/unwilling to give breaths",
+      "AED: switch on, follow prompts, minimise interruptions",
+      "Choking: encourage cough (mild); 5 back blows + 5 abdominal thrusts (severe); CPR if unresponsive",
+      "Recovery position: when breathing normally",
+      "Post-incident: handover essentials + reporting",
     ],
+    sections: [
+      {
+        heading: "1. Recognition",
+        content: "If a person is unresponsive and not breathing normally (including agonal gasps), treat as a cardiac arrest. Do not delay – early recognition saves lives. Check for normal breathing for no more than 10 seconds."
+      },
+      {
+        heading: "2. Call for Help & Start CPR",
+        content: "Call 999/112 immediately (use speakerphone if alone). Begin chest compressions without delay. Do not leave the person to find a phone – shout for help if needed."
+      },
+      {
+        heading: "3. Adult CPR Technique",
+        content: "Deliver 30 compressions to 2 rescue breaths. Compress at 100–120/min, depth 5–6 cm, allowing full recoil with minimal interruptions. If unable or unwilling to give rescue breaths, provide compression-only CPR – this is better than doing nothing."
+      },
+      {
+        heading: "4. AED (Defibrillator) Use",
+        content: "Switch the AED on as soon as it arrives. Apply pads as shown, stand clear during analysis and shock delivery. Resume CPR immediately after shock or 'no shock advised'. Minimise interruptions to compressions at all times."
+      },
+      {
+        heading: "5. Choking Response",
+        content: "Mild obstruction (effective cough): encourage the person to keep coughing. Severe obstruction (ineffective cough): deliver up to 5 back blows, then up to 5 abdominal thrusts, alternating until resolved. If the person becomes unresponsive, lower them to the ground, call for help, and start CPR."
+      },
+      {
+        heading: "6. Recovery Position",
+        content: "If the person is unresponsive but breathing normally, place them in the recovery position to maintain an open airway. Monitor breathing continuously until help arrives."
+      },
+      {
+        heading: "7. Handover & Reporting",
+        content: "Provide a structured handover to emergency services: what happened, when, actions taken, any changes observed. Complete an incident report as per your organisation's policy – include times, actions, outcomes, and any witnesses. Accurate documentation supports clinical continuity and governance."
+      }
+    ]
+  },
+  "basic-life-support": {
+    title: "Basic Life Support (BLS) — Key Guidance",
+    summary:
+      "Essential recognition, response, and post-incident guidance for managing cardiac arrest and choking emergencies.",
+    bullets: [
+      "Recognition: unresponsive + not breathing normally = treat as cardiac arrest",
+      "Call 999/112 + start CPR immediately",
+      "Adult CPR: 30:2 ratio; compression-only if unable/unwilling to give breaths",
+      "AED: switch on, follow prompts, minimise interruptions",
+      "Choking: encourage cough (mild); 5 back blows + 5 abdominal thrusts (severe); CPR if unresponsive",
+      "Recovery position: when breathing normally",
+      "Post-incident: handover essentials + reporting",
+    ],
+    sections: [
+      {
+        heading: "1. Recognition",
+        content: "If a person is unresponsive and not breathing normally (including agonal gasps), treat as a cardiac arrest. Do not delay – early recognition saves lives. Check for normal breathing for no more than 10 seconds."
+      },
+      {
+        heading: "2. Call for Help & Start CPR",
+        content: "Call 999/112 immediately (use speakerphone if alone). Begin chest compressions without delay. Do not leave the person to find a phone – shout for help if needed."
+      },
+      {
+        heading: "3. Adult CPR Technique",
+        content: "Deliver 30 compressions to 2 rescue breaths. Compress at 100–120/min, depth 5–6 cm, allowing full recoil with minimal interruptions. If unable or unwilling to give rescue breaths, provide compression-only CPR – this is better than doing nothing."
+      },
+      {
+        heading: "4. AED (Defibrillator) Use",
+        content: "Switch the AED on as soon as it arrives. Apply pads as shown, stand clear during analysis and shock delivery. Resume CPR immediately after shock or 'no shock advised'. Minimise interruptions to compressions at all times."
+      },
+      {
+        heading: "5. Choking Response",
+        content: "Mild obstruction (effective cough): encourage the person to keep coughing. Severe obstruction (ineffective cough): deliver up to 5 back blows, then up to 5 abdominal thrusts, alternating until resolved. If the person becomes unresponsive, lower them to the ground, call for help, and start CPR."
+      },
+      {
+        heading: "6. Recovery Position",
+        content: "If the person is unresponsive but breathing normally, place them in the recovery position to maintain an open airway. Monitor breathing continuously until help arrives."
+      },
+      {
+        heading: "7. Handover & Reporting",
+        content: "Provide a structured handover to emergency services: what happened, when, actions taken, any changes observed. Complete an incident report as per your organisation's policy – include times, actions, outcomes, and any witnesses. Accurate documentation supports clinical continuity and governance."
+      }
+    ]
   },
   "emergency-first-aid-at-work": {
     title: "Emergency First Aid at Work: workplace response",
