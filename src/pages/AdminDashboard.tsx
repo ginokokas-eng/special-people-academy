@@ -583,7 +583,7 @@ export default function AdminDashboard() {
   if (authLoading || rolesLoading) {
     return (
       <PortalLayout title="Admin Dashboard">
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           {/* Skeleton for stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -622,11 +622,11 @@ export default function AdminDashboard() {
 
   return (
     <PortalLayout title="Admin Dashboard">
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Manage courses, users, and platform settings</p>
+            <p className="text-muted-foreground mt-2">Manage courses, users, and platform settings</p>
           </div>
           <Button onClick={() => navigate('/admin-portal/staff-management')} variant="outline">
             <Shield className="h-4 w-4 mr-2" />
@@ -644,8 +644,8 @@ export default function AdminDashboard() {
         />
 
         {/* Tabs */}
-        <Tabs defaultValue="courses" className="w-full">
-          <TabsList className="flex-wrap h-auto">
+        <Tabs defaultValue="courses" className="w-full mt-2">
+          <TabsList className="flex-wrap h-auto mb-4">
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="offerings">Offerings & Pricing</TabsTrigger>
             <TabsTrigger value="featured">Featured</TabsTrigger>

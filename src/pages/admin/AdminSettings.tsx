@@ -5,7 +5,7 @@ import { Settings, Shield, Bell, Palette } from 'lucide-react';
 export default function AdminSettings() {
   return (
     <PortalLayout title="Settings">
-      <div className="space-y-6 p-4 lg:p-8">
+      <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-heading font-bold text-foreground">Admin Settings</h1>
           <p className="text-muted-foreground mt-1">Manage platform configuration and preferences.</p>

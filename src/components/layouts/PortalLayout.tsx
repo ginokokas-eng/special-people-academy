@@ -237,7 +237,9 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
 
       {/* Main content */}
       <main className="flex-1">
-        {children}
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {children}
+        </div>
       </main>
       <NotificationsSheet open={notificationsOpen} onOpenChange={setNotificationsOpen} />
       <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
