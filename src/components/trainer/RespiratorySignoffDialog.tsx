@@ -77,7 +77,7 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
     id: 'scope_boundaries',
     label: '1. Scope & Boundaries',
     description:
-      '• Explains course scope correctly (non-tracheostomy)\n• Identifies what is excluded (advanced ventilation, CPAP/BiPAP)\n• Understands when to stop and escalate',
+      '• Explains course scope and boundaries correctly (non-tracheostomy; no CPAP/BiPAP)\n• Understands when to stop and escalate',
     checkField: 'scope_boundaries',
     commentField: 'scope_boundaries_comments',
   },
@@ -85,7 +85,7 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
     id: 'respiratory_red_flags',
     label: '2. Respiratory Red Flags & Escalation',
     description:
-      '• Recognises signs of respiratory distress\n• Follows ABCDE escalation pathway correctly\n• Knows when and how to call for emergency help',
+      '• Identifies respiratory red flags\n• Follows escalation pathway correctly',
     checkField: 'respiratory_red_flags',
     commentField: 'respiratory_red_flags_comments',
   },
@@ -93,7 +93,7 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
     id: 'pulse_oximetry',
     label: '3. Pulse Oximetry Awareness',
     description:
-      '• Demonstrates correct probe placement\n• Understands target range is care-plan led\n• Knows when readings require escalation',
+      '• Correct use of pulse oximetry\n• Understands targets are care-plan-led',
     checkField: 'pulse_oximetry',
     commentField: 'pulse_oximetry_comments',
   },
@@ -101,47 +101,47 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
     id: 'oxygen_safety',
     label: '4. Oxygen Safety',
     description:
-      '• Demonstrates safe handling and storage principles\n• Understands fire-risk awareness (oxygen supports combustion)\n• Knows cylinder storage and transport rules',
+      '• Demonstrates safe storage/handling principles\n• Fire-risk awareness',
     checkField: 'oxygen_safety',
     commentField: 'oxygen_safety_comments',
   },
   {
     id: 'oxygen_support',
-    label: '5. Oxygen Support (Awareness + Policy-led)',
+    label: '5. Oxygen Support (Policy-led)',
     description:
-      '• Follows prescription/care plan for oxygen delivery\n• Documents flow rate, duration, SpO₂ readings\n• Escalates discrepancies appropriately',
+      '• Follows prescription/care plan and documents appropriately\n• No "adjusting" without instruction',
     checkField: 'oxygen_support',
     commentField: 'oxygen_support_comments',
   },
   {
     id: 'oral_suction',
-    label: '6. Oral Suction Awareness',
+    label: '6. Oral Suction Awareness Simulation',
     description:
-      '• Demonstrates safe approach on mannequin/trainer simulation\n• Time-limited suctioning (~10 seconds)\n• Indication-led; stops immediately if distress occurs',
+      '• Indication-led\n• Time-limited (~10 seconds)\n• Stops if distress/deterioration',
     checkField: 'oral_suction',
     commentField: 'oral_suction_comments',
   },
   {
     id: 'infection_prevention',
-    label: '7. Infection Prevention',
+    label: '7. Infection Prevention & Equipment Hygiene',
     description:
-      '• Uses correct PPE (gloves, apron, eye/face protection)\n• Demonstrates clean technique\n• Correct disposal of single-use items',
+      '• Correct PPE and clean technique\n• Equipment hygiene checks completed',
     checkField: 'infection_prevention',
     commentField: 'infection_prevention_comments',
   },
   {
     id: 'equipment_checks',
-    label: '8. Equipment Checks & Troubleshooting',
+    label: '7b. Equipment Checks & Troubleshooting',
     description:
-      '• Checks equipment at start of shift and before use\n• Basic troubleshooting (battery, filters, tubing) within policy\n• Reports faults correctly',
+      '• Checks equipment before use\n• Basic troubleshooting (battery, filters, tubing) within policy',
     checkField: 'equipment_checks',
     commentField: 'equipment_checks_comments',
   },
   {
     id: 'documentation_handover',
-    label: '9. Documentation & Handover',
+    label: '8. Documentation & Handover',
     description:
-      '• Accurate recording of actions, times, observations\n• Escalation notes completed correctly\n• Structured handover information provided',
+      '• Accurate recording of actions, times, observations\n• Escalation notes completed correctly',
     checkField: 'documentation_handover',
     commentField: 'documentation_handover_comments',
   },
