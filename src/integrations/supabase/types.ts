@@ -1556,6 +1556,123 @@ export type Database = {
           },
         ]
       }
+      respiratory_competency_signoffs: {
+        Row: {
+          action_plan: string | null
+          assessed_at: string | null
+          assessor_id: string
+          assessor_notes: string | null
+          attempt_number: number
+          course_id: string
+          created_at: string | null
+          documentation_handover: boolean | null
+          documentation_handover_comments: string | null
+          equipment_checks: boolean | null
+          equipment_checks_comments: string | null
+          id: string
+          infection_prevention: boolean | null
+          infection_prevention_comments: string | null
+          location: string | null
+          oral_suction: boolean | null
+          oral_suction_comments: string | null
+          outcome: string | null
+          oxygen_safety: boolean | null
+          oxygen_safety_comments: string | null
+          oxygen_support: boolean | null
+          oxygen_support_comments: string | null
+          pulse_oximetry: boolean | null
+          pulse_oximetry_comments: string | null
+          reassessment_date: string | null
+          respiratory_red_flags: boolean | null
+          respiratory_red_flags_comments: string | null
+          scope_boundaries: boolean | null
+          scope_boundaries_comments: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_plan?: string | null
+          assessed_at?: string | null
+          assessor_id: string
+          assessor_notes?: string | null
+          attempt_number?: number
+          course_id: string
+          created_at?: string | null
+          documentation_handover?: boolean | null
+          documentation_handover_comments?: string | null
+          equipment_checks?: boolean | null
+          equipment_checks_comments?: string | null
+          id?: string
+          infection_prevention?: boolean | null
+          infection_prevention_comments?: string | null
+          location?: string | null
+          oral_suction?: boolean | null
+          oral_suction_comments?: string | null
+          outcome?: string | null
+          oxygen_safety?: boolean | null
+          oxygen_safety_comments?: string | null
+          oxygen_support?: boolean | null
+          oxygen_support_comments?: string | null
+          pulse_oximetry?: boolean | null
+          pulse_oximetry_comments?: string | null
+          reassessment_date?: string | null
+          respiratory_red_flags?: boolean | null
+          respiratory_red_flags_comments?: string | null
+          scope_boundaries?: boolean | null
+          scope_boundaries_comments?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_plan?: string | null
+          assessed_at?: string | null
+          assessor_id?: string
+          assessor_notes?: string | null
+          attempt_number?: number
+          course_id?: string
+          created_at?: string | null
+          documentation_handover?: boolean | null
+          documentation_handover_comments?: string | null
+          equipment_checks?: boolean | null
+          equipment_checks_comments?: string | null
+          id?: string
+          infection_prevention?: boolean | null
+          infection_prevention_comments?: string | null
+          location?: string | null
+          oral_suction?: boolean | null
+          oral_suction_comments?: string | null
+          outcome?: string | null
+          oxygen_safety?: boolean | null
+          oxygen_safety_comments?: string | null
+          oxygen_support?: boolean | null
+          oxygen_support_comments?: string | null
+          pulse_oximetry?: boolean | null
+          pulse_oximetry_comments?: string | null
+          reassessment_date?: string | null
+          respiratory_red_flags?: boolean | null
+          respiratory_red_flags_comments?: string | null
+          scope_boundaries?: boolean | null
+          scope_boundaries_comments?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respiratory_competency_signoffs_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respiratory_competency_signoffs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scorm_packages: {
         Row: {
           created_at: string
