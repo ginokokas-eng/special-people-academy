@@ -11,8 +11,11 @@ import {
   Search,
   Bell,
   LayoutDashboard,
+  Phone,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
+import { SupportDialog } from '@/components/shared/SupportDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +37,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { isSuperAdmin, isOpsTrainingAdmin } = useRoles();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -94,9 +99,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" onClick={() => setSupportOpen(true)} aria-label="Contact Support">
+                  <Phone className="h-5 w-5" />
+                </Button>
+
+                <Button variant="ghost" size="icon" className="relative" onClick={() => setNotificationsOpen(true)} aria-label="Notifications">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
                 </Button>
 
                 <DropdownMenu>
@@ -196,6 +204,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {children}
         </main>
       </div>
+
+      <NotificationsSheet open={notificationsOpen} onOpenChange={setNotificationsOpen} />
+      <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
     </div>
   );
 };
