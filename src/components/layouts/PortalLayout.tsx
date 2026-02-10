@@ -5,19 +5,11 @@ import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { 
   GraduationCap, 
-  LayoutDashboard, 
   Menu, 
   X,
   Bell,
-  ClipboardList,
-  Users,
-  Briefcase,
-  PenTool,
-  User,
-  LogOut,
-  ChevronLeft,
   Home,
-  Settings2
+  LogOut,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -27,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ChevronLeft } from 'lucide-react';
+import { adminNavItems, adminDropdownItems, type NavItem } from '@/config/navigation';
 
 interface PortalLayoutProps {
   children: ReactNode;
@@ -36,9 +30,8 @@ interface PortalLayoutProps {
 }
 
 /**
- * PortalLayout - Layout for authenticated portal pages (/app/*)
- * Features a portal-specific header with navigation and user menu.
- * Used for admin, trainer, and org management routes.
+ * PortalLayout - Layout for admin portal pages (/admin-portal/*)
+ * Features a portal-specific header with role-based navigation and admin dropdown.
  */
 export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLayoutProps) => {
   const navigate = useNavigate();
@@ -51,30 +44,35 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
     const { error } = await signOut();
     if (error) {
       console.error('Sign out failed:', error);
-      // Still navigate to home even if there's an error
     }
     navigate('/');
   };
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
 
-  // Portal navigation items
-  const portalNavItems = [
-    ...(isSuperAdmin || isOpsTrainingAdmin ? [
-      { label: 'Course Builder', href: '/app/admin/courses', icon: PenTool },
-    ] : []),
-    ...(isTrainer ? [
-      { label: 'Trainer Portal', href: '/trainer', icon: ClipboardList },
-    ] : []),
-    ...(isAdmin ? [
-      { label: 'Admin Dashboard', href: '/admin', icon: LayoutDashboard },
-    ] : []),
-    ...(isSuperAdmin ? [
-      { label: 'Staff Management', href: '/staff-management', icon: Users },
-      { label: 'Career Applications', href: '/career-applications', icon: Briefcase },
-      { label: 'Integrations', href: '/app/admin/integrations-status', icon: Settings2 },
-    ] : []),
-  ];
+  // Filter nav items based on roles
+  const getVisibleNavItems = (): NavItem[] => {
+    return adminNavItems.filter(item => {
+      switch (item.href) {
+        case '/admin-portal/dashboard':
+          return isAdmin;
+        case '/admin-portal/courses':
+          return isSuperAdmin || isOpsTrainingAdmin;
+        case '/admin-portal/trainer':
+          return isTrainer;
+        case '/admin-portal/staff-management':
+          return isSuperAdmin;
+        case '/admin-portal/integrations':
+          return isSuperAdmin;
+        case '/admin-portal/settings':
+          return isAdmin;
+        default:
+          return isAdmin;
+      }
+    });
+  };
+
+  const visibleNavItems = getVisibleNavItems();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -116,7 +114,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
 
           {/* Center navigation (desktop) */}
           <nav className="hidden lg:flex items-center gap-1">
-            {portalNavItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = location.pathname.startsWith(item.href);
               return (
                 <Button
@@ -137,7 +135,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="hidden sm:flex gap-2">
               <Home className="h-4 w-4" />
-              Dashboard
+              Learner View
             </Button>
 
             <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/notifications')}>
@@ -164,14 +162,12 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
                   </p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  My Dashboard
-                </DropdownMenuItem>
+                {adminDropdownItems.map((item) => (
+                  <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)}>
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -199,7 +195,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <nav className="p-4 space-y-1">
-          {portalNavItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href);
             return (
               <Button
@@ -226,7 +222,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
             }}
           >
             <Home className="mr-3 h-5 w-5" />
-            My Dashboard
+            Learner View
           </Button>
         </nav>
       </aside>

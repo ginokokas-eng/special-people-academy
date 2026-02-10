@@ -91,7 +91,7 @@ export default function CoursePreview() {
     } catch (error) {
       console.error('Error fetching course:', error);
       toast.error('Failed to load course');
-      navigate('/app/admin/courses');
+      navigate('/admin-portal/courses');
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export default function CoursePreview() {
 
   if (rolesLoading || loading) {
     return (
-      <PortalLayout title="Course Preview" backHref={`/app/admin/courses/${id}/edit`} backLabel="Edit Course">
+      <PortalLayout title="Course Preview" backHref={`/admin-portal/courses/${id}/edit`} backLabel="Edit Course">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -127,7 +127,7 @@ export default function CoursePreview() {
 
   if (!course) {
     return (
-      <PortalLayout title="Course Preview" backHref="/app/admin/courses" backLabel="All Courses">
+      <PortalLayout title="Course Preview" backHref="/admin-portal/courses" backLabel="All Courses">
         <div className="text-center py-12">
           <p className="text-muted-foreground">Course not found</p>
         </div>
@@ -136,7 +136,7 @@ export default function CoursePreview() {
   }
 
   return (
-    <PortalLayout title={`Preview: ${course.title}`} backHref={`/app/admin/courses/${course.id}/edit`} backLabel="Edit Course">
+    <PortalLayout title={`Preview: ${course.title}`} backHref={`/admin-portal/courses/${course.id}/edit`} backLabel="Edit Course">
       <div className="space-y-6 p-4 lg:p-8">
         <div className="flex items-center gap-4">
           <div>

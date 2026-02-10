@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -166,16 +166,16 @@ export default function StaffManagement() {
 
   if (authLoading || rolesLoading || loading) {
     return (
-      <DashboardLayout>
+      <PortalLayout title="Staff Management">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
+      </PortalLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <PortalLayout title="Staff Management">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -368,6 +368,6 @@ export default function StaffManagement() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </PortalLayout>
   );
 }

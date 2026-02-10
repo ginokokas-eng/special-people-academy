@@ -83,7 +83,7 @@ export default function CourseBuilder() {
 
       if (error) throw error;
       toast.success('Course created');
-      navigate(`/app/admin/courses/${data.id}/edit`);
+      navigate(`/admin-portal/courses/${data.id}/edit`);
     } catch (error) {
       console.error('Error creating course:', error);
       toast.error('Failed to create course');
@@ -208,11 +208,11 @@ export default function CourseBuilder() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/app/admin/courses/${course.id}/edit`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/admin-portal/courses/${course.id}/edit`)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/app/admin/courses/${course.id}/preview`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/admin-portal/courses/${course.id}/preview`)}>
                               <Eye className="h-4 w-4 mr-2" />
                               Preview
                             </DropdownMenuItem>

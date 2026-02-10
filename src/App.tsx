@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
@@ -41,11 +41,11 @@ import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import StaffManagement from "./pages/StaffManagement";
-import CareerApplications from "./pages/CareerApplications";
 import CourseBuilder from "./pages/admin/CourseBuilder";
 import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
 import IntegrationsStatus from "./pages/admin/IntegrationsStatus";
+import AdminSettings from "./pages/admin/AdminSettings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
@@ -78,20 +78,26 @@ const App = () => (
                 <Route path="/certificates" element={<Certificates />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
-                {/* Admin routes - require admin role */}
-                <Route path="/admin" element={<ProtectedRoute requiredRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-                <Route path="/staff-management" element={<ProtectedRoute requiredRoles={['admin']}><StaffManagement /></ProtectedRoute>} />
-                <Route path="/career-applications" element={<ProtectedRoute requiredRoles={['admin']}><CareerApplications /></ProtectedRoute>} />
-                
-                {/* /app/admin/* routes - require admin role */}
-                <Route path="/app/admin/courses" element={<ProtectedRoute requiredRoles={['admin']}><CourseBuilder /></ProtectedRoute>} />
-                <Route path="/app/admin/courses/:id/edit" element={<ProtectedRoute requiredRoles={['admin']}><CourseEditor /></ProtectedRoute>} />
-                <Route path="/app/admin/courses/:id/preview" element={<ProtectedRoute requiredRoles={['admin']}><CoursePreview /></ProtectedRoute>} />
-                <Route path="/app/admin/integrations-status" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
-                
-                {/* Trainer routes - require trainer role */}
-                <Route path="/trainer" element={<ProtectedRoute requiredRoles={['trainer']}><TrainerPortal /></ProtectedRoute>} />
-                
+
+                {/* Admin portal routes - require admin role */}
+                <Route path="/admin-portal/dashboard" element={<ProtectedRoute requiredRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin-portal/staff-management" element={<ProtectedRoute requiredRoles={['admin']}><StaffManagement /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses" element={<ProtectedRoute requiredRoles={['admin']}><CourseBuilder /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses/:id/edit" element={<ProtectedRoute requiredRoles={['admin']}><CourseEditor /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['admin']}><CoursePreview /></ProtectedRoute>} />
+                <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
+                <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+                <Route path="/admin-portal/trainer" element={<ProtectedRoute requiredRoles={['trainer']}><TrainerPortal /></ProtectedRoute>} />
+
+                {/* Legacy route redirects */}
+                <Route path="/admin" element={<Navigate to="/admin-portal/dashboard" replace />} />
+                <Route path="/staff-management" element={<Navigate to="/admin-portal/staff-management" replace />} />
+                <Route path="/app/admin/courses" element={<Navigate to="/admin-portal/courses" replace />} />
+                <Route path="/app/admin/courses/:id/edit" element={<Navigate to="/admin-portal/courses/:id/edit" replace />} />
+                <Route path="/app/admin/courses/:id/preview" element={<Navigate to="/admin-portal/courses/:id/preview" replace />} />
+                <Route path="/app/admin/integrations-status" element={<Navigate to="/admin-portal/integrations" replace />} />
+                <Route path="/trainer" element={<Navigate to="/admin-portal/trainer" replace />} />
+
                 {/* Public routes */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/booking" element={<Booking />} />
