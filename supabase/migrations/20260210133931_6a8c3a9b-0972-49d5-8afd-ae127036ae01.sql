@@ -1,0 +1,2 @@
+ALTER TABLE public.courses DROP CONSTRAINT courses_level_check;
+ALTER TABLE public.courses ADD CONSTRAINT courses_level_check CHECK (level IS NULL OR level = ANY (ARRAY['New Joiner', 'Enhanced', 'Complex', 'Awareness']));
