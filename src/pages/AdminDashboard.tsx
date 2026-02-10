@@ -650,7 +650,7 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground mt-1">Manage courses, users, and platform settings</p>
           </div>
-          <Button onClick={() => navigate('/staff-management')} variant="outline">
+          <Button onClick={() => navigate('/admin-portal/staff-management')} variant="outline">
             <Shield className="h-4 w-4 mr-2" />
             Staff Management
           </Button>

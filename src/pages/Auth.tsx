@@ -54,11 +54,11 @@ export default function Auth() {
     const roles = rolesData?.map(r => r.role) || [];
     
     if (roles.includes('super_admin') || roles.includes('admin')) {
-      navigate('/admin');
+      navigate('/admin-portal/dashboard');
     } else if (roles.includes('ops_training_admin')) {
-      navigate('/app/admin/courses');
+      navigate('/admin-portal/courses');
     } else if (roles.includes('trainer')) {
-      navigate('/trainer');
+      navigate('/admin-portal/trainer');
     } else {
       navigate('/dashboard');
     }
@@ -91,11 +91,11 @@ export default function Auth() {
       toast.success('Welcome back!');
       // Redirect based on roles returned from signIn
       if (roles?.includes('super_admin') || roles?.includes('admin')) {
-        navigate('/admin');
+        navigate('/admin-portal/dashboard');
       } else if (roles?.includes('ops_training_admin')) {
-        navigate('/app/admin/courses');
+        navigate('/admin-portal/courses');
       } else if (roles?.includes('trainer')) {
-        navigate('/trainer');
+        navigate('/admin-portal/trainer');
       } else {
         navigate('/dashboard');
       }
@@ -161,11 +161,11 @@ export default function Auth() {
         toast.success('Welcome!');
         
         if (roles.includes('super_admin') || roles.includes('admin')) {
-          navigate('/admin');
+          navigate('/admin-portal/dashboard');
         } else if (roles.includes('ops_training_admin')) {
-          navigate('/app/admin/courses');
+          navigate('/admin-portal/courses');
         } else if (roles.includes('trainer')) {
-          navigate('/trainer');
+          navigate('/admin-portal/trainer');
         } else {
           navigate('/dashboard');
         }

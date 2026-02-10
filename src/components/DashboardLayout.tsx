@@ -5,20 +5,12 @@ import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { 
   GraduationCap, 
-  LayoutDashboard, 
-  BookOpen, 
-  Trophy, 
-  User, 
   LogOut, 
   Menu, 
   X,
   Search,
   Bell,
-  Settings,
-  ClipboardList,
-  Users,
-  Briefcase,
-  PenTool
+  LayoutDashboard,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,18 +21,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { learnerNavItems, learnerDropdownItems } from '@/config/navigation';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
-
-// Learner navigation items - "My Courses" shows only enrolled/assigned courses
-const learnerNavItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Courses', href: '/my-courses', icon: BookOpen },
-  { label: 'My Learning', href: '/my-learning', icon: GraduationCap },
-  { label: 'Certificates', href: '/certificates', icon: Trophy },
-];
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
@@ -54,7 +39,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const { error } = await signOut();
     if (error) {
       console.error('Sign out failed:', error);
-      // Still navigate to home even if there's an error
     }
     navigate('/');
   };
@@ -67,6 +51,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
+  const showAdminLink = isAdmin || isSuperAdmin || isOpsTrainingAdmin || isTrainer;
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,42 +118,16 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       </p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/profile')}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
-                    {isTrainer && (
-                      <DropdownMenuItem onClick={() => navigate('/trainer')}>
-                        <ClipboardList className="mr-2 h-4 w-4" />
-                        Trainer Portal
+                    {learnerDropdownItems.map((item) => (
+                      <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)}>
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
                       </DropdownMenuItem>
-                    )}
-                    {isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    ))}
+                    {showAdminLink && (
+                      <DropdownMenuItem onClick={() => navigate('/admin-portal/dashboard')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Admin Dashboard
-                      </DropdownMenuItem>
-                    )}
-                    {isSuperAdmin && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/staff-management')}>
-                          <Users className="mr-2 h-4 w-4" />
-                          Staff Management
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/career-applications')}>
-                          <Briefcase className="mr-2 h-4 w-4" />
-                          Career Applications
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {(isSuperAdmin || isOpsTrainingAdmin) && (
-                      <DropdownMenuItem onClick={() => navigate('/app/admin/courses')}>
-                        <PenTool className="mr-2 h-4 w-4" />
-                        Course Builder
+                        Admin Portal
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
