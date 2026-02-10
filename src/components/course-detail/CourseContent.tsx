@@ -11,7 +11,8 @@ import {
   Clock,
   Lock,
   BookOpen,
-  Gamepad2
+  Gamepad2,
+  Package
 } from 'lucide-react';
 
 interface Lesson {
@@ -51,6 +52,7 @@ const lessonTypeIcons: Record<string, React.ReactNode> = {
   practical: <Users className="h-4 w-4" />,
   text: <BookOpen className="h-4 w-4" />,
   scenario: <Gamepad2 className="h-4 w-4" />,
+  scorm: <Package className="h-4 w-4" />,
 };
 
 const lessonTypeLabels: Record<string, string> = {
@@ -60,6 +62,7 @@ const lessonTypeLabels: Record<string, string> = {
   practical: 'Practical',
   text: 'Text',
   scenario: 'Scenario',
+  scorm: 'SCORM',
 };
 
 export function CourseContent({ 

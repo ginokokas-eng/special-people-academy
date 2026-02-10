@@ -409,9 +409,64 @@ export default function CourseDetail() {
     }
   };
 
-  const handleLessonClick = (lesson: Lesson) => {
+  const handleLessonClick = async (lesson: Lesson) => {
     if (enrollment) {
+      // Check if this is a SCORM lesson
+      if (lesson.lesson_type === 'scorm') {
+        await handleScormLessonClick(lesson);
+        return;
+      }
       navigate(`/courses/${id}/learn?lesson=${lesson.id}`);
+    }
+  };
+
+  const handleScormLessonClick = async (lesson: Lesson) => {
+    if (!user) return;
+    
+    try {
+      // Check for existing registration
+      const { data: existingReg } = await supabase
+        .from('scorm_registrations')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('lesson_id', lesson.id)
+        .maybeSingle();
+
+      if (existingReg) {
+        navigate(`/scorm/launch/${existingReg.id}`);
+        return;
+      }
+
+      // Get scorm_package_id from the lesson
+      const { data: lessonData } = await supabase
+        .from('lessons')
+        .select('scorm_package_id')
+        .eq('id', lesson.id)
+        .single();
+
+      if (!lessonData?.scorm_package_id) {
+        toast.error('No SCORM package attached to this lesson');
+        return;
+      }
+
+      // Create registration
+      const { data: newReg, error: regError } = await supabase
+        .from('scorm_registrations')
+        .insert({
+          scorm_package_id: lessonData.scorm_package_id,
+          user_id: user.id,
+          course_id: id!,
+          lesson_id: lesson.id,
+          status: 'not_attempted',
+        })
+        .select('id')
+        .single();
+
+      if (regError) throw regError;
+      navigate(`/scorm/launch/${newReg.id}`);
+    } catch (err) {
+      console.error('Error launching SCORM:', err);
+      toast.error('Failed to launch SCORM content');
     }
   };
 
