@@ -33,6 +33,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CompetencySignoffDialog } from '@/components/trainer/CompetencySignoffDialog';
+import { BLSSignoffDialog } from '@/components/trainer/BLSSignoffDialog';
+
+const BLS_COURSE_ID = 'b1500001-0001-0001-0001-000000000001';
 import { 
   Calendar, 
   MapPin, 
@@ -618,17 +621,29 @@ export default function TrainerPortal() {
         </DialogContent>
       </Dialog>
 
-      {/* Competency Sign-off Dialog */}
+      {/* Competency Sign-off Dialog — route BLS course to its own checklist */}
       {selectedLearner && selectedSession && (
-        <CompetencySignoffDialog
-          open={competencyDialogOpen}
-          onOpenChange={setCompetencyDialogOpen}
-          learnerId={selectedLearner.user_id}
-          learnerName={selectedLearner.full_name || 'Unknown Learner'}
-          courseId={selectedSession.course_id}
-          courseTitle={selectedSession.course_title}
-          onSuccess={() => fetchLearners(selectedSession)}
-        />
+        selectedSession.course_id === BLS_COURSE_ID ? (
+          <BLSSignoffDialog
+            open={competencyDialogOpen}
+            onOpenChange={setCompetencyDialogOpen}
+            learnerId={selectedLearner.user_id}
+            learnerName={selectedLearner.full_name || 'Unknown Learner'}
+            courseId={selectedSession.course_id}
+            courseTitle={selectedSession.course_title}
+            onSuccess={() => fetchLearners(selectedSession)}
+          />
+        ) : (
+          <CompetencySignoffDialog
+            open={competencyDialogOpen}
+            onOpenChange={setCompetencyDialogOpen}
+            learnerId={selectedLearner.user_id}
+            learnerName={selectedLearner.full_name || 'Unknown Learner'}
+            courseId={selectedSession.course_id}
+            courseTitle={selectedSession.course_title}
+            onSuccess={() => fetchLearners(selectedSession)}
+          />
+        )
       )}
     </PortalLayout>
   );
