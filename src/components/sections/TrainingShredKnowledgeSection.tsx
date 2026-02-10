@@ -44,14 +44,49 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
     ],
   },
   "infection-prevention-control": {
-    title: "IPC essentials: hand hygiene, PPE, cleaning",
+    title: "Infection Prevention & Control — Key Guidance",
     summary:
-      "Core IPC standards for daily practice, including what to do and what to record.",
+      "Policy-led awareness guidance covering standard precautions, environmental hygiene, outbreak response, and documentation for care and support staff.",
     bullets: [
-      "When to use PPE and how to dispose safely",
-      "Hand hygiene moments and technique",
-      "Cleaning routines and escalation pathways",
+      "Chain of infection: six links and how to break them in daily practice",
+      "Hand hygiene: WHO 5 Moments, correct technique, soap vs sanitiser",
+      "PPE: task-based selection, donning/doffing order, single-use rules",
+      "Cleaning vs disinfection: high-touch surfaces and shared equipment",
+      "Waste, sharps & spills: safe handling, colour-coded streams, escalation",
+      "Laundry/linen: bag at point of use, no shaking, contamination prevention",
+      "Outbreak awareness: recognise, isolate, report, escalate",
+      "Documentation: incident reporting, audit readiness, learning culture",
     ],
+    sections: [
+      {
+        heading: "1. Chain of Infection",
+        content: "The chain of infection has six links: infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, and susceptible host. Breaking any single link can prevent infection from spreading. In daily practice, this means hand hygiene between contacts, correct PPE use, safe waste disposal, and environmental cleaning — each action targets a specific link in the chain."
+      },
+      {
+        heading: "2. Standard Precautions: Hand Hygiene & PPE",
+        content: "Hand hygiene is the single most effective measure to prevent infection. Follow the WHO 5 Moments: before touching a person, before a clean/aseptic procedure, after body fluid exposure risk, after touching a person, and after touching their surroundings. PPE selection is task- and risk-based — gloves, aprons, masks, and eye protection are used according to the procedure being performed. Remember: gloves do not replace hand hygiene. Follow the correct doffing order (gloves → apron → mask → hand hygiene) to prevent self-contamination."
+      },
+      {
+        heading: "3. Cleaning vs Disinfection",
+        content: "Cleaning physically removes dirt and some micro-organisms. Disinfection uses chemical or physical methods to kill or inactivate remaining pathogens on already-cleaned surfaces. High-touch surfaces (door handles, bed rails, call bells, light switches, shared equipment) require more frequent cleaning as part of routine IPC schedules. Always clean before disinfecting — disinfectant applied to a dirty surface is less effective."
+      },
+      {
+        heading: "4. Waste, Sharps & Spills",
+        content: "Follow colour-coded waste streams as per your organisation's policy. Sharps (needles, lancets, broken glass) must always go in a sharps container — never overfill beyond the fill line. For body fluid spills: put on appropriate PPE first, use the spill kit per policy, and dispose of materials in clinical waste. If the spill is beyond your competence or involves unknown substances, do not attempt to manage it — escalate immediately to your manager or specialist team."
+      },
+      {
+        heading: "5. Laundry & Linen",
+        content: "Contaminated (soiled) laundry must be bagged at the point of use in the correct bag (typically red or alginate-soluble) and must not be sorted, shaken, or rinsed by hand. This prevents aerosolisation and cross-contamination. Transport bagged laundry directly to the laundry area without placing it on the floor or other surfaces. Follow your organisation's temperature and process requirements for infected linen."
+      },
+      {
+        heading: "6. Outbreak Awareness",
+        content: "If a person you support develops new symptoms of possible infection (e.g., sudden diarrhoea, vomiting, fever, new rash, respiratory symptoms), take immediate action: isolate the person where possible, apply enhanced precautions (increased PPE, dedicated equipment), and report to your manager or nurse-in-charge without delay. Do not wait for a diagnosis before acting — early response limits spread. Follow your organisation's outbreak policy for notification to Public Health and external bodies."
+      },
+      {
+        heading: "7. Documentation & Audit Readiness",
+        content: "Accurate, timely documentation is essential for IPC governance. Record all infection-related observations, incidents, cleaning schedules, and escalation actions. Incident reports should be factual, include times and actions taken, and be completed as soon as possible after the event. Good documentation supports continuity of care, regulatory compliance (CQC), and a culture of learning and continuous improvement rather than blame."
+      }
+    ]
   },
   "enteral-feeding-tubes-management-competency-guide": {
     title: "Enteral Feeding Tubes — Key Guidance (Quick Reference)",
