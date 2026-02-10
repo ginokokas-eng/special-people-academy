@@ -328,6 +328,50 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
       }
     ]
   },
+  "medication-administration-awareness": {
+    title: "Medication Administration — Key Guidance (Awareness)",
+    summary:
+      "Policy-led awareness guidance covering stop-and-escalate rules, MAR/eMAR documentation, PRN awareness, controlled drugs, covert administration, safe storage, and incident reporting culture.",
+    bullets: [
+      "Stop & escalate: label mismatch, allergy alert, unclear instructions, missing meds",
+      "MAR/eMAR essentials: accurate, timely documentation; refusals/omissions/late doses",
+      "PRN awareness: criteria + reason/outcome documentation",
+      "Controlled Drugs overview: security, records, authorised staff only",
+      "Covert meds overview: formal pathway only (not a workaround)",
+      "Storage/disposal basics (policy-led)",
+      "Incident reporting and learning culture",
+    ],
+    sections: [
+      {
+        heading: "1. Stop-and-Escalate Rules",
+        content: "If a medication label does not match the MAR, do not administer – isolate and escalate per policy. Any allergy concern is a hard stop. If instructions are unclear, ambiguous, or a medication is missing, do not guess or improvise – stop and escalate to a responsible person immediately. These rules apply to all staff involved in medicines support."
+      },
+      {
+        heading: "2. MAR/eMAR Essentials",
+        content: "Record every administration, refusal, omission, and late dose immediately and accurately. Sign/initial with the correct time – never pre-sign or backdate. For refusals: record 'R' with the reason and escalate if required by policy. For omissions: use the appropriate code and document why. For late doses: record the actual time given, not the scheduled time. Accurate, timely records prevent missed or duplicate doses."
+      },
+      {
+        heading: "3. PRN Awareness",
+        content: "PRN ('as required') medication should only be given when the criteria on the MAR/care plan are met and within stated limits. Before giving PRN: check when last administered, confirm the minimum interval has passed, and verify the maximum daily dose has not been exceeded. Always document: the reason/indication for giving, the time, and the outcome/effect observed. If PRN is frequently needed or appears ineffective, escalate for review."
+      },
+      {
+        heading: "4. Controlled Drugs Overview",
+        content: "Controlled Drugs (CDs) are governed by stricter storage and record-keeping rules. Only authorised and trained staff may handle or administer CDs. Storage must be double-locked. A CD register must be maintained accurately – record every administration, disposal, and balance check. Report any discrepancy immediately. Keys must be held by authorised staff only."
+      },
+      {
+        heading: "5. Covert Administration Overview",
+        content: "Covert administration (disguising medication in food/drink) is a formal, documented pathway – never an informal workaround for refusal. It requires: a Mental Capacity Act (MCA) capacity assessment, a best-interest decision involving appropriate professionals, pharmacy confirmation that the medication can be safely modified, and ongoing documented review. Never administer covertly without these safeguards."
+      },
+      {
+        heading: "6. Storage and Disposal Basics",
+        content: "Store all medicines securely according to organisational policy, at the correct temperature (fridge items at 2–8°C with daily checks). Dispose of unwanted or expired medicines via authorised pharmaceutical waste routes only – never in domestic waste. Ensure only authorised staff have access to medicines storage."
+      },
+      {
+        heading: "7. Incident Reporting and Learning Culture",
+        content: "Report ALL medication incidents and near misses: wrong medication, wrong dose, wrong person, wrong time, wrong route, omission, or anything that could have caused harm. First action: ensure the person is safe – seek medical advice if needed. Inform your manager/senior immediately. Complete an incident report factually – what happened, when, who was involved, actions taken, any harm observed. Reporting supports a learning culture, not a blame culture."
+      }
+    ]
+  },
 };
 
 // Fallback KB for courses without specific content
