@@ -19,7 +19,6 @@ interface Course {
   title: string;
   category: string;
   duration_minutes: number;
-  level: string;
   thumbnail_url: string | null;
   delivery_type: string;
   course_offerings: CourseOffering[];
@@ -30,7 +29,6 @@ interface CourseCardProps {
   title: string;
   category: string;
   duration: string;
-  level: "New Joiner" | "Enhanced" | "Complex";
   priceDisplay: string;
   image: string;
   deliveryType: string;
@@ -42,7 +40,6 @@ const CourseCard = ({
   title,
   category,
   duration,
-  level,
   priceDisplay,
   image,
   deliveryType,
@@ -183,7 +180,7 @@ export const CoursesSection = () => {
         // Fetch featured, published courses with their offerings
         const { data, error } = await supabase
           .from("courses")
-          .select("id, title, category, duration_minutes, level, thumbnail_url, delivery_type, course_offerings(id, base_price_gbp, active)")
+          .select("id, title, category, duration_minutes, thumbnail_url, delivery_type, course_offerings(id, base_price_gbp, active)")
           .eq("is_featured", true)
           .eq("is_published", true)
           .order("updated_at", { ascending: false })
@@ -292,7 +289,6 @@ export const CoursesSection = () => {
                   title={course.title}
                   category={course.category}
                   duration={formatDuration(course.duration_minutes)}
-                  level={(course.level as "New Joiner" | "Enhanced" | "Complex") || "New Joiner"}
                   priceDisplay={getPriceDisplay(course.course_offerings)}
                   image={course.thumbnail_url || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop"}
                   deliveryType={course.delivery_type}
