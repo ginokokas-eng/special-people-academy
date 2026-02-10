@@ -142,6 +142,50 @@ const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {
       "Physical intervention: last resort, proportionate, documented",
     ],
   },
+  "respiratory-management-suction-oxygen-awareness": {
+    title: "Respiratory Management — Key Guidance (Suction & Oxygen Awareness)",
+    summary:
+      "Essential safety, monitoring, and escalation guidance for non-tracheostomy respiratory support including oxygen awareness and oral suction.",
+    bullets: [
+      "Oxygen is a medicine: prescription/care-plan led; document and escalate",
+      "Target SpO₂: 94–98% most adults; 88–92% hypercapnia risk (or plan-specific)",
+      "Oxygen safety: fire risk; cylinder handling and storage precautions",
+      "Monitoring: SpO₂ checks per care plan; escalate if unexpectedly low",
+      "Suction: indication-led; avoid routine suction; stop if distress",
+      "Oral suction: limit time (~10s); avoid trauma; clean technique",
+      "Escalation: red flags → contact clinician → emergency triggers",
+    ],
+    sections: [
+      {
+        heading: "1. Oxygen as a Medicine",
+        content: "Oxygen is treated as a medication under policy – it should only be administered according to a prescription or care plan (except in emergencies). Always document flow rate, duration, and SpO₂ readings. If there is any discrepancy between the prescribed setup and available equipment, do not improvise – stop and escalate to the responsible clinician or manager immediately."
+      },
+      {
+        heading: "2. Target Saturations",
+        content: "For most acutely ill adults, the target SpO₂ range is 94–98%. For people at risk of hypercapnic respiratory failure (e.g., COPD), the target is commonly 88–92% or as specified in the individual's care plan. Always follow the care plan target range and escalate promptly if readings fall outside the prescribed range."
+      },
+      {
+        heading: "3. Oxygen Safety",
+        content: "Oxygen supports combustion and significantly increases fire risk. Never use oil-based products near oxygen equipment. Ensure cylinders are stored upright, secured, away from heat sources, and in well-ventilated areas. No smoking or naked flames within the oxygen-use zone. Staff must be trained in safe storage, handling, and emergency procedures."
+      },
+      {
+        heading: "4. SpO₂ Monitoring",
+        content: "Monitor oxygen saturation according to the care plan or prescription instructions – not only when convenient. If a reading is unexpectedly low: first recheck probe placement and ensure no interference (cold hands, nail polish, movement). If the reading remains low and the person looks unwell, escalate urgently per policy. Document all readings, actions, and escalation."
+      },
+      {
+        heading: "5. Suction Principles",
+        content: "Oral suctioning should be indication-led – do not suction routinely or on a schedule unless clinically directed. Avoid suctioning if there is no clear need. If the person becomes distressed or deteriorates during suction, stop immediately, support airway positioning, and escalate per the care plan."
+      },
+      {
+        heading: "6. Oral Suction Safety",
+        content: "Limit each suction pass to approximately 10 seconds to reduce the risk of trauma and hypoxia. Use clean technique throughout: wear appropriate PPE, prevent catheter tip contamination, and dispose of single-use items correctly. Never reuse single-use suction catheters. Ensure the person has given consent where possible."
+      },
+      {
+        heading: "7. Escalation: Red Flags & Emergency Triggers",
+        content: "Recognise respiratory red flags: increased work of breathing, use of accessory muscles, cyanosis, confusion, decreasing consciousness, SpO₂ below target range. Follow the ABCDE escalation pathway. Know who to contact: shift lead, on-call clinician, or 999 for emergencies. Document all escalation actions, times, and outcomes. Competency sign-off is required for staff performing suction or oxygen tasks."
+      }
+    ]
+  },
   "basic-life-support-bls": {
     title: "Basic Life Support (BLS) — Key Guidance",
     summary:
