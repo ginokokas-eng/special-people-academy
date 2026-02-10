@@ -149,15 +149,18 @@ export default function CourseDetail() {
     }
   }, [id, user]);
 
+  const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
   const fetchCourseData = async () => {
     if (!id) return;
 
     try {
-      // Fetch course with all extended fields
+      // Support both UUID and slug-based lookups
+      const lookupField = isUUID(id) ? 'id' : 'slug';
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
         .select('*')
-        .eq('id', id)
+        .eq(lookupField, id)
         .single();
 
       if (courseError) throw courseError;
@@ -199,7 +202,7 @@ export default function CourseDetail() {
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')
-        .eq('course_id', id)
+        .eq('course_id', courseData.id)
         .order('order_index');
       
       setModules(modulesData || []);
@@ -208,7 +211,7 @@ export default function CourseDetail() {
       const { data: lessonsData } = await supabase
         .from('lessons')
         .select('*')
-        .eq('course_id', id)
+        .eq('course_id', courseData.id)
         .order('order_index');
 
       // Fetch instructor if exists
@@ -226,7 +229,7 @@ export default function CourseDetail() {
       const { data: sessionsData } = await supabase
         .from('practical_sessions')
         .select('*')
-        .eq('course_id', id)
+        .eq('course_id', courseData.id)
         .order('session_date');
       
       setPracticalSessions(sessionsData || []);
@@ -235,7 +238,7 @@ export default function CourseDetail() {
       const { data: resourcesData } = await supabase
         .from('course_resources')
         .select('*')
-        .eq('course_id', id)
+        .eq('course_id', courseData.id)
         .order('order_index');
       
       setResources(resourcesData || []);
@@ -244,7 +247,7 @@ export default function CourseDetail() {
       const { data: reviewsData } = await supabase
         .from('course_reviews')
         .select('*')
-        .eq('course_id', id)
+        .eq('course_id', courseData.id)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
       
@@ -272,7 +275,7 @@ export default function CourseDetail() {
           .from('enrollments')
           .select('*')
           .eq('user_id', user.id)
-          .eq('course_id', id)
+          .eq('course_id', courseData.id)
           .maybeSingle();
 
         setEnrollment(enrollmentData);
@@ -341,7 +344,7 @@ export default function CourseDetail() {
           .from('certificates')
           .select('id')
           .eq('user_id', user.id)
-          .eq('course_id', id)
+          .eq('course_id', courseData.id)
           .maybeSingle();
         
         setCertificateId(certData?.id);
@@ -405,7 +408,7 @@ export default function CourseDetail() {
     const targetLesson = firstIncomplete || lessons[0];
     
     if (targetLesson) {
-      navigate(`/courses/${id}/learn?lesson=${targetLesson.id}`);
+      navigate(`/courses/${course?.id}/learn?lesson=${targetLesson.id}`);
     }
   };
 
@@ -416,7 +419,7 @@ export default function CourseDetail() {
         await handleScormLessonClick(lesson);
         return;
       }
-      navigate(`/courses/${id}/learn?lesson=${lesson.id}`);
+      navigate(`/courses/${course?.id}/learn?lesson=${lesson.id}`);
     }
   };
 
@@ -455,7 +458,7 @@ export default function CourseDetail() {
         .insert({
           scorm_package_id: lessonData.scorm_package_id,
           user_id: user.id,
-          course_id: id!,
+          course_id: course?.id!,
           lesson_id: lesson.id,
           status: 'not_attempted',
         })
@@ -472,7 +475,7 @@ export default function CourseDetail() {
 
   const handleQuizClick = (lesson: Lesson) => {
     if (enrollment) {
-      navigate(`/courses/${id}/quiz?lesson=${lesson.id}`);
+      navigate(`/courses/${course?.id}/quiz?lesson=${lesson.id}`);
     }
   };
 
