@@ -34,8 +34,10 @@ import {
 } from '@/components/ui/select';
 import { CompetencySignoffDialog } from '@/components/trainer/CompetencySignoffDialog';
 import { BLSSignoffDialog } from '@/components/trainer/BLSSignoffDialog';
+import { RespiratorySignoffDialog } from '@/components/trainer/RespiratorySignoffDialog';
 
 const BLS_COURSE_ID = 'b1500001-0001-0001-0001-000000000001';
+const RESPIRATORY_COURSE_ID = '0c51cead-3b6f-4dea-97eb-f632305e566b';
 import { 
   Calendar, 
   MapPin, 
@@ -625,6 +627,16 @@ export default function TrainerPortal() {
       {selectedLearner && selectedSession && (
         selectedSession.course_id === BLS_COURSE_ID ? (
           <BLSSignoffDialog
+            open={competencyDialogOpen}
+            onOpenChange={setCompetencyDialogOpen}
+            learnerId={selectedLearner.user_id}
+            learnerName={selectedLearner.full_name || 'Unknown Learner'}
+            courseId={selectedSession.course_id}
+            courseTitle={selectedSession.course_title}
+            onSuccess={() => fetchLearners(selectedSession)}
+          />
+        ) : selectedSession.course_id === RESPIRATORY_COURSE_ID ? (
+          <RespiratorySignoffDialog
             open={competencyDialogOpen}
             onOpenChange={setCompetencyDialogOpen}
             learnerId={selectedLearner.user_id}
