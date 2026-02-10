@@ -78,13 +78,13 @@ export const Navbar = () => {
           <div className="hidden lg:flex items-center justify-center flex-1">
             <NavigationMenu>
               <NavigationMenuList className="gap-1">
-                {/* Courses */}
+                {/* Courses — learners see My Courses, visitors see catalogue */}
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
                     className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
                   >
-                    <Link to="/courses">Courses</Link>
+                    <Link to={user ? "/my-courses" : "/courses"}>Courses</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
@@ -261,9 +261,9 @@ export const Navbar = () => {
         {isMenuOpen && (
           <div className="lg:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-1">
-              {/* Courses */}
+              {/* Courses — learners see My Courses, visitors see catalogue */}
               <Link
-                to="/courses"
+                to={user ? "/my-courses" : "/courses"}
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
               >
