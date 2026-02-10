@@ -734,6 +734,7 @@ export default function AdminDashboard() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="Awareness">Awareness</SelectItem>
                               <SelectItem value="New Joiner">New Joiner</SelectItem>
                               <SelectItem value="Enhanced">Enhanced</SelectItem>
                               <SelectItem value="Complex">Complex</SelectItem>

@@ -55,7 +55,7 @@ const CATEGORIES = [
   'Uncategorized',
 ];
 
-const LEVELS = ['New Joiner', 'Foundation', 'Intermediate', 'Advanced', 'Expert'];
+const LEVELS = ['Awareness', 'New Joiner', 'Foundation', 'Intermediate', 'Advanced', 'Expert', 'Complex'];
 
 const DELIVERY_TYPES = [
   { value: 'online_self_paced', label: 'Online Self-Paced' },
