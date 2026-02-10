@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Info } from 'lucide-react';
 
 interface CourseOverviewProps {
   overview?: string;
@@ -7,6 +7,7 @@ interface CourseOverviewProps {
   learningOutcomes: string[];
   targetAudience: string[];
   requirements: string[];
+  scopeNotes?: string;
 }
 
 export function CourseOverview({
@@ -15,9 +16,26 @@ export function CourseOverview({
   learningOutcomes,
   targetAudience,
   requirements,
+  scopeNotes,
 }: CourseOverviewProps) {
   return (
     <div className="space-y-6">
+      {/* Scope Notes */}
+      {scopeNotes && (
+        <Card className="border border-border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Info className="h-5 w-5 text-primary" />
+              Scope of This Course
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+              {scopeNotes}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Overview */}
       {(overview || description) && (
         <Card>

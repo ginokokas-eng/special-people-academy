@@ -580,6 +580,7 @@ export default function CourseDetail() {
               learningOutcomes={course.learning_outcomes}
               targetAudience={course.target_audience}
               requirements={course.requirements}
+              scopeNotes={(course as any).scope_notes || undefined}
             />
 
             {/* E. Course Content */}
