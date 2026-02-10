@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { 
-  GraduationCap, 
   LogOut, 
   Menu, 
   X,
@@ -13,6 +12,7 @@ import {
   LayoutDashboard,
   Phone,
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { Input } from '@/components/ui/input';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
 import { SupportDialog } from '@/components/shared/SupportDialog';
@@ -75,9 +75,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </Button>
             
             <a href="/" className="flex items-center gap-2 font-bold text-lg">
-              <div className="p-1.5 rounded-lg gradient-primary">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <img src={logo} alt="Special People Academy" className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
               <span className="hidden sm:inline text-foreground">Special People Academy</span>
             </a>
           </div>
