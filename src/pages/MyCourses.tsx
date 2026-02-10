@@ -260,11 +260,17 @@ export default function MyCourses() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">My Courses</h1>
-          <p className="text-muted-foreground mt-1">
-            View all courses assigned to you or that you've enrolled in
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Courses</h1>
+            <p className="text-muted-foreground mt-1">
+              View all courses assigned to you or that you've enrolled in
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => navigate('/courses')}>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Browse all courses
+          </Button>
         </div>
 
         {courses.length === 0 ? (
