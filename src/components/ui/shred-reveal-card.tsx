@@ -164,22 +164,22 @@ export function TrainingShredCard({
 
   const backContent = (
     <div
-      className="h-full rounded-xl p-5 flex flex-col justify-between bg-scanner-dark"
+      className="h-full rounded-xl p-5 flex flex-col justify-between bg-card border border-border/50 shadow-sm"
     >
       <div>
         <span
-          className="text-xs font-medium uppercase tracking-wider text-scanner-beam"
+          className="text-xs font-medium uppercase tracking-wider text-primary"
         >
-          Knowledge Base
+          Key Guidance
         </span>
-        <h3 className="font-semibold text-primary-foreground mt-2 line-clamp-2">{title}</h3>
+        <h3 className="font-semibold text-foreground mt-2 line-clamp-2">{title}</h3>
         <ul className="mt-4 space-y-2">
           {knowledgePoints.map((point, idx) => (
             <li
               key={idx}
-              className="flex items-start gap-2 text-sm text-primary-foreground/80"
+              className="flex items-start gap-2 text-sm text-muted-foreground"
             >
-              <span className="text-scanner-beam">•</span>
+              <span className="text-primary">•</span>
               {point}
             </li>
           ))}
@@ -187,8 +187,7 @@ export function TrainingShredCard({
       </div>
       {certificationInfo && (
         <div
-          className="mt-4 pt-3 border-t text-xs text-scanner-peach"
-          style={{ borderColor: "hsl(var(--scanner-peach) / 0.2)" }}
+          className="mt-4 pt-3 border-t border-border text-xs text-muted-foreground"
         >
           {certificationInfo}
         </div>
