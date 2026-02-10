@@ -117,7 +117,6 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [dataLoading, setDataLoading] = useState(true);
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [courseDialogOpen, setCourseDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [saving, setSaving] = useState(false);
@@ -156,28 +155,11 @@ export default function AdminDashboard() {
     order_index: 0,
   });
 
-  // Auth guard - wait for both auth and roles to be resolved
+  // ProtectedRoute already handles auth + role guard, so fetch data on mount
   useEffect(() => {
-    // Wait until both auth and roles are loaded before redirecting
-    if (authLoading || rolesLoading) return;
-    
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    
-    if (!isAdmin) {
-      navigate('/dashboard');
-      toast.error('Access denied. Admin only.');
-      return;
-    }
-    
-    // Only fetch data once auth and roles are confirmed
-    if (!initialLoadDone) {
-      setInitialLoadDone(true);
-      fetchData();
-    }
-  }, [user, authLoading, rolesLoading, isAdmin, navigate, initialLoadDone]);
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchData = async () => {
     setIsRefreshing(true);
@@ -636,10 +618,6 @@ export default function AdminDashboard() {
         </div>
       </PortalLayout>
     );
-  }
-
-  if (!isAdmin) {
-    return null;
   }
 
   return (
