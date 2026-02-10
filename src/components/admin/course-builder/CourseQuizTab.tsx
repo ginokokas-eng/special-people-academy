@@ -303,7 +303,7 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
                       {quiz ? (
                         <span className="text-sm text-muted-foreground">({quizQuestions.length} questions)</span>
                       ) : (
-                        <span className="text-sm text-yellow-600">No quiz configured</span>
+                        <span className="text-sm text-warning">No quiz configured</span>
                       )}
                     </div>
                   </AccordionTrigger>
@@ -337,7 +337,7 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
                                   {question.options.map((opt, i) => (
                                     <span
                                       key={i}
-                                      className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-green-100 text-green-800' : 'bg-muted'}`}
+                                      className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-status-success-bg text-status-success-foreground' : 'bg-muted'}`}
                                     >
                                       {i === question.correct_answer && <CheckCircle className="h-3 w-3 inline mr-1" />}
                                       {opt}

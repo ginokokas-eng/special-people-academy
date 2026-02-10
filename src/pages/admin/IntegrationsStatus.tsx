@@ -259,10 +259,10 @@ export default function IntegrationsStatus() {
 
               <div className="p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-success" />
                   Sessions Synced
                 </div>
-                <p className="text-2xl font-bold text-green-600">{stats.synced}</p>
+                <p className="text-2xl font-bold text-success">{stats.synced}</p>
               </div>
 
               <div className="p-4 rounded-lg bg-muted/50">
@@ -381,7 +381,7 @@ export default function IntegrationsStatus() {
             {/* No Failed Sessions */}
             {failedSessions.length === 0 && stats.synced > 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-600" />
+                <CheckCircle className="h-12 w-12 mx-auto mb-4 text-success" />
                 <p className="font-medium">All sessions synced successfully</p>
                 <p className="text-sm">{stats.synced} session(s) synced to Outlook calendar</p>
               </div>

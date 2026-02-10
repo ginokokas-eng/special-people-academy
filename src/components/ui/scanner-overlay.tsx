@@ -24,11 +24,11 @@ export function ScannerOverlay({ isScanning, duration = 1.4, className }: Scanne
 
   return (
     <div className={cn("pointer-events-none absolute inset-0 z-20 overflow-hidden", className)}>
-      {/* Background glow - Deep Teal #124145 */}
+      {/* Background glow */}
       <motion.div
         className="absolute left-0 right-0 h-32"
         style={{ 
-          background: "linear-gradient(to bottom, rgba(18, 65, 69, 0.35), rgba(18, 65, 69, 0.15), transparent)",
+          background: "linear-gradient(to bottom, hsl(var(--scanner-dark) / 0.35), hsl(var(--scanner-dark) / 0.15), transparent)",
           filter: "blur(8px)"
         }}
         initial={{ top: "-8rem" }}
@@ -36,23 +36,23 @@ export function ScannerOverlay({ isScanning, duration = 1.4, className }: Scanne
         transition={{ duration, ease: "easeInOut" }}
       />
 
-      {/* Core beam - Green accent #C4D14F */}
+      {/* Core beam */}
       <motion.div
         className="absolute left-0 right-0 h-0.5"
         style={{
-          background: "linear-gradient(to right, transparent, #C4D14F, transparent)",
-          boxShadow: "0 0 12px 2px rgba(196, 209, 79, 0.6)"
+          background: "linear-gradient(to right, transparent, hsl(var(--scanner-beam)), transparent)",
+          boxShadow: "0 0 12px 2px hsl(var(--scanner-beam) / 0.6)"
         }}
         initial={{ top: "-0.25rem" }}
         animate={{ top: "100%" }}
         transition={{ duration, ease: "easeInOut" }}
       />
 
-      {/* Secondary beam line - Peach #FF988C */}
+      {/* Secondary beam line */}
       <motion.div
         className="absolute left-0 right-0 h-px opacity-60"
         style={{
-          background: "linear-gradient(to right, transparent 10%, #FF988C 50%, transparent 90%)",
+          background: "linear-gradient(to right, transparent 10%, hsl(var(--scanner-peach)) 50%, transparent 90%)",
         }}
         initial={{ top: "-0.5rem" }}
         animate={{ top: "100%" }}
@@ -66,10 +66,10 @@ export function ScannerOverlay({ isScanning, duration = 1.4, className }: Scanne
           className="absolute h-1 w-1 rounded-full"
           style={{ 
             left: `${50 + p.drift}%`, 
-            backgroundColor: p.isGreen ? "#C4D14F" : "#FF988C",
+            backgroundColor: p.isGreen ? "hsl(var(--scanner-beam))" : "hsl(var(--scanner-peach))",
             boxShadow: p.isGreen 
-              ? "0 0 4px rgba(196, 209, 79, 0.8)" 
-              : "0 0 4px rgba(255, 152, 140, 0.8)"
+              ? "0 0 4px hsl(var(--scanner-beam) / 0.8)" 
+              : "0 0 4px hsl(var(--scanner-peach) / 0.8)"
           }}
           initial={{ top: `${p.top}%`, opacity: 0, scale: 0 }}
           animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0] }}

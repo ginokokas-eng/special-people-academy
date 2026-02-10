@@ -164,25 +164,22 @@ export function TrainingShredCard({
 
   const backContent = (
     <div
-      className="h-full rounded-xl p-5 flex flex-col justify-between"
-      style={{ backgroundColor: "#124145" }}
+      className="h-full rounded-xl p-5 flex flex-col justify-between bg-scanner-dark"
     >
       <div>
         <span
-          className="text-xs font-medium uppercase tracking-wider"
-          style={{ color: "#C4D14F" }}
+          className="text-xs font-medium uppercase tracking-wider text-scanner-beam"
         >
           Knowledge Base
         </span>
-        <h3 className="font-semibold text-white mt-2 line-clamp-2">{title}</h3>
+        <h3 className="font-semibold text-primary-foreground mt-2 line-clamp-2">{title}</h3>
         <ul className="mt-4 space-y-2">
           {knowledgePoints.map((point, idx) => (
             <li
               key={idx}
-              className="flex items-start gap-2 text-sm"
-              style={{ color: "#F6E5D4" }}
+              className="flex items-start gap-2 text-sm text-primary-foreground/80"
             >
-              <span style={{ color: "#C4D14F" }}>•</span>
+              <span className="text-scanner-beam">•</span>
               {point}
             </li>
           ))}
@@ -190,8 +187,8 @@ export function TrainingShredCard({
       </div>
       {certificationInfo && (
         <div
-          className="mt-4 pt-3 border-t text-xs"
-          style={{ borderColor: "rgba(246, 229, 212, 0.2)", color: "#FF988C" }}
+          className="mt-4 pt-3 border-t text-xs text-scanner-peach"
+          style={{ borderColor: "hsl(var(--scanner-peach) / 0.2)" }}
         >
           {certificationInfo}
         </div>

@@ -92,6 +92,33 @@ export default {
   			warning: {
   				DEFAULT: 'hsl(var(--warning))',
   				foreground: 'hsl(var(--warning-foreground))'
+  			},
+  			info: {
+  				DEFAULT: 'hsl(var(--info))',
+  				foreground: 'hsl(var(--info-foreground))'
+  			},
+  			'scanner-dark': 'hsl(var(--scanner-dark))',
+  			'scanner-beam': 'hsl(var(--scanner-beam))',
+  			'scanner-peach': 'hsl(var(--scanner-peach))',
+  			'status-success': {
+  				DEFAULT: 'hsl(var(--status-success))',
+  				foreground: 'hsl(var(--status-success-foreground))',
+  				bg: 'hsl(var(--status-success-bg))'
+  			},
+  			'status-warning': {
+  				DEFAULT: 'hsl(var(--status-warning))',
+  				foreground: 'hsl(var(--status-warning-foreground))',
+  				bg: 'hsl(var(--status-warning-bg))'
+  			},
+  			'status-error': {
+  				DEFAULT: 'hsl(var(--status-error))',
+  				foreground: 'hsl(var(--status-error-foreground))',
+  				bg: 'hsl(var(--status-error-bg))'
+  			},
+  			'status-info': {
+  				DEFAULT: 'hsl(var(--status-info))',
+  				foreground: 'hsl(var(--status-info-foreground))',
+  				bg: 'hsl(var(--status-info-bg))'
   			}
   		},
   		borderRadius: {
