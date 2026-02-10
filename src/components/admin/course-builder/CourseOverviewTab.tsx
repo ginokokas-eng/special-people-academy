@@ -13,7 +13,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Course {
   id: string;
@@ -37,6 +38,8 @@ interface Course {
   cpd_certified: boolean;
   level: string | null;
   thumbnail_url: string | null;
+  prerequisite_course_id: string | null;
+  prerequisite_required: boolean;
 }
 
 interface CourseOverviewTabProps {
@@ -68,6 +71,16 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
   const [newOutcome, setNewOutcome] = useState('');
   const [newAudience, setNewAudience] = useState('');
   const [newRequirement, setNewRequirement] = useState('');
+  const [allCourses, setAllCourses] = useState<{ id: string; title: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('courses')
+      .select('id, title')
+      .neq('id', course.id)
+      .order('title')
+      .then(({ data }) => setAllCourses(data || []));
+  }, [course.id]);
 
   const addItem = (field: 'learning_outcomes' | 'target_audience' | 'requirements', value: string, setter: (v: string) => void) => {
     if (value.trim()) {
@@ -233,6 +246,40 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
                 checked={course.requires_practical_signoff}
                 onCheckedChange={(checked) => onUpdate({ requires_practical_signoff: checked })}
               />
+            </div>
+
+            <div className="space-y-3 pt-2 border-t border-border">
+              <Label>Prerequisite Course</Label>
+              <Select
+                value={course.prerequisite_course_id || 'none'}
+                onValueChange={(value) => onUpdate({ 
+                  prerequisite_course_id: value === 'none' ? null : value,
+                  prerequisite_required: value === 'none' ? false : course.prerequisite_required,
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="No prerequisite" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No prerequisite</SelectItem>
+                  {allCourses.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {course.prerequisite_course_id && (
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="prereq-required" className="text-sm">
+                    Require completion before access
+                  </Label>
+                  <Switch
+                    id="prereq-required"
+                    checked={course.prerequisite_required}
+                    onCheckedChange={(checked) => onUpdate({ prerequisite_required: checked })}
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

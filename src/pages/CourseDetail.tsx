@@ -22,6 +22,7 @@ import { CourseCarePlan } from '@/components/course-detail/CourseCarePlan';
 import { CourseSafetyGovernance } from '@/components/course-detail/CourseSafetyGovernance';
 import { CourseResources } from '@/components/course-detail/CourseResources';
 import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
+import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisite';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
@@ -105,6 +106,8 @@ interface Course {
   group_max_participants: number;
   regulated_cert_available: boolean;
   regulated_cert_fee: number;
+  prerequisite_course_id: string | null;
+  prerequisite_required: boolean;
 }
 
 interface Enrollment {
@@ -143,6 +146,8 @@ export default function CourseDetail() {
   const [quizProgress, setQuizProgress] = useState({ total: 0, passed: 0 });
   const [practicalProgress, setPracticalProgress] = useState({ required: false, completed: false });
   const [certificateId, setCertificateId] = useState<string | undefined>(undefined);
+  const [prereqCompleted, setPrereqCompleted] = useState(true); // default true = not blocked
+  
   useEffect(() => {
     if (id) {
       fetchCourseData();
@@ -194,6 +199,8 @@ export default function CourseDetail() {
         group_max_participants: courseData.group_max_participants || 12,
         regulated_cert_available: courseData.regulated_cert_available || false,
         regulated_cert_fee: courseData.regulated_cert_fee || 15,
+        prerequisite_course_id: (courseData as any).prerequisite_course_id || null,
+        prerequisite_required: (courseData as any).prerequisite_required || false,
       };
       
       setCourse(parsedCourse);
@@ -349,6 +356,19 @@ export default function CourseDetail() {
         
         setCertificateId(certData?.id);
 
+        // Check prerequisite completion
+        if (parsedCourse.prerequisite_course_id && parsedCourse.prerequisite_required) {
+          const { data: prereqEnrollment } = await supabase
+            .from('enrollments')
+            .select('completed_at')
+            .eq('user_id', user.id)
+            .eq('course_id', parsedCourse.prerequisite_course_id)
+            .maybeSingle();
+          setPrereqCompleted(!!prereqEnrollment?.completed_at);
+        } else {
+          setPrereqCompleted(true);
+        }
+
       } else {
         setLessons((lessonsData || []).map(lesson => ({ 
           ...lesson, 
@@ -359,6 +379,7 @@ export default function CourseDetail() {
         setQuizProgress({ total: 0, passed: 0 });
         setPracticalProgress({ required: false, completed: false });
         setCertificateId(undefined);
+        setPrereqCompleted(!parsedCourse.prerequisite_required);
       }
     } catch (error) {
       console.error('Error fetching course:', error);
@@ -375,6 +396,11 @@ export default function CourseDetail() {
     }
 
     if (!course) return;
+
+    if (!prereqCompleted) {
+      toast.error('You must complete the prerequisite course first');
+      return;
+    }
     
     setEnrolling(true);
     try {
@@ -398,6 +424,11 @@ export default function CourseDetail() {
   };
 
   const handleStart = () => {
+    if (!prereqCompleted) {
+      toast.error('You must complete the prerequisite course first');
+      return;
+    }
+
     if (!enrollment && user) {
       handleEnroll();
       return;
@@ -570,6 +601,15 @@ export default function CourseDetail() {
                 hasCertificate={course.has_certificate}
                 isCompleted={!!enrollment.completed_at}
                 certificateId={certificateId}
+              />
+            )}
+
+            {/* Prerequisite callout */}
+            {course.prerequisite_course_id && (
+              <CoursePrerequisite
+                prerequisiteCourseId={course.prerequisite_course_id}
+                prerequisiteRequired={course.prerequisite_required}
+                userId={user?.id}
               />
             )}
 
