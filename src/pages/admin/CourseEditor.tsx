@@ -40,6 +40,8 @@ interface Course {
   is_published: boolean;
   level: string | null;
   thumbnail_url: string | null;
+  prerequisite_course_id: string | null;
+  prerequisite_required: boolean;
 }
 
 export default function CourseEditor() {
@@ -118,6 +120,8 @@ export default function CourseEditor() {
           status: course.status,
           level: course.level,
           thumbnail_url: course.thumbnail_url,
+          prerequisite_course_id: course.prerequisite_course_id,
+          prerequisite_required: course.prerequisite_required,
           updated_at: new Date().toISOString(),
         })
         .eq('id', course.id);

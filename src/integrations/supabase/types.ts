@@ -649,6 +649,8 @@ export type Database = {
           overview: string | null
           pass_mark: number | null
           practical_details: string | null
+          prerequisite_course_id: string | null
+          prerequisite_required: boolean
           price: number | null
           price_face_to_face: number | null
           price_group: number | null
@@ -698,6 +700,8 @@ export type Database = {
           overview?: string | null
           pass_mark?: number | null
           practical_details?: string | null
+          prerequisite_course_id?: string | null
+          prerequisite_required?: boolean
           price?: number | null
           price_face_to_face?: number | null
           price_group?: number | null
@@ -747,6 +751,8 @@ export type Database = {
           overview?: string | null
           pass_mark?: number | null
           practical_details?: string | null
+          prerequisite_course_id?: string | null
+          prerequisite_required?: boolean
           price?: number | null
           price_face_to_face?: number | null
           price_group?: number | null
@@ -770,6 +776,13 @@ export type Database = {
             columns: ["instructor_id"]
             isOneToOne: false
             referencedRelation: "instructors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_prerequisite_course_id_fkey"
+            columns: ["prerequisite_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
