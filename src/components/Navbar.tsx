@@ -65,7 +65,7 @@ export const Navbar = () => {
             className="flex items-center gap-2 font-bold shrink-0 min-w-0"
             aria-label="Special People Academy Home"
           >
-            <img src={logo} alt="" className="h-9 w-9 object-contain flex-shrink-0" />
+            <img src={logo} alt="Special People Academy" className="h-8 sm:h-9 w-auto object-contain flex-shrink-0" />
             <span 
               className="text-foreground text-sm sm:text-base truncate"
               title="Special People Academy"

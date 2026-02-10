@@ -35,7 +35,7 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl mb-4">
-              <img src={logo} alt="Special People Academy" className="h-10 w-10 object-contain" />
+              <img src={logo} alt="Special People Academy" className="h-9 w-auto object-contain" />
               <span>Special People Academy</span>
             </Link>
             <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
