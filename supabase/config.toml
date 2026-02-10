@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.outlook-cancel-event]
 verify_jwt = false
+
+[functions.upload-scorm]
+verify_jwt = false

@@ -894,6 +894,7 @@ export type Database = {
           lesson_type: string | null
           module_id: string | null
           order_index: number
+          scorm_package_id: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -907,6 +908,7 @@ export type Database = {
           lesson_type?: string | null
           module_id?: string | null
           order_index?: number
+          scorm_package_id?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -920,6 +922,7 @@ export type Database = {
           lesson_type?: string | null
           module_id?: string | null
           order_index?: number
+          scorm_package_id?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -937,6 +940,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_scorm_package_id_fkey"
+            columns: ["scorm_package_id"]
+            isOneToOne: false
+            referencedRelation: "scorm_packages"
             referencedColumns: ["id"]
           },
         ]
@@ -1435,6 +1445,144 @@ export type Database = {
           },
         ]
       }
+      scorm_packages: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          launch_path: string
+          manifest_json: Json | null
+          storage_extracted_path: string
+          storage_zip_path: string
+          title: string
+          version: Database["public"]["Enums"]["scorm_version"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          launch_path: string
+          manifest_json?: Json | null
+          storage_extracted_path: string
+          storage_zip_path: string
+          title: string
+          version?: Database["public"]["Enums"]["scorm_version"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          launch_path?: string
+          manifest_json?: Json | null
+          storage_extracted_path?: string
+          storage_zip_path?: string
+          title?: string
+          version?: Database["public"]["Enums"]["scorm_version"]
+        }
+        Relationships: []
+      }
+      scorm_registrations: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          last_commit_at: string | null
+          lesson_id: string | null
+          lesson_location: string | null
+          score: number | null
+          scorm_package_id: string
+          status: Database["public"]["Enums"]["scorm_status"]
+          suspend_data: string | null
+          total_time_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          last_commit_at?: string | null
+          lesson_id?: string | null
+          lesson_location?: string | null
+          score?: number | null
+          scorm_package_id: string
+          status?: Database["public"]["Enums"]["scorm_status"]
+          suspend_data?: string | null
+          total_time_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          last_commit_at?: string | null
+          lesson_id?: string | null
+          lesson_location?: string | null
+          score?: number | null
+          scorm_package_id?: string
+          status?: Database["public"]["Enums"]["scorm_status"]
+          suspend_data?: string | null
+          total_time_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorm_registrations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorm_registrations_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorm_registrations_scorm_package_id_fkey"
+            columns: ["scorm_package_id"]
+            isOneToOne: false
+            referencedRelation: "scorm_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scorm_runtime_kv: {
+        Row: {
+          id: string
+          key: string
+          registration_id: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          registration_id: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          registration_id?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorm_runtime_kv_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "scorm_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_profiles: {
         Row: {
           can_sign_off_competency: boolean | null
@@ -1607,6 +1755,13 @@ export type Database = {
         | "live_online"
         | "in_person_practical"
         | "blended"
+      scorm_status:
+        | "not_attempted"
+        | "in_progress"
+        | "completed"
+        | "passed"
+        | "failed"
+      scorm_version: "1.2" | "2004"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1755,6 +1910,14 @@ export const Constants = {
         "in_person_practical",
         "blended",
       ],
+      scorm_status: [
+        "not_attempted",
+        "in_progress",
+        "completed",
+        "passed",
+        "failed",
+      ],
+      scorm_version: ["1.2", "2004"],
     },
   },
 } as const

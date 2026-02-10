@@ -57,6 +57,7 @@ const LESSON_TYPES = [
   { value: 'quiz', label: 'Quiz' },
   { value: 'resource', label: 'Resource/Download' },
   { value: 'practical', label: 'Practical Session' },
+  { value: 'scorm', label: 'SCORM Package' },
 ];
 
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
@@ -69,11 +70,18 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
-  const [lessonForm, setLessonForm] = useState({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+  const [lessonForm, setLessonForm] = useState({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
+  const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
     fetchData();
+    fetchScormPackages();
   }, [courseId]);
+
+  const fetchScormPackages = async () => {
+    const { data } = await supabase.from('scorm_packages').select('id, title').order('created_at', { ascending: false });
+    setScormPackages(data || []);
+  };
 
   const fetchData = async () => {
     try {
@@ -168,7 +176,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
     setSaving(true);
     try {
       const moduleLessons = lessons.filter(l => l.module_id === lessonDialog.moduleId);
-      const { error } = await supabase.from('lessons').insert({
+      const insertData: any = {
         course_id: courseId,
         module_id: lessonDialog.moduleId,
         title: lessonForm.title,
@@ -176,12 +184,16 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
         order_index: moduleLessons.length,
-      });
+      };
+      if (lessonForm.lesson_type === 'scorm' && lessonForm.scorm_package_id) {
+        insertData.scorm_package_id = lessonForm.scorm_package_id;
+      }
+      const { error } = await supabase.from('lessons').insert(insertData);
 
       if (error) throw error;
       toast.success('Lesson created');
       setLessonDialog({ open: false, lesson: null, moduleId: null });
-      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
       fetchData();
     } catch (error) {
       console.error('Error creating lesson:', error);
@@ -196,14 +208,18 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
     setSaving(true);
     try {
+      const updateData: any = {
+        title: lessonForm.title,
+        description: lessonForm.description || null,
+        lesson_type: lessonForm.lesson_type,
+        duration_minutes: lessonForm.duration_minutes || 0,
+      };
+      if (lessonForm.lesson_type === 'scorm') {
+        updateData.scorm_package_id = lessonForm.scorm_package_id || null;
+      }
       const { error } = await supabase
         .from('lessons')
-        .update({
-          title: lessonForm.title,
-          description: lessonForm.description || null,
-          lesson_type: lessonForm.lesson_type,
-          duration_minutes: lessonForm.duration_minutes || 0,
-        })
+        .update(updateData)
         .eq('id', lessonDialog.lesson.id);
 
       if (error) throw error;
@@ -243,12 +259,13 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       description: lesson.description || '',
       lesson_type: lesson.lesson_type || 'video',
       duration_minutes: lesson.duration_minutes || 0,
+      scorm_package_id: (lesson as any).scorm_package_id || '',
     });
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
   };
 
   const openAddLesson = (moduleId: string) => {
-    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0 });
+    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
     setLessonDialog({ open: true, lesson: null, moduleId });
   };
 
@@ -437,6 +454,27 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                 onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: parseInt(e.target.value) || 0 })}
               />
             </div>
+            {lessonForm.lesson_type === 'scorm' && (
+              <div className="space-y-2">
+                <Label htmlFor="lesson-scorm">SCORM Package</Label>
+                <Select
+                  value={lessonForm.scorm_package_id}
+                  onValueChange={(v) => setLessonForm({ ...lessonForm, scorm_package_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a SCORM package" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scormPackages.map((pkg) => (
+                      <SelectItem key={pkg.id} value={pkg.id}>{pkg.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {scormPackages.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No SCORM packages uploaded. Go to the SCORM tab to upload one first.</p>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="lesson-description">Description</Label>
               <Textarea
