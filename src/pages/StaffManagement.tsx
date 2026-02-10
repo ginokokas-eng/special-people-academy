@@ -41,11 +41,11 @@ const roleLabels: Record<AppRole, string> = {
 };
 
 const roleColors: Record<AppRole, string> = {
-  super_admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  ops_training_admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  trainer: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  learner: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+  super_admin: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
+  admin: 'bg-status-error-bg text-status-error-foreground dark:bg-destructive/20 dark:text-destructive',
+  ops_training_admin: 'bg-status-info-bg text-status-info-foreground dark:bg-info/20 dark:text-info',
+  trainer: 'bg-status-success-bg text-status-success-foreground dark:bg-success/20 dark:text-success',
+  learner: 'bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground',
 };
 
 export default function StaffManagement() {

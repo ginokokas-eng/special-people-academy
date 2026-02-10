@@ -165,9 +165,9 @@ export default function ScormPlayer() {
   };
 
   const statusColor: Record<string, string> = {
-    'completed': 'bg-green-100 text-green-800',
-    'passed': 'bg-green-100 text-green-800',
-    'failed': 'bg-red-100 text-red-800',
+    'completed': 'bg-status-success-bg text-status-success-foreground',
+    'passed': 'bg-status-success-bg text-status-success-foreground',
+    'failed': 'bg-status-error-bg text-status-error-foreground',
   };
 
   if (authLoading || loading) {

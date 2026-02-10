@@ -114,13 +114,13 @@ export default function CourseBuilder() {
 
   const getStatusBadge = (status: string, isPublished: boolean) => {
     if (isPublished) {
-      return <Badge className="bg-green-500">Published</Badge>;
+      return <Badge className="bg-success text-success-foreground">Published</Badge>;
     }
     switch (status) {
       case 'draft':
         return <Badge variant="secondary">Draft</Badge>;
       case 'review':
-        return <Badge className="bg-yellow-500">In Review</Badge>;
+        return <Badge className="bg-warning text-warning-foreground">In Review</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

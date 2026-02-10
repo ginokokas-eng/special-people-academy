@@ -95,7 +95,7 @@ export function PaymentsHealthPanel() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "processed":
-        return <Badge variant="default" className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" />Processed</Badge>;
+        return <Badge variant="default" className="bg-success text-success-foreground"><CheckCircle2 className="h-3 w-3 mr-1" />Processed</Badge>;
       case "failed":
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Failed</Badge>;
       case "received":
@@ -107,10 +107,10 @@ export function PaymentsHealthPanel() {
 
   const getHealthStatus = () => {
     if (summary.failedPayments24h > 0) {
-      return { status: "warning", color: "text-yellow-500", icon: AlertCircle };
+      return { status: "warning", color: "text-warning", icon: AlertCircle };
     }
     if (summary.latestWebhookReceived) {
-      return { status: "healthy", color: "text-green-500", icon: CheckCircle2 };
+      return { status: "healthy", color: "text-success", icon: CheckCircle2 };
     }
     return { status: "unknown", color: "text-muted-foreground", icon: AlertCircle };
   };

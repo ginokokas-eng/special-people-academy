@@ -43,21 +43,21 @@ export function CalendarSyncStatus({
           icon: CheckCircle2,
           label: 'Synced',
           variant: 'default' as const,
-          className: 'bg-green-100 text-green-800 border-green-200',
+          className: 'bg-status-success-bg text-status-success-foreground border-success/30',
         };
       case 'failed':
         return {
           icon: AlertCircle,
           label: 'Failed',
           variant: 'destructive' as const,
-          className: 'bg-red-100 text-red-800 border-red-200',
+          className: 'bg-status-error-bg text-status-error-foreground border-destructive/30',
         };
       case 'not_configured':
         return {
           icon: Settings2,
           label: 'Not Configured',
           variant: 'secondary' as const,
-          className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+          className: 'bg-status-warning-bg text-status-warning-foreground border-warning/30',
         };
       default:
         return {
@@ -91,7 +91,7 @@ export function CalendarSyncStatus({
             {(lastError || lastSyncedAt) && (
               <TooltipContent className="max-w-xs">
                 {lastError && (
-                  <p className="text-xs text-red-600 mb-1">{lastError}</p>
+                  <p className="text-xs text-destructive mb-1">{lastError}</p>
                 )}
                 {lastSyncedAt && (status === 'ok' || status === 'synced') && (
                   <p className="text-xs">
@@ -142,7 +142,7 @@ export function CalendarSyncStatus({
       </div>
 
       {lastError && (status === 'failed' || status === 'not_configured') && (
-        <p className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
+        <p className="text-xs text-destructive bg-status-error-bg p-2 rounded border border-destructive/30">
           {lastError}
         </p>
       )}
