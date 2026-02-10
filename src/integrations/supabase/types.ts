@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      bls_competency_signoffs: {
+        Row: {
+          action_plan: string | null
+          aed_use: boolean | null
+          aed_use_comments: string | null
+          assessed_at: string | null
+          assessor_id: string
+          assessor_notes: string | null
+          attempt_number: number
+          breathing_check: boolean | null
+          breathing_check_comments: string | null
+          chest_compressions: boolean | null
+          chest_compressions_comments: string | null
+          choking_response: boolean | null
+          choking_response_comments: string | null
+          course_id: string
+          created_at: string | null
+          handover_reporting: boolean | null
+          handover_reporting_comments: string | null
+          id: string
+          location: string | null
+          outcome: string | null
+          reassessment_date: string | null
+          recovery_position: boolean | null
+          recovery_position_comments: string | null
+          rescue_breaths: boolean | null
+          rescue_breaths_comments: string | null
+          scene_safety: boolean | null
+          scene_safety_comments: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action_plan?: string | null
+          aed_use?: boolean | null
+          aed_use_comments?: string | null
+          assessed_at?: string | null
+          assessor_id: string
+          assessor_notes?: string | null
+          attempt_number?: number
+          breathing_check?: boolean | null
+          breathing_check_comments?: string | null
+          chest_compressions?: boolean | null
+          chest_compressions_comments?: string | null
+          choking_response?: boolean | null
+          choking_response_comments?: string | null
+          course_id: string
+          created_at?: string | null
+          handover_reporting?: boolean | null
+          handover_reporting_comments?: string | null
+          id?: string
+          location?: string | null
+          outcome?: string | null
+          reassessment_date?: string | null
+          recovery_position?: boolean | null
+          recovery_position_comments?: string | null
+          rescue_breaths?: boolean | null
+          rescue_breaths_comments?: string | null
+          scene_safety?: boolean | null
+          scene_safety_comments?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action_plan?: string | null
+          aed_use?: boolean | null
+          aed_use_comments?: string | null
+          assessed_at?: string | null
+          assessor_id?: string
+          assessor_notes?: string | null
+          attempt_number?: number
+          breathing_check?: boolean | null
+          breathing_check_comments?: string | null
+          chest_compressions?: boolean | null
+          chest_compressions_comments?: string | null
+          choking_response?: boolean | null
+          choking_response_comments?: string | null
+          course_id?: string
+          created_at?: string | null
+          handover_reporting?: boolean | null
+          handover_reporting_comments?: string | null
+          id?: string
+          location?: string | null
+          outcome?: string | null
+          reassessment_date?: string | null
+          recovery_position?: boolean | null
+          recovery_position_comments?: string | null
+          rescue_breaths?: boolean | null
+          rescue_breaths_comments?: string | null
+          scene_safety?: boolean | null
+          scene_safety_comments?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bls_competency_signoffs_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bls_competency_signoffs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_participants: {
         Row: {
           booking_id: string
