@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, X, CheckCircle2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
 export default function ScormPlayer() {
   const { registrationId } = useParams<{ registrationId: string }>();
   const navigate = useNavigate();
@@ -67,12 +69,17 @@ export default function ScormPlayer() {
 
       setScormPackage(pkg);
 
-      // Build iframe URL from public storage
-      const { data: publicUrl } = supabase.storage
-        .from('scorm-extracted')
-        .getPublicUrl(`${pkg.storage_extracted_path}/${pkg.launch_path}`);
-
-      setIframeSrc(publicUrl.publicUrl);
+      // Build iframe URL using serve-scorm edge function for secure access
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) {
+        toast.error('Authentication error. Please sign in again.');
+        navigate('/auth');
+        return;
+      }
+      const scormBaseUrl = `${SUPABASE_URL}/functions/v1/serve-scorm/${pkg.id}`;
+      const launchUrl = `${scormBaseUrl}/${pkg.launch_path}?token=${encodeURIComponent(accessToken)}`;
+      setIframeSrc(launchUrl);
 
       // Create SCORM API adapter
       const adapter = new ScormApiAdapter({
