@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
+import { useNotifications } from '@/hooks/useNotifications';
 import { SupportDialog } from '@/components/shared/SupportDialog';
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const { unreadCount } = useNotifications();
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -150,6 +152,11 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
 
             <Button variant="ghost" size="icon" className="relative" onClick={() => setNotificationsOpen(true)} aria-label="Notifications">
               <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Button>
 
             <DropdownMenu>
