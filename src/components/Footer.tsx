@@ -1,8 +1,13 @@
-import { Twitter, Linkedin, Youtube, Mail } from "lucide-react";
+import { Twitter, Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.png";
+import { useBranding } from "@/hooks/useBrandingSettings";
 
 export const Footer = () => {
+  const branding = useBranding();
+  const logo = branding.logoMarkUrl || defaultLogo;
+  const platformName = branding.platformName || 'Special People Academy';
+
   const footerLinks = {
     Product: [
       { label: "Features", href: "/features" },
@@ -29,53 +34,59 @@ export const Footer = () => {
     ],
   };
 
+  const socialLinks = branding.socialLinks;
+  const footerLeft = (branding.footerTextLeft || '© {year} Special People Academy. All rights reserved.')
+    .replace('{year}', new Date().getFullYear().toString());
+  const footerRight = branding.footerTextRight || 'Made with ❤️ for every learner';
+
   return (
     <footer className="bg-foreground text-primary-foreground py-16 px-6">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl mb-4">
-              <img src={logo} alt="Special People Academy" className="h-9 w-auto object-contain" />
-              <span>Special People Academy</span>
+              <img src={logo} alt={platformName} className="h-9 w-auto object-contain" />
+              <span>{platformName}</span>
             </Link>
-            <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
-              Empowering special individuals to develop essential skills through personalized, inclusive training programs.
-            </p>
+            {branding.platformTagline && (
+              <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">{branding.platformTagline}</p>
+            )}
+            {!branding.platformTagline && (
+              <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
+                Empowering special individuals to develop essential skills through personalized, inclusive training programs.
+              </p>
+            )}
             <div className="flex gap-3">
-              <a 
-                href="https://x.com/YOUR_X_URL" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Twitter/X"
-                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a 
-                href="https://linkedin.com/company/YOUR_LINKEDIN_URL" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-              <a 
-                href="https://youtube.com/@YOUR_YOUTUBE_URL" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
-              >
-                <Youtube className="h-4 w-4" />
-              </a>
-              <a 
-                href="mailto:academy@specialpeople.org.uk"
-                aria-label="Email"
-                className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
+              {socialLinks.linkedin && (
+                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  <Linkedin className="h-4 w-4" />
+                </a>
+              )}
+              {socialLinks.facebook && (
+                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  <Facebook className="h-4 w-4" />
+                </a>
+              )}
+              {socialLinks.instagram && (
+                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  <Instagram className="h-4 w-4" />
+                </a>
+              )}
+              {socialLinks.youtube && (
+                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  <Youtube className="h-4 w-4" />
+                </a>
+              )}
+              {socialLinks.email && (
+                <a href={`mailto:${socialLinks.email}`} aria-label="Email"
+                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  <Mail className="h-4 w-4" />
+                </a>
+              )}
             </div>
           </div>
           {Object.entries(footerLinks).map(([title, links]) => (
@@ -94,9 +105,9 @@ export const Footer = () => {
           ))}
         </div>
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-primary-foreground/50">© 2026 Special People Academy. All rights reserved.</p>
+          <p className="text-sm text-primary-foreground/50">{footerLeft}</p>
           <div className="flex items-center gap-4 text-sm text-primary-foreground/50">
-            <span>Made with ❤️ for every learner</span>
+            <span>{footerRight}</span>
           </div>
         </div>
       </div>

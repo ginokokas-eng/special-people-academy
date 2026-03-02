@@ -45,18 +45,21 @@ export default function AdminSettings() {
             </Card>
           </Link>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5 text-primary" />
-                Branding
-              </CardTitle>
-              <CardDescription>Platform branding and appearance.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Brand customisation settings coming soon.</p>
-            </CardContent>
-          </Card>
+          <Link to="/admin-portal/settings/branding" className="block group">
+            <Card className="h-full transition-shadow group-hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5 text-primary" />
+                  Branding
+                  <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-foreground transition-colors" />
+                </CardTitle>
+                <CardDescription>Platform branding and appearance.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Manage logos, platform name, and footer content.</p>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card>
             <CardHeader>
