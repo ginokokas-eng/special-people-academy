@@ -5,7 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRedirectSettings } from "@/hooks/useRedirectSettings";
 import { useCart } from "@/hooks/useCart";
-import logo from "@/assets/logo.png";
+import { useBranding } from "@/hooks/useBrandingSettings";
+import defaultLogo from "@/assets/logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,9 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { itemCount: cartItemCount } = useCart();
+  const branding = useBranding();
+  const logo = branding.logoMarkUrl || defaultLogo;
+  const platformName = branding.platformName || 'Special People Academy';
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -66,14 +70,14 @@ export const Navbar = () => {
           <Link 
             to="/" 
             className="flex items-center gap-2 font-bold shrink-0 min-w-0"
-            aria-label="Special People Academy Home"
+            aria-label={`${platformName} Home`}
           >
-            <img src={logo} alt="Special People Academy" className="h-8 sm:h-9 w-auto object-contain flex-shrink-0" />
+            <img src={logo} alt={platformName} className="h-8 sm:h-9 w-auto object-contain flex-shrink-0" />
             <span 
               className="text-foreground text-sm sm:text-base truncate"
-              title="Special People Academy"
+              title={platformName}
             >
-              Special People Academy
+              {platformName}
             </span>
           </Link>
 

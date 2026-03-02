@@ -12,7 +12,8 @@ import {
   LogOut,
   Phone,
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import defaultLogo from '@/assets/logo.png';
+import { useBranding } from '@/hooks/useBrandingSettings';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
 import { useNotifications } from '@/hooks/useNotifications';
 import { SupportDialog } from '@/components/shared/SupportDialog';
@@ -47,6 +48,8 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const { unreadCount } = useNotifications();
+  const branding = useBranding();
+  const logo = branding.logoMarkUrl || defaultLogo;
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -107,7 +110,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
               </Button>
             ) : (
               <a href="/" className="flex items-center gap-2 font-bold text-lg">
-                <img src={logo} alt="Special People Academy" className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
+                <img src={logo} alt={branding.platformName} className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
                 <span className="hidden sm:inline text-foreground">Admin Portal</span>
               </a>
             )}

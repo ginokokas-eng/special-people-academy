@@ -13,7 +13,8 @@ import {
   LayoutDashboard,
   Phone,
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import defaultLogo from '@/assets/logo.png';
+import { useBranding } from '@/hooks/useBrandingSettings';
 import { Input } from '@/components/ui/input';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -42,6 +43,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const { unreadCount } = useNotifications();
+  const branding = useBranding();
+  const logo = branding.logoMarkUrl || defaultLogo;
+  const platformName = branding.platformName || 'Special People Academy';
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -80,8 +84,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </Button>
             
             <a href="/" className="flex items-center gap-2 font-bold text-lg">
-              <img src={logo} alt="Special People Academy" className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
-              <span className="hidden sm:inline text-foreground">Special People Academy</span>
+              <img src={logo} alt={platformName} className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
+              <span className="hidden sm:inline text-foreground">{platformName}</span>
             </a>
           </div>
 
