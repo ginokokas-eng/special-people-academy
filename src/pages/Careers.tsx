@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
 import { CTABanner } from "@/components/marketing/CTABanner";
@@ -170,8 +172,13 @@ const openRoles = [
 ];
 
 export default function Careers() {
+  const generalSettings = useGeneralSettings();
   const [applicationOpen, setApplicationOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState('General Application');
+
+  if (!generalSettings.enableCareerApplications) {
+    return <Navigate to="/" replace />;
+  }
 
   const openApplication = (roleTitle: string) => {
     setSelectedRole(roleTitle);

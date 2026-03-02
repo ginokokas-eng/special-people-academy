@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import defaultLogo from '@/assets/logo.png';
 import { useBranding } from '@/hooks/useBrandingSettings';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { Input } from '@/components/ui/input';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -44,8 +45,17 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [supportOpen, setSupportOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const branding = useBranding();
+  const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
   const platformName = branding.platformName || 'Special People Academy';
+
+  // Adjust learner nav based on general settings
+  const adjustedLearnerNavItems = learnerNavItems.map(item => {
+    if (item.href === '/my-courses' && generalSettings.learnerCoursesNavDestination === 'catalog') {
+      return { ...item, label: 'Courses', href: '/courses' };
+    }
+    return item;
+  });
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -182,7 +192,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}>
             <nav className="p-4 space-y-1">
-              {learnerNavItems.map((item) => {
+              {adjustedLearnerNavItems.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <Button
