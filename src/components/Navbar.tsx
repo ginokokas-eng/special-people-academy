@@ -3,6 +3,7 @@ import { Menu, X, ChevronDown, User, LogOut, Settings, BookOpen, Award, Shopping
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useRedirectSettings } from "@/hooks/useRedirectSettings";
 import { useCart } from "@/hooks/useCart";
 import logo from "@/assets/logo.png";
 import {
@@ -47,12 +48,14 @@ export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { itemCount: cartItemCount } = useCart();
 
+  const { logoutRedirectUrl } = useRedirectSettings();
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
       console.error('Sign out failed:', error);
     }
-    navigate('/');
+    navigate(logoutRedirectUrl);
   };
 
   return (

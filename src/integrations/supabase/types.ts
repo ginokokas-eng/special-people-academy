@@ -1319,6 +1319,30 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          id: string
+          section: string
+          settings: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          section: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          section?: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       practical_attendance: {
         Row: {
           attended: boolean | null
@@ -1823,6 +1847,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      settings_audit_log: {
+        Row: {
+          change_summary: string | null
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_value: Json | null
+          previous_value: Json | null
+          section: string
+        }
+        Insert: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value?: Json | null
+          previous_value?: Json | null
+          section: string
+        }
+        Update: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value?: Json | null
+          previous_value?: Json | null
+          section?: string
+        }
+        Relationships: []
       }
       staff_profiles: {
         Row: {

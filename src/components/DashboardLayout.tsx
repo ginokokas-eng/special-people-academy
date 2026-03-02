@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useRedirectSettings } from '@/hooks/useRedirectSettings';
 import { useRoles } from '@/hooks/useRoles';
 import { Button } from '@/components/ui/button';
 import { 
@@ -40,12 +41,14 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
 
+  const { logoutRedirectUrl } = useRedirectSettings();
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
       console.error('Sign out failed:', error);
     }
-    navigate('/');
+    navigate(logoutRedirectUrl);
   };
 
   const handleSearch = (e: React.FormEvent) => {

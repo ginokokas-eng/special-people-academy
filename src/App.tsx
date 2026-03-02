@@ -46,6 +46,7 @@ import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
 import IntegrationsStatus from "./pages/admin/IntegrationsStatus";
 import AdminSettings from "./pages/admin/AdminSettings";
+import SecuritySettings from "./pages/admin/SecuritySettings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
@@ -87,6 +88,7 @@ const App = () => (
                 <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['admin']}><CoursePreview /></ProtectedRoute>} />
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+                <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/trainer" element={<ProtectedRoute requiredRoles={['trainer']}><TrainerPortal /></ProtectedRoute>} />
 
                 {/* Legacy route redirects */}
