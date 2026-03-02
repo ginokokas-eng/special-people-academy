@@ -49,6 +49,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import SecuritySettings from "./pages/admin/SecuritySettings";
 import NotificationSettings from "./pages/admin/NotificationSettings";
 import BrandingSettings from "./pages/admin/BrandingSettings";
+import GeneralSettings from "./pages/admin/GeneralSettings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
@@ -93,6 +94,7 @@ const App = () => (
                 <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/notifications" element={<ProtectedRoute requiredRoles={['admin']}><NotificationSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/branding" element={<ProtectedRoute requiredRoles={['admin']}><BrandingSettings /></ProtectedRoute>} />
+                <Route path="/admin-portal/settings/general" element={<ProtectedRoute requiredRoles={['admin']}><GeneralSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/trainer" element={<ProtectedRoute requiredRoles={['trainer']}><TrainerPortal /></ProtectedRoute>} />
 
                 {/* Legacy route redirects */}

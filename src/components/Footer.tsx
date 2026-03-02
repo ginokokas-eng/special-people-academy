@@ -2,9 +2,11 @@ import { Twitter, Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-re
 import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.png";
 import { useBranding } from "@/hooks/useBrandingSettings";
+import { useGeneralSettings } from "@/hooks/useGeneralSettings";
 
 export const Footer = () => {
   const branding = useBranding();
+  const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
   const platformName = branding.platformName || 'Special People Academy';
 
@@ -23,7 +25,7 @@ export const Footer = () => {
     ],
     Company: [
       { label: "About Us", href: "/about" },
-      { label: "Careers", href: "/careers" },
+      ...(generalSettings.enableCareerApplications ? [{ label: "Careers", href: "/careers" }] : []),
       { label: "Contact", href: "/contact" },
       { label: "Partners", href: "/partners" },
     ],

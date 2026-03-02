@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRedirectSettings } from "@/hooks/useRedirectSettings";
 import { useCart } from "@/hooks/useCart";
 import { useBranding } from "@/hooks/useBrandingSettings";
+import { useGeneralSettings } from "@/hooks/useGeneralSettings";
 import defaultLogo from "@/assets/logo.png";
 import {
   DropdownMenu,
@@ -49,8 +50,12 @@ export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { itemCount: cartItemCount } = useCart();
   const branding = useBranding();
+  const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
   const platformName = branding.platformName || 'Special People Academy';
+  const coursesHref = user
+    ? (generalSettings.learnerCoursesNavDestination === 'catalog' ? '/courses' : '/my-courses')
+    : '/courses';
 
   const { logoutRedirectUrl } = useRedirectSettings();
 
@@ -91,7 +96,7 @@ export const Navbar = () => {
                     asChild
                     className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
                   >
-                    <Link to={user ? "/my-courses" : "/courses"}>Courses</Link>
+                    <Link to={coursesHref}>Courses</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
@@ -270,7 +275,7 @@ export const Navbar = () => {
             <div className="flex flex-col gap-1">
               {/* Courses — learners see My Courses, visitors see catalogue */}
               <Link
-                to={user ? "/my-courses" : "/courses"}
+                to={coursesHref}
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
               >

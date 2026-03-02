@@ -61,18 +61,21 @@ export default function AdminSettings() {
             </Card>
           </Link>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
-                General
-              </CardTitle>
-              <CardDescription>General platform configuration.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">General settings coming soon.</p>
-            </CardContent>
-          </Card>
+          <Link to="/admin-portal/settings/general" className="block group">
+            <Card className="h-full transition-shadow group-hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-primary" />
+                  General
+                  <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-foreground transition-colors" />
+                </CardTitle>
+                <CardDescription>Organisation profile, training defaults, and feature toggles.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Manage organisation details, default training rules, and enable/disable platform features.</p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
     </PortalLayout>
