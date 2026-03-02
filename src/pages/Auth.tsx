@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRedirectSettings } from '@/hooks/useRedirectSettings';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
@@ -21,6 +22,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signIn, signUp, loading } = useAuth();
+  const { loginRedirectUrl } = useRedirectSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Determine initial tab based on route
@@ -60,7 +62,7 @@ export default function Auth() {
     } else if (roles.includes('trainer')) {
       navigate('/admin-portal/trainer');
     } else {
-      navigate('/dashboard');
+      navigate(loginRedirectUrl);
     }
   };
 
@@ -97,7 +99,7 @@ export default function Auth() {
       } else if (roles?.includes('trainer')) {
         navigate('/admin-portal/trainer');
       } else {
-        navigate('/dashboard');
+        navigate(loginRedirectUrl);
       }
     }
   };
@@ -128,7 +130,7 @@ export default function Auth() {
       }
     } else {
       toast.success('Account created successfully! Welcome to Special People Academy.');
-      navigate('/dashboard');
+      navigate(loginRedirectUrl);
     }
   };
 
@@ -170,7 +172,7 @@ export default function Auth() {
           navigate('/dashboard');
         }
       } else {
-        navigate('/dashboard');
+          navigate(loginRedirectUrl);
       }
     }
     setIsSubmitting(false);

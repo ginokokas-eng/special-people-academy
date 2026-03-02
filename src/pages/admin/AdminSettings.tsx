@@ -1,6 +1,7 @@
 import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Shield, Bell, Palette } from 'lucide-react';
+import { Settings, Shield, Bell, Palette, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function AdminSettings() {
   return (
@@ -12,18 +13,21 @@ export default function AdminSettings() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                Security
-              </CardTitle>
-              <CardDescription>Authentication and access control settings.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Role-based access is managed via Staff Management. Contact your super admin for changes.</p>
-            </CardContent>
-          </Card>
+          <Link to="/admin-portal/settings/security" className="block group">
+            <Card className="h-full transition-shadow group-hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Security
+                  <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-foreground transition-colors" />
+                </CardTitle>
+                <CardDescription>Authentication methods, domain restrictions, and session controls.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Manage sign-in methods, allowed domains, and session behaviour.</p>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card>
             <CardHeader>
