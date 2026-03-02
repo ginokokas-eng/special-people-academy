@@ -29,18 +29,21 @@ export default function AdminSettings() {
             </Card>
           </Link>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-primary" />
-                Notifications
-              </CardTitle>
-              <CardDescription>Email and in-app notification preferences.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Notification settings coming soon.</p>
-            </CardContent>
-          </Card>
+          <Link to="/admin-portal/settings/notifications" className="block group">
+            <Card className="h-full transition-shadow group-hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  Notifications
+                  <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-foreground transition-colors" />
+                </CardTitle>
+                <CardDescription>Email and in-app notification preferences.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Configure notification channels, events, and reminder rules.</p>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card>
             <CardHeader>
