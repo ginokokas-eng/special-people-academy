@@ -7,7 +7,7 @@ export default function TermsOfService() {
   return (
     <MarketingLayout 
       title="Terms of Service" 
-      description="Terms governing use of Special People Academy's platform and services."
+      description="Terms governing use of Special People Training's platform and services."
     >
       <div className="py-16 md:py-20 px-6">
         <div className="container mx-auto max-w-3xl">
@@ -30,7 +30,7 @@ export default function TermsOfService() {
             </div>
 
             <p>
-              These Terms of Service ("Terms") govern your access to and use of Special People Academy (the "Platform"), operated by <strong>[Company Legal Name]</strong>, located at [Company Address]. By accessing or using the Platform, you agree to be bound by these Terms.
+              These Terms of Service ("Terms") govern your access to and use of Special People Training (the "Platform"), operated by <strong>[Company Legal Name]</strong>, located at [Company Address]. By accessing or using the Platform, you agree to be bound by these Terms.
             </p>
 
             {/* 1. Acceptance of Terms */}

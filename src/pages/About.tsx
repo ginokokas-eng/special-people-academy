@@ -105,7 +105,7 @@ export default function About() {
       <PageHero 
         badge="About Us" 
         title="Made with care—for every learner" 
-        subtitle="Special People Academy exists to help special individuals build essential life skills through inclusive training tools that respect each person's pace and strengths."
+        subtitle="Special People Training exists to help special individuals build essential life skills through inclusive training tools that respect each person's pace and strengths."
         primaryCTA={{ text: "Partner With Us", href: "/partners" }}
         secondaryCTA={{ text: "Contact Us", href: "/contact" }}
       />
@@ -123,7 +123,7 @@ export default function About() {
           <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
             <p>
               We believe that every person—regardless of ability—deserves access to training that helps them grow. 
-              Special People Academy was built to make that possible.
+              Special People Training was built to make that possible.
             </p>
             <p>
               Our platform helps educators, therapists, families, and program leaders deliver consistent, 
@@ -263,7 +263,7 @@ export default function About() {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-muted-foreground">
-                We are committed to making Special People Academy accessible to all users, 
+                We are committed to making Special People Training accessible to all users, 
                 including those who use assistive technologies. Our platform is designed to meet 
                 WCAG 2.1 AA standards and is continuously tested with real users.
               </p>

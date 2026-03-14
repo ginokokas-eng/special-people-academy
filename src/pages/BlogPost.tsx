@@ -124,7 +124,7 @@ export default function BlogPost() {
             Ready to put these ideas into practice?
           </h2>
           <p className="text-muted-foreground mb-6">
-            See how Special People Academy can help your organization deliver accessible, personalized training.
+            See how Special People Training can help your organization deliver accessible, personalized training.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">

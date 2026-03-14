@@ -160,7 +160,7 @@ const openRoles = [
       "Identify and develop strategic partnerships with schools, agencies, and organizations",
       "Manage partner relationships and ensure mutual success",
       "Collaborate with marketing on co-branded initiatives",
-      "Represent Special People Academy at events and conferences"
+      "Represent Special People Training at events and conferences"
     ],
     requirements: [
       "3+ years in partnerships, business development, or sales",
@@ -203,7 +203,7 @@ export default function Careers() {
           <div className="text-center mb-12">
             <Badge className="mb-4">Why Join Us</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Why work at Special People Academy
+              Why work at Special People Training
             </h2>
           </div>
           

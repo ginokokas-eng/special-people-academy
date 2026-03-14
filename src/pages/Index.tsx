@@ -13,8 +13,8 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Special People Academy | Inclusive Training & CPD Courses</title>
-        <meta name="description" content="Special People Academy provides inclusive, CPD-certified training courses for care professionals. Build essential skills with step-by-step lessons and progress tracking." />
+        <title>Special People Training | Inclusive Training & CPD Courses</title>
+        <meta name="description" content="Special People Training provides inclusive, CPD-certified training courses for care professionals. Build essential skills with step-by-step lessons and progress tracking." />
       </Helmet>
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />

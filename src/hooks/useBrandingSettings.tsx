@@ -21,12 +21,12 @@ export interface BrandingSettings {
 }
 
 const DEFAULT_SETTINGS: BrandingSettings = {
-  platformName: 'Special People Academy',
+  platformName: 'Special People Training',
   platformTagline: '',
   logoMarkUrl: '',
   logoFullUrl: '',
   faviconUrl: '',
-  footerTextLeft: '© {year} Special People Academy. All rights reserved.',
+  footerTextLeft: '© {year} Special People Training. All rights reserved.',
   footerTextRight: 'Made with ❤️ for every learner',
   socialLinks: {
     linkedin: '',

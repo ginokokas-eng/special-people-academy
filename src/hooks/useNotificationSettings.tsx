@@ -23,7 +23,7 @@ export interface NotificationSettings {
 const DEFAULT_SETTINGS: NotificationSettings = {
   enableInAppNotifications: true,
   enableEmailNotifications: true,
-  fromName: 'Special People Academy',
+  fromName: 'Special People Training',
   fromEmail: 'training@specialpeople.org.uk',
   replyToEmail: 'training@specialpeople.org.uk',
   notifyLearnerCourseAssigned: true,

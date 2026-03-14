@@ -47,7 +47,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const branding = useBranding();
   const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
-  const platformName = branding.platformName || 'Special People Academy';
+  const platformName = branding.platformName || 'Special People Training';
 
   // Adjust learner nav based on general settings
   const adjustedLearnerNavItems = learnerNavItems.map(item => {

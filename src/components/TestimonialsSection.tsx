@@ -53,7 +53,7 @@ export const TestimonialsSection = () => {
             Trusted by Care Providers Across the UK
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hear from the teams transforming their training with Special People Academy.
+            Hear from the teams transforming their training with Special People Training.
           </p>
         </div>
 

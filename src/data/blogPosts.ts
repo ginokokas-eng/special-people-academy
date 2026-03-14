@@ -393,12 +393,12 @@ A safe, motivating environment doesn't happen by accident. It requires intention
   {
     id: "8",
     slug: "whats-new-january-2026",
-    title: "What's New in Special People Academy (January 2026)",
+    title: "What's New in Special People Training (January 2026)",
     excerpt: "This month we've launched improved progress dashboards, new lesson templates, and enhanced accessibility features. Here's everything you need to know.",
     content: `
 ## January 2026 Updates
 
-We've been busy improving Special People Academy based on your feedback. Here's what's new this month.
+We've been busy improving Special People Training based on your feedback. Here's what's new this month.
 
 ## 🎯 Improved Progress Dashboards
 
@@ -440,7 +440,7 @@ We're working on:
 
 As always, we'd love your feedback. Reach out through the Help Center or your account manager.
 
-Thank you for being part of the Special People Academy community!
+Thank you for being part of the Special People Training community!
     `,
     author: "SPA Product Team",
     date: "2026-01-20",

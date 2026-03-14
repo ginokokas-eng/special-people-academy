@@ -148,7 +148,7 @@ export default function Contact() {
     return (
       <MarketingLayout 
         title="Contact" 
-        description="Contact Special People Academy for demos, support, partnerships, or general questions."
+        description="Contact Special People Training for demos, support, partnerships, or general questions."
       >
         <div className="container mx-auto max-w-xl px-6 py-24">
           <Card className="text-center">
@@ -184,7 +184,7 @@ export default function Contact() {
   return (
     <MarketingLayout 
       title="Contact" 
-      description="Contact Special People Academy for demos, support, partnerships, or general questions."
+      description="Contact Special People Training for demos, support, partnerships, or general questions."
     >
       <PageHero 
         badge="Contact Us" 
@@ -216,7 +216,7 @@ export default function Contact() {
                     <CardHeader>
                       <CardTitle>Request a Demo</CardTitle>
                       <CardDescription>
-                        Tell us about your program and we'll show you how Special People Academy can help.
+                        Tell us about your program and we'll show you how Special People Training can help.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>

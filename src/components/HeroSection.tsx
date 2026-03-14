@@ -24,7 +24,7 @@ export const HeroSection = () => {
             <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
               Transform Your Skills with{" "}
               <span className="text-gradient-primary">
-                Special People Academy
+                Special People Training
               </span>
             </h1>
 

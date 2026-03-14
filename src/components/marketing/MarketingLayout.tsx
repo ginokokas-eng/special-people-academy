@@ -12,7 +12,7 @@ export const MarketingLayout = ({ children, title, description }: MarketingLayou
   return (
     <>
       <Helmet>
-        <title>{title} | Special People Academy</title>
+        <title>{title} | Special People Training</title>
         <meta name="description" content={description} />
       </Helmet>
       <div className="min-h-screen bg-background">

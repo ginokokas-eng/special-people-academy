@@ -43,7 +43,7 @@ const upcomingWebinars = [
 const onDemandWebinars = [
   {
     id: "4",
-    title: "Intro to Special People Academy",
+    title: "Intro to Special People Training",
     description: "A comprehensive overview of the platform, core features, and how organizations use SPA to deliver inclusive training.",
     host: "SPA Team",
     duration: "25 minutes",
