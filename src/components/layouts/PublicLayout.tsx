@@ -20,7 +20,7 @@ export const PublicLayout = ({ children, title, description }: PublicLayoutProps
     <>
       {(title || description) && (
         <Helmet>
-          {title && <title>{title} | Special People Academy</title>}
+          {title && <title>{title} | Special People Training</title>}
           {description && <meta name="description" content={description} />}
         </Helmet>
       )}

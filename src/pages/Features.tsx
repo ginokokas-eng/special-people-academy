@@ -138,7 +138,7 @@ const accessibilityCommitments = [
 
 const testimonials = [
   {
-    quote: "Special People Academy transformed how we deliver life skills training. The step-by-step approach means every learner can succeed at their own pace, and the progress reports make our funding reviews so much easier.",
+    quote: "Special People Training transformed how we deliver life skills training. The step-by-step approach means every learner can succeed at their own pace, and the progress reports make our funding reviews so much easier.",
     name: "Maria Gonzales",
     role: "Program Director, Community Skills Center"
   },
@@ -156,7 +156,7 @@ const testimonials = [
 
 const faqs = [
   {
-    question: "Who is Special People Academy for?",
+    question: "Who is Special People Training for?",
     answer: "SPA is designed for individuals with diverse learning needs and the people who support them—families, caregivers, educators, therapists, job coaches, and program administrators. Whether you're teaching life skills at home or running a workforce readiness program, SPA adapts to your context."
   },
   {
@@ -172,7 +172,7 @@ const faqs = [
     answer: "Progress is tracked through daily notes, skill mastery levels (emerging, developing, mastered), and visual trend reports. You can see how each skill is progressing over time and generate summary reports for reviews or meetings."
   },
   {
-    question: "Is Special People Academy mobile-friendly?",
+    question: "Is Special People Training mobile-friendly?",
     answer: "Yes. SPA is fully responsive and works on tablets, smartphones, and desktop computers. Whether you're in a classroom, at home, or on the go, you can access lessons and log progress from any device."
   },
   {
@@ -190,7 +190,7 @@ export default function Features() {
       <PageHero
         badge="Platform Features"
         title="Inclusive training built around each learner"
-        subtitle="Special People Academy helps you plan, deliver, and track skill-building programs with accessible, step-by-step learning—designed for diverse needs and real-world goals."
+        subtitle="Special People Training helps you plan, deliver, and track skill-building programs with accessible, step-by-step learning—designed for diverse needs and real-world goals."
         primaryCTA={{ text: "Request a demo", href: "/contact" }}
         secondaryCTA={{ text: "Start a free trial", href: "/auth" }}
       />
@@ -203,7 +203,7 @@ export default function Features() {
               Why Teams Choose SPA
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From families to schools to employers, teams trust Special People Academy to deliver meaningful, measurable skill development.
+              From families to schools to employers, teams trust Special People Training to deliver meaningful, measurable skill development.
             </p>
           </div>
           
@@ -269,7 +269,7 @@ export default function Features() {
               Built for Everyday Use Cases
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See how Special People Academy supports real-world skill building across different settings.
+              See how Special People Training supports real-world skill building across different settings.
             </p>
           </div>
           
@@ -318,7 +318,7 @@ export default function Features() {
                 Accessibility Is Not an Add-On
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                At Special People Academy, accessibility is built into every feature from the ground up. We believe everyone deserves equal access to learning, regardless of ability. Our platform is designed to meet WCAG guidelines and continuously improved based on user feedback.
+                At Special People Training, accessibility is built into every feature from the ground up. We believe everyone deserves equal access to learning, regardless of ability. Our platform is designed to meet WCAG guidelines and continuously improved based on user feedback.
               </p>
               <ul className="space-y-3">
                 {accessibilityCommitments.map((commitment, index) => (
@@ -385,13 +385,13 @@ export default function Features() {
 
       <FAQSection 
         title="Frequently Asked Questions"
-        subtitle="Get answers to the most common questions about Special People Academy."
+        subtitle="Get answers to the most common questions about Special People Training."
         faqs={faqs} 
       />
 
       <CTABanner
         title="Ready to Build Skills with Confidence?"
-        subtitle="Join hundreds of families, schools, and organizations using Special People Academy to deliver meaningful, measurable learning experiences."
+        subtitle="Join hundreds of families, schools, and organizations using Special People Training to deliver meaningful, measurable learning experiences."
         primaryCTA={{ text: "Request a demo", href: "/contact" }}
         secondaryCTA={{ text: "View pricing", href: "/pricing" }}
       />

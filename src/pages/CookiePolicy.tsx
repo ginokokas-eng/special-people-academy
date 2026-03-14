@@ -73,7 +73,7 @@ export default function CookiePolicy() {
   return (
     <MarketingLayout 
       title="Cookie Policy" 
-      description="Learn how Special People Academy uses cookies and similar technologies and how you can manage preferences."
+      description="Learn how Special People Training uses cookies and similar technologies and how you can manage preferences."
     >
       <div className="py-16 md:py-20 px-6">
         <div className="container mx-auto max-w-3xl">
@@ -96,7 +96,7 @@ export default function CookiePolicy() {
             </div>
 
             <p>
-              This Cookie Policy explains how <strong>[Company Legal Name]</strong> ("we," "us," or "our") uses cookies and similar tracking technologies when you visit or use Special People Academy (the "Platform"). It also explains your choices regarding these technologies.
+              This Cookie Policy explains how <strong>[Company Legal Name]</strong> ("we," "us," or "our") uses cookies and similar tracking technologies when you visit or use Special People Training (the "Platform"). It also explains your choices regarding these technologies.
             </p>
             <p>
               This policy should be read alongside our{" "}

@@ -24,7 +24,7 @@ export const CTASection = () => {
             </h2>
             
             <p className="text-primary-foreground/80 max-w-xl mx-auto text-lg">
-              Join organizations using Special People Academy to unlock potential, build confidence, and drive meaningful growth.
+              Join organizations using Special People Training to unlock potential, build confidence, and drive meaningful growth.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">

@@ -146,7 +146,7 @@ export default function Integrations() {
       <PageHero
         badge="Connect Your Tools"
         title="Integrations that fit into your workflow"
-        subtitle="Bring Special People Academy into the tools your team already uses—so adoption is easier and reporting is smoother."
+        subtitle="Bring Special People Training into the tools your team already uses—so adoption is easier and reporting is smoother."
         primaryCTA={{ text: "Request a Demo", href: "/contact" }}
         secondaryCTA={{ text: "Contact Us", href: "/contact" }}
       />

@@ -52,7 +52,7 @@ export const Navbar = () => {
   const branding = useBranding();
   const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
-  const platformName = branding.platformName || 'Special People Academy';
+  const platformName = branding.platformName || 'Special People Training';
   const coursesHref = user
     ? (generalSettings.learnerCoursesNavDestination === 'catalog' ? '/courses' : '/my-courses')
     : '/courses';

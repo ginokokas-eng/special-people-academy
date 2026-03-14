@@ -8,7 +8,7 @@ export const Footer = () => {
   const branding = useBranding();
   const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;
-  const platformName = branding.platformName || 'Special People Academy';
+  const platformName = branding.platformName || 'Special People Training';
 
   const footerLinks = {
     Product: [
@@ -37,7 +37,7 @@ export const Footer = () => {
   };
 
   const socialLinks = branding.socialLinks;
-  const footerLeft = (branding.footerTextLeft || '© {year} Special People Academy. All rights reserved.')
+  const footerLeft = (branding.footerTextLeft || '© {year} Special People Training. All rights reserved.')
     .replace('{year}', new Date().getFullYear().toString());
   const footerRight = branding.footerTextRight || 'Made with ❤️ for every learner';
 

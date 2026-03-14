@@ -252,7 +252,7 @@ export default function AdminSettings() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-1.5">
-                  <StatusChip variant="secondary">{(brand.platformName as string) || 'Special People Academy'}</StatusChip>
+                  <StatusChip variant="secondary">{(brand.platformName as string) || 'Special People Training'}</StatusChip>
                   <StatusChip variant={brand.logoMarkUrl ? 'default' : 'outline'}>
                     Logo: {brand.logoMarkUrl ? 'Set' : 'Not set'}
                   </StatusChip>

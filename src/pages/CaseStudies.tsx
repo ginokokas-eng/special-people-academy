@@ -54,7 +54,7 @@ export default function CaseStudies() {
   return (
     <MarketingLayout
       title="Case Studies"
-      description="See how schools and programs use Special People Academy to deliver consistent, inclusive skill-building and track progress."
+      description="See how schools and programs use Special People Training to deliver consistent, inclusive skill-building and track progress."
     >
       <PageHero
         badge="Case Studies"

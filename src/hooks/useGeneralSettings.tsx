@@ -19,7 +19,7 @@ export interface GeneralSettings {
 }
 
 const DEFAULT_SETTINGS: GeneralSettings = {
-  organisationName: 'Special People Academy',
+  organisationName: 'Special People Training',
   supportEmail: 'training@specialpeople.org.uk',
   supportPhone: '',
   address: '',

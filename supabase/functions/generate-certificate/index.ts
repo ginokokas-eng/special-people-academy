@@ -11,7 +11,7 @@ function isValidUUID(uuid: string): boolean {
   return typeof uuid === 'string' && uuidRegex.test(uuid);
 }
 
-// PDF generation using SVG template with Special People Academy branding
+// PDF generation using SVG template with Special People Training branding
 function generateCertificatePDF(data: {
   learnerName: string;
   courseTitle: string;
@@ -82,7 +82,7 @@ function generateCertificatePDF(data: {
   <rect x="25" y="100" width="792" height="4" fill="url(#greenGradient)"/>
   
   <!-- Academy Logo/Name in header -->
-  <text x="421" y="55" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="white" text-anchor="middle" font-weight="bold" letter-spacing="1">Special People Academy</text>
+  <text x="421" y="55" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="white" text-anchor="middle" font-weight="bold" letter-spacing="1">Special People Training</text>
   <text x="421" y="80" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="rgba(255,255,255,0.9)" text-anchor="middle" letter-spacing="2">EXCELLENCE IN PROFESSIONAL TRAINING</text>
   
   <!-- Certificate Title -->
@@ -131,7 +131,7 @@ function generateCertificatePDF(data: {
   <!-- Footer bar -->
   <rect x="25" y="545" width="792" height="25" fill="url(#purpleGradient)" rx="0"/>
   <rect x="25" y="540" width="792" height="5" fill="url(#greenGradient)"/>
-  <text x="421" y="562" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="white" text-anchor="middle" letter-spacing="1">Special People Academy • Professional Training & Development • www.specialpeopleacademy.com</text>
+  <text x="421" y="562" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="white" text-anchor="middle" letter-spacing="1">Special People Training • Professional Training & Development • www.specialpeopleacademy.com</text>
   
   <!-- Bottom corners rounding fix -->
   <rect x="25" y="545" width="12" height="25" fill="url(#purpleGradient)"/>
@@ -295,7 +295,7 @@ Deno.serve(async (req) => {
     if (!instructorName) {
       const isPBSCourse = courseTitle.toLowerCase().includes('pbs') || 
                           courseTitle.toLowerCase().includes('positive behaviour');
-      instructorName = isPBSCourse ? 'Elisa Bianco' : 'Special People Academy';
+      instructorName = isPBSCourse ? 'Elisa Bianco' : 'Special People Training';
     }
     
     const cpdHours = course?.cpd_hours || undefined;

@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
   return (
     <MarketingLayout 
       title="Privacy Policy" 
-      description="Learn how we collect, use, and protect personal information when you use Special People Academy."
+      description="Learn how we collect, use, and protect personal information when you use Special People Training."
     >
       <div className="py-16 md:py-20 px-6">
         <div className="container mx-auto max-w-3xl">
@@ -30,7 +30,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <p>
-              <strong>[Company Legal Name]</strong> ("we," "us," or "our"), located at [Company Address], operates Special People Academy (the "Platform"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Platform.
+              <strong>[Company Legal Name]</strong> ("we," "us," or "our"), located at [Company Address], operates Special People Training (the "Platform"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Platform.
             </p>
             <p>
               By using the Platform, you consent to the practices described in this Privacy Policy. If you do not agree with this policy, please do not use our services.
@@ -39,7 +39,7 @@ export default function PrivacyPolicy() {
             {/* 1. Overview */}
             <h2>1. Overview</h2>
             <p>
-              Special People Academy is an inclusive training platform designed to help individuals build essential life skills. We are committed to protecting your privacy and ensuring that your personal information is handled responsibly and in compliance with applicable data protection laws, including the UK GDPR and, where applicable, the EU GDPR.
+              Special People Training is an inclusive training platform designed to help individuals build essential life skills. We are committed to protecting your privacy and ensuring that your personal information is handled responsibly and in compliance with applicable data protection laws, including the UK GDPR and, where applicable, the EU GDPR.
             </p>
             <p>
               This policy applies to all users of the Platform, including learners, educators, administrators, and caregivers.
@@ -168,7 +168,7 @@ export default function PrivacyPolicy() {
             {/* 9. Children's Privacy */}
             <h2>9. Children's Privacy</h2>
             <p>
-              Special People Academy may be used by organizations and caregivers to support learners of all ages, including minors. <strong>We do not collect personal information directly from children under 16.</strong>
+              Special People Training may be used by organizations and caregivers to support learners of all ages, including minors. <strong>We do not collect personal information directly from children under 16.</strong>
             </p>
             <p>
               When the Platform is used to support minors, all data is collected and managed by authorized educators, caregivers, or organizational administrators who have obtained appropriate consent from parents or legal guardians.

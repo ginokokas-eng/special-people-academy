@@ -33,7 +33,7 @@ const partnerTypes = [
   { 
     icon: Settings, 
     title: "Implementation Partners", 
-    description: "For consultants, schools, and organizations supporting rollout and training. Help clients get the most from Special People Academy with expert guidance.",
+    description: "For consultants, schools, and organizations supporting rollout and training. Help clients get the most from Special People Training with expert guidance.",
     ideal: "Consultants, education agencies, training providers"
   },
   { 
@@ -114,7 +114,7 @@ export default function Partners() {
     >
       <PageHero 
         badge="Partner Program" 
-        title="Partner with Special People Academy" 
+        title="Partner with Special People Training" 
         subtitle="Let's bring inclusive, effective skill-building to more learners—together."
         primaryCTA={{ text: "Apply to Partner", href: "#apply" }}
         secondaryCTA={{ text: "Contact Us", href: "/contact" }}

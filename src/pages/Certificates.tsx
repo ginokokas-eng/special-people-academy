@@ -107,7 +107,7 @@ export default function Certificates() {
   };
 
   const handleShare = async (cert: Certificate) => {
-    const shareText = `I've completed "${cert.course.title}" at Special People Academy! Certificate ID: ${cert.certificate_number}`;
+    const shareText = `I've completed "${cert.course.title}" at Special People Training! Certificate ID: ${cert.certificate_number}`;
     
     if (navigator.share) {
       try {
@@ -183,7 +183,7 @@ export default function Certificates() {
                       </div>
                       <div className="flex items-center justify-center gap-2 text-sm text-primary">
                         <Award className="h-4 w-4" />
-                        <span>Special People Academy</span>
+                        <span>Special People Training</span>
                       </div>
                     </div>
                   </div>

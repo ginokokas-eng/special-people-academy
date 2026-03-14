@@ -129,7 +129,7 @@ export default function Auth() {
         toast.error(error.message);
       }
     } else {
-      toast.success('Account created successfully! Welcome to Special People Academy.');
+      toast.success('Account created successfully! Welcome to Special People Training.');
       navigate(loginRedirectUrl);
     }
   };
@@ -269,7 +269,7 @@ export default function Auth() {
       <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-foreground">Welcome to Special People Academy</h1>
+            <h1 className="text-2xl font-bold text-foreground">Welcome to Special People Training</h1>
             <p className="text-muted-foreground mt-2">Your journey to learning starts here</p>
           </div>
 
@@ -365,7 +365,7 @@ export default function Auth() {
             <TabsContent value="signup">
               <CardHeader className="pt-0">
                 <CardTitle>Create Account</CardTitle>
-                <CardDescription>Join Special People Academy today</CardDescription>
+                <CardDescription>Join Special People Training today</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
