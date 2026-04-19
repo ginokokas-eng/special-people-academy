@@ -66,31 +66,6 @@ export const HeroSection = () => {
               </Button>
             </div>
 
-            {/* Mini proof row */}
-            <div className="flex items-center gap-6 pt-4">
-              <div className="flex -space-x-2">
-                {["A", "M", "S", "J"].map((i, idx) => (
-                  <div
-                    key={i}
-                    className="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-[11px] font-semibold text-white"
-                    style={{
-                      background: [
-                        "linear-gradient(135deg,#7C3AED,#4C1D95)",
-                        "linear-gradient(135deg,#06B6D4,#0EA5E9)",
-                        "linear-gradient(135deg,#10B981,#059669)",
-                        "linear-gradient(135deg,#F59E0B,#D97706)",
-                      ][idx],
-                    }}
-                  >
-                    {i}
-                  </div>
-                ))}
-              </div>
-              <div className="text-sm text-[hsl(259_20%_30%)]">
-                <span className="font-semibold text-[hsl(259_72%_14%)]">1,200+ care staff</span>{" "}
-                trained this month
-              </div>
-            </div>
 
             {/* Two editorial cards under the hero copy */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7 pt-8">
