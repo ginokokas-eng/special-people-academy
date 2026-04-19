@@ -1,127 +1,82 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  Clock, 
-  Users, 
-  Star, 
-  Play, 
-  BookOpen, 
-  Filter,
-  Loader2 
-} from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Search, BookOpen, Loader2, ArrowRight } from 'lucide-react';
+import { EditorialCourseCard, type EditorialCourse } from '@/components/courses/EditorialCourseCard';
 
-interface CourseOffering {
-  base_price_gbp: number;
-  active: boolean;
-}
-
-interface Course {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string;
-  thumbnail_url: string | null;
-  duration_minutes: number;
-  level: string;
+interface Course extends EditorialCourse {
   is_published: boolean;
-  course_offerings: CourseOffering[];
+  level: string;
   enrollmentCount?: number;
 }
 
+const CATEGORY_FILTERS = [
+  { key: 'all', label: 'All courses' },
+  { key: 'Mandatory', label: 'Mandatory' },
+  { key: 'Clinical', label: 'Clinical' },
+  { key: 'Dementia & EOL', label: 'Dementia & EOL' },
+  { key: 'Safeguarding', label: 'Safeguarding' },
+  { key: 'Leadership', label: 'Leadership' },
+  { key: 'Specialist', label: 'Specialist' },
+];
 
 export default function Courses() {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [levelFilter, setLevelFilter] = useState<string>('all');
-  const [categories, setCategories] = useState<string[]>([]);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select(
+            'id, title, description, category, thumbnail_url, duration_minutes, level, is_published, cpd_hours, course_offerings(id, base_price_gbp, active)'
+          )
+          .eq('is_published', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setCourses((data as Course[]) || []);
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchCourses();
   }, []);
 
-  const fetchCourses = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*, course_offerings(base_price_gbp, active)')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+  const counts = useMemo(() => {
+    const tally: Record<string, number> = { all: courses.length };
+    courses.forEach((c) => {
+      if (!c.category) return;
+      tally[c.category] = (tally[c.category] || 0) + 1;
+    });
+    return tally;
+  }, [courses]);
 
-      if (error) throw error;
-
-      // Get unique categories
-      const uniqueCategories = [...new Set(data?.map(c => c.category) || [])];
-      setCategories(uniqueCategories);
-
-      // Get enrollment counts
-      const coursesWithCounts = await Promise.all(
-        (data || []).map(async (course) => {
-          const { count } = await supabase
-            .from('enrollments')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
-          
-          return { ...course, enrollmentCount: count || 0 };
-        })
-      );
-
-      setCourses(coursesWithCounts);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
-    const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
-
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours === 0) return `${mins}m`;
-    if (mins === 0) return `${hours}h`;
-    return `${hours}h ${mins}m`;
-  };
-
-  const getPriceDisplay = (offerings: CourseOffering[]) => {
-    const activeOfferings = offerings?.filter(o => o.active) || [];
-    if (activeOfferings.length === 0) return "Pricing TBC";
-    const minPrice = Math.min(...activeOfferings.map(o => o.base_price_gbp));
-    if (minPrice === 0) return "Free";
-    return `From £${minPrice}`;
-  };
+  const filteredCourses = useMemo(() => {
+    return courses.filter((course) => {
+      const matchesSearch =
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      const matchesCategory = activeFilter === 'all' || course.category === activeFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [courses, searchQuery, activeFilter]);
 
   if (loading) {
     return (
       <PublicLayout title="Courses" description="Browse our CPD-certified training courses">
-        <div className="container py-12 flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="container py-20 flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-[hsl(262_83%_45%)]" />
         </div>
       </PublicLayout>
     );
@@ -129,125 +84,111 @@ export default function Courses() {
 
   return (
     <PublicLayout title="Courses" description="Browse our CPD-certified training courses">
-      <div className="container py-8 md:py-12">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Course Catalog</h1>
-            <p className="text-muted-foreground mt-1">Explore and enroll in courses</p>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+      <section className="bg-white">
+        <div className="section-container py-14 lg:py-20">
+          {/* Editorial header */}
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
+            <div className="lg:col-span-7">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="h-px w-8 bg-[hsl(189_94%_30%)]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(189_94%_30%)]">
+                  01 / Catalog
+                </span>
+              </div>
+              <h1 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
+                Courses for every shift,
+                <br />
+                every role, every registration.
+              </h1>
             </div>
-            <div className="flex gap-2">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[160px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={levelFilter} onValueChange={setLevelFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="Complex">Complex</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="lg:col-span-5 lg:pt-6">
+              <p className="text-[15px] lg:text-base leading-relaxed text-[hsl(259_20%_35%)]">
+                From the Care Certificate onward. Mapped to the 2024 Adult Social Care
+                workforce framework and reviewed by registered clinicians quarterly.
+              </p>
             </div>
           </div>
 
-          {/* Results count */}
-          <p className="text-sm text-muted-foreground">
+          {/* Search */}
+          <div className="relative max-w-xl mb-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(259_20%_55%)]" />
+            <Input
+              placeholder="Search courses by title or topic…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-11 h-12 rounded-full border-[#EEEAF8] bg-white focus-visible:ring-[hsl(189_94%_30%)]"
+            />
+          </div>
+
+          {/* Filter pills */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {CATEGORY_FILTERS.map((f) => {
+              const count = counts[f.key] ?? 0;
+              const isActive = activeFilter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => setActiveFilter(f.key)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2 ${
+                    isActive
+                      ? 'bg-[hsl(259_72%_14%)] text-white border border-[hsl(259_72%_14%)]'
+                      : 'bg-white text-[hsl(259_72%_14%)] border border-[#EEEAF8] hover:border-[#D6CCF5]'
+                  }`}
+                >
+                  {f.label}
+                  <span
+                    className={`tabular-nums text-[11px] font-medium ${
+                      isActive ? 'text-white/70' : 'text-[hsl(259_20%_55%)]'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="text-[13px] text-[hsl(259_20%_45%)] mb-10">
             Showing {filteredCourses.length} of {courses.length} courses
           </p>
 
-          {/* Courses grid */}
+          {/* Cards */}
           {filteredCourses.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No courses found</h3>
-                <p className="text-muted-foreground">Try adjusting your search or filters</p>
-              </CardContent>
-            </Card>
+            <div className="text-center py-16 rounded-3xl border border-dashed border-[#E8E4F7] bg-[hsl(262_50%_98%)]">
+              <BookOpen className="h-12 w-12 text-[hsl(259_20%_55%)] mx-auto mb-4" />
+              <h3 className="font-heading text-lg font-semibold text-[hsl(259_72%_14%)] mb-2">
+                No courses found
+              </h3>
+              <p className="text-[hsl(259_20%_40%)] mb-6">
+                Try adjusting your search or category filter.
+              </p>
+              <Button
+                variant="outline"
+                className="rounded-full border-[#E8E4F7]"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveFilter('all');
+                }}
+              >
+                Reset filters
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course) => (
-                <Card 
-                  key={course.id} 
-                  className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
-                  onClick={() => navigate(`/courses/${course.id}`)}
+              {filteredCourses.map((course, index) => (
+                <div
+                  key={course.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
                 >
-                  <div className="relative aspect-video bg-muted overflow-hidden">
-                    {course.thumbnail_url ? (
-                      <img 
-                        src={course.thumbnail_url} 
-                        alt={course.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                        <BookOpen className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
-                        <Play className="h-6 w-6 text-foreground ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
-                  <CardHeader className="pb-2">
-                    <p className="text-xs font-medium text-primary">{course.category}</p>
-                    <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                      {course.title}
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {course.description}
-                    </p>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xl font-bold text-foreground">
-                        {getPriceDisplay(course.course_offerings)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {formatDuration(course.duration_minutes || 0)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {course.enrollmentCount}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-warning fill-warning" />
-                        4.8
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <EditorialCourseCard course={course} />
+                </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </section>
     </PublicLayout>
   );
 }
