@@ -15,7 +15,7 @@ export const HeroSection = () => {
       </div>
 
       <div className="container mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Left column */}
           <div className="lg:col-span-6 space-y-7 animate-fade-up">
             {/* Trust pill */}
