@@ -96,83 +96,42 @@ export const HeroSection = () => {
           {/* Right column — glass compliance dashboard */}
           <div className="lg:col-span-6 relative animate-fade-up mt-4 lg:mt-0" style={{ animationDelay: "150ms" }}>
             <div className="relative max-w-[560px] lg:ml-auto">
-              {/* Floating mini cards */}
-              <div className="hidden md:flex absolute -left-4 lg:-left-8 -top-5 z-20 items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.25)] px-3.5 py-2.5 animate-fade-up" style={{ animationDelay: "350ms" }}>
-                <div className="h-9 w-9 rounded-xl bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_32%)] flex items-center justify-center">
-                  <BadgeCheck className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Certificate issued</div>
-                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Medication — Sarah O.</div>
-                </div>
-              </div>
+              {/* Live stats dark card */}
+              <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-7 sm:p-8 min-h-[440px] flex flex-col">
+                <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
+                <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
 
-              <div className="hidden md:flex absolute -right-4 -bottom-5 z-20 items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.25)] px-3.5 py-2.5 animate-fade-up" style={{ animationDelay: "500ms" }}>
-                <div className="h-9 w-9 rounded-xl bg-[hsl(38_92%_50%/0.15)] text-[hsl(38_92%_40%)] flex items-center justify-center">
-                  <Clock className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Renewal due</div>
-                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Safeguarding · 14 days</div>
-                </div>
-              </div>
-
-              {/* Main glass dashboard card */}
-              <div className="relative rounded-3xl border border-[#E8E4F7] bg-white/85 backdrop-blur-xl shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-6 sm:p-7">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <div className="text-xs font-medium text-[hsl(259_20%_45%)]">Compliance overview</div>
-                    <div className="font-heading text-lg font-bold text-[hsl(259_72%_14%)]">
-                      Sunrise Care Group
-                    </div>
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(152_60%_50%)] opacity-60" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(152_60%_50%)]" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_28%)] text-[11px] font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[hsl(152_55%_42%)]" />
-                    Inspection-ready
+
+                  <div className="font-heading text-[64px] sm:text-[80px] font-bold text-white leading-none tracking-tight tabular-nums">
+                    47,291
+                  </div>
+
+                  <p className="text-[14px] leading-relaxed text-white/70 mt-4 max-w-xs">
+                    certifications issued to care workers across the UK this month alone.
+                  </p>
+
+                  <div className="flex-1" />
+
+                  <div className="flex flex-wrap gap-1.5 mt-6">
+                    {["Care Homes", "NHS Trusts", "Supported Living", "Domiciliary"].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 rounded-full border border-white/20 bg-white/5 text-[10px] font-semibold tracking-wide uppercase text-white/85"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                {/* KPI row */}
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[
-                    { label: "Compliant", value: "94%", icon: ShieldCheck, color: "text-[hsl(152_55%_32%)]", bg: "bg-[hsl(152_55%_42%/0.10)]" },
-                    { label: "Certificates", value: "1,284", icon: Award, color: "text-[hsl(262_83%_45%)]", bg: "bg-[hsl(262_83%_58%/0.10)]" },
-                    { label: "Trained", value: "+12%", icon: TrendingUp, color: "text-[hsl(217_91%_45%)]", bg: "bg-[hsl(217_91%_60%/0.10)]" },
-                  ].map((k) => {
-                    const Icon = k.icon;
-                    return (
-                      <div key={k.label} className="rounded-xl border border-[#EEEAF8] p-3 bg-white/60">
-                        <div className={`h-7 w-7 rounded-lg ${k.bg} ${k.color} flex items-center justify-center mb-2`}>
-                          <Icon className="h-3.5 w-3.5" />
-                        </div>
-                        <div className="text-base font-bold text-[hsl(259_72%_14%)] leading-none">{k.value}</div>
-                        <div className="text-[11px] text-[hsl(259_20%_45%)] mt-1">{k.label}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Progress rows */}
-                <div className="space-y-3.5">
-                  {[
-                    { name: "Safeguarding Adults", pct: 96, tone: "bg-[hsl(152_55%_42%)]" },
-                    { name: "Medication Management", pct: 88, tone: "bg-[hsl(262_83%_58%)]" },
-                    { name: "Moving & Handling", pct: 72, tone: "bg-[hsl(38_92%_50%)]" },
-                    { name: "Basic Life Support", pct: 81, tone: "bg-[hsl(217_91%_60%)]" },
-                  ].map((row) => (
-                    <div key={row.name}>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-medium text-[hsl(259_72%_14%)]">{row.name}</span>
-                        <span className="font-semibold text-[hsl(259_20%_30%)]">{row.pct}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-[hsl(259_30%_94%)] overflow-hidden">
-                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${row.pct}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </article>
             </div>
           </div>
         </div>
