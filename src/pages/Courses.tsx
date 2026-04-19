@@ -89,12 +89,6 @@ export default function Courses() {
           {/* Editorial header */}
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
             <div className="lg:col-span-7">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="h-px w-8 bg-[hsl(189_94%_30%)]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(189_94%_30%)]">
-                  01 / Catalog
-                </span>
-              </div>
               <h1 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
                 Courses for every shift,
                 <br />
