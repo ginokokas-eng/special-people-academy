@@ -1,6 +1,6 @@
-import { Shield, Zap, Target, Award } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ShieldCheck, Globe, CalendarClock, UserCheck, Layers, FileCheck2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,16 +21,16 @@ interface FeatureCardData {
 
 const featuresData: FeatureCardData[] = [
   {
-    icon: <Shield className="h-6 w-6" />,
-    title: "Compliance Ready (CQC & Ofsted Aligned)",
-    shortText: "Stay inspection-ready with training mapped to real-world requirements, robust evidence, and clear audit trails.",
+    icon: <ShieldCheck className="h-5 w-5" />,
+    title: "CQC-ready by default",
+    shortText:
+      "Audit packs generate in one click. Every completion is timestamped, signed and mapped to the Quality Statements.",
     modalHeading: "Compliance you can evidence",
     bullets: [
-      "CQC-aligned training oversight: clear records of who trained, when, and competency status.",
-      "Ofsted-aware practice: safeguarding, behaviour support, and care standards reflected in course design (where relevant to children's services).",
-      "Governance-friendly reporting: downloadable training matrices, attendance logs, and refresher alerts.",
-      "Policy-linked learning: connect courses to your internal policies/procedures (Safeguarding, MCA, medication, epilepsy, first aid, etc.).",
-      "Audit trail: version control for materials and certificates, so you can demonstrate continuous improvement.",
+      "One-click audit packs aligned to the CQC Quality Statements.",
+      "Timestamped completions with assessor sign-off and version history.",
+      "Downloadable training matrices, attendance logs, and refresher alerts.",
+      "Policy-linked learning across Safeguarding, MCA, medication and more.",
     ],
     ctas: [
       { label: "View Courses", href: "/courses", variant: "default" },
@@ -38,16 +38,33 @@ const featuresData: FeatureCardData[] = [
     ],
   },
   {
-    icon: <Zap className="h-6 w-6" />,
-    title: "Microlearning that fits shift work",
-    shortText: "Short, focused learning blocks designed for busy carers, nurses, and support teams—without compromising quality.",
-    modalHeading: "Learning built for the realities of care",
+    icon: <Globe className="h-5 w-5" />,
+    title: "Built for UK care",
+    shortText:
+      "Aligned to the Care Certificate, CQC, Care Inspectorate (Scotland) and CIW (Wales). Not generic US compliance.",
+    modalHeading: "Designed for the UK regulatory landscape",
     bullets: [
-      "Bite-sized lessons (5–15 minutes) to reduce training fatigue.",
-      "Mobile-friendly access for staff on different shifts and locations.",
-      "Knowledge checks to confirm understanding (quick quizzes / scenario questions).",
-      "Practical focus: what to do, what to record, what to escalate.",
-      "Blended learning options: combine online learning + in-person practical competency where required.",
+      "Mapped to the 15 Care Certificate Standards from day one.",
+      "References CQC (England), Care Inspectorate (Scotland) and CIW (Wales).",
+      "Reviewed quarterly by registered UK clinicians and former managers.",
+      "Reflects current statutory frameworks — not US healthcare boilerplate.",
+    ],
+    ctas: [
+      { label: "Browse training", href: "/courses", variant: "default" },
+      { label: "See features", href: "/features", variant: "outline" },
+    ],
+  },
+  {
+    icon: <CalendarClock className="h-5 w-5" />,
+    title: "Built for rotas, not desks",
+    shortText:
+      "Short, focused modules designed for handover gaps and shift breaks. Mobile-friendly across every device.",
+    modalHeading: "Learning that fits real shift patterns",
+    bullets: [
+      "5–15 minute modules learners actually finish on shift.",
+      "Mobile-first experience for staff across sites and time zones.",
+      "Quick knowledge checks and scenario questions.",
+      "Blend online learning with in-person practical sign-off.",
     ],
     ctas: [
       { label: "See how it works", href: "/features", variant: "default" },
@@ -55,16 +72,16 @@ const featuresData: FeatureCardData[] = [
     ],
   },
   {
-    icon: <Target className="h-6 w-6" />,
-    title: "Personalized Paths for each role",
-    shortText: "Role-based learning journeys for support workers, senior carers, nurses, and therapists—tailored to service needs.",
-    modalHeading: "Role-specific learning journeys (not one-size-fits-all)",
+    icon: <UserCheck className="h-5 w-5" />,
+    title: "Personalised role pathways",
+    shortText:
+      "Tailored journeys for support workers, senior carers, nurses and team leads — assigned automatically.",
+    modalHeading: "Role-specific learning journeys",
     bullets: [
-      "Role pathways: Support Worker, Senior Support Worker, Team Lead, Registered Nurse, Healthcare Assistant, Physiotherapy/Allied roles (as applicable).",
-      "Client-specific add-ons: match training to complex needs (epilepsy rescue meds, PEG/enteral feeding, anaphylaxis, PBS).",
-      "Skills gap tracking: identify what's missing and assign the next module automatically (or via admin).",
-      "Refresher schedules: automated reminders for annual/bi-annual renewals based on course type.",
-      "Manager oversight: coordinators and clinical leads can monitor progress by team, site, or client package.",
+      "Pathways for Support Worker, Senior Carer, Team Lead, Nurse and Allied roles.",
+      "Client-specific add-ons: epilepsy rescue meds, PEG/enteral feeding, PBS.",
+      "Skills-gap tracking with automatic next-module assignment.",
+      "Manager oversight by team, site or client package.",
     ],
     ctas: [
       { label: "Talk to us about pathways", href: "/contact", variant: "default" },
@@ -72,16 +89,33 @@ const featuresData: FeatureCardData[] = [
     ],
   },
   {
-    icon: <Award className="h-6 w-6" />,
-    title: "Verified Certificates (CPD Provider)",
-    shortText: "Industry-recognised certification and clear proof of learning—easy to share, store, and audit.",
+    icon: <Layers className="h-5 w-5" />,
+    title: "Practical sign-off built in",
+    shortText:
+      "Hands-on competency captured by trainers in the field — no paper forms, no chasing assessors.",
+    modalHeading: "Practical competency, properly evidenced",
+    bullets: [
+      "Trainer-led practical sign-off with photo and signature capture.",
+      "Reassessment dates auto-scheduled based on course type.",
+      "Outcome categories: competent, competent-with-support, requires reassessment.",
+      "Linked directly to the learner's audit-ready record.",
+    ],
+    ctas: [
+      { label: "Talk to us", href: "/contact", variant: "default" },
+      { label: "View Courses", href: "/courses", variant: "outline" },
+    ],
+  },
+  {
+    icon: <FileCheck2 className="h-5 w-5" />,
+    title: "Verified CPD certificates",
+    shortText:
+      "Industry-recognised certificates with CPD hours, learner ID and outcomes — easy to share and audit.",
     modalHeading: "Certificates that mean something",
     bullets: [
-      "CPD provider approach: deliver structured learning with clear outcomes and CPD hours (where applicable).",
-      "Certificates include: learner name, course title, learning outcomes, CPD hours (if CPD-certified), completion date, and certificate ID.",
-      "Download anytime: PDF certificates stored in the learner profile for quick access.",
-      "Manager view: export certificates for tenders, audits, and compliance packs.",
-      "Practical competency sign-off: for hands-on courses, include assessor sign-off and expiry date.",
+      "CPD hours, learning outcomes, completion date and certificate ID on every cert.",
+      "PDF certificates stored in the learner profile, downloadable any time.",
+      "Manager export for tenders, audits and compliance packs.",
+      "Practical sign-off and expiry date for hands-on courses.",
     ],
     ctas: [
       { label: "View Pricing", href: "/pricing", variant: "default" },
@@ -98,20 +132,18 @@ interface FeatureCardProps {
 const FeatureCard = ({ feature, onClick }: FeatureCardProps) => (
   <button
     onClick={onClick}
-    className="group card-soft card-soft-hover p-6 text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2"
+    className="group rounded-3xl border border-[#EEEAF8] bg-white p-6 lg:p-7 text-left w-full transition-all duration-300 shadow-[0_1px_2px_rgba(20,10,60,0.04)] hover:shadow-[0_18px_40px_-22px_rgba(76,29,149,0.18)] hover:border-[#D6CCF5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(189_94%_30%)] focus-visible:ring-offset-2"
     aria-label={`Learn more about ${feature.title}`}
   >
-    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4C1D95] flex items-center justify-center text-white mb-5 transition-transform duration-300 group-hover:scale-105">
+    <div className="w-10 h-10 rounded-xl bg-[hsl(189_94%_94%)] text-[hsl(189_94%_28%)] flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-105">
       {feature.icon}
     </div>
-    <h3 className="font-heading font-bold text-[hsl(259_72%_14%)] text-lg leading-snug mb-2">
+    <h3 className="font-heading font-bold text-[hsl(259_72%_14%)] text-[19px] leading-snug mb-3">
       {feature.title}
     </h3>
-    <p className="text-[hsl(259_20%_40%)] text-sm leading-relaxed">{feature.shortText}</p>
-    <span className="inline-flex items-center gap-1 text-[hsl(262_83%_45%)] text-sm font-semibold mt-4 group-hover:gap-2 transition-all">
-      Learn more
-      <span aria-hidden>→</span>
-    </span>
+    <p className="text-[hsl(259_20%_40%)] text-[14px] leading-relaxed">
+      {feature.shortText}
+    </p>
   </button>
 );
 
@@ -120,25 +152,80 @@ export const FeaturesSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="section-y bg-white">
-      <div className="section-container">
-        <div className="max-w-2xl mb-12 lg:mb-14">
-          <span className="eyebrow mb-3">Why us</span>
-          <h2 className="heading-display text-3xl lg:text-[40px] leading-tight mt-3">
-            Why care providers choose Special People Training
-          </h2>
-          <p className="mt-3 text-[hsl(259_20%_30%)] text-base lg:text-lg max-w-xl">
-            Practical, inspection-aware learning that fits how UK care services actually run —
-            built with frontline teams, not for them.
-          </p>
+    <section className="section-y bg-white relative overflow-hidden">
+      {/* Soft ambient corner glow */}
+      <div aria-hidden className="pointer-events-none absolute -top-20 right-0 w-[520px] h-[520px] rounded-full bg-[hsl(217_91%_60%/0.08)] blur-[120px]" />
+
+      <div className="section-container relative">
+        {/* Editorial header */}
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-12 lg:mb-14">
+          <div className="lg:col-span-7">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-px w-8 bg-[hsl(189_94%_30%)]" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(189_94%_30%)]">
+                02 / The Difference
+              </span>
+            </div>
+            <h2 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
+              Not another LMS.<br />
+              A training partner that<br />
+              knows what 3am looks like.
+            </h2>
+          </div>
+          <div className="lg:col-span-5 lg:pt-6">
+            <p className="text-[15px] lg:text-base leading-relaxed text-[hsl(259_20%_35%)]">
+              Built by clinicians and former care home managers. Every course is written,
+              filmed and reviewed by people who have done the work.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+        {/* Dark promise band */}
+        <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0B2545] via-[#0E2F5A] to-[#0A1E3D] p-8 sm:p-10 lg:p-14 mb-10 lg:mb-12 shadow-[0_30px_80px_-30px_rgba(11,37,69,0.5)]">
+          <div aria-hidden className="absolute -top-24 -left-16 w-[420px] h-[420px] rounded-full bg-[hsl(217_91%_60%/0.18)] blur-[140px]" />
+          <div aria-hidden className="absolute -bottom-24 -right-10 w-[360px] h-[360px] rounded-full bg-[hsl(38_92%_50%/0.10)] blur-[140px]" />
+
+          <div className="relative text-white max-w-3xl">
+            <div className="flex items-center gap-2 mb-5 text-[hsl(38_92%_60%)]">
+              <span className="text-base leading-none">−</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em]">
+                The Special People Promise
+              </span>
+            </div>
+            <h3 className="font-heading text-[28px] sm:text-[34px] lg:text-[40px] leading-[1.1] font-bold tracking-tight">
+              Your staff deserve training that{" "}
+              <span className="text-[hsl(38_92%_55%)]">respects their time,</span> their
+              intelligence, and the weight they carry.
+            </h3>
+
+            <div className="grid sm:grid-cols-2 gap-8 mt-10 pt-8 border-t border-white/15">
+              <div>
+                <div className="font-heading text-[44px] lg:text-[56px] font-bold leading-none text-white tabular-nums">
+                  12<span className="text-[hsl(38_92%_60%)]">m</span>
+                </div>
+                <p className="text-[13px] text-white/70 leading-relaxed mt-3 max-w-xs">
+                  Average module length. Designed for handover, not all-day classroom blocks.
+                </p>
+              </div>
+              <div>
+                <div className="font-heading text-[44px] lg:text-[56px] font-bold leading-none text-white tabular-nums">
+                  87<span className="text-[hsl(38_92%_60%)]">%</span>
+                </div>
+                <p className="text-[13px] text-white/70 leading-relaxed mt-3 max-w-xs">
+                  Of learners say they finish modules on shift. We built this for rotas, not desks.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature cards grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
           {featuresData.map((feature, index) => (
             <div
               key={index}
               className="animate-fade-up"
-              style={{ animationDelay: `${index * 80}ms` }}
+              style={{ animationDelay: `${index * 70}ms` }}
             >
               <FeatureCard
                 feature={feature}
@@ -155,7 +242,7 @@ export const FeaturesSection = () => {
           {selectedFeature && (
             <>
               <DialogHeader>
-                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center text-primary-foreground mb-4">
+                <div className="w-12 h-12 rounded-xl bg-[hsl(189_94%_94%)] text-[hsl(189_94%_28%)] flex items-center justify-center mb-4">
                   {selectedFeature.icon}
                 </div>
                 <DialogTitle className="text-xl">{selectedFeature.modalHeading}</DialogTitle>
@@ -163,7 +250,7 @@ export const FeaturesSection = () => {
                   Details about {selectedFeature.title}
                 </DialogDescription>
               </DialogHeader>
-              
+
               <ul className="space-y-3 my-4">
                 {selectedFeature.bullets.map((bullet, idx) => (
                   <li key={idx} className="flex gap-3 text-sm text-muted-foreground">
