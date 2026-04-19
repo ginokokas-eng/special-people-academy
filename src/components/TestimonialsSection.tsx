@@ -46,30 +46,37 @@ const column3 = testimonials.filter((_, i) => i % 3 === 2);
 
 export const TestimonialsSection = () => {
   return (
-    <section className="py-20 px-6 bg-background">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Trusted by Care Providers Across the UK
+    <section className="section-y bg-white relative overflow-hidden">
+      {/* Soft ambient glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-[hsl(262_83%_58%/0.05)] blur-[120px]" />
+      </div>
+
+      <div className="section-container relative">
+        <div className="max-w-2xl mx-auto text-center mb-12 lg:mb-14">
+          <span className="eyebrow mb-3">Social proof</span>
+          <h2 className="heading-display text-3xl lg:text-[40px] leading-tight mt-3">
+            Trusted by care providers across the UK
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hear from the teams transforming their training with Special People Training.
+          <p className="text-[hsl(259_20%_30%)] mt-3 text-base lg:text-lg">
+            Hear from registered managers, training leads and operations directors using
+            Special People Training every day.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[500px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
-          <TestimonialsColumn 
-            testimonials={column1} 
-            duration={25}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[520px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_88%,transparent)]">
+          <TestimonialsColumn
+            testimonials={column1}
+            duration={28}
           />
-          <TestimonialsColumn 
-            testimonials={column2} 
-            duration={30}
+          <TestimonialsColumn
+            testimonials={column2}
+            duration={34}
             className="hidden md:block"
           />
-          <TestimonialsColumn 
-            testimonials={column3} 
-            duration={22}
+          <TestimonialsColumn
+            testimonials={column3}
+            duration={24}
             className="hidden lg:block"
           />
         </div>
