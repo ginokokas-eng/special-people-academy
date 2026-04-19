@@ -55,10 +55,9 @@ export const Footer = () => {
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
               <img src={logo} alt={platformName} className="h-9 w-auto object-contain" />
               <span className="font-heading font-bold text-lg leading-tight">
-                <span className="block">Special</span>
-                <span className="block">People</span>
+                <span className="block">Special People</span>
                 <span className="block text-[11px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
-                  TRAINING<br />ACADEMY
+                  TRAINING ACADEMY
                 </span>
               </span>
             </Link>
