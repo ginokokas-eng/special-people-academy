@@ -1,4 +1,4 @@
-import { Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
+import { Linkedin, Youtube, Mail, Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
@@ -12,102 +12,147 @@ export const Footer = () => {
 
   const footerLinks = {
     Platform: [
-      { label: "Features", href: "/features" },
-      { label: "Courses", href: "/courses" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Integrations", href: "/integrations" },
+      { label: "Course catalog", href: "/courses" },
+      { label: "For care homes", href: "/enterprise" },
+      { label: "For NHS trusts", href: "/enterprise" },
+      { label: "For domiciliary", href: "/enterprise" },
+      { label: "Integrations", href: "/integrations", badge: "NEW" as const },
     ],
     Compliance: [
-      { label: "Enterprise", href: "/enterprise" },
-      { label: "Case Studies", href: "/case-studies" },
-      { label: "Partners", href: "/partners" },
-      { label: "Help Center", href: "/help-center" },
+      { label: "CQC audit packs", href: "/features" },
+      { label: "Care Inspectorate", href: "/features" },
+      { label: "CIW Wales", href: "/features" },
+      { label: "Skills for Care", href: "/features" },
+      { label: "CPD certification", href: "/features" },
     ],
     Resources: [
-      { label: "Blog", href: "/blog" },
+      { label: "Case studies", href: "/case-studies" },
+      { label: "CQC inspection guide", href: "/blog" },
+      { label: "Blog & insights", href: "/blog" },
+      { label: "Help centre", href: "/help-center" },
       { label: "Webinars", href: "/webinars" },
-      { label: "Help Center", href: "/help-center" },
     ],
     Company: [
-      { label: "About Us", href: "/about" },
-      ...(generalSettings.enableCareerApplications ? [{ label: "Careers", href: "/careers" }] : []),
+      { label: "About us", href: "/about" },
+      ...(generalSettings.enableCareerApplications
+        ? [{ label: "Careers", href: "/careers", badge: "5" as const }]
+        : []),
+      { label: "Press", href: "/about" },
       { label: "Contact", href: "/contact" },
-      { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms of Service", href: "/terms-of-service" },
+      { label: "Partner programme", href: "/partners" },
     ],
   };
 
   const socialLinks = branding.socialLinks;
-  const footerLeft = (branding.footerTextLeft || '© {year} Special People Training. All rights reserved.')
-    .replace('{year}', new Date().getFullYear().toString());
-  const footerRight = branding.footerTextRight || 'Made with ❤️ for every learner';
+  const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#0F0626] text-white relative overflow-hidden">
-      {/* Subtle ambient glow */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] rounded-full bg-[hsl(262_83%_58%/0.12)] blur-[140px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-[hsl(217_91%_60%/0.08)] blur-[140px]" />
-      </div>
-
-      <div className="relative section-container py-16 lg:py-20">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10 mb-14">
+    <footer className="bg-white text-[hsl(259_72%_14%)] border-t border-[#EEEAF8]">
+      <div className="section-container py-14 lg:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10 mb-12">
+          {/* Brand column */}
           <div className="col-span-2">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
               <img src={logo} alt={platformName} className="h-9 w-auto object-contain" />
-              <span className="font-heading font-bold text-lg">{platformName}</span>
+              <span className="font-heading font-bold text-lg leading-tight">
+                <span className="block">Special</span>
+                <span className="block">People</span>
+                <span className="block text-[11px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
+                  TRAINING<br />ACADEMY
+                </span>
+              </span>
             </Link>
-            {branding.platformTagline ? (
-              <p className="text-white/65 text-sm leading-relaxed mb-7 max-w-xs">{branding.platformTagline}</p>
-            ) : (
-              <p className="text-white/65 text-sm leading-relaxed mb-7 max-w-xs">
-                CPD-certified, inspection-ready training built with UK care providers.
-              </p>
-            )}
+            <p className="text-[hsl(259_20%_38%)] text-sm leading-relaxed mb-6 max-w-[15rem]">
+              CPD-certified training for the UK care sector. Built with clinicians, registered
+              managers and the carers who show up every day.
+            </p>
             <div className="flex gap-2">
               {socialLinks.linkedin && (
-                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
-                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
+                <a
+                  href={socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
                   <Linkedin className="h-4 w-4" />
                 </a>
               )}
+              {socialLinks.twitter && (
+                <a
+                  href={socialLinks.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter / X"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
+                  <Twitter className="h-4 w-4" />
+                </a>
+              )}
               {socialLinks.facebook && (
-                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
+                <a
+                  href={socialLinks.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
                   <Facebook className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.instagram && (
-                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
                   <Instagram className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.youtube && (
-                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
+                <a
+                  href={socialLinks.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
                   <Youtube className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.email && (
-                <a href={`mailto:${socialLinks.email}`} aria-label="Email"
-                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
+                <a
+                  href={`mailto:${socialLinks.email}`}
+                  aria-label="Email"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
+                >
                   <Mail className="h-4 w-4" />
                 </a>
               )}
             </div>
           </div>
+
+          {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="font-semibold text-[11px] uppercase tracking-[0.18em] text-white/55 mb-4">{title}</h4>
-              <ul className="space-y-2.5">
+              <h4 className="font-heading font-bold text-[15px] text-[hsl(259_72%_14%)] mb-5">
+                {title}
+              </h4>
+              <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       to={link.href}
-                      className="text-sm text-white/75 hover:text-white transition-colors"
+                      className="inline-flex items-center gap-2 text-sm text-[hsl(259_20%_38%)] hover:text-[hsl(259_72%_14%)] transition-colors"
                     >
                       {link.label}
+                      {"badge" in link && link.badge && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#F59E0B] text-[#1A1448] text-[10px] font-bold tracking-wide">
+                          {link.badge}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -115,10 +160,29 @@ export const Footer = () => {
             </div>
           ))}
         </div>
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-white/50">{footerLeft}</p>
-          <div className="flex items-center gap-4 text-xs text-white/50">
-            <span>{footerRight}</span>
+
+        {/* Divider + bottom bar */}
+        <div className="pt-8 border-t border-[#EEEAF8] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <p className="text-xs text-[hsl(259_20%_45%)]">
+            © {year} Special People Training Academy Ltd. Registered in England & Wales. Company
+            No. 12345678.
+          </p>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[hsl(259_20%_45%)]">
+            <Link to="/privacy-policy" className="hover:text-[hsl(259_72%_14%)] transition-colors">
+              Privacy
+            </Link>
+            <Link to="/terms-of-service" className="hover:text-[hsl(259_72%_14%)] transition-colors">
+              Terms
+            </Link>
+            <Link to="/cookie-policy" className="hover:text-[hsl(259_72%_14%)] transition-colors">
+              Cookie preferences
+            </Link>
+            <Link to="/help-center" className="hover:text-[hsl(259_72%_14%)] transition-colors">
+              Accessibility
+            </Link>
+            <Link to="/about" className="hover:text-[hsl(259_72%_14%)] transition-colors">
+              Modern slavery
+            </Link>
           </div>
         </div>
       </div>
