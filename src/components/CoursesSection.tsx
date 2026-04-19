@@ -1,28 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, Star, ArrowRight, GraduationCap, ShoppingCart } from "lucide-react";
+import { ArrowRight, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EditorialCourseCard, type EditorialCourse } from "@/components/courses/EditorialCourseCard";
 
-interface CourseOffering {
-  id: string;
-  base_price_gbp: number;
-  active: boolean;
-}
-
-interface Course {
-  id: string;
-  title: string;
-  category: string;
-  duration_minutes: number;
-  thumbnail_url: string | null;
+interface Course extends EditorialCourse {
   delivery_type: string;
-  description: string | null;
-  cpd_hours: number | null;
-  course_offerings: CourseOffering[];
+  duration_minutes: number;
 }
 
 const CATEGORY_FILTERS = [
