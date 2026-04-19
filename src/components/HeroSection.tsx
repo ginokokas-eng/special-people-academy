@@ -93,7 +93,7 @@ export const HeroSection = () => {
             </div>
 
             {/* Two editorial cards under the hero copy */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10 pt-8">
               {/* Lead nurse portrait card */}
               <article className="relative rounded-3xl bg-gradient-to-br from-[#F5C6BC] via-[#F1B8AE] to-[#EBA89E] min-h-[440px] overflow-hidden p-6 flex flex-col justify-between">
                 <div
