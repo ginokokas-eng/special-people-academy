@@ -132,6 +132,7 @@ export const HeroSection = () => {
                   </div>
                 </div>
               </article>
+            </div>
           </div>
         </div>
       </div>
