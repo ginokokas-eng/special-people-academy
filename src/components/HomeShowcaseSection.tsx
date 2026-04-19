@@ -11,10 +11,10 @@ export const HomeShowcaseSection = () => {
         {/* Top CTA row */}
         <div className="flex flex-wrap items-center gap-4 mb-10">
           <Button
-            onClick={() => navigate("/auth")}
-            className="rounded-full bg-[hsl(259_72%_14%)] hover:bg-[hsl(259_72%_10%)] text-white h-11 px-5 text-[14px] font-semibold shadow-[0_10px_30px_-12px_rgba(20,10,60,0.4)]"
+            onClick={() => navigate("/contact")}
+            className="rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white h-11 px-5 text-[14px] font-semibold shadow-[0_10px_30px_-12px_rgba(124,58,237,0.6)]"
           >
-            Start 14-day trial
+            Contact Sales
             <ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>
           <Button
@@ -23,7 +23,7 @@ export const HomeShowcaseSection = () => {
             className="rounded-full h-11 px-5 text-[14px] font-semibold border-[#E8E4F7] bg-white hover:bg-[hsl(262_50%_97%)] text-[hsl(259_72%_14%)]"
           >
             <Play className="h-4 w-4 mr-1.5" />
-            Watch 2-min tour
+            Explore Courses
           </Button>
           <p className="text-[13px] text-[hsl(259_20%_45%)] max-w-[260px] leading-snug">
             No card required. Multi-seat discounts for rotas of 25+.
