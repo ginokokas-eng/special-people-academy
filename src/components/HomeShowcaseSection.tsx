@@ -1,4 +1,4 @@
-import { ArrowRight, Play, Circle, BadgeCheck, Clock, ShieldCheck, Award, TrendingUp } from "lucide-react";
+import { ArrowRight, Play, Circle, BadgeCheck, Clock, ShieldCheck, Award, TrendingUp, BookOpen, Zap, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +30,61 @@ export const HomeShowcaseSection = () => {
           </p>
         </div>
 
-        {/* Two-card editorial row */}
-        <div className="grid md:grid-cols-2 gap-5 lg:gap-6 mb-16">
+        {/* Three-card editorial row */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 mb-16">
+          {/* Currently Playing module card */}
+          <article className="relative rounded-[28px] bg-white border border-[#EEEAF8] shadow-[0_20px_50px_-25px_rgba(76,29,149,0.25)] p-6 flex flex-col min-h-[460px]">
+            {/* Top label */}
+            <div className="flex items-center gap-2 mb-6">
+              <span className="h-2 w-2 rounded-full bg-[hsl(262_83%_58%)]" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(262_83%_45%)]">
+                Currently Playing · Module 4 of 7
+              </span>
+            </div>
+
+            {/* Title */}
+            <h3 className="font-heading text-[28px] lg:text-[32px] font-bold text-[hsl(259_72%_14%)] leading-[1.05] tracking-tight mb-4">
+              Safeguarding<br />Adults at Risk —<br />Level 3
+            </h3>
+
+            {/* Description */}
+            <p className="text-[14px] leading-relaxed text-[hsl(259_20%_45%)] mb-6">
+              Scenario-based learning with real-world decision points, built to the 2024 statutory framework.
+            </p>
+
+            <div className="flex-1" />
+
+            {/* Divider */}
+            <div className="border-t border-dashed border-[#E8E4F7] mb-4" />
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">Duration</div>
+                <div className="text-[15px] font-bold text-[hsl(259_72%_14%)]">3h 40m</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">CPD Points</div>
+                <div className="text-[15px] font-bold text-[hsl(259_72%_14%)]">12</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">Format</div>
+                <div className="text-[15px] font-bold text-[hsl(259_72%_14%)]">Video + Quiz</div>
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div>
+              <div className="h-1.5 rounded-full bg-[hsl(259_30%_94%)] overflow-hidden mb-2">
+                <div className="h-full rounded-full bg-gradient-to-r from-[hsl(262_83%_58%)] to-[hsl(217_91%_60%)]" style={{ width: "68%" }} />
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[hsl(259_20%_45%)]">
+                <span>4 of 7 modules</span>
+                <span className="font-semibold">68% complete</span>
+              </div>
+            </div>
+          </article>
+
           {/* Lead nurse portrait card */}
           <article className="relative rounded-[28px] bg-gradient-to-br from-[#F5C6BC] via-[#F1B8AE] to-[#EBA89E] aspect-[4/5] md:aspect-auto md:min-h-[460px] overflow-hidden p-6 flex flex-col justify-between">
             {/* Diagonal stripe pattern */}
