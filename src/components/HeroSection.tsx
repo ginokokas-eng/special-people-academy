@@ -15,16 +15,16 @@ export const HeroSection = () => {
       </div>
 
       <div className="container mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Left column */}
-          <div className="lg:col-span-6 space-y-7 animate-fade-up">
+          <div className="lg:col-span-7 space-y-7 animate-fade-up">
             {/* Trust pill */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E8E4F7] shadow-[0_1px_2px_rgba(20,10,60,0.04)] text-xs font-medium text-[hsl(259_72%_14%)]">
               <ShieldCheck className="h-3.5 w-3.5 text-[hsl(262_83%_58%)]" />
               CPD-certified · CQC-ready · Built for UK care providers
             </div>
 
-            <h1 className="font-heading text-[40px] sm:text-5xl lg:text-[58px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
+            <h1 className="font-heading text-[48px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight font-bold text-[hsl(259_72%_14%)]">
               Training that treats{" "}
               <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
                 carers
@@ -182,8 +182,8 @@ export const HeroSection = () => {
           </div>
 
           {/* Right column — dark Live stats card */}
-          <div className="lg:col-span-6 relative animate-fade-up mt-4 lg:mt-0 lg:sticky lg:top-24" style={{ animationDelay: "150ms" }}>
-            <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-7 sm:p-8 min-h-[440px] flex flex-col">
+          <div className="lg:col-span-5 relative animate-fade-up mt-4 lg:mt-0 lg:sticky lg:top-24" style={{ animationDelay: "150ms" }}>
+            <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-6 sm:p-7 min-h-[380px] flex flex-col">
               <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
               <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
 
@@ -196,7 +196,7 @@ export const HeroSection = () => {
                   <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
                 </div>
 
-                <div className="font-heading text-[64px] sm:text-[80px] font-bold text-white leading-none tracking-tight tabular-nums">
+                <div className="font-heading text-[52px] sm:text-[64px] font-bold text-white leading-none tracking-tight tabular-nums">
                   47,291
                 </div>
 
