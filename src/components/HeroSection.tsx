@@ -24,7 +24,7 @@ export const HeroSection = () => {
               CPD-certified · CQC-ready · Built for UK care providers
             </div>
 
-            <h1 className="font-heading text-[40px] sm:text-5xl lg:text-[58px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
+            <h1 className="font-heading text-[48px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight font-bold text-[hsl(259_72%_14%)]">
               Training that treats{" "}
               <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
                 carers
