@@ -133,15 +133,15 @@ export const HeroSection = () => {
               </article>
 
               {/* Currently Playing module card */}
-              <article className="relative rounded-3xl bg-white border border-[#EEEAF8] shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-6 min-h-[440px] flex flex-col">
-                <div className="flex items-center gap-2 mb-5">
+              <article className="relative rounded-3xl bg-white border border-[#EEEAF8] shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-8 min-h-[540px] flex flex-col">
+                <div className="flex items-center gap-2 mb-6">
                   <span className="h-2 w-2 rounded-full bg-[hsl(262_83%_58%)]" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(262_83%_45%)]">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(262_83%_45%)]">
                     Currently Playing · Module 4 of 7
                   </span>
                 </div>
 
-                <h3 className="font-heading text-[24px] font-bold text-[hsl(259_72%_14%)] leading-[1.05] tracking-tight mb-4">
+                <h3 className="font-heading text-[30px] font-bold text-[hsl(259_72%_14%)] leading-[1.05] tracking-tight mb-4">
                   Safeguarding<br />Adults at Risk —<br />Level 3
                 </h3>
 
