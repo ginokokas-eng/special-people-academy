@@ -196,7 +196,7 @@ export const HeroSection = () => {
                   <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
                 </div>
 
-                <div className="font-heading text-[64px] sm:text-[80px] font-bold text-white leading-none tracking-tight tabular-nums">
+                <div className="font-heading text-[52px] sm:text-[64px] font-bold text-white leading-none tracking-tight tabular-nums">
                   47,291
                 </div>
 
