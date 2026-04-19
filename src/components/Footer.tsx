@@ -1,4 +1,4 @@
-import { Twitter, Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
+import { Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
