@@ -28,6 +28,7 @@ export const HeroSection = () => {
               Training that treats<br />
               <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
                 carers
+              </span>
               <br />
               like the{" "}
               <span className="relative inline-block text-[hsl(259_15%_55%)]">
