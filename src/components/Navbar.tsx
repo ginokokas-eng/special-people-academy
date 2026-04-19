@@ -21,6 +21,7 @@ import {
   LifeBuoy,
   Video,
   Download,
+  ArrowRight,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -369,12 +370,13 @@ export const Navbar = () => {
                 </Link>
                 <button
                   onClick={() => navigate("/contact")}
-                  className="hidden lg:inline-flex group relative overflow-hidden items-center justify-center rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-[14px] font-semibold px-5 py-2.5 transition-colors duration-200 shadow-[0_6px_18px_-6px_rgba(124,58,237,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2"
+                  className="hidden lg:inline-flex group relative overflow-hidden items-center justify-center gap-1.5 rounded-full bg-[#0F0B30] hover:bg-[#1A1448] text-white text-[14px] font-semibold px-5 py-2.5 transition-colors duration-200 shadow-[0_6px_18px_-6px_rgba(15,11,48,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F0B30] focus-visible:ring-offset-2"
                 >
                   <span className="relative z-10">Contact Sales</span>
+                  <ArrowRight className="relative z-10 h-4 w-4" />
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                    className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/15 to-transparent"
                   />
                 </button>
               </>
