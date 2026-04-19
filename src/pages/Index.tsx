@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
+import { LiveStatsSection } from "@/components/LiveStatsSection";
 import { TrustStrip } from "@/components/marketing/TrustStrip";
 import { CoursesSection } from "@/components/CoursesSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
