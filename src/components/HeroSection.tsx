@@ -88,26 +88,26 @@ export const HeroSection = () => {
           </div>
 
           {/* Right column — glass compliance dashboard */}
-          <div className="lg:col-span-6 relative animate-fade-up" style={{ animationDelay: "150ms" }}>
-            <div className="relative">
+          <div className="lg:col-span-6 relative animate-fade-up mt-4 lg:mt-0" style={{ animationDelay: "150ms" }}>
+            <div className="relative max-w-[560px] lg:ml-auto">
               {/* Floating mini cards */}
-              <div className="hidden sm:flex absolute -left-6 top-10 z-20 items-center gap-3 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E8E4F7] shadow-[0_20px_50px_-20px_rgba(76,29,149,0.25)] px-4 py-3 animate-fade-up" style={{ animationDelay: "350ms" }}>
-                <div className="h-10 w-10 rounded-xl bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_32%)] flex items-center justify-center">
-                  <BadgeCheck className="h-5 w-5" />
+              <div className="hidden md:flex absolute -left-4 lg:-left-8 -top-5 z-20 items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.25)] px-3.5 py-2.5 animate-fade-up" style={{ animationDelay: "350ms" }}>
+                <div className="h-9 w-9 rounded-xl bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_32%)] flex items-center justify-center">
+                  <BadgeCheck className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <div className="text-xs text-[hsl(259_20%_45%)]">Certificate issued</div>
-                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)]">Medication — Sarah O.</div>
+                  <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Certificate issued</div>
+                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Medication — Sarah O.</div>
                 </div>
               </div>
 
-              <div className="hidden sm:flex absolute -right-4 bottom-10 z-20 items-center gap-3 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E8E4F7] shadow-[0_20px_50px_-20px_rgba(76,29,149,0.25)] px-4 py-3 animate-fade-up" style={{ animationDelay: "500ms" }}>
-                <div className="h-10 w-10 rounded-xl bg-[hsl(38_92%_50%/0.15)] text-[hsl(38_92%_40%)] flex items-center justify-center">
-                  <Clock className="h-5 w-5" />
+              <div className="hidden md:flex absolute -right-4 -bottom-5 z-20 items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.25)] px-3.5 py-2.5 animate-fade-up" style={{ animationDelay: "500ms" }}>
+                <div className="h-9 w-9 rounded-xl bg-[hsl(38_92%_50%/0.15)] text-[hsl(38_92%_40%)] flex items-center justify-center">
+                  <Clock className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <div className="text-xs text-[hsl(259_20%_45%)]">Renewal due</div>
-                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)]">Safeguarding · 14 days</div>
+                  <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Renewal due</div>
+                  <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Safeguarding · 14 days</div>
                 </div>
               </div>
 

@@ -75,13 +75,11 @@ export const OrganisationsSection = () => {
   const ActiveIcon = current.icon;
 
   return (
-    <section className="bg-[hsl(270_30%_98%)] py-20 lg:py-24">
-      <div className="container mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="max-w-2xl mb-10">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(262_83%_45%)] mb-3">
-            For organisations
-          </span>
-          <h2 className="font-heading text-3xl lg:text-[40px] leading-tight font-bold text-[hsl(259_72%_14%)]">
+    <section className="section-y bg-[hsl(270_30%_98%)]">
+      <div className="section-container">
+        <div className="max-w-2xl mb-10 lg:mb-12">
+          <span className="eyebrow mb-3">For organisations</span>
+          <h2 className="heading-display text-3xl lg:text-[40px] leading-tight mt-3">
             Built for the way care teams actually work
           </h2>
           <p className="mt-3 text-[hsl(259_20%_30%)] text-base lg:text-lg">

@@ -98,16 +98,19 @@ interface FeatureCardProps {
 const FeatureCard = ({ feature, onClick }: FeatureCardProps) => (
   <button
     onClick={onClick}
-    className="group p-6 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+    className="group card-soft card-soft-hover p-6 text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2"
     aria-label={`Learn more about ${feature.title}`}
   >
-    <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center text-primary-foreground mb-4 group-hover:scale-110 transition-transform">
+    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4C1D95] flex items-center justify-center text-white mb-5 transition-transform duration-300 group-hover:scale-105">
       {feature.icon}
     </div>
-    <h3 className="font-semibold text-foreground text-lg mb-2">{feature.title}</h3>
-    <p className="text-muted-foreground text-sm leading-relaxed">{feature.shortText}</p>
-    <span className="inline-flex items-center text-primary text-sm font-medium mt-3 group-hover:underline">
-      Learn more →
+    <h3 className="font-heading font-bold text-[hsl(259_72%_14%)] text-lg leading-snug mb-2">
+      {feature.title}
+    </h3>
+    <p className="text-[hsl(259_20%_40%)] text-sm leading-relaxed">{feature.shortText}</p>
+    <span className="inline-flex items-center gap-1 text-[hsl(262_83%_45%)] text-sm font-semibold mt-4 group-hover:gap-2 transition-all">
+      Learn more
+      <span aria-hidden>→</span>
     </span>
   </button>
 );
@@ -117,27 +120,29 @@ export const FeaturesSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 px-6 bg-secondary/30">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Why Choose Special People Training
+    <section className="section-y bg-white">
+      <div className="section-container">
+        <div className="max-w-2xl mb-12 lg:mb-14">
+          <span className="eyebrow mb-3">Why us</span>
+          <h2 className="heading-display text-3xl lg:text-[40px] leading-tight mt-3">
+            Why care providers choose Special People Training
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to build an inclusive culture of continuous learning and personal development.
+          <p className="mt-3 text-[hsl(259_20%_30%)] text-base lg:text-lg max-w-xl">
+            Practical, inspection-aware learning that fits how UK care services actually run —
+            built with frontline teams, not for them.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
           {featuresData.map((feature, index) => (
             <div
               key={index}
               className="animate-fade-up"
-              style={{ animationDelay: `${index * 100}ms` }}
+              style={{ animationDelay: `${index * 80}ms` }}
             >
-              <FeatureCard 
-                feature={feature} 
-                onClick={() => setSelectedFeature(feature)} 
+              <FeatureCard
+                feature={feature}
+                onClick={() => setSelectedFeature(feature)}
               />
             </div>
           ))}

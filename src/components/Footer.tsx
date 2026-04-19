@@ -1,4 +1,4 @@
-import { Twitter, Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
+import { Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
@@ -43,50 +43,55 @@ export const Footer = () => {
   const footerRight = branding.footerTextRight || 'Made with ❤️ for every learner';
 
   return (
-    <footer className="bg-foreground text-primary-foreground py-16 px-6">
-      <div className="container mx-auto max-w-6xl">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+    <footer className="bg-[#0F0626] text-white relative overflow-hidden">
+      {/* Subtle ambient glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] rounded-full bg-[hsl(262_83%_58%/0.12)] blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-[hsl(217_91%_60%/0.08)] blur-[140px]" />
+      </div>
+
+      <div className="relative section-container py-16 lg:py-20">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10 mb-14">
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2 font-bold text-xl mb-4">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
               <img src={logo} alt={platformName} className="h-9 w-auto object-contain" />
-              <span>{platformName}</span>
+              <span className="font-heading font-bold text-lg">{platformName}</span>
             </Link>
-            {branding.platformTagline && (
-              <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">{branding.platformTagline}</p>
-            )}
-            {!branding.platformTagline && (
-              <p className="text-primary-foreground/60 text-sm mb-6 max-w-xs">
-                Empowering special individuals to develop essential skills through personalized, inclusive training programs.
+            {branding.platformTagline ? (
+              <p className="text-white/65 text-sm leading-relaxed mb-7 max-w-xs">{branding.platformTagline}</p>
+            ) : (
+              <p className="text-white/65 text-sm leading-relaxed mb-7 max-w-xs">
+                CPD-certified, inspection-ready training built with UK care providers.
               </p>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {socialLinks.linkedin && (
                 <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
-                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
                   <Linkedin className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.facebook && (
                 <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
                   <Facebook className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.instagram && (
                 <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
                   <Instagram className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.youtube && (
                 <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
                   <Youtube className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.email && (
                 <a href={`mailto:${socialLinks.email}`} aria-label="Email"
-                  className="p-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors">
+                  className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-colors">
                   <Mail className="h-4 w-4" />
                 </a>
               )}
@@ -94,11 +99,14 @@ export const Footer = () => {
           </div>
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="font-semibold mb-4">{title}</h4>
-              <ul className="space-y-2">
+              <h4 className="font-semibold text-[11px] uppercase tracking-[0.18em] text-white/55 mb-4">{title}</h4>
+              <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link to={link.href} className="text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors">
+                    <Link
+                      to={link.href}
+                      className="text-sm text-white/75 hover:text-white transition-colors"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -107,9 +115,9 @@ export const Footer = () => {
             </div>
           ))}
         </div>
-        <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-primary-foreground/50">{footerLeft}</p>
-          <div className="flex items-center gap-4 text-sm text-primary-foreground/50">
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-white/50">{footerLeft}</p>
+          <div className="flex items-center gap-4 text-xs text-white/50">
             <span>{footerRight}</span>
           </div>
         </div>

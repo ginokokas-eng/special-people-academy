@@ -29,8 +29,8 @@ export const ComplianceBand = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="bg-white py-20 lg:py-28">
-      <div className="container mx-auto max-w-7xl px-6 lg:px-8">
+    <section className="section-y bg-white">
+      <div className="section-container">
         <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1E0B4B] via-[#3B0F8B] to-[#6D28D9] p-8 sm:p-12 lg:p-16 shadow-[0_40px_100px_-30px_rgba(45,14,107,0.45)]">
           {/* Ambient glows */}
           <div aria-hidden className="absolute -top-24 -right-16 w-[420px] h-[420px] rounded-full bg-[hsl(262_83%_58%/0.35)] blur-[140px]" />
