@@ -7,7 +7,6 @@ import { FeaturesSection } from "@/components/FeaturesSection";
 import { ComplianceBand } from "@/components/marketing/ComplianceBand";
 import { OrganisationsSection } from "@/components/marketing/OrganisationsSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
-import { LiveStatsSection } from "@/components/LiveStatsSection";
 import { PricingSection } from "@/components/marketing/PricingSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
@@ -27,7 +26,6 @@ const Index = () => {
         <main className="flex-1">
           <HeroSection />
           <TrustStrip />
-          <LiveStatsSection />
           <CoursesSection />
           <FeaturesSection />
           <ComplianceBand />
