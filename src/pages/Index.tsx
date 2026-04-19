@@ -1,11 +1,13 @@
 import { Helmet } from "react-helmet-async";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
-import { StatsSection } from "@/components/StatsSection";
+import { TrustStrip } from "@/components/marketing/TrustStrip";
 import { CoursesSection } from "@/components/CoursesSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
+import { ComplianceBand } from "@/components/marketing/ComplianceBand";
+import { OrganisationsSection } from "@/components/marketing/OrganisationsSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
-import TrainingShredKnowledgeSection from "@/components/sections/TrainingShredKnowledgeSection";
+import { PricingSection } from "@/components/marketing/PricingSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -13,18 +15,23 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Special People Training | Inclusive Training & CPD Courses</title>
-        <meta name="description" content="Special People Training provides inclusive, CPD-certified training courses for care professionals. Build essential skills with step-by-step lessons and progress tracking." />
+        <title>Special People Training | CPD-certified UK Care Training</title>
+        <meta
+          name="description"
+          content="Inspection-ready, CPD-certified training for UK care providers. Practical sign-off, audit packs and live compliance dashboards — built for care homes, domiciliary care, supported living and the NHS."
+        />
       </Helmet>
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <main className="flex-1">
           <HeroSection />
-          <StatsSection />
+          <TrustStrip />
           <CoursesSection />
           <FeaturesSection />
+          <ComplianceBand />
+          <OrganisationsSection />
           <TestimonialsSection />
-          <TrainingShredKnowledgeSection />
+          <PricingSection />
           <CTASection />
         </main>
         <Footer />
