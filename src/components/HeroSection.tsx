@@ -123,10 +123,10 @@ export const HeroSection = () => {
                 </div>
 
                 <div className="relative z-10">
-                  <h3 className="font-heading text-[20px] font-bold text-[hsl(259_72%_14%)] leading-tight">
+                  <h3 className="font-heading text-[24px] font-bold text-[hsl(259_72%_14%)] leading-tight">
                     Amara Okafor, RN
                   </h3>
-                  <p className="text-[12px] text-[hsl(259_72%_14%)]/70 mt-0.5">
+                  <p className="text-[14px] text-[hsl(259_72%_14%)]/70 mt-1">
                     Clinical Lead · Sheffield
                   </p>
                 </div>
