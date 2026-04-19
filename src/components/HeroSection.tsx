@@ -17,7 +17,7 @@ export const HeroSection = () => {
       <div className="container mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32 relative z-10">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Left column */}
-          <div className="lg:col-span-6 space-y-7 animate-fade-up">
+          <div className="lg:col-span-7 space-y-7 animate-fade-up">
             {/* Trust pill */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E8E4F7] shadow-[0_1px_2px_rgba(20,10,60,0.04)] text-xs font-medium text-[hsl(259_72%_14%)]">
               <ShieldCheck className="h-3.5 w-3.5 text-[hsl(262_83%_58%)]" />
