@@ -29,9 +29,9 @@ const Index = () => {
           <CoursesSection />
           <FeaturesSection />
           <ComplianceBand />
+          <PricingSection />
           <OrganisationsSection />
           <TestimonialsSection />
-          <PricingSection />
           <CTASection />
         </main>
         <Footer />
