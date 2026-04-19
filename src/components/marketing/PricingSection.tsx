@@ -66,7 +66,7 @@ export const PricingSection = () => {
             <div className="flex items-center gap-3 mb-6">
               <span className="h-px w-8 bg-[hsl(189_94%_30%)]" />
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(189_94%_30%)]">
-                05 / Pricing
+                04 / Pricing
               </span>
             </div>
             <h2 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
