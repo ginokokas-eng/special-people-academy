@@ -182,7 +182,7 @@ export const HeroSection = () => {
           </div>
 
           {/* Right column — dark Live stats card */}
-          <div className="lg:col-span-5 relative animate-fade-up mt-4 lg:mt-0 lg:sticky lg:top-24" style={{ animationDelay: "150ms" }}>
+          <div className="lg:col-span-5 relative animate-fade-up mt-4 lg:mt-32 lg:sticky lg:top-24" style={{ animationDelay: "150ms" }}>
             <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-6 sm:p-7 min-h-[380px] flex flex-col">
               <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
               <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
