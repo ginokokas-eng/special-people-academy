@@ -1,4 +1,4 @@
-import { ArrowRight, Play, Circle } from "lucide-react";
+import { ArrowRight, Play, Circle, BadgeCheck, Clock, ShieldCheck, Award, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -75,62 +75,87 @@ export const HomeShowcaseSection = () => {
             </div>
           </article>
 
-          {/* Currently Playing module card */}
-          <article className="relative rounded-[28px] bg-white border border-[#EEEAF8] shadow-[0_18px_40px_-22px_rgba(76,29,149,0.18)] p-7 lg:p-9 flex flex-col">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-2 mb-5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(262_83%_58%)] opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(262_83%_58%)]" />
-              </span>
-              <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-[hsl(262_83%_45%)]">
-                Currently playing · Module 4 of 7
-              </span>
+          {/* Compliance overview dashboard card */}
+          <div className="relative">
+            {/* Floating "Certificate issued" chip */}
+            <div className="hidden sm:flex absolute -left-3 lg:-left-6 -top-5 z-20 items-center gap-3 rounded-2xl bg-white border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.30)] px-3.5 py-2.5">
+              <div className="h-9 w-9 rounded-xl bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_32%)] flex items-center justify-center">
+                <BadgeCheck className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Certificate issued</div>
+                <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Medication — Sarah O.</div>
+              </div>
             </div>
 
-            <h3 className="font-heading text-[28px] lg:text-[34px] leading-[1.1] font-bold text-[hsl(259_72%_14%)] tracking-tight mb-4">
-              Safeguarding Adults at Risk — Level 3
-            </h3>
-            <p className="text-[15px] leading-relaxed text-[hsl(259_20%_35%)] max-w-md">
-              Scenario-based learning with real-world decision points, built to the 2024
-              statutory framework.
-            </p>
+            {/* Floating "Renewal due" chip */}
+            <div className="hidden sm:flex absolute -right-3 lg:-right-4 -bottom-5 z-20 items-center gap-3 rounded-2xl bg-white border border-[#EEEAF8] shadow-[0_18px_40px_-20px_rgba(76,29,149,0.30)] px-3.5 py-2.5">
+              <div className="h-9 w-9 rounded-xl bg-[hsl(38_92%_50%/0.15)] text-[hsl(38_92%_45%)] flex items-center justify-center">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide font-semibold text-[hsl(259_20%_45%)]">Renewal due</div>
+                <div className="text-sm font-semibold text-[hsl(259_72%_14%)] leading-tight">Safeguarding · 14 days</div>
+              </div>
+            </div>
 
-            <div className="flex-1" />
-
-            {/* Divider */}
-            <div className="border-t border-dashed border-[#E8E4F7] my-6" />
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mb-5">
-              {[
-                { label: "Duration", value: "3h 40m" },
-                { label: "CPD Points", value: "12" },
-                { label: "Format", value: "Video + Quiz" },
-              ].map((s) => (
-                <div key={s.label}>
-                  <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[hsl(259_20%_50%)] mb-1">
-                    {s.label}
-                  </div>
-                  <div className="font-heading text-[17px] font-bold text-[hsl(259_72%_14%)] leading-tight">
-                    {s.value}
+            {/* Main glass dashboard card */}
+            <article className="relative rounded-[28px] border border-[#E8E4F7] bg-white/95 backdrop-blur-xl shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-6 sm:p-7 lg:p-8 h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <div className="text-xs font-medium text-[hsl(259_20%_45%)]">Compliance overview</div>
+                  <div className="font-heading text-lg lg:text-xl font-bold text-[hsl(259_72%_14%)] leading-tight">
+                    Sunrise Care Group
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[hsl(152_55%_42%/0.12)] text-[hsl(152_55%_28%)] text-[11px] font-semibold whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[hsl(152_55%_42%)]" />
+                  Inspection-ready
+                </div>
+              </div>
 
-            {/* Progress bar */}
-            <div className="h-[5px] rounded-full bg-[hsl(259_30%_94%)] overflow-hidden mb-2">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981]"
-                style={{ width: "68%" }}
-              />
-            </div>
-            <div className="flex justify-between text-[12px] text-[hsl(259_20%_45%)]">
-              <span>4 of 7 modules</span>
-              <span className="font-semibold text-[hsl(259_72%_14%)]">68% complete</span>
-            </div>
-          </article>
+              {/* KPI tiles */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {[
+                  { label: "Compliant", value: "94%", icon: ShieldCheck, color: "text-[hsl(152_55%_32%)]", bg: "bg-[hsl(152_55%_42%/0.10)]" },
+                  { label: "Certificates", value: "1,284", icon: Award, color: "text-[hsl(262_83%_45%)]", bg: "bg-[hsl(262_83%_58%/0.10)]" },
+                  { label: "Trained", value: "+12%", icon: TrendingUp, color: "text-[hsl(217_91%_45%)]", bg: "bg-[hsl(217_91%_60%/0.10)]" },
+                ].map((k) => {
+                  const Icon = k.icon;
+                  return (
+                    <div key={k.label} className="rounded-xl border border-[#EEEAF8] p-3 bg-white">
+                      <div className={`h-7 w-7 rounded-lg ${k.bg} ${k.color} flex items-center justify-center mb-2`}>
+                        <Icon className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="text-base lg:text-lg font-bold text-[hsl(259_72%_14%)] leading-none">{k.value}</div>
+                      <div className="text-[11px] text-[hsl(259_20%_45%)] mt-1">{k.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Progress rows */}
+              <div className="space-y-3.5">
+                {[
+                  { name: "Safeguarding Adults", pct: 96, tone: "bg-[hsl(152_55%_42%)]" },
+                  { name: "Medication Management", pct: 88, tone: "bg-[hsl(262_83%_58%)]" },
+                  { name: "Moving & Handling", pct: 72, tone: "bg-[hsl(38_92%_50%)]" },
+                  { name: "Basic Life Support", pct: 81, tone: "bg-[hsl(217_91%_60%)]" },
+                ].map((row) => (
+                  <div key={row.name}>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-medium text-[hsl(259_72%_14%)]">{row.name}</span>
+                      <span className="font-semibold text-[hsl(259_20%_30%)]">{row.pct}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[hsl(259_30%_94%)] overflow-hidden">
+                      <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${row.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
         </div>
 
         {/* Live stats dark band */}
