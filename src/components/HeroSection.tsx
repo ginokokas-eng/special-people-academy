@@ -50,7 +50,7 @@ export const HeroSection = () => {
               <Button
                 size="lg"
                 onClick={() => navigate("/contact")}
-                className="rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 h-12 text-[15px] font-semibold shadow-[0_10px_30px_-12px_rgba(124,58,237,0.6)]"
+                className="rounded-full bg-[#0F0B30] hover:bg-[#1A1448] text-white px-6 h-12 text-[15px] font-semibold shadow-[0_10px_30px_-12px_rgba(15,11,48,0.5)]"
               >
                 Contact Sales
                 <ArrowRight className="h-4 w-4 ml-1" />
@@ -59,7 +59,7 @@ export const HeroSection = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => navigate("/courses")}
-                className="rounded-full h-12 px-6 text-[15px] font-semibold border-[#E8E4F7] bg-white hover:bg-[hsl(262_83%_58%/0.05)] text-[hsl(259_72%_14%)]"
+                className="rounded-full h-12 px-6 text-[15px] font-semibold border-[#E5E7EB] bg-white hover:bg-[#F9FAFB] text-[#0F0B30]"
               >
                 <Play className="h-4 w-4 mr-1" />
                 Explore Courses
