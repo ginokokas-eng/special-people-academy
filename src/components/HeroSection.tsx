@@ -178,46 +178,44 @@ export const HeroSection = () => {
                   </div>
                 </div>
               </article>
-            </div>
-          </div>
 
-          {/* Right column — dark Live stats card */}
-          <div className="lg:col-span-5 relative animate-fade-up mt-4 lg:mt-32 lg:sticky lg:top-24" style={{ animationDelay: "150ms" }}>
-            <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-6 sm:p-7 min-h-[380px] flex flex-col">
-              <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
-              <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
+              {/* Dark Live stats card */}
+              <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-7 min-h-[540px] flex flex-col">
+                <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
+                <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center gap-2 mb-5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(152_60%_50%)] opacity-60" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(152_60%_50%)]" />
-                  </span>
-                  <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
-                </div>
-
-                <div className="font-heading text-[52px] sm:text-[64px] font-bold text-white leading-none tracking-tight tabular-nums">
-                  47,291
-                </div>
-
-                <p className="text-[14px] leading-relaxed text-white/70 mt-4 max-w-xs">
-                  certifications issued to care workers across the UK this month alone.
-                </p>
-
-                <div className="flex-1" />
-
-                <div className="flex flex-wrap gap-1.5 mt-6">
-                  {["Care Homes", "NHS Trusts", "Supported Living", "Domiciliary"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2.5 py-1 rounded-full border border-white/20 bg-white/5 text-[10px] font-semibold tracking-wide uppercase text-white/85"
-                    >
-                      {tag}
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex items-center gap-2 mb-5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(152_60%_50%)] opacity-60" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(152_60%_50%)]" />
                     </span>
-                  ))}
+                    <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
+                  </div>
+
+                  <div className="font-heading text-[56px] sm:text-[64px] font-bold text-white leading-none tracking-tight tabular-nums">
+                    47,291
+                  </div>
+
+                  <p className="text-[14px] leading-relaxed text-white/70 mt-4 max-w-xs">
+                    certifications issued to care workers across the UK this month alone.
+                  </p>
+
+                  <div className="flex-1" />
+
+                  <div className="flex flex-wrap gap-1.5 mt-6">
+                    {["Care Homes", "NHS Trusts", "Supported Living", "Domiciliary"].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 rounded-full border border-white/20 bg-white/5 text-[10px] font-semibold tracking-wide uppercase text-white/85"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+            </div>
           </div>
         </div>
       </div>
