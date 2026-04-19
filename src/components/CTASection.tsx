@@ -12,8 +12,8 @@ export const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 lg:py-28 px-6 bg-white">
-      <div className="container mx-auto max-w-7xl">
+    <section className="section-y bg-white">
+      <div className="section-container">
         <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0F0626] via-[#2D0E6B] to-[#4C1D95] p-8 sm:p-12 lg:p-16 shadow-[0_40px_100px_-30px_rgba(15,6,38,0.55)]">
           {/* Ambient glows */}
           <div aria-hidden className="absolute -top-32 left-1/3 w-[420px] h-[420px] rounded-full bg-[hsl(262_83%_58%/0.30)] blur-[140px]" />

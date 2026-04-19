@@ -58,13 +58,11 @@ export const PricingSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="bg-white py-20 lg:py-24">
-      <div className="container mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto text-center mb-12">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(262_83%_45%)] mb-3">
-            Plans
-          </span>
-          <h2 className="font-heading text-3xl lg:text-[40px] leading-tight font-bold text-[hsl(259_72%_14%)]">
+    <section className="section-y bg-white">
+      <div className="section-container">
+        <div className="max-w-2xl mx-auto text-center mb-12 lg:mb-14">
+          <span className="eyebrow mb-3">Plans</span>
+          <h2 className="heading-display text-3xl lg:text-[40px] leading-tight mt-3">
             Simple plans, tailored to your service
           </h2>
           <p className="mt-3 text-[hsl(259_20%_30%)] text-base lg:text-lg">
