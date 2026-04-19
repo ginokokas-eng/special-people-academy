@@ -1,9 +1,57 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, ShieldCheck, BadgeCheck, Clock, Award, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+
+const LIVE_STATS_VALUE = 47291;
+const LIVE_STATS_DURATION = 2100;
+const LIVE_STATS_SECTORS = ["Care Homes", "NHS Trusts", "Supported Living", "Domiciliary"];
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 export const HeroSection = () => {
   const navigate = useNavigate();
+
+  // Live stats animation
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [statsDisplay, setStatsDisplay] = useState(0);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!statsVisible || startedRef.current) return;
+    startedRef.current = true;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setStatsDisplay(LIVE_STATS_VALUE);
+      return;
+    }
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / LIVE_STATS_DURATION);
+      setStatsDisplay(Math.round(easeOutCubic(t) * LIVE_STATS_VALUE));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [statsVisible]);
 
   return (
     <section className="relative bg-white overflow-hidden">
@@ -156,21 +204,37 @@ export const HeroSection = () => {
               </article>
 
               {/* Dark Live stats card */}
-              <article className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-7 min-h-[540px] flex flex-col">
+              <article
+                ref={statsRef}
+                className={`group relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1A1448] via-[#16123E] to-[#0F0B30] p-7 min-h-[540px] flex flex-col transition-all duration-700 ease-out will-change-transform shadow-[0_30px_80px_-30px_rgba(15,11,48,0.55)] hover:shadow-[0_40px_100px_-30px_rgba(15,11,48,0.7)] hover:-translate-y-0.5 ${
+                  statsVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-[0.98]"
+                }`}
+              >
                 <div aria-hidden className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-[hsl(262_83%_58%/0.22)] blur-[110px] pointer-events-none" />
                 <div aria-hidden className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-[hsl(217_91%_60%/0.16)] blur-[110px] pointer-events-none" />
+                <div aria-hidden className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5" />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 -inset-x-1/2 opacity-[0.07] mix-blend-screen animate-[hero-shimmer_7s_linear_infinite]"
+                  style={{
+                    background:
+                      "linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.6) 50%, transparent 65%)",
+                  }}
+                />
 
                 <div className="relative z-10 flex flex-col h-full">
                   <div className="flex items-center gap-2 mb-5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(152_60%_50%)] opacity-60" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(152_60%_50%)]" />
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(152_70%_55%)] opacity-60" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[hsl(152_70%_55%)] shadow-[0_0_12px_rgba(74,222,128,0.7)]" />
                     </span>
-                    <span className="text-[11px] font-semibold text-white/80">Live · Last 30 days</span>
+                    <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-white/80">
+                      Live · Last 30 days
+                    </span>
                   </div>
 
                   <div className="font-heading text-[56px] sm:text-[64px] font-bold text-white leading-none tracking-tight tabular-nums">
-                    47,291
+                    {statsDisplay.toLocaleString("en-GB")}
                   </div>
 
                   <p className="text-[14px] leading-relaxed text-white/70 mt-4 max-w-xs">
@@ -180,10 +244,13 @@ export const HeroSection = () => {
                   <div className="flex-1" />
 
                   <div className="flex flex-wrap gap-1.5 mt-6">
-                    {["Care Homes", "NHS Trusts", "Supported Living", "Domiciliary"].map((tag) => (
+                    {LIVE_STATS_SECTORS.map((tag, i) => (
                       <span
                         key={tag}
-                        className="px-2.5 py-1 rounded-full border border-white/20 bg-white/5 text-[10px] font-semibold tracking-wide uppercase text-white/85"
+                        className={`px-2.5 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur text-[10px] font-semibold tracking-wide uppercase text-white/85 transition-all duration-500 ease-out ${
+                          statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                        }`}
+                        style={{ transitionDelay: `${600 + i * 120}ms` }}
                       >
                         {tag}
                       </span>
@@ -195,6 +262,13 @@ export const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes hero-shimmer {
+          0% { transform: translateX(-30%); }
+          100% { transform: translateX(30%); }
+        }
+      `}</style>
     </section>
   );
 };
