@@ -32,7 +32,7 @@ export const HeroSection = () => {
               like the{" "}
               <span className="relative inline-block text-[hsl(259_15%_55%)]">
                 replaceable
-                <span aria-hidden className="absolute left-0 right-0 top-1/2 h-[3px] bg-[hsl(262_83%_58%/0.55)] rounded-full -translate-y-1/2" />
+                <span aria-hidden className="absolute left-0 right-0 top-[60%] h-[3px] bg-[hsl(262_83%_58%/0.55)] rounded-full -translate-y-1/2" />
               </span>{" "}
               <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
                 essential
