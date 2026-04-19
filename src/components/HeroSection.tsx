@@ -14,7 +14,7 @@ export const HeroSection = () => {
         <div className="absolute bottom-[-160px] left-1/3 w-[420px] h-[420px] rounded-full bg-[hsl(280_70%_70%/0.10)] blur-[120px]" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32 relative z-10">
+      <div className="container mx-auto max-w-7xl px-6 lg:px-8 pt-6 pb-24 lg:pt-10 lg:pb-32 relative z-10">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Main column */}
           <div className="lg:col-span-12 space-y-7 animate-fade-up">
