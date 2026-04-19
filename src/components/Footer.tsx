@@ -1,4 +1,4 @@
-import { Linkedin, Youtube, Mail, Facebook, Instagram, Twitter } from "lucide-react";
+import { Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
@@ -76,17 +76,6 @@ export const Footer = () => {
                   className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
                 >
                   <Linkedin className="h-4 w-4" />
-                </a>
-              )}
-              {socialLinks.twitter && (
-                <a
-                  href={socialLinks.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Twitter / X"
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-[#F4F1FB] hover:bg-[#E8E2F5] text-[hsl(259_72%_14%)] transition-colors"
-                >
-                  <Twitter className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.facebook && (
