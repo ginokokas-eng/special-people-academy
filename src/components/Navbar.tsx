@@ -152,10 +152,13 @@ export const Navbar = () => {
               className="h-9 w-auto object-contain flex-shrink-0"
             />
             <span
-              className="text-[hsl(259_72%_14%)] text-sm sm:text-base font-semibold truncate"
+              className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
               title={platformName}
             >
-              {platformName}
+              <span className="block text-sm sm:text-base">Special People</span>
+              <span className="block text-[9px] sm:text-[10px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
+                TRAINING ACADEMY
+              </span>
             </span>
           </Link>
 
