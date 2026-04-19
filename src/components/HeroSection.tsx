@@ -25,7 +25,7 @@ export const HeroSection = () => {
             </div>
 
             <h1 className="font-heading text-[56px] sm:text-7xl lg:text-[88px] leading-[1.0] tracking-tight font-bold text-[hsl(259_72%_14%)] max-w-5xl">
-              Training that treats{" "}
+              Training that treats<br />
               <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
                 carers
               </span>{" "}
