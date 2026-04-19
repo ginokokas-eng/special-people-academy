@@ -25,19 +25,25 @@ export const HeroSection = () => {
             </div>
 
             <h1 className="font-heading text-[40px] sm:text-5xl lg:text-[58px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
-              Care training that's{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 bg-gradient-to-r from-[#7C3AED] via-[#6D28D9] to-[#4C1D95] bg-clip-text text-transparent">
-                  inspection-ready
-                </span>
-                <span aria-hidden className="absolute -bottom-1 left-0 right-0 h-2 bg-[hsl(262_83%_58%/0.12)] rounded-full -z-0" />
+              Training that treats{" "}
+              <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
+                carers
               </span>{" "}
-              from day one.
+              like the{" "}
+              <span className="relative inline-block text-[hsl(259_15%_55%)]">
+                replaceable
+                <span aria-hidden className="absolute left-0 right-0 top-1/2 h-[3px] bg-[hsl(262_83%_58%/0.55)] rounded-full -translate-y-1/2" />
+              </span>{" "}
+              <span className="bg-gradient-to-r from-[#0E7490] via-[#0D9488] to-[#10B981] bg-clip-text text-transparent">
+                essential
+              </span>{" "}
+              workers they are.
             </h1>
 
             <p className="text-lg leading-relaxed text-[hsl(259_20%_30%)] max-w-xl">
-              CPD-certified courses, practical sign-off and audit-ready records — designed
-              with UK care providers to keep teams confident and services compliant.
+              A compliance-ready learning platform for the people who show up, day and
+              night, for the people who need them most. Built with care providers, nurses
+              and support leads across the UK.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-1">
