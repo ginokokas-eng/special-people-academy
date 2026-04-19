@@ -93,56 +93,88 @@ export const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right column — glass compliance dashboard */}
+          {/* Right column — two editorial cards */}
           <div className="lg:col-span-6 relative animate-fade-up mt-4 lg:mt-0" style={{ animationDelay: "150ms" }}>
-            <div className="relative max-w-[560px] lg:ml-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5">
+              {/* Lead nurse portrait card */}
+              <article className="relative rounded-3xl bg-gradient-to-br from-[#F5C6BC] via-[#F1B8AE] to-[#EBA89E] min-h-[480px] overflow-hidden p-6 flex flex-col justify-between">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 opacity-[0.18] pointer-events-none"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(135deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 9px)",
+                  }}
+                />
+                <div className="absolute inset-4 rounded-[20px] border border-dashed border-white/55 pointer-events-none" />
+
+                <div className="relative z-10 flex justify-end">
+                  <span className="px-3 py-1.5 rounded-full bg-[hsl(259_72%_14%)]/85 backdrop-blur text-[10px] font-bold tracking-[0.12em] uppercase text-white">
+                    Meet the team
+                  </span>
+                </div>
+
+                <div className="relative z-10 flex-1 flex items-center justify-center">
+                  <div className="text-center font-mono text-[10px] tracking-wider text-[hsl(259_72%_14%)]/55 uppercase leading-relaxed">
+                    [ Lead Nurse Portrait
+                    <br />
+                    warm, natural light
+                    <br />
+                    800×1066 ]
+                  </div>
+                </div>
+
+                <div className="relative z-10">
+                  <h3 className="font-heading text-[20px] font-bold text-[hsl(259_72%_14%)] leading-tight">
+                    Amara Okafor, RN
+                  </h3>
+                  <p className="text-[12px] text-[hsl(259_72%_14%)]/70 mt-0.5">
+                    Clinical Lead · Sheffield
+                  </p>
+                </div>
+              </article>
+
               {/* Currently Playing module card */}
-              <article className="relative rounded-3xl bg-white border border-[#EEEAF8] shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-7 sm:p-8 min-h-[480px] flex flex-col">
-                {/* Top label */}
-                <div className="flex items-center gap-2 mb-7">
+              <article className="relative rounded-3xl bg-white border border-[#EEEAF8] shadow-[0_30px_80px_-30px_rgba(76,29,149,0.30)] p-6 min-h-[480px] flex flex-col">
+                <div className="flex items-center gap-2 mb-5">
                   <span className="h-2 w-2 rounded-full bg-[hsl(262_83%_58%)]" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(262_83%_45%)]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(262_83%_45%)]">
                     Currently Playing · Module 4 of 7
                   </span>
                 </div>
 
-                {/* Title */}
-                <h3 className="font-heading text-[34px] sm:text-[40px] font-bold text-[hsl(259_72%_14%)] leading-[1.05] tracking-tight mb-5">
+                <h3 className="font-heading text-[26px] font-bold text-[hsl(259_72%_14%)] leading-[1.05] tracking-tight mb-4">
                   Safeguarding<br />Adults at Risk —<br />Level 3
                 </h3>
 
-                {/* Description */}
-                <p className="text-[15px] leading-relaxed text-[hsl(259_20%_45%)] mb-6 max-w-md">
+                <p className="text-[13px] leading-relaxed text-[hsl(259_20%_45%)] mb-5">
                   Scenario-based learning with real-world decision points, built to the 2024 statutory framework.
                 </p>
 
                 <div className="flex-1" />
 
-                {/* Divider */}
-                <div className="border-t border-dashed border-[#E8E4F7] mb-5" />
+                <div className="border-t border-dashed border-[#E8E4F7] mb-4" />
 
-                {/* Stats grid */}
-                <div className="grid grid-cols-3 gap-4 mb-5">
+                <div className="grid grid-cols-3 gap-3 mb-4">
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1.5">Duration</div>
-                    <div className="text-[17px] font-bold text-[hsl(259_72%_14%)]">3h 40m</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">Duration</div>
+                    <div className="text-[14px] font-bold text-[hsl(259_72%_14%)]">3h 40m</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1.5">CPD Points</div>
-                    <div className="text-[17px] font-bold text-[hsl(259_72%_14%)]">12</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">CPD Points</div>
+                    <div className="text-[14px] font-bold text-[hsl(259_72%_14%)]">12</div>
                   </div>
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1.5">Format</div>
-                    <div className="text-[17px] font-bold text-[hsl(259_72%_14%)]">Video + Quiz</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wide text-[hsl(259_20%_55%)] mb-1">Format</div>
+                    <div className="text-[14px] font-bold text-[hsl(259_72%_14%)]">Video + Quiz</div>
                   </div>
                 </div>
 
-                {/* Progress */}
                 <div>
                   <div className="h-1.5 rounded-full bg-[hsl(259_30%_94%)] overflow-hidden mb-2">
                     <div className="h-full rounded-full bg-gradient-to-r from-[hsl(262_83%_58%)] to-[hsl(217_91%_60%)]" style={{ width: "68%" }} />
                   </div>
-                  <div className="flex items-center justify-between text-[12px] text-[hsl(259_20%_45%)]">
+                  <div className="flex items-center justify-between text-[11px] text-[hsl(259_20%_45%)]">
                     <span>4 of 7 modules</span>
                     <span className="font-semibold">68% complete</span>
                   </div>
