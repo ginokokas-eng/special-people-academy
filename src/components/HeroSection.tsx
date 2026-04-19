@@ -95,7 +95,7 @@ export const HeroSection = () => {
             {/* Two editorial cards under the hero copy */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10 pt-8">
               {/* Lead nurse portrait card */}
-              <article className="relative rounded-3xl bg-gradient-to-br from-[#F5C6BC] via-[#F1B8AE] to-[#EBA89E] min-h-[440px] overflow-hidden p-6 flex flex-col justify-between">
+              <article className="relative rounded-3xl bg-gradient-to-br from-[#F5C6BC] via-[#F1B8AE] to-[#EBA89E] min-h-[540px] overflow-hidden p-8 flex flex-col justify-between">
                 <div
                   aria-hidden
                   className="absolute inset-0 opacity-[0.18] pointer-events-none"
