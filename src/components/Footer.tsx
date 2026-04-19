@@ -1,6 +1,6 @@
 import { Twitter, Linkedin, Youtube, Mail, Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
 import { useGeneralSettings } from "@/hooks/useGeneralSettings";
 
@@ -11,28 +11,29 @@ export const Footer = () => {
   const platformName = branding.platformName || 'Special People Training';
 
   const footerLinks = {
-    Product: [
+    Platform: [
       { label: "Features", href: "/features" },
+      { label: "Courses", href: "/courses" },
       { label: "Pricing", href: "/pricing" },
       { label: "Integrations", href: "/integrations" },
+    ],
+    Compliance: [
       { label: "Enterprise", href: "/enterprise" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "Partners", href: "/partners" },
+      { label: "Help Center", href: "/help-center" },
     ],
     Resources: [
       { label: "Blog", href: "/blog" },
-      { label: "Help Center", href: "/help-center" },
       { label: "Webinars", href: "/webinars" },
-      { label: "Case Studies", href: "/case-studies" },
+      { label: "Help Center", href: "/help-center" },
     ],
     Company: [
       { label: "About Us", href: "/about" },
       ...(generalSettings.enableCareerApplications ? [{ label: "Careers", href: "/careers" }] : []),
       { label: "Contact", href: "/contact" },
-      { label: "Partners", href: "/partners" },
-    ],
-    Legal: [
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms of Service", href: "/terms-of-service" },
-      { label: "Cookie Policy", href: "/cookie-policy" },
     ],
   };
 

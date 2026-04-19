@@ -29,7 +29,7 @@ import { useRedirectSettings } from "@/hooks/useRedirectSettings";
 import { useCart } from "@/hooks/useCart";
 import { useBranding } from "@/hooks/useBrandingSettings";
 import { useGeneralSettings } from "@/hooks/useGeneralSettings";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.svg";
 import {
   DropdownMenu,
   DropdownMenuContent,
