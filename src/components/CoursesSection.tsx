@@ -166,7 +166,7 @@ export const CoursesSection = () => {
                 className="animate-fade-up"
                 style={{ animationDelay: `${index * 80}ms` }}
               >
-                <EditorialCard course={course} />
+                <EditorialCourseCard course={course} />
               </div>
             ))}
           </div>
