@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Calendar } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const steps = [
-  "30-min discovery call with our care training team",
-  "Tailored demo aligned to your services",
-  "Free pilot scoped to your first cohort",
+  { title: "Quick call.", body: "15 minutes with a human. No scripted demo." },
+  { title: "Migrate in 48h.", body: "We import your records, SCORM & users." },
+  { title: "Go live.", body: "Your team is training the same week." },
+  { title: "You stay.", body: "94% annual retention. Our best salespeople are our customers." },
 ];
 
 export const CTASection = () => {
@@ -14,71 +15,65 @@ export const CTASection = () => {
   return (
     <section className="section-y bg-white">
       <div className="section-container">
-        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0F0626] via-[#2D0E6B] to-[#4C1D95] p-8 sm:p-12 lg:p-16 shadow-[0_40px_100px_-30px_rgba(15,6,38,0.55)]">
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0B2545] via-[#0E2F5A] to-[#0A1E3D] p-8 sm:p-12 lg:p-16 shadow-[0_40px_100px_-30px_rgba(11,37,69,0.55)]">
           {/* Ambient glows */}
-          <div aria-hidden className="absolute -top-32 left-1/3 w-[420px] h-[420px] rounded-full bg-[hsl(262_83%_58%/0.30)] blur-[140px]" />
-          <div aria-hidden className="absolute -bottom-24 right-0 w-[360px] h-[360px] rounded-full bg-[hsl(217_91%_60%/0.25)] blur-[140px]" />
+          <div aria-hidden className="absolute -top-32 -left-20 w-[460px] h-[460px] rounded-full bg-[hsl(217_91%_60%/0.18)] blur-[140px]" />
+          <div aria-hidden className="absolute -bottom-24 -right-10 w-[420px] h-[420px] rounded-full bg-[hsl(38_92%_50%/0.14)] blur-[140px]" />
 
-          <div className="relative grid lg:grid-cols-12 gap-10 lg:gap-16 items-center text-white">
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-medium backdrop-blur-sm">
-                <Calendar className="h-3.5 w-3.5" />
-                Onboarding in under 2 weeks
-              </div>
+          <div className="relative max-w-3xl text-white">
+            <h2 className="font-heading text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] font-bold tracking-tight">
+              Care work is<br />
+              the hardest job<br />
+              in the country.{" "}
+              <span className="text-[hsl(38_92%_55%)] block sm:inline">
+                Training shouldn't make it harder.
+              </span>
+            </h2>
 
-              <h2 className="font-heading text-3xl lg:text-[48px] leading-[1.05] font-bold tracking-tight">
-                Bring your whole team{" "}
-                <span className="bg-gradient-to-r from-[#C4B5FD] via-white to-[#A5F3FC] bg-clip-text text-transparent">
-                  inspection-ready
-                </span>
-              </h2>
+            <p className="mt-6 text-white/75 text-base lg:text-[17px] leading-relaxed max-w-xl">
+              Start a 14-day trial in under 90 seconds. Bring your existing training records.
+              We'll take it from there.
+            </p>
 
-              <p className="text-white/75 text-base lg:text-lg max-w-xl leading-relaxed">
-                Talk to a specialist who understands UK care delivery. We'll show you exactly how
-                Special People Training fits your service, sites and budget.
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button
-                  size="lg"
-                  onClick={() => navigate("/contact")}
-                  className="rounded-full bg-white text-[#2D0E6B] hover:bg-white/95 px-6 h-12 font-semibold"
-                >
-                  Contact Sales
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  onClick={() => navigate("/courses")}
-                  className="rounded-full h-12 px-5 text-white hover:bg-white/10 font-semibold"
-                >
-                  Browse courses
-                </Button>
-              </div>
+            <div className="flex flex-wrap gap-3 mt-8">
+              <Button
+                size="lg"
+                onClick={() => navigate("/auth")}
+                className="rounded-full bg-[hsl(38_92%_55%)] hover:bg-[hsl(38_92%_50%)] text-[#0B2545] px-6 h-12 font-semibold shadow-[0_10px_30px_-12px_rgba(245,158,11,0.55)]"
+              >
+                Start free trial
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate("/contact")}
+                className="rounded-full h-12 px-6 font-semibold border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              >
+                Book a 20-min demo
+              </Button>
             </div>
 
-            {/* What happens next checklist */}
-            <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-white/15 bg-white/[0.06] backdrop-blur-md p-6">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/65 mb-4">
+            {/* What happens next */}
+            <div className="mt-12 rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-md p-6 lg:p-7">
+              <div className="flex items-center gap-2 mb-5 text-[hsl(38_92%_60%)]">
+                <span className="text-base leading-none">−</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.22em]">
                   What happens next
-                </div>
-                <ul className="space-y-3.5">
-                  {steps.map((s, idx) => (
-                    <li key={s} className="flex items-start gap-3">
-                      <span className="h-7 w-7 rounded-full bg-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="text-sm text-white/90 leading-relaxed pt-1">{s}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5 pt-5 border-t border-white/10 flex items-center gap-2 text-xs text-white/65">
-                  <Check className="h-3.5 w-3.5 text-[hsl(152_55%_60%)]" />
-                  No obligation, no pressure — ever.
-                </div>
+                </span>
               </div>
+              <ul className="space-y-3.5">
+                {steps.map((s, idx) => (
+                  <li key={s.title} className="flex items-start gap-4 text-sm leading-relaxed">
+                    <span className="font-mono text-[12px] font-semibold text-[hsl(38_92%_60%)] tabular-nums pt-0.5 w-5 shrink-0">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-white/85">
+                      <span className="font-semibold text-white">{s.title}</span> {s.body}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
