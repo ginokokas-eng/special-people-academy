@@ -389,20 +389,33 @@ export const Navbar = () => {
               </>
             )}
 
-            {/* Hamburger */}
+            {/* Hamburger - morphing futuristic icon */}
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-[hsl(259_72%_14%)]"
+              className={cn(
+                "lg:hidden relative overflow-visible transition-colors duration-300",
+                isMenuOpen
+                  ? "text-white hover:text-white hover:bg-white/10"
+                  : "text-[hsl(259_72%_14%)] hover:text-[hsl(262_83%_58%)] hover:bg-[hsl(262_83%_58%/0.06)]"
+              )}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
+              aria-controls="futuristic-mobile-menu"
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <MorphingMenuIcon open={isMenuOpen} />
+              {!isMenuOpen && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-md ring-1 ring-[hsl(262_83%_58%/0.0)] hover:ring-[hsl(262_83%_58%/0.15)] transition-all"
+                />
+              )}
             </Button>
           </div>
         </div>
       </div>
+
 
       {/* Mobile Slide-over */}
       <div
