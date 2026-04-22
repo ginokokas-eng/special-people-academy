@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import {
-  Menu,
-  X,
-  ChevronDown,
+  FuturisticMobileMenu,
+  MorphingMenuIcon,
+} from "@/components/FuturisticMobileMenu";
+import {
   User,
   LogOut,
   Settings,
@@ -46,11 +47,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 type DropdownItem = {
@@ -80,8 +76,6 @@ const resourcesLinks: DropdownItem[] = [
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [orgOpen, setOrgOpen] = useState(false);
-  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -104,17 +98,6 @@ export const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      const original = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = original;
-      };
-    }
-  }, [isMenuOpen]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -384,229 +367,61 @@ export const Navbar = () => {
               </>
             )}
 
-            {/* Hamburger */}
+            {/* Hamburger - morphing futuristic icon */}
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-[hsl(259_72%_14%)]"
+              className={cn(
+                "lg:hidden relative overflow-visible transition-colors duration-300",
+                isMenuOpen
+                  ? "text-white hover:text-white hover:bg-white/10"
+                  : "text-[hsl(259_72%_14%)] hover:text-[hsl(262_83%_58%)] hover:bg-[hsl(262_83%_58%/0.06)]"
+              )}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
+              aria-controls="futuristic-mobile-menu"
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Slide-over */}
-      <div
-        className={cn(
-          "lg:hidden fixed inset-0 z-[60] transition-opacity duration-300",
-          isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        aria-hidden={!isMenuOpen}
-      >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-[hsl(259_72%_14%/0.4)] backdrop-blur-sm"
-          onClick={() => setIsMenuOpen(false)}
-        />
-        {/* Panel */}
-        <div
-          className={cn(
-            "absolute inset-y-0 right-0 w-full sm:max-w-md flex flex-col text-white shadow-2xl transition-transform duration-300 ease-out",
-            "bg-gradient-to-br from-[#4C1D95] via-[#6D28D9] to-[#7C3AED]",
-            isMenuOpen ? "translate-x-0" : "translate-x-full"
-          )}
-        >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-            <Link
-              to="/"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-2.5 min-w-0"
-            >
-              <img src={logo} alt={platformName} className="h-8 w-auto bg-white/95 rounded-md p-1" />
-              <span className="font-semibold truncate">{platformName}</span>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(false)}
-              aria-label="Close menu"
-              className="text-white hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-5 py-6 space-y-2">
-            <Link
-              to={coursesHref}
-              onClick={() => setIsMenuOpen(false)}
-              className="block px-4 py-3.5 text-base font-semibold rounded-xl hover:bg-white/10 transition-colors"
-            >
-              Courses
-            </Link>
-
-            <Collapsible open={orgOpen} onOpenChange={setOrgOpen}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3.5 text-base font-semibold rounded-xl hover:bg-white/10 transition-colors">
-                For Organisations
-                <ChevronDown
-                  className={cn("h-4 w-4 transition-transform duration-200", orgOpen && "rotate-180")}
+              <MorphingMenuIcon open={isMenuOpen} />
+              {!isMenuOpen && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-md ring-1 ring-[hsl(262_83%_58%/0.0)] hover:ring-[hsl(262_83%_58%/0.15)] transition-all"
                 />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pl-2 mt-1 space-y-1">
-                {forOrganisationsLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <Link
-                      key={link.label}
-                      to={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-white/85 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                      <Icon className="h-4 w-4 text-white/70" />
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={resourcesOpen} onOpenChange={setResourcesOpen}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3.5 text-base font-semibold rounded-xl hover:bg-white/10 transition-colors">
-                Resources
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 transition-transform duration-200",
-                    resourcesOpen && "rotate-180"
-                  )}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pl-2 mt-1 space-y-1">
-                {resourcesLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <Link
-                      key={link.label}
-                      to={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-white/85 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                      <Icon className="h-4 w-4 text-white/70" />
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Link
-              to="/about"
-              onClick={() => setIsMenuOpen(false)}
-              className="block px-4 py-3.5 text-base font-semibold rounded-xl hover:bg-white/10 transition-colors"
-            >
-              About
-            </Link>
-
-            <Link
-              to="/cart"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-3.5 text-base font-semibold rounded-xl hover:bg-white/10 transition-colors"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              Basket
-              {cartItemCount > 0 && (
-                <span className="ml-auto h-6 min-w-6 px-1.5 bg-white text-[#7C3AED] text-xs rounded-full flex items-center justify-center font-bold">
-                  {cartItemCount > 9 ? "9+" : cartItemCount}
-                </span>
               )}
-            </Link>
-
-            {user && (
-              <div className="pt-4 mt-4 border-t border-white/10 space-y-1">
-                <Link
-                  to="/my-learning"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm rounded-lg hover:bg-white/10"
-                >
-                  <BookOpen className="h-4 w-4" /> My Learning
-                </Link>
-                <Link
-                  to="/certificates"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm rounded-lg hover:bg-white/10"
-                >
-                  <Award className="h-4 w-4" /> Certifications
-                </Link>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm rounded-lg hover:bg-white/10"
-                >
-                  <User className="h-4 w-4" /> Profile
-                </Link>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm rounded-lg hover:bg-white/10"
-                >
-                  <Settings className="h-4 w-4" /> Settings
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Sticky bottom actions */}
-          <div className="px-5 py-5 border-t border-white/10 bg-black/10 backdrop-blur-sm space-y-3">
-            {user ? (
-              <>
-                <button
-                  onClick={() => {
-                    navigate("/contact");
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full inline-flex items-center justify-center rounded-full bg-white text-[#6D28D9] text-base font-semibold px-5 py-3 hover:bg-white/95 transition-colors"
-                >
-                  Contact Support
-                </button>
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-white/30 text-white text-base font-medium px-5 py-3 hover:bg-white/10 transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    navigate("/auth");
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full inline-flex items-center justify-center rounded-full border border-white/30 text-white text-base font-medium px-5 py-3 hover:bg-white/10 transition-colors"
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => {
-                    navigate("/contact");
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full inline-flex items-center justify-center rounded-full bg-white text-[#6D28D9] text-base font-semibold px-5 py-3 hover:bg-white/95 transition-colors"
-                >
-                  Contact Sales
-                </button>
-              </>
-            )}
+            </Button>
           </div>
         </div>
       </div>
+
+
+      {/* Premium futuristic mobile menu */}
+      <FuturisticMobileMenu
+        open={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        items={
+          user
+            ? [
+                { label: "All Courses", href: coursesHref },
+                { label: "Corporate Solutions", href: "/enterprise" },
+                { label: "Contact Us", href: "/contact" },
+                { label: "My Learning", href: "/my-learning" },
+                {
+                  label: "Sign Out",
+                  href: "#",
+                  onClick: handleSignOut,
+                  primary: true,
+                },
+              ]
+            : [
+                { label: "All Courses", href: coursesHref },
+                { label: "Corporate Solutions", href: "/enterprise" },
+                { label: "Contact Us", href: "/contact" },
+                { label: "Sign In", href: "/auth" },
+                { label: "Sign Up", href: "/auth?mode=signup", primary: true },
+              ]
+        }
+      />
     </header>
   );
 };
