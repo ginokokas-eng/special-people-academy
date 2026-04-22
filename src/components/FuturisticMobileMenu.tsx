@@ -27,8 +27,8 @@ export const FuturisticMobileMenu = ({
   open,
   onClose,
   items,
-  tagline = "Lead the shift from marketing department to marketing culture.",
-  footerText = "MBA-level marketing training for modern teams.",
+  tagline = "The training academy.",
+  footerText = "The training academy.",
 }: FuturisticMobileMenuProps) => {
   const navigate = useNavigate();
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
