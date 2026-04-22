@@ -130,33 +130,35 @@ export const Navbar = () => {
       className={cn(
         "sticky top-0 z-50 w-full transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 animate-nav-in",
         scrolled
-          ? "bg-white/85 backdrop-blur-md border-b border-[#E8E4F7] shadow-[0_1px_2px_rgba(20,10,60,0.04)]"
-          : "bg-white/70 backdrop-blur-[2px] border-b border-transparent"
+          ? "bg-white/90 backdrop-blur-xl border-b border-[#E8E4F7] shadow-[0_2px_8px_-2px_rgba(20,10,60,0.06)]"
+          : "bg-white/85 backdrop-blur-md border-b border-[#F0EDFA]"
       )}
     >
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
             "flex items-center justify-between transition-[height] duration-300",
-            "h-[60px] lg:h-[68px]"
+            "h-[64px] lg:h-[72px]"
           )}
         >
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2.5 shrink-0 min-w-0 pr-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2 rounded-md"
+            className="flex items-center gap-2.5 shrink-0 min-w-0 pr-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2 rounded-md"
             aria-label={`${platformName} Home`}
           >
             <img
               src={logo}
               alt={platformName}
-              className="h-9 w-auto object-contain flex-shrink-0"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain flex-shrink-0 drop-shadow-[0_1px_2px_rgba(76,29,149,0.15)]"
             />
             <span
               className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
               title={platformName}
             >
-              <span className="block text-sm sm:text-base">Special People</span>
+              <span className="block text-[15px] sm:text-base tracking-tight">Special People</span>
               <span className="block text-[9px] sm:text-[10px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
                 TRAINING ACADEMY
               </span>
