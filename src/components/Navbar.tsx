@@ -5,7 +5,6 @@ import {
   type FuturisticMenuItem,
 } from "@/components/FuturisticMobileMenu";
 import {
-  Menu,
   X,
   ChevronDown,
   User,
