@@ -13,6 +13,8 @@ import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
+import { useBranding } from '@/hooks/useBrandingSettings';
+import defaultLogo from '@/assets/logo.svg';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -269,7 +271,22 @@ export default function Auth() {
       <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-foreground">Welcome to Special People Training</h1>
+            <Link to="/" className="inline-flex flex-col items-center gap-3 mb-5 group">
+              <img
+                src={branding.logoMarkUrl || defaultLogo}
+                alt={branding.platformName || 'Special People Training'}
+                width={64}
+                height={64}
+                className="h-16 w-16 object-contain drop-shadow-[0_2px_8px_rgba(76,29,149,0.18)] transition-transform duration-300 group-hover:scale-105"
+              />
+              <span className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] text-center">
+                <span className="block text-lg tracking-tight">Special People</span>
+                <span className="block text-[10px] font-bold tracking-[0.22em] text-[hsl(262_83%_58%)] mt-1">
+                  TRAINING ACADEMY
+                </span>
+              </span>
+            </Link>
+            <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
             <p className="text-muted-foreground mt-2">Your journey to learning starts here</p>
           </div>
 
