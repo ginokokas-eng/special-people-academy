@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,7 @@ export default function Auth() {
   const location = useLocation();
   const { user, signIn, signUp, loading } = useAuth();
   const { loginRedirectUrl } = useRedirectSettings();
+  const branding = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Determine initial tab based on route
