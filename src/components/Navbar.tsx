@@ -212,7 +212,7 @@ export const Navbar = () => {
                   <NavigationMenuTrigger
                     className={cn(
                       navLinkBase,
-                      "bg-transparent hover:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-[hsl(262_83%_58%)] [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
+                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent data-[state=open]:!bg-transparent data-[state=open]:!text-[hsl(262_83%_58%)] data-[active]:!bg-transparent [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
                     )}
                   >
                     <span className="relative">
