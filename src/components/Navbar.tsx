@@ -142,7 +142,7 @@ export const Navbar = () => {
               title={platformName}
             >
               <span className="block text-[15px] sm:text-base tracking-tight">Special People</span>
-              <span className="block text-[9px] sm:text-[10px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
+              <span className="block text-[9px] sm:text-[10px] font-bold tracking-[0.22em] text-[hsl(262_83%_58%)] mt-0.5">
                 TRAINING ACADEMY
               </span>
             </span>
