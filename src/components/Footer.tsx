@@ -56,7 +56,7 @@ export const Footer = () => {
               <img src={logo} alt={platformName} className="h-9 w-auto object-contain" />
               <span className="font-heading font-bold text-lg leading-tight">
                 <span className="block">Special People</span>
-                <span className="block text-[11px] font-bold tracking-[0.22em] text-[hsl(189_94%_30%)] mt-0.5">
+                <span className="block text-[11px] font-bold tracking-[0.22em] text-[hsl(262_83%_58%)] mt-0.5">
                   TRAINING ACADEMY
                 </span>
               </span>
