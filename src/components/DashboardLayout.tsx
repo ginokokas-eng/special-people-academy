@@ -13,7 +13,7 @@ import {
   LayoutDashboard,
   Phone,
 } from 'lucide-react';
-import defaultLogo from '@/assets/logo.png';
+import defaultLogo from '@/assets/logo.svg';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { Input } from '@/components/ui/input';
@@ -93,9 +93,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             
-            <a href="/" className="flex items-center gap-2 font-bold text-lg">
-              <img src={logo} alt={platformName} className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
-              <span className="hidden sm:inline text-foreground">{platformName}</span>
+            <a href="/" className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+              <img src={logo} alt={platformName} className="h-8 w-8 object-contain flex-shrink-0" />
+              <span className="hidden sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
             </a>
           </div>
 

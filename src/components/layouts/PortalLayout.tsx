@@ -12,7 +12,7 @@ import {
   LogOut,
   Phone,
 } from 'lucide-react';
-import defaultLogo from '@/assets/logo.png';
+import defaultLogo from '@/assets/logo.svg';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -109,9 +109,9 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
                 {backLabel || 'Back'}
               </Button>
             ) : (
-              <a href="/" className="flex items-center gap-2 font-bold text-lg">
-                <img src={logo} alt={branding.platformName} className="h-7 sm:h-8 w-auto object-contain flex-shrink-0" />
-                <span className="hidden sm:inline text-foreground">Admin Portal</span>
+              <a href="/" className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+                <img src={logo} alt={branding.platformName} className="h-8 w-8 object-contain flex-shrink-0" />
+                <span className="hidden sm:inline text-foreground tracking-tight">Admin Portal</span>
               </a>
             )}
 
