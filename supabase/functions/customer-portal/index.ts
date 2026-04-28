@@ -55,7 +55,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("[CUSTOMER-PORTAL] Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Unable to open billing portal" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
