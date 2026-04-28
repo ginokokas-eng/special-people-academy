@@ -50,17 +50,34 @@ async function getGraphAccessToken(): Promise<string> {
   return data.access_token;
 }
 
+function escapeHtml(unsafe: string): string {
+  return String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function buildEventBody(session: any, course: any, trainerName: string | null, bookedCount: number): string {
+  const safeTitle = escapeHtml(course?.title || 'Training');
+  const safeDeliveryType = escapeHtml(course?.delivery_type || 'In-person Practical');
+  const safeTrainer = escapeHtml(trainerName || 'TBC');
+  const safeLocation = escapeHtml(session?.location || 'TBC');
+  const safeNotes = session?.notes ? escapeHtml(session.notes) : '';
+  const safeMax = Number(session?.max_attendees) || 20;
+  const safeBooked = Number(bookedCount) || 0;
+
   return `
-    <h2>${course.title} — Practical Session</h2>
+    <h2>${safeTitle} — Practical Session</h2>
     <table style="border-collapse: collapse; margin: 10px 0;">
-      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Course:</td><td>${course.title}</td></tr>
-      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Delivery Type:</td><td>${course.delivery_type || 'In-person Practical'}</td></tr>
-      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Trainer:</td><td>${trainerName || 'TBC'}</td></tr>
-      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Capacity:</td><td>Booked: ${bookedCount}/${session.max_attendees || 20}</td></tr>
-      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Location:</td><td>${session.location || 'TBC'}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Course:</td><td>${safeTitle}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Delivery Type:</td><td>${safeDeliveryType}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Trainer:</td><td>${safeTrainer}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Capacity:</td><td>Booked: ${safeBooked}/${safeMax}</td></tr>
+      <tr><td style="padding: 5px 10px 5px 0; font-weight: bold;">Location:</td><td>${safeLocation}</td></tr>
     </table>
-    ${session.notes ? `<p><strong>Notes:</strong> ${session.notes}</p>` : ''}
+    ${safeNotes ? `<p><strong>Notes:</strong> ${safeNotes}</p>` : ''}
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;" />
     <p style="font-size: 12px; color: #666;">
       This is an internal admin calendar event. Do not share externally.<br/>
