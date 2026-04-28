@@ -299,7 +299,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ error: error.message, status: 'failed' }),
+      JSON.stringify({ error: 'Calendar update failed', status: 'failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
