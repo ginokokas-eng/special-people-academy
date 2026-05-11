@@ -49,12 +49,21 @@ Deno.serve(async (req) => {
     const endpoint = buildWorkersEndpoint(configuredEndpoint);
     const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
     const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
-    if (!apiKey) return json({ error: 'Ariadne API key not configured' }, 500);
+    if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
     if (!isUuid(apiKey)) {
       return json(
         {
           error: 'Ariadne API key is not valid',
           detail: 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.',
+        },
+        500,
+      );
+    }
+    if (!isJwtLike(anonKey)) {
+      return json(
+        {
+          error: 'Ariadne anon key is not valid',
+          detail: 'ARIADNE_ANON_KEY must be the publishable JWT-style key from Ariadne, not a placeholder value.',
         },
         500,
       );
@@ -205,14 +214,16 @@ function buildWorkersEndpoint(rawEndpoint: string) {
   return url.toString();
 }
 
-function buildAriadneHeaders(apiKey: string, anonKey?: string) {
+function buildAriadneHeaders(apiKey: string, anonKey: string) {
   const headers = new Headers({
     'accept': 'application/json',
     'X-API-Key': apiKey,
+    'apikey': anonKey,
+    'Authorization': `Bearer ${anonKey}`,
   });
-  if (anonKey && anonKey !== 'XX' && anonKey.includes('.')) {
-    headers.set('apikey', anonKey);
-    headers.set('Authorization', `Bearer ${anonKey}`);
-  }
   return headers;
+}
+
+function isJwtLike(value: string) {
+  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
 }
