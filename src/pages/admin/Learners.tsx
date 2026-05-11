@@ -35,6 +35,28 @@ export default function Learners() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<null | {
+    total: number; created: number; updated: number; skipped: number; failed: number;
+    errors?: Array<{ email?: string; reason: string }>;
+  }>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-learners-from-ariadne');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSyncResult(data);
+      toast.success(`Synced: ${data.created} created, ${data.updated} updated`);
+      await load();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Sync failed: ${e?.message ?? 'unknown error'}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (authLoading || rolesLoading) return;
