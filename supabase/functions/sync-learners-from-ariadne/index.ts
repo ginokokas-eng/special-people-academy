@@ -47,13 +47,14 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('ARIADNE_API_KEY');
     if (!endpoint || !apiKey) return json({ error: 'Ariadne endpoint not configured' }, 500);
 
-    const ariadneRes = await fetch(endpoint, {
-      method: 'POST',
+    const url = new URL(endpoint);
+    if (!url.searchParams.has('source')) url.searchParams.set('source', 'fountain');
+    const ariadneRes = await fetch(url.toString(), {
+      method: 'GET',
       headers: {
-        'content-type': 'application/json',
+        'accept': 'application/json',
         'x-api-key': apiKey,
       },
-      body: JSON.stringify({ source: 'fountain' }),
     });
     if (!ariadneRes.ok) {
       const txt = await ariadneRes.text();
