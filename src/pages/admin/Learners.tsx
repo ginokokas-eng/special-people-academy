@@ -45,14 +45,19 @@ export default function Learners() {
     setSyncing(true);
     try {
       const { data, error } = await supabase.functions.invoke('sync-learners-from-ariadne');
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        const detail = typeof error.context?.body === 'string' ? error.context.body : error.message;
+        throw new Error(detail || 'Ariadne sync failed');
+      }
+      if (data?.error) throw new Error(data.detail ? `${data.error}: ${data.detail}` : data.error);
       setSyncResult(data);
       toast.success(`Synced: ${data.created} created, ${data.updated} updated`);
       await load();
     } catch (e: any) {
       console.error(e);
-      toast.error(`Sync failed: ${e?.message ?? 'unknown error'}`);
+      toast.error('Ariadne sync failed', {
+        description: e?.message ?? 'Please check the Ariadne credentials and try again.',
+      });
     } finally {
       setSyncing(false);
     }
