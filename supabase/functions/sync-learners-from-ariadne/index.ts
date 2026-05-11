@@ -70,9 +70,9 @@ Deno.serve(async (req) => {
       ? payload
       : payload?.data ?? payload?.workers ?? payload?.learners ?? [];
 
-    if (requestUrl.searchParams.get('inspect') === 'true') {
-      return json({ ok: true, mode: 'inspect', count: workers.length, top_keys: payload && typeof payload === 'object' ? Object.keys(payload) : null, sample: workers.slice(0, 2) });
-    }
+    console.log('[ariadne] payload top_keys:', payload && typeof payload === 'object' ? Object.keys(payload) : null);
+    console.log('[ariadne] sample worker:', JSON.stringify(workers[0] ?? null));
+    console.log('[ariadne] worker count:', workers.length);
 
     let created = 0;
     let updated = 0;
