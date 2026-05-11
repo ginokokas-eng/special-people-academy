@@ -49,24 +49,14 @@ Deno.serve(async (req) => {
     const endpoint = buildWorkersEndpoint(configuredEndpoint);
     const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
     const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
-    if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
+    if (!apiKey || !anonKey) {
+      return syncError('Ariadne credentials not configured', 'Both ARIADNE_API_KEY and ARIADNE_ANON_KEY are required.');
+    }
     if (!isUuid(apiKey)) {
-      return json(
-        {
-          error: 'Ariadne API key is not valid',
-          detail: 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.',
-        },
-        500,
-      );
+      return syncError('Ariadne API key is not valid', 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.');
     }
     if (!isJwtLike(anonKey)) {
-      return json(
-        {
-          error: 'Ariadne anon key is not valid',
-          detail: 'ARIADNE_ANON_KEY must be the publishable JWT-style key from Ariadne, not a placeholder value.',
-        },
-        500,
-      );
+      return syncError('Ariadne anon key is not valid', 'ARIADNE_ANON_KEY must be the publishable JWT-style key from Ariadne, not a placeholder value.');
     }
 
     const requestUrl = new URL(req.url);
@@ -86,7 +76,7 @@ Deno.serve(async (req) => {
     });
     if (!ariadneRes.ok) {
       const txt = await ariadneRes.text();
-      return json({ error: `Ariadne returned ${ariadneRes.status}`, detail: txt }, 502);
+      return syncError(`Ariadne returned ${ariadneRes.status}`, explainAriadneError(txt));
     }
     const payload = await ariadneRes.json();
     const workers: AriadneWorker[] = Array.isArray(payload)
