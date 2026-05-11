@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     const endpoint = buildWorkersEndpoint(configuredEndpoint);
     const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
     const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
-    if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
+    if (!apiKey) return json({ error: 'Ariadne API key not configured' }, 500);
     if (!isUuid(apiKey)) {
       return json(
         {
@@ -62,12 +62,7 @@ Deno.serve(async (req) => {
 
     const ariadneRes = await fetch(endpoint, {
       method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'X-API-Key': apiKey,
-        'apikey': anonKey,
-        'Authorization': `Bearer ${anonKey}`,
-      },
+      headers: buildAriadneHeaders(apiKey, anonKey),
     });
     if (!ariadneRes.ok) {
       const txt = await ariadneRes.text();
