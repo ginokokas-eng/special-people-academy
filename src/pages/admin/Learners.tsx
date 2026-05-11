@@ -9,7 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, GraduationCap, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Loader2, GraduationCap, Search, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Learner {
@@ -33,6 +35,28 @@ export default function Learners() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<null | {
+    total: number; created: number; updated: number; skipped: number; failed: number;
+    errors?: Array<{ email?: string; reason: string }>;
+  }>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-learners-from-ariadne');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSyncResult(data);
+      toast.success(`Synced: ${data.created} created, ${data.updated} updated`);
+      await load();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Sync failed: ${e?.message ?? 'unknown error'}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (authLoading || rolesLoading) return;
@@ -85,12 +109,18 @@ export default function Learners() {
   return (
     <PortalLayout>
       <div className="container max-w-[1400px] mx-auto py-8 px-4 space-y-6">
-        <div className="flex items-center gap-3">
-          <GraduationCap className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-heading font-bold text-foreground">Learners</h1>
-            <p className="text-muted-foreground">All registered learners across the platform</p>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-heading font-bold text-foreground">Learners</h1>
+              <p className="text-muted-foreground">All registered learners across the platform</p>
+            </div>
           </div>
+          <Button onClick={handleSync} disabled={syncing}>
+            {syncing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Sync from Ariadne
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -188,6 +218,38 @@ export default function Learners() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!syncResult} onOpenChange={(o) => !o && setSyncResult(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sync complete</DialogTitle>
+            <DialogDescription>Results from Ariadne sync</DialogDescription>
+          </DialogHeader>
+          {syncResult && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded border p-3"><div className="text-muted-foreground">Total received</div><div className="text-2xl font-semibold">{syncResult.total}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Created</div><div className="text-2xl font-semibold text-primary">{syncResult.created}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Updated</div><div className="text-2xl font-semibold">{syncResult.updated}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Skipped</div><div className="text-2xl font-semibold">{syncResult.skipped}</div></div>
+                <div className="rounded border p-3 col-span-2"><div className="text-muted-foreground">Failed</div><div className="text-2xl font-semibold text-destructive">{syncResult.failed}</div></div>
+              </div>
+              {syncResult.errors && syncResult.errors.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded p-2 text-xs space-y-1">
+                  {syncResult.errors.map((err, i) => (
+                    <div key={i} className="text-muted-foreground">
+                      <span className="font-mono">{err.email ?? '—'}</span>: {err.reason}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSyncResult(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }
