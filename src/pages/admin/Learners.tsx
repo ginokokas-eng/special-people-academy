@@ -109,12 +109,18 @@ export default function Learners() {
   return (
     <PortalLayout>
       <div className="container max-w-[1400px] mx-auto py-8 px-4 space-y-6">
-        <div className="flex items-center gap-3">
-          <GraduationCap className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-heading font-bold text-foreground">Learners</h1>
-            <p className="text-muted-foreground">All registered learners across the platform</p>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-heading font-bold text-foreground">Learners</h1>
+              <p className="text-muted-foreground">All registered learners across the platform</p>
+            </div>
           </div>
+          <Button onClick={handleSync} disabled={syncing}>
+            {syncing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Sync from Ariadne
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
