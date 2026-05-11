@@ -41,6 +41,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import StaffManagement from "./pages/StaffManagement";
+import Learners from "./pages/admin/Learners";
 import CourseBuilder from "./pages/admin/CourseBuilder";
 import CourseEditor from "./pages/admin/CourseEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
