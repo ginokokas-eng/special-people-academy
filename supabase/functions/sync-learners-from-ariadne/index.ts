@@ -43,9 +43,10 @@ Deno.serve(async (req) => {
     if (!allowed) return json({ error: 'Forbidden' }, 403);
 
     // Fetch from Ariadne
-    const endpoint =
+    const configuredEndpoint =
       Deno.env.get('ARIADNE_LEARNERS_ENDPOINT') ||
       'https://hbklqmoywlxbjvpxsxyc.supabase.co/functions/v1/external-training-sync?resource=workers';
+    const endpoint = buildWorkersEndpoint(configuredEndpoint);
     const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
     const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
     if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
@@ -200,4 +201,11 @@ function json(body: unknown, status = 200) {
 
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function buildWorkersEndpoint(rawEndpoint: string) {
+  const url = new URL(rawEndpoint);
+  url.search = '';
+  url.searchParams.set('resource', 'workers');
+  return url.toString();
 }
