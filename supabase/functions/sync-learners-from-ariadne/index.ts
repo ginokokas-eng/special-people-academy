@@ -46,9 +46,18 @@ Deno.serve(async (req) => {
     const endpoint =
       Deno.env.get('ARIADNE_LEARNERS_ENDPOINT') ||
       'https://hbklqmoywlxbjvpxsxyc.supabase.co/functions/v1/external-training-sync?resource=workers';
-    const apiKey = Deno.env.get('ARIADNE_API_KEY');
-    const anonKey = Deno.env.get('ARIADNE_ANON_KEY');
+    const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
+    const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
     if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
+    if (!isUuid(apiKey)) {
+      return json(
+        {
+          error: 'Ariadne API key is not valid',
+          detail: 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.',
+        },
+        500,
+      );
+    }
 
     const ariadneRes = await fetch(endpoint, {
       method: 'GET',
@@ -187,4 +196,8 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'content-type': 'application/json' },
   });
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
