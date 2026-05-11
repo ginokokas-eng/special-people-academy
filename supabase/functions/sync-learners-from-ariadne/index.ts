@@ -66,9 +66,28 @@ Deno.serve(async (req) => {
       return syncError(`Ariadne returned ${ariadneRes.status}`, explainAriadneError(txt));
     }
     const payload = await ariadneRes.json();
-    const workers: AriadneWorker[] = Array.isArray(payload)
+    const rawWorkers: any[] = Array.isArray(payload)
       ? payload
       : payload?.data ?? payload?.workers ?? payload?.learners ?? [];
+
+    // Normalize Ariadne shape -> { email, fountain_applicant_id, full_name, external_id }
+    const workers: AriadneWorker[] = rawWorkers.map((w: any) => {
+      const email = w.email ?? w.invite_email ?? w.work_email ?? null;
+      const fountain_applicant_id = w.fountain_applicant_id ?? w.external_id ?? null;
+      const full_name = w.full_name
+        ?? [w.first_name, w.last_name].filter(Boolean).join(' ').trim()
+        ?? w.preferred_name
+        ?? null;
+      return {
+        email,
+        fountain_applicant_id,
+        full_name: full_name || null,
+        external_id: w.external_id ?? fountain_applicant_id,
+        source_system: w.source_system ?? 'fountain',
+      } as AriadneWorker;
+    });
+
+    console.log('[ariadne] worker count:', workers.length, 'first normalized:', JSON.stringify(workers[0] ?? null));
 
     let created = 0;
     let updated = 0;
