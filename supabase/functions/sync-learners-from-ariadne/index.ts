@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     const payload = await ariadneRes.json();
     const workers: AriadneWorker[] = Array.isArray(payload)
       ? payload
-      : payload?.workers ?? payload?.learners ?? [];
+      : payload?.data ?? payload?.workers ?? payload?.learners ?? [];
 
     let created = 0;
     let updated = 0;
