@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     const myEnr = (enrollments ?? []).filter((e) => e.user_id === p.user_id);
     const myCerts = (certificates ?? []).filter((c) => c.user_id === p.user_id);
     const lastActivity = myEnr
-      .map((e) => e.last_activity_at ?? e.completed_at ?? e.enrolled_at)
+      .map((e) => e.completed_at ?? e.enrolled_at)
       .filter(Boolean)
       .sort()
       .pop() ?? null;
@@ -98,20 +98,19 @@ Deno.serve(async (req) => {
       external_id: p.external_id,
       source_system: p.source_system,
       enrollments_total: myEnr.length,
-      enrollments_completed: myEnr.filter((e) => e.status === 'completed' || !!e.completed_at).length,
+      enrollments_completed: myEnr.filter((e) => !!e.completed_at).length,
       enrollments: myEnr.map((e) => ({
         course_id: e.course_id,
-        status: e.status,
-        progress: e.progress,
+        status: e.completed_at ? 'completed' : 'in_progress',
         enrolled_at: e.enrolled_at,
         completed_at: e.completed_at,
-        last_activity_at: e.last_activity_at,
       })),
       certificates: myCerts.map((c) => ({
         course_id: c.course_id,
         type: c.certificate_type,
+        certificate_number: c.certificate_number,
         issued_at: c.issued_at,
-        url: c.certificate_url,
+        pdf_path: c.pdf_path,
       })),
       last_activity_at: lastActivity,
     };
