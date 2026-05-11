@@ -43,34 +43,40 @@ Deno.serve(async (req) => {
     if (!allowed) return json({ error: 'Forbidden' }, 403);
 
     // Fetch from Ariadne
-    const endpoint =
+    const configuredEndpoint =
       Deno.env.get('ARIADNE_LEARNERS_ENDPOINT') ||
       'https://hbklqmoywlxbjvpxsxyc.supabase.co/functions/v1/external-training-sync?resource=workers';
+    const endpoint = buildWorkersEndpoint(configuredEndpoint);
     const apiKey = Deno.env.get('ARIADNE_API_KEY')?.trim();
     const anonKey = Deno.env.get('ARIADNE_ANON_KEY')?.trim();
-    if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
+    if (!apiKey || !anonKey) {
+      return syncError('Ariadne credentials not configured', 'Both ARIADNE_API_KEY and ARIADNE_ANON_KEY are required.');
+    }
     if (!isUuid(apiKey)) {
-      return json(
-        {
-          error: 'Ariadne API key is not valid',
-          detail: 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.',
-        },
-        500,
-      );
+      return syncError('Ariadne API key is not valid', 'ARIADNE_API_KEY must be the UUID-format key issued by Ariadne, not a placeholder value.');
+    }
+    if (!isJwtLike(anonKey)) {
+      return syncError('Ariadne anon key is not valid', 'ARIADNE_ANON_KEY must be the publishable JWT-style key from Ariadne, not a placeholder value.');
+    }
+
+    const requestUrl = new URL(req.url);
+    if (requestUrl.searchParams.get('dry_run') === 'true') {
+      return json({
+        ok: true,
+        mode: 'dry_run',
+        endpoint,
+        apiKeyLooksUuid: isUuid(apiKey),
+        anonKeyLooksJwt: isJwtLike(anonKey),
+      });
     }
 
     const ariadneRes = await fetch(endpoint, {
       method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'X-API-Key': apiKey,
-        'apikey': anonKey,
-        'Authorization': `Bearer ${anonKey}`,
-      },
+      headers: buildAriadneHeaders(apiKey, anonKey),
     });
     if (!ariadneRes.ok) {
       const txt = await ariadneRes.text();
-      return json({ error: `Ariadne returned ${ariadneRes.status}`, detail: txt }, 502);
+      return syncError(`Ariadne returned ${ariadneRes.status}`, explainAriadneError(txt));
     }
     const payload = await ariadneRes.json();
     const workers: AriadneWorker[] = Array.isArray(payload)
@@ -198,6 +204,38 @@ function json(body: unknown, status = 200) {
   });
 }
 
+function syncError(error: string, detail: string) {
+  return json({ ok: false, error, detail, total: 0, created: 0, updated: 0, skipped: 0, failed: 0 });
+}
+
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function buildWorkersEndpoint(rawEndpoint: string) {
+  const url = new URL(rawEndpoint);
+  url.search = '';
+  url.searchParams.set('resource', 'workers');
+  return url.toString();
+}
+
+function buildAriadneHeaders(apiKey: string, anonKey: string) {
+  const headers = new Headers({
+    'accept': 'application/json',
+    'X-API-Key': apiKey,
+    'apikey': anonKey,
+    'Authorization': `Bearer ${anonKey}`,
+  });
+  return headers;
+}
+
+function isJwtLike(value: string) {
+  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+function explainAriadneError(detail: string) {
+  if (detail.includes('invalid input syntax for type uuid') && detail.includes('"XX"')) {
+    return 'Ariadne is still receiving a placeholder value "XX" for a UUID field. Check the API key configured in Ariadne for this external-training-sync endpoint.';
+  }
+  return detail;
 }
