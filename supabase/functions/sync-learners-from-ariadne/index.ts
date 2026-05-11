@@ -204,3 +204,15 @@ function buildWorkersEndpoint(rawEndpoint: string) {
   url.searchParams.set('resource', 'workers');
   return url.toString();
 }
+
+function buildAriadneHeaders(apiKey: string, anonKey?: string) {
+  const headers = new Headers({
+    'accept': 'application/json',
+    'X-API-Key': apiKey,
+  });
+  if (anonKey && anonKey !== 'XX' && anonKey.includes('.')) {
+    headers.set('apikey', anonKey);
+    headers.set('Authorization', `Bearer ${anonKey}`);
+  }
+  return headers;
+}
