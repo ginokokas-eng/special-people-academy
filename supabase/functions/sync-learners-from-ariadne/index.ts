@@ -204,6 +204,10 @@ function json(body: unknown, status = 200) {
   });
 }
 
+function syncError(error: string, detail: string) {
+  return json({ ok: false, error, detail, total: 0, created: 0, updated: 0, skipped: 0, failed: 0 });
+}
+
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -227,4 +231,11 @@ function buildAriadneHeaders(apiKey: string, anonKey: string) {
 
 function isJwtLike(value: string) {
   return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+function explainAriadneError(detail: string) {
+  if (detail.includes('invalid input syntax for type uuid') && detail.includes('"XX"')) {
+    return 'Ariadne is still receiving a placeholder value "XX" for a UUID field. Check the API key configured in Ariadne for this external-training-sync endpoint.';
+  }
+  return detail;
 }
