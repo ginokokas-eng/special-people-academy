@@ -43,19 +43,20 @@ Deno.serve(async (req) => {
     if (!allowed) return json({ error: 'Forbidden' }, 403);
 
     // Fetch from Ariadne
-    const endpoint = Deno.env.get('ARIADNE_LEARNERS_ENDPOINT');
+    const endpoint =
+      Deno.env.get('ARIADNE_LEARNERS_ENDPOINT') ||
+      'https://hbklqmoywlxbjvpxsxyc.supabase.co/functions/v1/external-training-sync?resource=workers';
     const apiKey = Deno.env.get('ARIADNE_API_KEY');
-    if (!endpoint || !apiKey) return json({ error: 'Ariadne endpoint not configured' }, 500);
+    const anonKey = Deno.env.get('ARIADNE_ANON_KEY');
+    if (!apiKey || !anonKey) return json({ error: 'Ariadne credentials not configured' }, 500);
 
-    const url = new URL(endpoint);
-    if (!url.searchParams.has('source')) url.searchParams.set('source', 'fountain');
-    if (!url.searchParams.has('api_key')) url.searchParams.set('api_key', apiKey);
-    const ariadneRes = await fetch(url.toString(), {
+    const ariadneRes = await fetch(endpoint, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'x-api-key': apiKey,
-        'authorization': `Bearer ${apiKey}`,
+        'X-API-Key': apiKey,
+        'apikey': anonKey,
+        'Authorization': `Bearer ${anonKey}`,
       },
     });
     if (!ariadneRes.ok) {
