@@ -218,6 +218,38 @@ export default function Learners() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!syncResult} onOpenChange={(o) => !o && setSyncResult(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sync complete</DialogTitle>
+            <DialogDescription>Results from Ariadne sync</DialogDescription>
+          </DialogHeader>
+          {syncResult && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded border p-3"><div className="text-muted-foreground">Total received</div><div className="text-2xl font-semibold">{syncResult.total}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Created</div><div className="text-2xl font-semibold text-primary">{syncResult.created}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Updated</div><div className="text-2xl font-semibold">{syncResult.updated}</div></div>
+                <div className="rounded border p-3"><div className="text-muted-foreground">Skipped</div><div className="text-2xl font-semibold">{syncResult.skipped}</div></div>
+                <div className="rounded border p-3 col-span-2"><div className="text-muted-foreground">Failed</div><div className="text-2xl font-semibold text-destructive">{syncResult.failed}</div></div>
+              </div>
+              {syncResult.errors && syncResult.errors.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded p-2 text-xs space-y-1">
+                  {syncResult.errors.map((err, i) => (
+                    <div key={i} className="text-muted-foreground">
+                      <span className="font-mono">{err.email ?? '—'}</span>: {err.reason}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSyncResult(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }
