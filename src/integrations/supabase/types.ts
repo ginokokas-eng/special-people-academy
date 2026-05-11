@@ -1481,9 +1481,12 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           department: string | null
+          external_id: string | null
+          fountain_applicant_id: string | null
           full_name: string | null
           id: string
           job_title: string | null
+          source_system: string | null
           updated_at: string
           user_id: string
         }
@@ -1491,9 +1494,12 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           department?: string | null
+          external_id?: string | null
+          fountain_applicant_id?: string | null
           full_name?: string | null
           id?: string
           job_title?: string | null
+          source_system?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1501,9 +1507,12 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           department?: string | null
+          external_id?: string | null
+          fountain_applicant_id?: string | null
           full_name?: string | null
           id?: string
           job_title?: string | null
+          source_system?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2046,6 +2055,42 @@ export type Database = {
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_sync_log: {
+        Row: {
+          created_at: string
+          email: string | null
+          external_id: string | null
+          id: string
+          message: string | null
+          source_system: string
+          status: string
+          triggered_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          id?: string
+          message?: string | null
+          source_system: string
+          status: string
+          triggered_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          id?: string
+          message?: string | null
+          source_system?: string
+          status?: string
+          triggered_by?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
