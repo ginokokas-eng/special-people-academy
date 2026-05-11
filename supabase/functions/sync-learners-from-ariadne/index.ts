@@ -70,6 +70,10 @@ Deno.serve(async (req) => {
       ? payload
       : payload?.data ?? payload?.workers ?? payload?.learners ?? [];
 
+    if (requestUrl.searchParams.get('inspect') === 'true') {
+      return json({ ok: true, mode: 'inspect', count: workers.length, top_keys: payload && typeof payload === 'object' ? Object.keys(payload) : null, sample: workers.slice(0, 2) });
+    }
+
     let created = 0;
     let updated = 0;
     let skipped = 0;
