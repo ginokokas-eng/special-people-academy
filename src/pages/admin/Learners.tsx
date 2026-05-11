@@ -49,7 +49,9 @@ export default function Learners() {
         const detail = typeof error.context?.body === 'string' ? error.context.body : error.message;
         throw new Error(detail || 'Ariadne sync failed');
       }
-      if (data?.error) throw new Error(data.detail ? `${data.error}: ${data.detail}` : data.error);
+      if (data?.ok === false || data?.error) {
+        throw new Error(data.detail ? `${data.error}: ${data.detail}` : data.error);
+      }
       setSyncResult(data);
       toast.success(`Synced: ${data.created} created, ${data.updated} updated`);
       await load();
