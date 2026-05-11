@@ -31,6 +31,7 @@ export const adminNavItems: NavItem[] = [
   { label: 'Admin Dashboard', href: '/admin-portal/dashboard', icon: LayoutDashboard },
   { label: 'Course Builder', href: '/admin-portal/courses', icon: PenTool },
   { label: 'Training Portal', href: '/admin-portal/trainer', icon: ClipboardList },
+  { label: 'Learners', href: '/admin-portal/learners', icon: GraduationCap },
   { label: 'Staff Management', href: '/admin-portal/staff-management', icon: Users },
   { label: 'Integrations', href: '/admin-portal/integrations', icon: Settings2 },
   { label: 'Settings', href: '/admin-portal/settings', icon: Settings },
