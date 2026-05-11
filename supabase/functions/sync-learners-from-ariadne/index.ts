@@ -69,6 +69,17 @@ Deno.serve(async (req) => {
       );
     }
 
+    const requestUrl = new URL(req.url);
+    if (requestUrl.searchParams.get('dry_run') === 'true') {
+      return json({
+        ok: true,
+        mode: 'dry_run',
+        endpoint,
+        apiKeyLooksUuid: isUuid(apiKey),
+        anonKeyLooksJwt: isJwtLike(anonKey),
+      });
+    }
+
     const ariadneRes = await fetch(endpoint, {
       method: 'GET',
       headers: buildAriadneHeaders(apiKey, anonKey),
