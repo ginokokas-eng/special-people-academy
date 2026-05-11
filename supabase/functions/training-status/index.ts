@@ -70,11 +70,11 @@ Deno.serve(async (req) => {
   const [{ data: enrollments }, { data: certificates }, { data: authList }] = await Promise.all([
     admin
       .from('enrollments')
-      .select('user_id, course_id, status, progress, completed_at, last_activity_at, enrolled_at')
+      .select('user_id, course_id, completed_at, enrolled_at')
       .in('user_id', userIds),
     admin
       .from('certificates')
-      .select('user_id, course_id, certificate_type, issued_at, certificate_url')
+      .select('user_id, course_id, certificate_type, certificate_number, issued_at, pdf_path')
       .in('user_id', userIds),
     admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
