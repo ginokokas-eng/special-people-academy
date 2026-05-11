@@ -49,11 +49,13 @@ Deno.serve(async (req) => {
 
     const url = new URL(endpoint);
     if (!url.searchParams.has('source')) url.searchParams.set('source', 'fountain');
+    if (!url.searchParams.has('api_key')) url.searchParams.set('api_key', apiKey);
     const ariadneRes = await fetch(url.toString(), {
       method: 'GET',
       headers: {
         'accept': 'application/json',
         'x-api-key': apiKey,
+        'authorization': `Bearer ${apiKey}`,
       },
     });
     if (!ariadneRes.ok) {
