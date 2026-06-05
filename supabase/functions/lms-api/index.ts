@@ -59,7 +59,7 @@ async function handleCatalog(admin: SupabaseClient, url: URL) {
   let q = admin
     .from('courses')
     .select(
-      'id, title, subtitle, description, category, level, thumbnail_url, duration_minutes, cpd_hours, is_mandatory, is_internal, is_published, has_certificate, pass_mark, language, delivery_type, updated_at',
+      'id, title, subtitle, description, category, level, thumbnail_url, duration_minutes, cpd_hours, is_mandatory, is_internal, is_published, has_certificate, pass_mark, language, delivery_type, updated_at, training_ids, programmes, mandatory_category, evidence_type, renewal_months, warning_days',
     )
     .eq('is_published', true)
     .order('updated_at', { ascending: false });
