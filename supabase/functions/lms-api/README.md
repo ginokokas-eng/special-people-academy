@@ -1,6 +1,7 @@
-# ariadne-api
+# lms-api
 
-Read/write API exposed by the special-people-academy to the Ariadne app.
+Generic read/write integration API exposed by the academy LMS to external
+partner systems (e.g. the Ariadne app).
 
 Single endpoint, switched by `?resource=`. Authentication is a shared secret
 sent in the `x-ariadne-secret` header, matching the `ARIADNE_SYNC_SECRET`
