@@ -623,6 +623,7 @@ export type Database = {
           category: string
           certificate_details: string | null
           certificate_expiry_months: number | null
+          completion_deadline_days: number | null
           cpd_certified: boolean | null
           cpd_eligible: boolean | null
           cpd_hours: number | null
@@ -631,6 +632,7 @@ export type Database = {
           delivery_type: string | null
           description: string | null
           duration_minutes: number | null
+          evidence_type: string | null
           faqs: Json | null
           featured_rank: number | null
           group_max_participants: number | null
@@ -646,6 +648,7 @@ export type Database = {
           last_updated: string | null
           learning_outcomes: Json | null
           level: string | null
+          mandatory_category: string | null
           overview: string | null
           pass_mark: number | null
           practical_details: string | null
@@ -655,8 +658,10 @@ export type Database = {
           price_face_to_face: number | null
           price_group: number | null
           price_online: number | null
+          programmes: number[]
           regulated_cert_available: boolean | null
           regulated_cert_fee: number | null
+          renewal_months: number | null
           requirements: Json | null
           requires_practical_signoff: boolean | null
           scope_notes: string | null
@@ -666,7 +671,9 @@ export type Database = {
           target_audience: Json | null
           thumbnail_url: string | null
           title: string
+          training_ids: string[]
           updated_at: string
+          warning_days: number | null
         }
         Insert: {
           assessment_details?: string | null
@@ -674,6 +681,7 @@ export type Database = {
           category: string
           certificate_details?: string | null
           certificate_expiry_months?: number | null
+          completion_deadline_days?: number | null
           cpd_certified?: boolean | null
           cpd_eligible?: boolean | null
           cpd_hours?: number | null
@@ -682,6 +690,7 @@ export type Database = {
           delivery_type?: string | null
           description?: string | null
           duration_minutes?: number | null
+          evidence_type?: string | null
           faqs?: Json | null
           featured_rank?: number | null
           group_max_participants?: number | null
@@ -697,6 +706,7 @@ export type Database = {
           last_updated?: string | null
           learning_outcomes?: Json | null
           level?: string | null
+          mandatory_category?: string | null
           overview?: string | null
           pass_mark?: number | null
           practical_details?: string | null
@@ -706,8 +716,10 @@ export type Database = {
           price_face_to_face?: number | null
           price_group?: number | null
           price_online?: number | null
+          programmes?: number[]
           regulated_cert_available?: boolean | null
           regulated_cert_fee?: number | null
+          renewal_months?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
@@ -717,7 +729,9 @@ export type Database = {
           target_audience?: Json | null
           thumbnail_url?: string | null
           title: string
+          training_ids?: string[]
           updated_at?: string
+          warning_days?: number | null
         }
         Update: {
           assessment_details?: string | null
@@ -725,6 +739,7 @@ export type Database = {
           category?: string
           certificate_details?: string | null
           certificate_expiry_months?: number | null
+          completion_deadline_days?: number | null
           cpd_certified?: boolean | null
           cpd_eligible?: boolean | null
           cpd_hours?: number | null
@@ -733,6 +748,7 @@ export type Database = {
           delivery_type?: string | null
           description?: string | null
           duration_minutes?: number | null
+          evidence_type?: string | null
           faqs?: Json | null
           featured_rank?: number | null
           group_max_participants?: number | null
@@ -748,6 +764,7 @@ export type Database = {
           last_updated?: string | null
           learning_outcomes?: Json | null
           level?: string | null
+          mandatory_category?: string | null
           overview?: string | null
           pass_mark?: number | null
           practical_details?: string | null
@@ -757,8 +774,10 @@ export type Database = {
           price_face_to_face?: number | null
           price_group?: number | null
           price_online?: number | null
+          programmes?: number[]
           regulated_cert_available?: boolean | null
           regulated_cert_fee?: number | null
+          renewal_months?: number | null
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
@@ -768,7 +787,9 @@ export type Database = {
           target_audience?: Json | null
           thumbnail_url?: string | null
           title?: string
+          training_ids?: string[]
           updated_at?: string
+          warning_days?: number | null
         }
         Relationships: [
           {
