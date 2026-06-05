@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
 
   try {
     if (resource === 'catalog') return await handleCatalog(admin, url);
+    if (resource === 'register') return await handleRegister(admin, req);
     if (resource === 'enroll') return await handleEnroll(admin, req);
     if (resource === 'progress') return await handleProgress(admin, req, url);
     if (resource === 'certificate') return await handleCertificate(admin, url);
@@ -39,6 +40,8 @@ Deno.serve(async (req) => {
         error: 'Unknown resource',
         usage: {
           catalog: 'GET ?resource=catalog[&since=ISO]',
+          register:
+            'POST ?resource=register  body: { fountain_applicant_id, email, full_name? }',
           enroll:
             'POST ?resource=enroll  body: { fountain_applicant_id, course_id, assigned_by?, due_date? }',
           progress:
@@ -54,6 +57,63 @@ Deno.serve(async (req) => {
     return json({ error: (e as Error).message }, 500);
   }
 });
+
+async function handleRegister(admin: SupabaseClient, req: Request) {
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
+  let body: { fountain_applicant_id?: string; email?: string; full_name?: string } = {};
+  try { body = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
+
+  if (!body.fountain_applicant_id || !body.email) {
+    return json({ error: 'fountain_applicant_id and email are required' }, 400);
+  }
+
+  const { fountain_applicant_id, email, full_name } = body;
+
+  // Idempotent — return existing profile if already registered
+  const { data: existing } = await admin
+    .from('profiles')
+    .select('user_id, fountain_applicant_id')
+    .eq('fountain_applicant_id', fountain_applicant_id)
+    .maybeSingle();
+
+  if (existing) {
+    return json({ data: { user_id: existing.user_id, fountain_applicant_id, created: false } });
+  }
+
+  // Check if an auth user already exists for this email and link them
+  const { data: authList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const existingAuthUser = (authList?.users ?? []).find(
+    (u) => u.email?.toLowerCase() === email.toLowerCase(),
+  );
+
+  let userId: string;
+  if (existingAuthUser) {
+    userId = existingAuthUser.id;
+  } else {
+    // Create a new auth user — no password, they'll sign in via magic link / SSO
+    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: full_name ?? null, fountain_applicant_id },
+    });
+    if (createErr || !created?.user) {
+      return json({ error: createErr?.message ?? 'Failed to create user' }, 500);
+    }
+    userId = created.user.id;
+  }
+
+  // Upsert the profile row (handles race conditions or orphaned auth users)
+  const { error: profileErr } = await admin
+    .from('profiles')
+    .upsert(
+      { user_id: userId, fountain_applicant_id, full_name: full_name ?? null },
+      { onConflict: 'user_id', ignoreDuplicates: false },
+    );
+  if (profileErr) return json({ error: profileErr.message }, 500);
+
+  return json({ data: { user_id: userId, fountain_applicant_id, created: !existingAuthUser } });
+}
 
 async function handleCatalog(admin: SupabaseClient, url: URL) {
   let q = admin
