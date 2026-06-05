@@ -231,6 +231,15 @@ async function handleProgress(admin: SupabaseClient, req: Request, url: URL) {
   const lessonsByCourse = new Map<string, string[]>();
   const completedLessonsByUser = new Map<string, Set<string>>();
 
+  const courseTitleById = new Map<string, string>();
+  if (enrolledCourseIds.length) {
+    const { data: courseRows } = await admin
+      .from('courses')
+      .select('id, title')
+      .in('id', enrolledCourseIds);
+    for (const c of courseRows ?? []) courseTitleById.set(c.id, c.title);
+  }
+
   if (enrolledCourseIds.length) {
     const { data: lessons } = await admin
       .from('lessons')
@@ -275,6 +284,7 @@ async function handleProgress(admin: SupabaseClient, req: Request, url: URL) {
           : 'not_started';
       return {
         course_id: e.course_id,
+        course_title: courseTitleById.get(e.course_id) ?? null,
         status,
         enrolled_at: e.enrolled_at,
         completed_at: e.completed_at,
