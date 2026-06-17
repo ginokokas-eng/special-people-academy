@@ -33,5 +33,8 @@ verify_jwt = false
 [functions.upload-scorm]
 verify_jwt = false
 
+[functions.serve-scorm]
+verify_jwt = false
+
 [functions.ariadne-api]
 verify_jwt = false

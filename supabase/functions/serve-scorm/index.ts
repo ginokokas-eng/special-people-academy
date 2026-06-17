@@ -43,6 +43,29 @@ function getContentType(filePath: string): string {
   return CONTENT_TYPES[ext] || "application/octet-stream";
 }
 
+function withToken(path: string, token: string): string {
+  if (
+    !path ||
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("//") ||
+    path.startsWith("data:") ||
+    path.startsWith("#") ||
+    path.startsWith("javascript:")
+  ) {
+    return path;
+  }
+
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}token=${encodeURIComponent(token)}`;
+}
+
+function rewriteCssUrls(css: string, token: string): string {
+  return css.replace(/url\((['"]?)([^'")]+)\1\)/gi, (_match, quote: string, path: string) => {
+    return `url(${quote}${withToken(path.trim(), token)}${quote})`;
+  });
+}
+
 // In-memory short-lived token cache to avoid re-verifying on every sub-resource
 // Maps token -> { userId, expiresAt }
 const tokenCache = new Map<string, { userId: string; roles: string[]; expiresAt: number }>();
@@ -80,7 +103,16 @@ Deno.serve(async (req) => {
     if (pathParts[0] === "serve-scorm") startIdx = 1;
 
     const packageId = pathParts[startIdx];
-    const filePath = pathParts.slice(startIdx + 1).join("/");
+    let filePath: string;
+
+    try {
+      filePath = pathParts.slice(startIdx + 1).map((part) => decodeURIComponent(part)).join("/");
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid encoded file path" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!packageId || !filePath) {
       return new Response(JSON.stringify({ error: "Invalid path" }), {
@@ -224,14 +256,29 @@ Deno.serve(async (req) => {
       const tokenScript = `<script>
 (function(){
   var token = ${JSON.stringify(token)};
+  function withToken(url) {
+    if (!url || typeof url !== 'string' || url.startsWith('http') || url.startsWith('//') || url.startsWith('data:') || url.startsWith('#') || url.startsWith('javascript:')) {
+      return url;
+    }
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return url + sep + 'token=' + encodeURIComponent(token);
+  }
   var origOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
-    if (url && typeof url === 'string' && !url.startsWith('http') && !url.startsWith('//')) {
-      var sep = url.indexOf('?') >= 0 ? '&' : '?';
-      url = url + sep + 'token=' + encodeURIComponent(token);
-    }
+    url = withToken(url);
     return origOpen.apply(this, arguments);
   };
+  if (window.fetch) {
+    var origFetch = window.fetch;
+    window.fetch = function(input, init) {
+      if (typeof input === 'string') {
+        input = withToken(input);
+      } else if (input && input.url) {
+        input = new Request(withToken(input.url), input);
+      }
+      return origFetch.call(this, input, init);
+    };
+  }
 })();
 </script>`;
       // Inject after <head> or at start
@@ -248,8 +295,7 @@ Deno.serve(async (req) => {
       html = html.replace(
         /(src|href)="(?!https?:\/\/|\/\/|data:|#|javascript:)([^"]+)"/gi,
         (match: string, attr: string, path: string) => {
-          const sep = path.indexOf('?') >= 0 ? '&' : '?';
-          return `${attr}="${path}${sep}token=${encodeURIComponent(token)}"`;
+          return `${attr}="${withToken(path, token)}"`;
         }
       );
 
@@ -263,12 +309,51 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (contentType === "text/css" && token) {
+      const css = rewriteCssUrls(new TextDecoder().decode(arrayBuffer), token);
+      return new Response(css, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/css; charset=utf-8",
+          "Cache-Control": "private, max-age=3600",
+        },
+      });
+    }
+
+    const rangeHeader = req.headers.get("range");
+    if (rangeHeader) {
+      const rangeMatch = rangeHeader.match(/^bytes=(\d*)-(\d*)$/);
+      if (rangeMatch) {
+        const totalLength = arrayBuffer.byteLength;
+        const start = rangeMatch[1] ? Number.parseInt(rangeMatch[1], 10) : 0;
+        const end = rangeMatch[2] ? Number.parseInt(rangeMatch[2], 10) : totalLength - 1;
+
+        if (start <= end && start >= 0 && end < totalLength) {
+          const chunk = arrayBuffer.slice(start, end + 1);
+          return new Response(chunk, {
+            status: 206,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": contentType,
+              "Cache-Control": "private, max-age=3600",
+              "Accept-Ranges": "bytes",
+              "Content-Range": `bytes ${start}-${end}/${totalLength}`,
+              "Content-Length": String(chunk.byteLength),
+            },
+          });
+        }
+      }
+    }
+
     return new Response(arrayBuffer, {
       status: 200,
       headers: {
         ...corsHeaders,
         "Content-Type": contentType,
         "Cache-Control": "private, max-age=3600",
+        "Accept-Ranges": "bytes",
+        "Content-Length": String(arrayBuffer.byteLength),
       },
     });
   } catch (error) {

@@ -6,6 +6,15 @@
 import { supabase } from '@/integrations/supabase/client';
 
 type ScormData = Record<string, string>;
+type ScormStatus = 'not_attempted' | 'in_progress' | 'completed' | 'passed' | 'failed';
+type ScormRegistrationUpdate = {
+  status: ScormStatus;
+  last_commit_at: string;
+  score?: number;
+  lesson_location?: string;
+  suspend_data?: string;
+  total_time_seconds?: number;
+};
 
 interface ScormApiOptions {
   registrationId: string;
@@ -187,14 +196,14 @@ export class ScormApiAdapter {
       const suspendData = this.data['cmi.suspend_data'];
 
       // Map SCORM status to our enum
-      let dbStatus: string = 'in_progress';
+      let dbStatus: ScormStatus = 'in_progress';
       if (lessonStatus === 'completed') dbStatus = 'completed';
       else if (lessonStatus === 'passed') dbStatus = 'passed';
       else if (lessonStatus === 'failed') dbStatus = 'failed';
       else if (lessonStatus === 'not attempted') dbStatus = 'not_attempted';
       else dbStatus = 'in_progress';
 
-      const updateData: Record<string, any> = {
+      const updateData: ScormRegistrationUpdate = {
         status: dbStatus,
         last_commit_at: new Date().toISOString(),
       };
