@@ -141,7 +141,7 @@ export default function ScormPlayer() {
       if (reg.course_id) {
         try {
           await supabase.functions.invoke('check-course-completion', {
-            body: { userId: reg.user_id, courseId: reg.course_id },
+            body: { course_id: reg.course_id },
           });
         } catch (e) {
           console.error('Error checking course completion:', e);
