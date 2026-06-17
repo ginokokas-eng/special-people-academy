@@ -185,7 +185,7 @@ export function ScormPackageManager() {
           <DialogHeader>
             <DialogTitle>Upload SCORM Package</DialogTitle>
             <DialogDescription>
-              Upload a SCORM 1.2 ZIP package. The system will extract it and detect the launch file from the manifest.
+              Upload a true SCORM 1.2 ZIP (not a raw MP4 export). The system extracts it and detects the launch file from the manifest automatically.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
