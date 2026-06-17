@@ -445,11 +445,7 @@ export default function CourseDetail() {
 
   const handleLessonClick = async (lesson: Lesson) => {
     if (enrollment) {
-      // Check if this is a SCORM lesson
-      if (lesson.lesson_type === 'scorm') {
-        await handleScormLessonClick(lesson);
-        return;
-      }
+      // All lesson types (text, video, scorm) open in the unified learn player
       navigate(`/courses/${course?.id}/learn?lesson=${lesson.id}`);
     }
   };

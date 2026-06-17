@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+import CourseLearn from "./pages/CourseLearn";
 import QuizPage from "./pages/QuizPage";
 import MyLearning from "./pages/MyLearning";
 import MyCourses from "./pages/MyCourses";
@@ -77,6 +78,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:id" element={<CourseDetail />} />
+                <Route path="/courses/:id/learn" element={<CourseLearn />} />
                 <Route path="/courses/:courseId/quiz" element={<QuizPage />} />
                 <Route path="/my-learning" element={<MyLearning />} />
                 <Route path="/my-courses" element={<MyCourses />} />

@@ -79,7 +79,14 @@ export default function ScormPlayer() {
       }
       const scormBaseUrl = `${SUPABASE_URL}/functions/v1/serve-scorm/${pkg.id}`;
       const launchUrl = `${scormBaseUrl}/${pkg.launch_path}?token=${encodeURIComponent(accessToken)}`;
-      setIframeSrc(launchUrl);
+      try {
+        const resp = await fetch(launchUrl);
+        if (!resp.ok) throw new Error('Failed to fetch SCORM content');
+        setIframeSrc(await resp.text());
+      } catch (e) {
+        console.error('Error fetching SCORM html:', e);
+        toast.error('Failed to load SCORM content');
+      }
 
       // Create SCORM API adapter
       const adapter = new ScormApiAdapter({
@@ -215,7 +222,7 @@ export default function ScormPlayer() {
       <div className="flex-1">
         {iframeSrc && (
           <iframe
-            src={iframeSrc}
+            srcDoc={iframeSrc}
             className="w-full h-full border-0"
             title="SCORM Content"
             allow="autoplay; fullscreen"
