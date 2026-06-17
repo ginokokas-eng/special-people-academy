@@ -222,7 +222,7 @@ export default function ScormPlayer() {
       <div className="flex-1">
         {iframeSrc && (
           <iframe
-            src={iframeSrc}
+            srcDoc={iframeSrc}
             className="w-full h-full border-0"
             title="SCORM Content"
             allow="autoplay; fullscreen"
