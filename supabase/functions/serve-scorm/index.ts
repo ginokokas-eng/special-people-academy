@@ -4,6 +4,8 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Expose-Headers":
+    "Accept-Ranges, Content-Length, Content-Range, Content-Type",
 };
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -256,26 +258,62 @@ Deno.serve(async (req) => {
     if (contentType === "text/html" && token) {
       let html = new TextDecoder().decode(arrayBuffer);
 
-      // Absolute directory of the current file, e.g.
-      // https://<proj>.supabase.co/functions/v1/serve-scorm/<pkg>/<dir>/
-      const baseDir =
-        url.origin + url.pathname.substring(0, url.pathname.lastIndexOf("/") + 1);
+      // Absolute public directory of the current file. Inside the Edge runtime
+      // req.url is mounted at /serve-scorm/..., but browsers must request the
+      // public /functions/v1/serve-scorm/... route or assets redirect and get
+      // blocked by the browser.
+      const fileDir = filePath.includes("/")
+        ? filePath.substring(0, filePath.lastIndexOf("/") + 1)
+        : "";
+      const baseDir = `${supabaseUrl}/functions/v1/serve-scorm/${packageId}/${fileDir}`;
       const baseTag = `<base href="${baseDir}">`;
 
       const tokenScript = `<script>
 (function(){
   var token = ${JSON.stringify(token)};
   function withToken(url) {
-    if (!url || typeof url !== 'string' || url.startsWith('http') || url.startsWith('//') || url.startsWith('data:') || url.startsWith('#') || url.startsWith('javascript:')) {
+    if (!url || typeof url !== 'string' || url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('#') || url.startsWith('javascript:')) {
       return url;
     }
-    var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return url + sep + 'token=' + encodeURIComponent(token);
+    try {
+      var parsed = new URL(url, document.baseURI);
+      if (parsed.searchParams.has('token')) return parsed.href;
+      parsed.searchParams.set('token', token);
+      return parsed.href;
+    } catch (_) {
+      var sep = url.indexOf('?') >= 0 ? '&' : '?';
+      return url + sep + 'token=' + encodeURIComponent(token);
+    }
   }
+  var origSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function(name, value) {
+    var attr = String(name || '').toLowerCase();
+    if ((attr === 'src' || attr === 'href') && typeof value === 'string') {
+      value = withToken(value);
+    }
+    return origSetAttribute.call(this, name, value);
+  };
+  function patchUrlProperty(proto, prop) {
+    var desc = Object.getOwnPropertyDescriptor(proto, prop);
+    if (!desc || !desc.set || !desc.get) return;
+    Object.defineProperty(proto, prop, {
+      configurable: true,
+      enumerable: desc.enumerable,
+      get: desc.get,
+      set: function(value) { return desc.set.call(this, typeof value === 'string' ? withToken(value) : value); }
+    });
+  }
+  [HTMLMediaElement.prototype, HTMLSourceElement.prototype, HTMLImageElement.prototype, HTMLScriptElement.prototype, HTMLIFrameElement.prototype].forEach(function(proto) {
+    patchUrlProperty(proto, 'src');
+  });
+  [HTMLLinkElement.prototype, HTMLAnchorElement.prototype].forEach(function(proto) {
+    patchUrlProperty(proto, 'href');
+  });
   var origOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
-    url = withToken(url);
-    return origOpen.apply(this, arguments);
+    var args = Array.prototype.slice.call(arguments);
+    args[1] = withToken(url);
+    return origOpen.apply(this, args);
   };
   if (window.fetch) {
     var origFetch = window.fetch;
