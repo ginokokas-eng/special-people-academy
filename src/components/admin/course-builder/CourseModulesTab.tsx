@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
 
 interface Module {
   id: string;
@@ -41,24 +42,42 @@ interface Lesson {
   module_id: string | null;
   title: string;
   description: string | null;
-  lesson_type: string;
+  lesson_type: LessonType;
   order_index: number;
   duration_minutes: number | null;
+  scorm_package_id: string | null;
 }
 
 interface CourseModulesTabProps {
   courseId: string;
 }
 
-const LESSON_TYPES = [
+const LESSON_TYPE_VALUES = ['video', 'text', 'pdf', 'quiz', 'practical', 'scenario', 'scorm'] as const;
+type LessonType = typeof LESSON_TYPE_VALUES[number];
+type LessonInsert = Database['public']['Tables']['lessons']['Insert'];
+type LessonUpdate = Database['public']['Tables']['lessons']['Update'];
+
+interface LessonForm {
+  title: string;
+  description: string;
+  lesson_type: LessonType;
+  duration_minutes: number;
+  scorm_package_id: string;
+}
+
+const LESSON_TYPES: Array<{ value: LessonType; label: string }> = [
   { value: 'video', label: 'Video' },
   { value: 'text', label: 'Text/Article' },
-  { value: 'step_by_step', label: 'Step by Step Guide' },
+  { value: 'pdf', label: 'PDF' },
   { value: 'quiz', label: 'Quiz' },
-  { value: 'resource', label: 'Resource/Download' },
   { value: 'practical', label: 'Practical Session' },
+  { value: 'scenario', label: 'Scenario' },
   { value: 'scorm', label: 'SCORM Package' },
 ];
+
+function normalizeLessonType(value: string | null): LessonType {
+  return LESSON_TYPE_VALUES.includes(value as LessonType) ? (value as LessonType) : 'video';
+}
 
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [modules, setModules] = useState<Module[]>([]);
@@ -70,7 +89,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
-  const [lessonForm, setLessonForm] = useState({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
+  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
@@ -94,7 +113,10 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       if (lessonsRes.error) throw lessonsRes.error;
 
       setModules(modulesRes.data || []);
-      setLessons(lessonsRes.data || []);
+      setLessons((lessonsRes.data || []).map((lesson) => ({
+        ...lesson,
+        lesson_type: normalizeLessonType(lesson.lesson_type),
+      })));
     } catch (error) {
       console.error('Error fetching modules:', error);
       toast.error('Failed to load modules');
@@ -172,11 +194,15 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       toast.error('Lesson title is required');
       return;
     }
+    if (lessonForm.lesson_type === 'scorm' && !lessonForm.scorm_package_id) {
+      toast.error('Select a SCORM package before creating this lesson');
+      return;
+    }
 
     setSaving(true);
     try {
       const moduleLessons = lessons.filter(l => l.module_id === lessonDialog.moduleId);
-      const insertData: any = {
+      const insertData: LessonInsert = {
         course_id: courseId,
         module_id: lessonDialog.moduleId,
         title: lessonForm.title,
@@ -205,18 +231,22 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
   const handleUpdateLesson = async () => {
     if (!lessonDialog.lesson || !lessonForm.title.trim()) return;
+    if (lessonForm.lesson_type === 'scorm' && !lessonForm.scorm_package_id) {
+      toast.error('Select a SCORM package before saving this lesson');
+      return;
+    }
 
     setSaving(true);
     try {
-      const updateData: any = {
+      const updateData: LessonUpdate = {
         title: lessonForm.title,
         description: lessonForm.description || null,
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
       };
-      if (lessonForm.lesson_type === 'scorm') {
-        updateData.scorm_package_id = lessonForm.scorm_package_id || null;
-      }
+      updateData.scorm_package_id = lessonForm.lesson_type === 'scorm'
+        ? lessonForm.scorm_package_id
+        : null;
       const { error } = await supabase
         .from('lessons')
         .update(updateData)
@@ -259,7 +289,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       description: lesson.description || '',
       lesson_type: lesson.lesson_type || 'video',
       duration_minutes: lesson.duration_minutes || 0,
-      scorm_package_id: (lesson as any).scorm_package_id || '',
+      scorm_package_id: lesson.scorm_package_id || '',
     });
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
   };
@@ -446,7 +476,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
               <Label htmlFor="lesson-type">Type</Label>
               <Select
                 value={lessonForm.lesson_type}
-                onValueChange={(value) => setLessonForm({ ...lessonForm, lesson_type: value })}
+                onValueChange={(value) => {
+                  const lessonType = normalizeLessonType(value);
+                  setLessonForm({
+                    ...lessonForm,
+                    lesson_type: lessonType,
+                    scorm_package_id: lessonType === 'scorm' ? lessonForm.scorm_package_id : '',
+                  });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />

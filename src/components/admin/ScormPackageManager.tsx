@@ -77,8 +77,6 @@ export function ScormPackageManager() {
       formData.append('title', uploadForm.title);
       formData.append('version', uploadForm.version);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const { data, error } = await supabase.functions.invoke('upload-scorm', {
         body: formData,
       });
@@ -90,9 +88,9 @@ export function ScormPackageManager() {
       setSelectedFile(null);
       setUploadForm({ title: '', version: '1.2' });
       fetchPackages();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Upload error:', err);
-      toast.error(err.message || 'Failed to upload SCORM package');
+      toast.error(err instanceof Error ? err.message : 'Failed to upload SCORM package');
     } finally {
       setUploading(false);
     }
