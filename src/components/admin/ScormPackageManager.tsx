@@ -120,7 +120,18 @@ export function ScormPackageManager() {
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            <strong>HeyGen workflow:</strong> In HeyGen, export your video as SCORM (ZIP) → choose SCORM 1.2 → set completion threshold (e.g. 80% watched) → upload the ZIP here → attach it to a course lesson in the Course Builder.
+            <strong>HeyGen SCORM workflow</strong>
+            <ol className="mt-2 list-decimal space-y-1 pl-5">
+              <li>
+                <strong>In HeyGen:</strong> export the video as SCORM (ZIP) → choose <strong>SCORM 1.2</strong> → set a completion threshold (e.g. 80% watched).
+              </li>
+              <li>
+                <strong>Here in the SCORM tab:</strong> upload the ZIP below.
+              </li>
+              <li>
+                <strong>In the Modules &amp; Lessons tab:</strong> add a lesson of type <strong>SCORM Package</strong> and attach the package you uploaded.
+              </li>
+            </ol>
           </AlertDescription>
         </Alert>
 
