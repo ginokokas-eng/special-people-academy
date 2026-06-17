@@ -241,7 +241,10 @@ export default function CourseLearn() {
             .eq('id', regId);
         }
 
-        if (!cancelled) setScormSrc(launchUrl);
+        const resp = await fetch(launchUrl);
+        if (!resp.ok) throw new Error('Failed to fetch SCORM content');
+        const html = await resp.text();
+        if (!cancelled) setScormHtml(html);
       } catch (err) {
         console.error('SCORM load error:', err);
         toast.error('Failed to load module');
