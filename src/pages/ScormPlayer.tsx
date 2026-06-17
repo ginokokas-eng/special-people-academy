@@ -225,8 +225,8 @@ export default function ScormPlayer() {
             srcDoc={iframeSrc}
             className="w-full h-full border-0"
             title="SCORM Content"
-            allow="autoplay; fullscreen"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
           />
         )}
       </div>
