@@ -4,6 +4,8 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Expose-Headers":
+    "Accept-Ranges, Content-Length, Content-Range, Content-Type",
 };
 
 const CONTENT_TYPES: Record<string, string> = {
