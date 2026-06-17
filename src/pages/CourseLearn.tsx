@@ -151,7 +151,7 @@ export default function CourseLearn() {
       );
       if (courseId) {
         supabase.functions
-          .invoke('check-course-completion', { body: { userId: user.id, courseId } })
+          .invoke('check-course-completion', { body: { course_id: courseId } })
           .catch((e) => console.error('completion check error', e));
       }
     },
@@ -310,8 +310,8 @@ export default function CourseLearn() {
                 srcDoc={scormHtml}
                 className="w-full h-full border-0"
                 title={activeLesson.title}
-                allow="autoplay; fullscreen"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
               />
             ) : (
               <div className="h-full flex items-center justify-center text-primary-foreground/70 text-sm">

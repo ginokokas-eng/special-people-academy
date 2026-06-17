@@ -141,7 +141,7 @@ export default function ScormPlayer() {
       if (reg.course_id) {
         try {
           await supabase.functions.invoke('check-course-completion', {
-            body: { userId: reg.user_id, courseId: reg.course_id },
+            body: { course_id: reg.course_id },
           });
         } catch (e) {
           console.error('Error checking course completion:', e);
@@ -225,8 +225,8 @@ export default function ScormPlayer() {
             srcDoc={iframeSrc}
             className="w-full h-full border-0"
             title="SCORM Content"
-            allow="autoplay; fullscreen"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
           />
         )}
       </div>
