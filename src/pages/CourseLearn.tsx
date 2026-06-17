@@ -151,7 +151,7 @@ export default function CourseLearn() {
       );
       if (courseId) {
         supabase.functions
-          .invoke('check-course-completion', { body: { userId: user.id, courseId } })
+          .invoke('check-course-completion', { body: { course_id: courseId } })
           .catch((e) => console.error('completion check error', e));
       }
     },
