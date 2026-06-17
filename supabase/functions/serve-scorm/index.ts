@@ -256,10 +256,14 @@ Deno.serve(async (req) => {
     if (contentType === "text/html" && token) {
       let html = new TextDecoder().decode(arrayBuffer);
 
-      // Absolute directory of the current file, e.g.
-      // https://<proj>.supabase.co/functions/v1/serve-scorm/<pkg>/<dir>/
-      const baseDir =
-        url.origin + url.pathname.substring(0, url.pathname.lastIndexOf("/") + 1);
+      // Absolute public directory of the current file. Inside the Edge runtime
+      // req.url is mounted at /serve-scorm/..., but browsers must request the
+      // public /functions/v1/serve-scorm/... route or assets redirect and get
+      // blocked by the browser.
+      const fileDir = filePath.includes("/")
+        ? filePath.substring(0, filePath.lastIndexOf("/") + 1)
+        : "";
+      const baseDir = `${supabaseUrl}/functions/v1/serve-scorm/${packageId}/${fileDir}`;
       const baseTag = `<base href="${baseDir}">`;
 
       const tokenScript = `<script>
@@ -274,8 +278,9 @@ Deno.serve(async (req) => {
   }
   var origOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
-    url = withToken(url);
-    return origOpen.apply(this, arguments);
+    var args = Array.prototype.slice.call(arguments);
+    args[1] = withToken(url);
+    return origOpen.apply(this, args);
   };
   if (window.fetch) {
     var origFetch = window.fetch;
