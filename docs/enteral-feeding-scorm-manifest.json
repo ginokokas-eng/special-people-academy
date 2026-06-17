@@ -1,0 +1,146 @@
+{
+  "course": {
+    "title": "Enteral Feeding Tubes: Management & Competency (NG/PEG/JEJ)",
+    "slug": "enteral-feeding-tubes-management-competency",
+    "category": "Complex Needs & Specialist Care",
+    "default_delivery": "Blended (Online + Practical sign-off)",
+    "requires_practical_signoff": true,
+    "certificate_expiry_months": 24,
+    "final_quiz_pass_mark_percent": 80,
+    "final_quiz_attempts_allowed": 2
+  },
+  "local_paths": {
+    "prepared_package_folder": "C:\\Users\\ginok\\Downloads\\Special People Training Academy\\1. Enteral Feeding Package",
+    "upload_ready_scorm_folder": "C:\\Users\\ginok\\Downloads\\Special People Training Academy\\1. Enteral Feeding Package\\SCORM Upload Ready for Lovable",
+    "sharepoint_materials_folder": "C:\\Users\\ginok\\Downloads\\Special People Training Academy\\1. Enteral Feeding Package\\Course Materials from SharePoint Pack"
+  },
+  "modules": [
+    {
+      "module_no": 1,
+      "title": "Introduction and route foundations",
+      "lesson_numbers": [1, 2, 3, 4, 5, 6]
+    },
+    {
+      "module_no": 2,
+      "title": "Verification and feeding methods",
+      "lesson_numbers": [7, 8, 9, 10]
+    },
+    {
+      "module_no": 3,
+      "title": "Routine care, troubleshooting and medicines",
+      "lesson_numbers": [11, 12, 13]
+    },
+    {
+      "module_no": 4,
+      "title": "Competency and accountability",
+      "lesson_numbers": [14]
+    }
+  ],
+  "lessons": [
+    {
+      "lesson_no": 1,
+      "title": "Introduction, scope and workshop objectives",
+      "source_slides": "1-2",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L01_intro_scope_objectives.zip"
+    },
+    {
+      "lesson_no": 2,
+      "title": "The foundation: what enteral feeding is and why it is used",
+      "source_slides": "3",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L02_foundation_what_and_why.zip"
+    },
+    {
+      "lesson_no": 3,
+      "title": "Device selection map: tube routes and safe method matching",
+      "source_slides": "4",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L03_device_selection_map.zip"
+    },
+    {
+      "lesson_no": 4,
+      "title": "Short-term access: the nasal route",
+      "source_slides": "5",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L04_short_term_nasal_route.zip"
+    },
+    {
+      "lesson_no": 5,
+      "title": "Long-term access: the gastric route (PEG)",
+      "source_slides": "6",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L05_long_term_gastric_route_peg.zip"
+    },
+    {
+      "lesson_no": 6,
+      "title": "Long-term access: the post-pyloric route",
+      "source_slides": "7",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L06_long_term_post_pyloric_route.zip"
+    },
+    {
+      "lesson_no": 7,
+      "title": "Verification: safety non-negotiables",
+      "source_slides": "8",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L07_verification_safety.zip"
+    },
+    {
+      "lesson_no": 8,
+      "title": "Feeding techniques and mechanics",
+      "source_slides": "9",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L08_feeding_techniques_mechanics.zip"
+    },
+    {
+      "lesson_no": 9,
+      "title": "Gastric feeding protocols: bolus methods",
+      "source_slides": "10",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L09_gastric_bolus_protocols.zip"
+    },
+    {
+      "lesson_no": 10,
+      "title": "Continuous pump feeding",
+      "source_slides": "11",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L10_continuous_pump_feeding.zip"
+    },
+    {
+      "lesson_no": 11,
+      "title": "Routine care: daily hygiene and rotation rules",
+      "source_slides": "12",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L11_routine_care_rotation_rules.zip"
+    },
+    {
+      "lesson_no": 12,
+      "title": "Troubleshooting: mechanical issues",
+      "source_slides": "13",
+      "duration_minutes": 5,
+      "scorm_zip_filename": "enteral_feeding_L12_troubleshooting_mechanical_issues.zip"
+    },
+    {
+      "lesson_no": 13,
+      "title": "Complications and safe medication administration",
+      "source_slides": "14",
+      "duration_minutes": 6,
+      "scorm_zip_filename": "enteral_feeding_L13_complications_safe_medication.zip"
+    },
+    {
+      "lesson_no": 14,
+      "title": "Competency summary and accountability",
+      "source_slides": "15",
+      "duration_minutes": 4,
+      "scorm_zip_filename": "enteral_feeding_L14_competency_summary_accountability.zip"
+    }
+  ],
+  "supporting_materials": {
+    "course_data": "enteral_feeding_course_data_ppt_aligned.json",
+    "final_quiz": "enteral_feeding_final_quiz_ppt_aligned.csv",
+    "practical_signoff_checklist": "enteral_feeding_practical_signoff_checklist_ppt_aligned.csv",
+    "knowledge_base": "enteral_feeding_knowledge_base_ppt_aligned.json",
+    "lovable_prompts": "lovable_prompts_enteral_feeding_ppt_aligned.txt"
+  }
+}
