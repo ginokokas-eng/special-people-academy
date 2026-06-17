@@ -159,6 +159,9 @@ export function ScormPackageManager() {
                     <p className="text-xs text-muted-foreground">
                       Launch: {pkg.launch_path} • {new Date(pkg.created_at).toLocaleDateString()}
                     </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Selectable as a SCORM Package lesson in the Modules &amp; Lessons tab.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
