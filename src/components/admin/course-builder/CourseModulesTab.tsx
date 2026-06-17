@@ -470,6 +470,10 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
             {lessonForm.lesson_type === 'scorm' && (
               <div className="space-y-2">
                 <Label htmlFor="lesson-scorm">SCORM Package</Label>
+                <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                  <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  Attach a HeyGen SCORM package you already uploaded in the SCORM tab.
+                </p>
                 <Select
                   value={lessonForm.scorm_package_id}
                   onValueChange={(v) => setLessonForm({ ...lessonForm, scorm_package_id: v })}
@@ -483,8 +487,21 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                {scormPackages.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No SCORM packages uploaded. Go to the SCORM tab to upload one first.</p>
+                {scormPackages.length === 0 ? (
+                  <p className="flex items-start gap-1.5 text-xs rounded-md bg-warning/10 text-warning p-2">
+                    <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                    No SCORM packages uploaded yet. Go to the SCORM tab to upload a HeyGen SCORM 1.2 ZIP first.
+                  </p>
+                ) : lessonForm.scorm_package_id ? (
+                  <p className="flex items-center gap-1.5 text-xs text-success">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    Package attached.
+                  </p>
+                ) : (
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    No package attached yet — learners won't see any content until you select one.
+                  </p>
                 )}
               </div>
             )}
