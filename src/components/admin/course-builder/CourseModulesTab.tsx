@@ -342,6 +342,19 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                                 <span className="text-xs px-2 py-1 bg-background rounded">
                                   {LESSON_TYPES.find(t => t.value === lesson.lesson_type)?.label || lesson.lesson_type}
                                 </span>
+                                {lesson.lesson_type === 'scorm' && (
+                                  (lesson as any).scorm_package_id ? (
+                                    <span className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-success/10 text-success">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Package attached
+                                    </span>
+                                  ) : (
+                                    <span className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-warning/10 text-warning">
+                                      <AlertTriangle className="h-3 w-3" />
+                                      No package attached
+                                    </span>
+                                  )
+                                )}
                               </div>
                               <div className="flex gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => openEditLesson(lesson)}>
