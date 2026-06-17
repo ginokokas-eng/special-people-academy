@@ -311,11 +311,26 @@ Deno.serve(async (req) => {
         }
       );
 
+      // Explicit CSP suitable for SCORM/HeyGen content: allow inline + eval
+      // scripts, inline styles, media (video/audio), images, fonts and network
+      // calls over same-origin/https plus blob:/data: URIs, and permit the app
+      // to embed this document in an iframe.
+      const scormCsp =
+        "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
+        "script-src 'self' https: blob: 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src 'self' https: 'unsafe-inline'; " +
+        "img-src 'self' https: data: blob:; " +
+        "media-src 'self' https: data: blob:; " +
+        "font-src 'self' https: data:; " +
+        "connect-src 'self' https: data: blob:; " +
+        "frame-ancestors *;";
+
       return new Response(html, {
         status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "text/html; charset=utf-8",
+          "Content-Security-Policy": scormCsp,
           "Cache-Control": "private, no-cache",
         },
       });
