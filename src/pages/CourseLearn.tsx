@@ -305,9 +305,9 @@ export default function CourseLearn() {
               <div className="h-full flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary-foreground/70" />
               </div>
-            ) : scormSrc ? (
+            ) : scormHtml ? (
               <iframe
-                src={scormSrc}
+                srcDoc={scormHtml}
                 className="w-full h-full border-0"
                 title={activeLesson.title}
                 allow="autoplay; fullscreen"
