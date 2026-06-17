@@ -249,10 +249,19 @@ Deno.serve(async (req) => {
     const contentType = getContentType(filePath);
     const arrayBuffer = await fileData.arrayBuffer();
 
-    // For HTML files, inject a base tag and token propagation script
-    // so that relative resource requests also include the token
+    // For HTML files, inject a <base> tag (so relative assets resolve back to
+    // this function when the HTML is rendered via iframe srcDoc on another
+    // origin) and a token propagation script so XHR/fetch requests also carry
+    // the token.
     if (contentType === "text/html" && token) {
       let html = new TextDecoder().decode(arrayBuffer);
+
+      // Absolute directory of the current file, e.g.
+      // https://<proj>.supabase.co/functions/v1/serve-scorm/<pkg>/<dir>/
+      const baseDir =
+        url.origin + url.pathname.substring(0, url.pathname.lastIndexOf("/") + 1);
+      const baseTag = `<base href="${baseDir}">`;
+
       const tokenScript = `<script>
 (function(){
   var token = ${JSON.stringify(token)};
@@ -281,14 +290,17 @@ Deno.serve(async (req) => {
   }
 })();
 </script>`;
-      // Inject after <head> or at start
+      // Inject base tag first (must precede any resource references), then the
+      // token script. Insert right after the opening <head>.
+      const headInjection = baseTag + tokenScript;
       if (html.includes("<head>")) {
-        html = html.replace("<head>", "<head>" + tokenScript);
+        html = html.replace("<head>", "<head>" + headInjection);
       } else if (html.includes("<HEAD>")) {
-        html = html.replace("<HEAD>", "<HEAD>" + tokenScript);
+        html = html.replace("<HEAD>", "<HEAD>" + headInjection);
       } else {
-        html = tokenScript + html;
+        html = headInjection + html;
       }
+
 
       // Rewrite relative src/href attributes to include token
       // This handles <script src="...">, <link href="...">, <img src="..."> etc.
