@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+import CourseLearn from "./pages/CourseLearn";
 import QuizPage from "./pages/QuizPage";
 import MyLearning from "./pages/MyLearning";
 import MyCourses from "./pages/MyCourses";
