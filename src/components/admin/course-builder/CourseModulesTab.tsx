@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GripVertical, Plus, Trash2, Edit, Loader2 } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Module {
