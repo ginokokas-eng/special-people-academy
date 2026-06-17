@@ -51,7 +51,7 @@ export default function CourseLearn() {
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
-  const [scormSrc, setScormSrc] = useState('');
+  const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
   const apiRef = useRef<ScormApiAdapter | null>(null);
 
