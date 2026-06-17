@@ -270,12 +270,43 @@ Deno.serve(async (req) => {
 (function(){
   var token = ${JSON.stringify(token)};
   function withToken(url) {
-    if (!url || typeof url !== 'string' || url.startsWith('http') || url.startsWith('//') || url.startsWith('data:') || url.startsWith('#') || url.startsWith('javascript:')) {
+    if (!url || typeof url !== 'string' || url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('#') || url.startsWith('javascript:')) {
       return url;
     }
-    var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return url + sep + 'token=' + encodeURIComponent(token);
+    try {
+      var parsed = new URL(url, document.baseURI);
+      if (parsed.searchParams.has('token')) return parsed.href;
+      parsed.searchParams.set('token', token);
+      return parsed.href;
+    } catch (_) {
+      var sep = url.indexOf('?') >= 0 ? '&' : '?';
+      return url + sep + 'token=' + encodeURIComponent(token);
+    }
   }
+  var origSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function(name, value) {
+    var attr = String(name || '').toLowerCase();
+    if ((attr === 'src' || attr === 'href') && typeof value === 'string') {
+      value = withToken(value);
+    }
+    return origSetAttribute.call(this, name, value);
+  };
+  function patchUrlProperty(proto, prop) {
+    var desc = Object.getOwnPropertyDescriptor(proto, prop);
+    if (!desc || !desc.set || !desc.get) return;
+    Object.defineProperty(proto, prop, {
+      configurable: true,
+      enumerable: desc.enumerable,
+      get: desc.get,
+      set: function(value) { return desc.set.call(this, typeof value === 'string' ? withToken(value) : value); }
+    });
+  }
+  [HTMLMediaElement.prototype, HTMLSourceElement.prototype, HTMLImageElement.prototype, HTMLScriptElement.prototype, HTMLIFrameElement.prototype].forEach(function(proto) {
+    patchUrlProperty(proto, 'src');
+  });
+  [HTMLLinkElement.prototype, HTMLAnchorElement.prototype].forEach(function(proto) {
+    patchUrlProperty(proto, 'href');
+  });
   var origOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
     var args = Array.prototype.slice.call(arguments);
