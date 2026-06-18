@@ -13,12 +13,17 @@ interface ProtectedRouteProps {
 
 /**
  * Protects routes based on authentication and role requirements.
- * 
+ *
+ * Role flags come from the centralised helper (src/lib/roles.ts). The check is
+ * capability-based: a higher role satisfies a lower-role requirement.
+ *
  * Usage:
- * - No requiredRoles: Just requires authentication
- * - requiredRoles=['admin']: Requires admin or super_admin
- * - requiredRoles=['trainer']: Requires trainer, ops_training_admin, admin, or super_admin
- * - requiredRoles=['super_admin']: Requires super_admin only
+ * - No requiredRoles: just requires authentication.
+ * - requiredRoles=['learner']: any authenticated user.
+ * - requiredRoles=['trainer']: trainer, ops_training_admin, admin, or super_admin.
+ * - requiredRoles=['ops_training_admin']: ops_training_admin, admin, or super_admin.
+ * - requiredRoles=['admin']: admin or super_admin (admin-level access).
+ * - requiredRoles=['super_admin']: super_admin ONLY (isSuperAdmin is strict).
  */
 export function ProtectedRoute({ 
   children, 
