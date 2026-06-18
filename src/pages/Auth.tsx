@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
+import { computeRoleFlags } from '@/lib/roles';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import defaultLogo from '@/assets/logo.svg';
