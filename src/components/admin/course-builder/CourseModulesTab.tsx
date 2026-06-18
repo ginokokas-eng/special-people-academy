@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -176,7 +177,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   };
 
   const handleDeleteModule = async (moduleId: string) => {
-    if (!confirm('Delete this module and all its lessons?')) return;
+    if (!(await confirmDialog({ title: 'Delete module?', description: 'This will permanently delete this module and all its lessons.' }))) return;
 
     try {
       const { error } = await supabase.from('modules').delete().eq('id', moduleId);
@@ -265,7 +266,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm('Delete this lesson?')) return;
+    if (!(await confirmDialog({ title: 'Delete lesson?', description: 'This will permanently delete this lesson.' }))) return;
 
     try {
       const { error } = await supabase.from('lessons').delete().eq('id', lessonId);

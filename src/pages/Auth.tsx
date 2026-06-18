@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
+import { computeRoleFlags } from '@/lib/roles';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import defaultLogo from '@/assets/logo.svg';
@@ -47,26 +48,25 @@ export default function Auth() {
     }
   }, [user, loading]);
 
+  // Decide where to send a user after auth, based on their role.
+  const landingForRoles = (roles: string[]): string => {
+    const flags = computeRoleFlags(roles);
+    if (flags.isAdmin) return '/admin-portal/dashboard';
+    if (flags.isOpsTrainingAdmin) return '/admin-portal/courses';
+    if (flags.isTrainer) return '/admin-portal/trainer';
+    return loginRedirectUrl;
+  };
+
   const redirectBasedOnRole = async () => {
     if (!user) return;
-    
-    // Check roles in database
+
     const { data: rolesData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
-    
+
     const roles = rolesData?.map(r => r.role) || [];
-    
-    if (roles.includes('super_admin') || roles.includes('admin')) {
-      navigate('/admin-portal/dashboard');
-    } else if (roles.includes('ops_training_admin')) {
-      navigate('/admin-portal/courses');
-    } else if (roles.includes('trainer')) {
-      navigate('/admin-portal/trainer');
-    } else {
-      navigate(loginRedirectUrl);
-    }
+    navigate(landingForRoles(roles));
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -94,16 +94,18 @@ export default function Auth() {
       }
     } else {
       toast.success('Welcome back!');
-      // Redirect based on roles returned from signIn
-      if (roles?.includes('super_admin') || roles?.includes('admin')) {
-        navigate('/admin-portal/dashboard');
-      } else if (roles?.includes('ops_training_admin')) {
-        navigate('/admin-portal/courses');
-      } else if (roles?.includes('trainer')) {
-        navigate('/admin-portal/trainer');
-      } else {
-        navigate(loginRedirectUrl);
+      // Ensure any active staff profile is reflected in the user's roles
+      // (server-side, tamper-resistant), then redirect based on roles.
+      let effectiveRoles = roles || [];
+      const { data: synced } = await supabase.rpc('sync_staff_role');
+      if (synced) {
+        const { data: rolesData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
+        effectiveRoles = rolesData?.map(r => r.role) || effectiveRoles;
       }
+      navigate(landingForRoles(effectiveRoles));
     }
   };
 
@@ -150,112 +152,29 @@ export default function Auth() {
     }
 
     if (!result.redirected) {
-      // Check if user needs role assignment based on email
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (authUser?.email) {
-        await assignRoleByEmail(authUser.email, authUser.id);
-        
-        // Now fetch the roles and redirect
+      if (authUser?.id) {
+        // Server-side, DB-backed staff role assignment based on an active
+        // staff profile matching the signed-in email. No hard-coded emails.
+        await supabase.rpc('sync_staff_role');
+
         const { data: rolesData } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', authUser.id);
-        
+
         const roles = rolesData?.map(r => r.role) || [];
-        
+
         toast.success('Welcome!');
-        
-        if (roles.includes('super_admin') || roles.includes('admin')) {
-          navigate('/admin-portal/dashboard');
-        } else if (roles.includes('ops_training_admin')) {
-          navigate('/admin-portal/courses');
-        } else if (roles.includes('trainer')) {
-          navigate('/admin-portal/trainer');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate(landingForRoles(roles));
       } else {
-          navigate(loginRedirectUrl);
+        navigate(loginRedirectUrl);
       }
     }
     setIsSubmitting(false);
   };
 
-  const assignRoleByEmail = async (email: string, userId: string) => {
-    type AppRole = 'admin' | 'learner' | 'trainer' | 'super_admin' | 'ops_training_admin';
-    
-    // Super admins - same permissions as each other
-    const superAdminEmails = [
-      'constantine.bentai@specialpeople.org.uk',
-      'peter@specialpeople.org.uk',
-    ];
-    
-    // Internal staff with specific roles
-    const internalStaff: Record<string, { role: AppRole; canSignOff: boolean }> = {
-      'constantine.bentai@specialpeople.org.uk': { role: 'super_admin', canSignOff: true },
-      'peter@specialpeople.org.uk': { role: 'super_admin', canSignOff: true },
-      'tamar@specialpeople.org.uk': { role: 'ops_training_admin', canSignOff: true },
-      'marina@specialpeople.org.uk': { role: 'ops_training_admin', canSignOff: true },
-      'elisa@specialpeople.org.uk': { role: 'ops_training_admin', canSignOff: false },
-    };
 
-    const normalizedEmail = email.toLowerCase();
-    const staffConfig = internalStaff[normalizedEmail];
-    
-    if (staffConfig) {
-      // Check if role already assigned
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', staffConfig.role)
-        .maybeSingle();
-
-      if (!existingRole) {
-        // Remove default learner role if assigning a staff role
-        await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role', 'learner');
-
-        // Assign the correct role
-        await supabase
-          .from('user_roles')
-          .insert([{ user_id: userId, role: staffConfig.role }]);
-      }
-
-      // Update staff profile link
-      await supabase
-        .from('staff_profiles')
-        .update({ user_id: userId })
-        .eq('email', normalizedEmail);
-    } else {
-      // Non-admin user - ensure they have the learner role
-      const { data: existingLearnerRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'learner')
-        .maybeSingle();
-
-      if (!existingLearnerRole) {
-        // Check if they have any role at all
-        const { data: anyRole } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (!anyRole) {
-          // Assign default learner role
-          await supabase
-            .from('user_roles')
-            .insert([{ user_id: userId, role: 'learner' }]);
-        }
-      }
-    }
-  };
 
   if (loading) {
     return (

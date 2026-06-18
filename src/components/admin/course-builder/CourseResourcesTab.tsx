@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -117,7 +118,7 @@ export function CourseResourcesTab({ courseId }: CourseResourcesTabProps) {
   };
 
   const handleDelete = async (resourceId: string) => {
-    if (!confirm('Delete this resource?')) return;
+    if (!(await confirmDialog({ title: 'Delete resource?', description: 'This will permanently delete this resource.' }))) return;
 
     try {
       const { error } = await supabase.from('course_resources').delete().eq('id', resourceId);

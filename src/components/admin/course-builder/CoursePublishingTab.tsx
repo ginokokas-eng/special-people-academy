@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,7 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
   };
 
   const handleUnpublish = async () => {
-    if (!confirm('Unpublish this course? It will no longer be visible in the catalogue.')) return;
+    if (!(await confirmDialog({ title: 'Unpublish course?', description: 'It will no longer be visible in the catalogue.', confirmLabel: 'Unpublish' }))) return;
 
     setSaving(true);
     try {

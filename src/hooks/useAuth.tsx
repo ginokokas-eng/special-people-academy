@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { computeRoleFlags } from '@/lib/roles';
 
 interface AuthContextType {
   user: User | null;
@@ -42,10 +43,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq('user_id', userId);
       
       const roles = data?.map(r => r.role) || [];
-      setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
-      setIsTrainer(roles.includes('trainer') || roles.includes('admin') || roles.includes('super_admin') || roles.includes('ops_training_admin'));
-      setIsSuperAdmin(roles.includes('super_admin') || roles.includes('admin'));
-      setIsOpsTrainingAdmin(roles.includes('ops_training_admin') || roles.includes('super_admin') || roles.includes('admin') || roles.includes('trainer'));
+      // Derive all role flags from the centralised helper so semantics stay
+      // consistent. Note: isSuperAdmin is STRICT (super_admin only); isAdmin
+      // is the admin-level helper (admin OR super_admin).
+      const flags = computeRoleFlags(roles);
+      setIsAdmin(flags.isAdmin);
+      setIsTrainer(flags.isTrainer);
+      setIsSuperAdmin(flags.isSuperAdmin);
+      setIsOpsTrainingAdmin(flags.isOpsTrainingAdmin);
       return roles;
     } finally {
       setRolesLoading(false);

@@ -50,10 +50,12 @@ import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
+import { SystemStatusPanel } from '@/components/admin/SystemStatusPanel';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { AdminTableControls } from '@/components/admin/AdminTableControls';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Course {
   id: string;
@@ -121,6 +123,22 @@ export default function AdminDashboard() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Destructive-action confirmation dialog state (replaces window.confirm)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmLabel: string;
+    action: () => void;
+  }>({ open: false, title: '', description: '', confirmLabel: 'Delete', action: () => {} });
+
+  const askConfirm = (
+    title: string,
+    description: string,
+    action: () => void,
+    confirmLabel = 'Delete',
+  ) => setConfirmState({ open: true, title, description, confirmLabel, action });
+
   // Lesson management state
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
   const [selectedCourseForLessons, setSelectedCourseForLessons] = useState<Course | null>(null);
@@ -177,25 +195,31 @@ export default function AdminDashboard() {
         .from('profiles')
         .select('user_id, full_name, department');
 
-      // Get enrollment counts and enrolled courses per user
-      const usersWithEnrollments: User[] = [];
-      for (const profile of profilesData || []) {
-        const { data: enrollmentsData, count } = await supabase
-          .from('enrollments')
-          .select('course_id', { count: 'exact' })
-          .eq('user_id', profile.user_id);
+      // Fetch ALL enrollments once and group them by user (no per-user N+1).
+      const { data: allEnrollments } = await supabase
+        .from('enrollments')
+        .select('user_id, course_id');
 
-        usersWithEnrollments.push({
+      const enrollmentsByUser = new Map<string, string[]>();
+      for (const e of allEnrollments || []) {
+        const list = enrollmentsByUser.get(e.user_id) || [];
+        list.push(e.course_id);
+        enrollmentsByUser.set(e.user_id, list);
+      }
+
+      const usersWithEnrollments: User[] = (profilesData || []).map(profile => {
+        const enrolledCourses = enrollmentsByUser.get(profile.user_id) || [];
+        return {
           id: profile.user_id,
           email: '',
           profile: {
             full_name: profile.full_name,
             department: profile.department,
           },
-          enrollments: count || 0,
-          enrolledCourses: enrollmentsData?.map(e => e.course_id) || [],
-        });
-      }
+          enrollments: enrolledCourses.length,
+          enrolledCourses,
+        };
+      });
       setUsers(usersWithEnrollments);
 
       // Calculate enhanced stats
@@ -370,7 +394,6 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
 
     try {
       const { error } = await supabase
@@ -502,7 +525,6 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm('Are you sure you want to delete this lesson?')) return;
 
     try {
       const { error } = await supabase
@@ -653,6 +675,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses" className="mt-6">
@@ -905,7 +928,11 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeleteCourse(course.id)}
+                                onClick={() => askConfirm(
+                                  'Delete course?',
+                                  `This will permanently delete "${course.title}". This cannot be undone.`,
+                                  () => handleDeleteCourse(course.id),
+                                )}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -927,6 +954,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="payments" className="mt-6">
             <PaymentsHealthPanel />
+          </TabsContent>
+
+          <TabsContent value="system" className="mt-6">
+            <SystemStatusPanel />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
@@ -1107,7 +1138,11 @@ export default function AdminDashboard() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleDeleteLesson(lesson.id)}
+                              onClick={() => askConfirm(
+                                'Delete lesson?',
+                                `This will permanently delete "${lesson.title}". This cannot be undone.`,
+                                () => handleDeleteLesson(lesson.id),
+                              )}
                               className="text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -1181,6 +1216,18 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <ConfirmDialog
+        open={confirmState.open}
+        onOpenChange={(open) => setConfirmState((s) => ({ ...s, open }))}
+        title={confirmState.title}
+        description={confirmState.description}
+        confirmLabel={confirmState.confirmLabel}
+        onConfirm={() => {
+          confirmState.action();
+          setConfirmState((s) => ({ ...s, open: false }));
+        }}
+      />
     </PortalLayout>
   );
 }

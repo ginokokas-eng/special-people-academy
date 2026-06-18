@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -311,7 +312,7 @@ export function PracticalSessionsManager() {
   };
 
   const handleDelete = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to delete this session?')) return;
+    if (!(await confirmDialog({ title: 'Delete session?', description: 'This will permanently delete this practical session.' }))) return;
 
     try {
       const session = sessions.find(s => s.id === sessionId);

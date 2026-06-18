@@ -51,7 +51,7 @@ const roleColors: Record<AppRole, string> = {
 export default function StaffManagement() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isSuperAdmin, loading: rolesLoading } = useRoles();
+  const { isAdmin, loading: rolesLoading } = useRoles();
   const [staff, setStaff] = useState<StaffProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,13 +69,13 @@ export default function StaffManagement() {
     if (!authLoading && !rolesLoading) {
       if (!user) {
         navigate('/auth');
-      } else if (!isSuperAdmin) {
+      } else if (!isAdmin) {
         navigate('/access-denied');
       } else {
         fetchStaff();
       }
     }
-  }, [user, authLoading, rolesLoading, isSuperAdmin, navigate]);
+  }, [user, authLoading, rolesLoading, isAdmin, navigate]);
 
   const fetchStaff = async () => {
     setLoading(true);

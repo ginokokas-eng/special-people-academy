@@ -54,39 +54,60 @@ export default function MyLearning() {
         .eq('user_id', user.id)
         .order('enrolled_at', { ascending: false });
 
-      const coursesWithProgress: EnrolledCourse[] = [];
+      // Map enrollments -> course rows once.
+      const rows = (enrollments || [])
+        .map(enrollment => {
+          const course = enrollment.course as {
+            id: string;
+            title: string;
+            category: string;
+            thumbnail_url: string | null;
+            duration_minutes: number;
+            level: string;
+          } | null;
+          return course ? { enrollment, course } : null;
+        })
+        .filter((r): r is NonNullable<typeof r> => !!r);
 
-      for (const enrollment of enrollments || []) {
-        const course = enrollment.course as {
-          id: string;
-          title: string;
-          category: string;
-          thumbnail_url: string | null;
-          duration_minutes: number;
-          level: string;
-        } | null;
+      const courseIds = rows.map(r => r.course.id);
 
-        if (!course) continue;
+      // Single query for all lessons across enrolled courses (no N+1).
+      const { data: allLessons } = courseIds.length
+        ? await supabase
+            .from('lessons')
+            .select('id, course_id')
+            .in('course_id', courseIds)
+        : { data: [] as { id: string; course_id: string }[] };
 
-        // Get lessons count
-        const { data: lessons } = await supabase
-          .from('lessons')
-          .select('id')
-          .eq('course_id', course.id);
+      const lessonIds = (allLessons || []).map(l => l.id);
 
-        // Get completed lessons
-        const { data: completedLessons } = await supabase
-          .from('lesson_progress')
-          .select('id')
-          .eq('user_id', user.id)
-          .in('lesson_id', lessons?.map(l => l.id) || [])
-          .eq('completed', true);
+      // Single query for all completed progress for this user.
+      const { data: completed } = lessonIds.length
+        ? await supabase
+            .from('lesson_progress')
+            .select('lesson_id')
+            .eq('user_id', user.id)
+            .in('lesson_id', lessonIds)
+            .eq('completed', true)
+        : { data: [] as { lesson_id: string }[] };
 
-        const progress = lessons?.length
-          ? Math.round((completedLessons?.length || 0) / lessons.length * 100)
-          : 0;
+      const lessonsByCourse = new Map<string, number>();
+      const lessonToCourse = new Map<string, string>();
+      for (const l of allLessons || []) {
+        lessonsByCourse.set(l.course_id, (lessonsByCourse.get(l.course_id) || 0) + 1);
+        lessonToCourse.set(l.id, l.course_id);
+      }
+      const completedByCourse = new Map<string, number>();
+      for (const c of completed || []) {
+        const cid = lessonToCourse.get(c.lesson_id);
+        if (cid) completedByCourse.set(cid, (completedByCourse.get(cid) || 0) + 1);
+      }
 
-        coursesWithProgress.push({
+      const coursesWithProgress: EnrolledCourse[] = rows.map(({ enrollment, course }) => {
+        const total = lessonsByCourse.get(course.id) || 0;
+        const done = completedByCourse.get(course.id) || 0;
+        const progress = total ? Math.round((done / total) * 100) : 0;
+        return {
           id: course.id,
           title: course.title,
           category: course.category,
@@ -96,8 +117,8 @@ export default function MyLearning() {
           progress,
           enrolledAt: enrollment.enrolled_at,
           completedAt: enrollment.completed_at,
-        });
-      }
+        };
+      });
 
       setCourses(coursesWithProgress);
     } catch (error) {

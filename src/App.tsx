@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -68,6 +69,7 @@ const App = () => (
           <CartProvider>
             <Toaster />
             <Sonner />
+            <ConfirmDialogHost />
             <BrowserRouter>
               <ScrollToTop />
               <Routes>
@@ -89,10 +91,10 @@ const App = () => (
                 {/* Admin portal routes - require admin role */}
                 <Route path="/admin-portal/dashboard" element={<ProtectedRoute requiredRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/admin-portal/staff-management" element={<ProtectedRoute requiredRoles={['admin']}><StaffManagement /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CourseBuilder /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses/:id/edit" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CourseEditor /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CoursePreview /></ProtectedRoute>} />
                 <Route path="/admin-portal/learners" element={<ProtectedRoute requiredRoles={['admin']}><Learners /></ProtectedRoute>} />
-                <Route path="/admin-portal/courses" element={<ProtectedRoute requiredRoles={['admin']}><CourseBuilder /></ProtectedRoute>} />
-                <Route path="/admin-portal/courses/:id/edit" element={<ProtectedRoute requiredRoles={['admin']}><CourseEditor /></ProtectedRoute>} />
-                <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['admin']}><CoursePreview /></ProtectedRoute>} />
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />
