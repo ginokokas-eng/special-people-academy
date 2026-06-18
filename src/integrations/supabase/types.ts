@@ -2129,6 +2129,10 @@ export type Database = {
       }
       is_ops_training_admin: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      sync_staff_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
     }
     Enums: {
       app_role:
