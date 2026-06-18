@@ -38,3 +38,37 @@ export interface LearnCourse {
   practical_details: string | null;
   certificate_details: string | null;
 }
+
+export interface LessonVideoSource {
+  id: string;
+  lesson_id: string;
+  quality_label: string;
+  source_url: string;
+  mime_type: string | null;
+  width: number | null;
+  height: number | null;
+  is_default: boolean;
+}
+
+export interface TranscriptSegment {
+  start: number; // seconds
+  end?: number;
+  text: string;
+}
+
+export interface LessonTranscript {
+  id: string;
+  lesson_id: string;
+  language_code: string;
+  language_label: string;
+  transcript_text: string | null;
+  vtt_url: string | null;
+  segments: TranscriptSegment[] | null;
+}
+
+/** Imperative bridge so tabs (notes, transcript) can drive the active video. */
+export interface MediaController {
+  seekTo: (seconds: number) => void;
+  getCurrentTime: () => number;
+  isAvailable: () => boolean;
+}

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 import {
   Loader2,
   CheckCircle2,
@@ -22,6 +23,10 @@ import {
   Award,
   Sparkles,
   BookOpen,
+  FileText,
+  RectangleHorizontal,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,8 +38,21 @@ import { ResourcesTab } from '@/components/course-learn/ResourcesTab';
 import { PracticalTab } from '@/components/course-learn/PracticalTab';
 import { CertificateTab } from '@/components/course-learn/CertificateTab';
 import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
+import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
+import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
+import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
+import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
+import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
-import type { LearnCourse, LearnLesson, LearnModule, LearnResource } from '@/components/course-learn/types';
+import type {
+  LearnCourse,
+  LearnLesson,
+  LearnModule,
+  LearnResource,
+  LessonTranscript,
+  LessonVideoSource,
+  MediaController,
+} from '@/components/course-learn/types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const sb = supabase as any;
@@ -44,6 +62,7 @@ export default function CourseLearn() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  const { prefs, setPrefs } = useLearnerPrefs();
 
   const [course, setCourse] = useState<LearnCourse | null>(null);
   const [modules, setModules] = useState<LearnModule[]>([]);
@@ -54,9 +73,25 @@ export default function CourseLearn() {
   const [scormLoading, setScormLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Per-lesson media support
+  const [transcript, setTranscript] = useState<LessonTranscript | null>(null);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const [videoSources, setVideoSources] = useState<LessonVideoSource[]>([]);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  // Dialogs
+  const [contentInfoOpen, setContentInfoOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportTime, setReportTime] = useState(0);
+
   const apiRef = useRef<ScormApiAdapter | null>(null);
+  const mediaRef = useRef<MediaController | null>(null);
+  const scormFrameWrapRef = useRef<HTMLDivElement>(null);
+  const [scormFullscreen, setScormFullscreen] = useState(false);
 
   const courseId = course?.id ?? null;
+  const theatre = prefs.theatre;
 
   const isUUID = (str: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -65,6 +100,19 @@ export default function CourseLearn() {
   const activeLesson = useMemo(
     () => lessons.find((l) => l.id === activeLessonId) || lessons[0],
     [lessons, activeLessonId]
+  );
+
+  const isVideoLesson = activeLesson?.lesson_type === 'video';
+  const canSeek = isVideoLesson;
+  const activeModuleName = useMemo(
+    () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
+    [modules, activeLesson]
+  );
+  const hasTranscript = !!transcript && (!!transcript.transcript_text || (transcript.segments?.length ?? 0) > 0);
+  const lessonHasResources = useMemo(
+    () =>
+      resources.some((r) => !r.lesson_id || r.lesson_id === activeLesson?.id),
+    [resources, activeLesson]
   );
 
   useEffect(() => {
@@ -137,6 +185,47 @@ export default function CourseLearn() {
       setLoading(false);
     }
   };
+
+  // Load transcript + video sources for the active lesson
+  useEffect(() => {
+    let cancelled = false;
+    setTranscript(null);
+    setVideoSources([]);
+    setCurrentTime(0);
+    if (!activeLesson) return;
+    setTranscriptLoading(true);
+    (async () => {
+      const [{ data: tData }, { data: vData }] = await Promise.all([
+        sb
+          .from('lesson_transcripts')
+          .select('id, lesson_id, language_code, language_label, transcript_text, vtt_url, segments')
+          .eq('lesson_id', activeLesson.id)
+          .order('language_code')
+          .limit(1),
+        sb
+          .from('lesson_video_sources')
+          .select('id, lesson_id, quality_label, source_url, mime_type, width, height, is_default')
+          .eq('lesson_id', activeLesson.id)
+          .order('height', { ascending: false }),
+      ]);
+      if (cancelled) return;
+      setTranscript((tData && tData[0]) || null);
+      setVideoSources(vData || []);
+      setTranscriptLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLesson?.id]);
+
+  // Poll current time while the transcript tab is open (for active-segment highlight)
+  useEffect(() => {
+    if (activeTab !== 'transcript' || !canSeek) return;
+    const t = setInterval(() => {
+      setCurrentTime(mediaRef.current?.getCurrentTime?.() ?? 0);
+    }, 500);
+    return () => clearInterval(t);
+  }, [activeTab, canSeek, activeLesson?.id]);
 
   const markComplete = useCallback(
     async (lessonId: string) => {
@@ -264,6 +353,13 @@ export default function CourseLearn() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLesson?.id]);
 
+  useEffect(() => {
+    const onFs = () =>
+      setScormFullscreen(document.fullscreenElement === scormFrameWrapRef.current);
+    document.addEventListener('fullscreenchange', onFs);
+    return () => document.removeEventListener('fullscreenchange', onFs);
+  }, []);
+
   const goToLesson = (lessonId: string) => {
     setSearchParams({ lesson: lessonId });
     setMobileNavOpen(false);
@@ -275,9 +371,24 @@ export default function CourseLearn() {
   const nextLesson =
     currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
 
+  const openTranscript = () => setActiveTab('transcript');
+  const toggleTheatre = () => setPrefs({ theatre: !prefs.theatre });
+
+  const toggleScormFullscreen = () => {
+    const el = scormFrameWrapRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else el.requestFullscreen().catch(() => {});
+  };
+
+  const handleVideoEnded = () => {
+    if (activeLesson) markComplete(activeLesson.id);
+    if (prefs.autoplay && nextLesson) goToLesson(nextLesson.id);
+  };
+
   if (authLoading || loading || !course) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -286,7 +397,7 @@ export default function CourseLearn() {
   const renderLessonBody = () => {
     if (!activeLesson) {
       return (
-        <div className="aspect-video w-full rounded-lg border bg-muted flex items-center justify-center text-muted-foreground">
+        <div className="flex aspect-video w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
           No lessons available in this course yet.
         </div>
       );
@@ -294,54 +405,104 @@ export default function CourseLearn() {
 
     if (activeLesson.lesson_type === 'scorm') {
       return (
-        <div className="aspect-video w-full rounded-lg overflow-hidden border bg-black">
-          {scormLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-foreground/70" />
+        <div className="space-y-2">
+          <div
+            ref={scormFrameWrapRef}
+            className={cn(
+              'w-full overflow-hidden rounded-lg border bg-black',
+              scormFullscreen ? 'h-screen rounded-none' : 'aspect-video'
+            )}
+          >
+            {scormLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary-foreground/70" />
+              </div>
+            ) : scormHtml ? (
+              <iframe
+                srcDoc={scormHtml}
+                className="h-full w-full border-0"
+                title={activeLesson.title}
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-primary-foreground/70">
+                Unable to load this module.
+              </div>
+            )}
+          </div>
+          {/* Wrapper-level controls for SCORM */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" disabled={!prevLesson} onClick={() => prevLesson && goToLesson(prevLesson.id)}>
+              <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+            </Button>
+            <Button variant="outline" size="sm" disabled={!nextLesson} onClick={() => nextLesson && goToLesson(nextLesson.id)}>
+              Next <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+            <div className="ml-auto flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={openTranscript}>
+                <FileText className="mr-1.5 h-4 w-4" /> Transcript
+              </Button>
+              <Button
+                variant={theatre ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={toggleTheatre}
+              >
+                <RectangleHorizontal className="mr-1.5 h-4 w-4" /> Theatre
+              </Button>
+              <Button variant="outline" size="sm" onClick={toggleScormFullscreen}>
+                {scormFullscreen ? (
+                  <Minimize className="mr-1.5 h-4 w-4" />
+                ) : (
+                  <Maximize className="mr-1.5 h-4 w-4" />
+                )}
+                Fullscreen
+              </Button>
             </div>
-          ) : scormHtml ? (
-            <iframe
-              srcDoc={scormHtml}
-              className="w-full h-full border-0"
-              title={activeLesson.title}
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-primary-foreground/70 text-sm">
-              Unable to load this module.
-            </div>
-          )}
+          </div>
         </div>
       );
     }
 
     if (activeLesson.lesson_type === 'video') {
       return (
-        <div className="aspect-video w-full rounded-lg overflow-hidden border bg-black">
-          {activeLesson.video_url ? (
-            <video src={activeLesson.video_url} controls className="w-full h-full" />
-          ) : (
-            <div className="h-full flex items-center justify-center text-primary-foreground/70 text-sm">
-              No video available for this lesson.
-            </div>
-          )}
-        </div>
+        <VideoPlayer
+          key={activeLesson.id}
+          title={activeLesson.title}
+          sources={videoSources}
+          fallbackUrl={activeLesson.video_url}
+          vttUrl={transcript?.vtt_url}
+          hasCaptions={!!transcript?.vtt_url}
+          prefs={prefs}
+          setPrefs={setPrefs}
+          theatre={theatre}
+          onToggleTheatre={toggleTheatre}
+          onToggleTranscript={openTranscript}
+          onPrev={prevLesson ? () => goToLesson(prevLesson.id) : undefined}
+          onNext={nextLesson ? () => goToLesson(nextLesson.id) : undefined}
+          onEnded={handleVideoEnded}
+          onContentInfo={() => setContentInfoOpen(true)}
+          onReport={(t) => {
+            setReportTime(t);
+            setReportOpen(true);
+          }}
+          controllerRef={mediaRef}
+        />
       );
     }
 
     if (activeLesson.lesson_type === 'quiz') {
       return (
         <div className="rounded-lg border bg-card p-8 text-center">
-          <HelpCircle className="h-10 w-10 mx-auto text-primary mb-3" />
-          <h3 className="text-lg font-semibold mb-1">{activeLesson.title}</h3>
+          <HelpCircle className="mx-auto mb-3 h-10 w-10 text-primary" />
+          <h3 className="mb-1 text-lg font-semibold">{activeLesson.title}</h3>
           {activeLesson.description && (
-            <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+            <p className="mx-auto mb-4 max-w-md text-sm text-muted-foreground">
               {activeLesson.description}
             </p>
           )}
           <Button size="lg" onClick={() => navigate(`/courses/${courseId}/quiz?lesson=${activeLesson.id}`)}>
-            <HelpCircle className="h-4 w-4 mr-2" />
+            <HelpCircle className="mr-2 h-4 w-4" />
             Start Assessment
           </Button>
         </div>
@@ -351,9 +512,9 @@ export default function CourseLearn() {
     if (activeLesson.lesson_type === 'practical') {
       return (
         <div className="rounded-lg border bg-card p-8 text-center">
-          <ClipboardCheck className="h-10 w-10 mx-auto text-primary mb-3" />
-          <h3 className="text-lg font-semibold mb-1">Practical session</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-primary" />
+          <h3 className="mb-1 text-lg font-semibold">Practical session</h3>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
             This lesson is completed in person with a trainer. See the Practical sign-off tab below for
             your status and next steps.
           </p>
@@ -365,7 +526,7 @@ export default function CourseLearn() {
     return (
       <div className="rounded-lg border bg-card p-6">
         {activeLesson.description ? (
-          <div className="prose prose-sm max-w-none text-foreground whitespace-pre-line leading-relaxed">
+          <div className="prose prose-sm max-w-none whitespace-pre-line leading-relaxed text-foreground">
             {activeLesson.description}
           </div>
         ) : (
@@ -378,25 +539,28 @@ export default function CourseLearn() {
   const tabList = (
     <TabsList className="h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
       <TabsTrigger value="overview" className="data-[state=active]:bg-secondary">
-        <BookOpen className="h-4 w-4 mr-1.5" /> Overview
+        <BookOpen className="mr-1.5 h-4 w-4" /> Overview
       </TabsTrigger>
       <TabsTrigger value="qa" className="data-[state=active]:bg-secondary">
-        <MessageCircleQuestion className="h-4 w-4 mr-1.5" /> Q&amp;A
+        <MessageCircleQuestion className="mr-1.5 h-4 w-4" /> Q&amp;A
       </TabsTrigger>
       <TabsTrigger value="notes" className="data-[state=active]:bg-secondary">
-        <StickyNote className="h-4 w-4 mr-1.5" /> Notes
+        <StickyNote className="mr-1.5 h-4 w-4" /> Notes
+      </TabsTrigger>
+      <TabsTrigger value="transcript" className="data-[state=active]:bg-secondary">
+        <FileText className="mr-1.5 h-4 w-4" /> Transcript
       </TabsTrigger>
       <TabsTrigger value="resources" className="data-[state=active]:bg-secondary">
-        <Paperclip className="h-4 w-4 mr-1.5" /> Resources
+        <Paperclip className="mr-1.5 h-4 w-4" /> Resources
       </TabsTrigger>
       <TabsTrigger value="practical" className="data-[state=active]:bg-secondary">
-        <ClipboardCheck className="h-4 w-4 mr-1.5" /> Practical
+        <ClipboardCheck className="mr-1.5 h-4 w-4" /> Practical
       </TabsTrigger>
       <TabsTrigger value="certificate" className="data-[state=active]:bg-secondary">
-        <Award className="h-4 w-4 mr-1.5" /> Certificate
+        <Award className="mr-1.5 h-4 w-4" /> Certificate
       </TabsTrigger>
       <TabsTrigger value="assistant" className="data-[state=active]:bg-secondary">
-        <Sparkles className="h-4 w-4 mr-1.5" /> AI Assistant
+        <Sparkles className="mr-1.5 h-4 w-4" /> AI Assistant
       </TabsTrigger>
     </TabsList>
   );
@@ -413,20 +577,20 @@ export default function CourseLearn() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
-      <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b bg-card">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="flex items-center justify-between gap-3 border-b bg-card px-4 py-2.5">
+        <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(`/courses/${courseId || id}`)}>
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="mr-1 h-4 w-4" />
             <span className="hidden sm:inline">Course</span>
           </Button>
-          <h1 className="text-sm font-semibold truncate text-foreground">{course.title}</h1>
+          <h1 className="truncate text-sm font-semibold text-foreground">{course.title}</h1>
         </div>
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="lg:hidden">
-              <ListChecks className="h-4 w-4 mr-1.5" /> Content
+              <ListChecks className="mr-1.5 h-4 w-4" /> Content
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[88vw] max-w-sm p-0">
@@ -438,17 +602,17 @@ export default function CourseLearn() {
         </Sheet>
       </header>
 
-      <div className="flex-1 flex min-h-0">
+      <div className="flex min-h-0 flex-1">
         {/* Main */}
-        <main className="flex-1 min-w-0 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className={cn('mx-auto px-4 py-6 lg:px-8', theatre ? 'max-w-6xl' : 'max-w-4xl')}>
             {activeLesson && (
               <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <div className="mb-1.5 flex flex-wrap items-center gap-2">
                   <Badge variant="outline">{lessonTypeLabel(activeLesson.lesson_type)}</Badge>
                   {activeLesson.completed && (
                     <Badge className="bg-status-success-bg text-status-success-foreground">
-                      <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
+                      <CheckCircle2 className="mr-1 h-3 w-3" /> Completed
                     </Badge>
                   )}
                 </div>
@@ -460,24 +624,24 @@ export default function CourseLearn() {
 
             {/* Lesson navigation */}
             {activeLesson && (
-              <div className="flex flex-wrap items-center justify-between gap-3 mt-5 pb-5 border-b">
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b pb-5">
                 <Button
                   variant="outline"
                   disabled={!prevLesson}
                   onClick={() => prevLesson && goToLesson(prevLesson.id)}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+                  <ChevronLeft className="mr-1 h-4 w-4" /> Previous
                 </Button>
                 <div className="flex items-center gap-2">
                   {activeLesson.lesson_type !== 'quiz' &&
                     activeLesson.lesson_type !== 'scorm' &&
                     !activeLesson.completed && (
                       <Button variant="secondary" onClick={() => markComplete(activeLesson.id)}>
-                        <CheckCircle2 className="h-4 w-4 mr-1" /> Mark complete
+                        <CheckCircle2 className="mr-1 h-4 w-4" /> Mark complete
                       </Button>
                     )}
                   <Button disabled={!nextLesson} onClick={() => nextLesson && goToLesson(nextLesson.id)}>
-                    Next <ChevronRight className="h-4 w-4 ml-1" />
+                    Next <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -486,7 +650,7 @@ export default function CourseLearn() {
             {/* Workspace tabs */}
             <div className="mt-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <div className="overflow-x-auto -mx-1 px-1 pb-1">{tabList}</div>
+                <div className="-mx-1 overflow-x-auto px-1 pb-1">{tabList}</div>
                 <div className="mt-5">
                   <TabsContent value="overview">
                     <OverviewTab course={course} activeLesson={activeLesson} />
@@ -495,7 +659,22 @@ export default function CourseLearn() {
                     <QnaTab courseId={course.id} activeLesson={activeLesson} />
                   </TabsContent>
                   <TabsContent value="notes">
-                    <NotesTab courseId={course.id} activeLesson={activeLesson} lessons={lessons} />
+                    <NotesTab
+                      courseId={course.id}
+                      activeLesson={activeLesson}
+                      lessons={lessons}
+                      canSeek={canSeek}
+                      controllerRef={mediaRef}
+                    />
+                  </TabsContent>
+                  <TabsContent value="transcript">
+                    <TranscriptTab
+                      transcript={transcript}
+                      loading={transcriptLoading}
+                      canSeek={canSeek}
+                      controllerRef={mediaRef}
+                      currentTime={currentTime}
+                    />
                   </TabsContent>
                   <TabsContent value="resources">
                     <ResourcesTab courseId={course.id} resources={resources} lessons={lessons} />
@@ -515,9 +694,27 @@ export default function CourseLearn() {
           </div>
         </main>
 
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:flex flex-col w-80 xl:w-96 border-l bg-card">{sidebar}</aside>
+        {/* Desktop sidebar — hidden in theatre mode */}
+        {!theatre && (
+          <aside className="hidden w-80 flex-col border-l bg-card lg:flex xl:w-96">{sidebar}</aside>
+        )}
       </div>
+
+      <ContentInfoDialog
+        open={contentInfoOpen}
+        onOpenChange={setContentInfoOpen}
+        lesson={activeLesson}
+        moduleName={activeModuleName}
+        hasTranscript={hasTranscript}
+        hasResources={lessonHasResources}
+      />
+      <ReportProblemDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        courseId={course.id}
+        lessonId={activeLesson?.id}
+        playbackTime={reportTime}
+      />
     </div>
   );
 }
