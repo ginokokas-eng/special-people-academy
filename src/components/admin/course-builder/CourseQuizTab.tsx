@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -185,7 +186,7 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
   };
 
   const handleDeleteQuiz = async (quizId: string) => {
-    if (!confirm('Delete this quiz and all its questions?')) return;
+    if (!(await confirmDialog({ title: 'Delete quiz?', description: 'This will permanently delete this quiz and all its questions.' }))) return;
 
     try {
       const { error } = await supabase.from('quizzes').delete().eq('id', quizId);
@@ -237,7 +238,7 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
   };
 
   const handleDeleteQuestion = async (questionId: string) => {
-    if (!confirm('Delete this question?')) return;
+    if (!(await confirmDialog({ title: 'Delete question?', description: 'This will permanently delete this question.' }))) return;
 
     try {
       const { error } = await supabase.from('quiz_questions').delete().eq('id', questionId);
