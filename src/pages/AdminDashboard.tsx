@@ -122,6 +122,22 @@ export default function AdminDashboard() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Destructive-action confirmation dialog state (replaces window.confirm)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmLabel: string;
+    action: () => void;
+  }>({ open: false, title: '', description: '', confirmLabel: 'Delete', action: () => {} });
+
+  const askConfirm = (
+    title: string,
+    description: string,
+    action: () => void,
+    confirmLabel = 'Delete',
+  ) => setConfirmState({ open: true, title, description, confirmLabel, action });
+
   // Lesson management state
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
   const [selectedCourseForLessons, setSelectedCourseForLessons] = useState<Course | null>(null);
