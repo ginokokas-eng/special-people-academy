@@ -54,6 +54,7 @@ import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { AdminTableControls } from '@/components/admin/AdminTableControls';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Course {
   id: string;
@@ -376,7 +377,6 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
 
     try {
       const { error } = await supabase
@@ -508,7 +508,6 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm('Are you sure you want to delete this lesson?')) return;
 
     try {
       const { error } = await supabase
