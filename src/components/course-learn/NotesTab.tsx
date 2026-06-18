@@ -97,7 +97,7 @@ export function NotesTab({
     const ok = await confirmDialog({
       title: 'Delete note?',
       description: 'This cannot be undone.',
-      confirmText: 'Delete',
+      confirmLabel: 'Delete',
       destructive: true,
     });
     if (!ok) return;
