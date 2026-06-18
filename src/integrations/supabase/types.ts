@@ -498,12 +498,96 @@ export type Database = {
           },
         ]
       }
+      course_question_replies: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_instructor_reply: boolean
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_instructor_reply?: boolean
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_instructor_reply?: boolean
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_question_replies_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "course_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_questions: {
+        Row: {
+          body: string
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_questions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_resources: {
         Row: {
           course_id: string
           created_at: string
           description: string | null
           id: string
+          lesson_id: string | null
           order_index: number
           resource_type: string
           title: string
@@ -514,6 +598,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          lesson_id?: string | null
           order_index?: number
           resource_type: string
           title: string
@@ -524,6 +609,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          lesson_id?: string | null
           order_index?: number
           resource_type?: string
           title?: string
@@ -535,6 +621,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resources_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -869,6 +962,54 @@ export type Database = {
           job_title?: string | null
         }
         Relationships: []
+      }
+      learner_notes: {
+        Row: {
+          body: string
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string | null
+          timestamp_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          timestamp_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          timestamp_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_notes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       learner_notifications: {
         Row: {
@@ -2125,6 +2266,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_enrolled: {
+        Args: { _course_id: string; _user_id: string }
         Returns: boolean
       }
       is_ops_training_admin: { Args: { _user_id: string }; Returns: boolean }
