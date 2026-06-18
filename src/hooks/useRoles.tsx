@@ -1,8 +1,8 @@
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
+import { computeRoleFlags, type AppRole } from '@/lib/roles';
 
-type AppRole = 'admin' | 'learner' | 'trainer' | 'super_admin' | 'ops_training_admin';
 
 interface UseRolesReturn {
   roles: AppRole[];
