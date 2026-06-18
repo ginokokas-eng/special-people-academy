@@ -1210,6 +1210,18 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <ConfirmDialog
+        open={confirmState.open}
+        onOpenChange={(open) => setConfirmState((s) => ({ ...s, open }))}
+        title={confirmState.title}
+        description={confirmState.description}
+        confirmLabel={confirmState.confirmLabel}
+        onConfirm={() => {
+          confirmState.action();
+          setConfirmState((s) => ({ ...s, open: false }));
+        }}
+      />
     </PortalLayout>
   );
 }
