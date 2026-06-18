@@ -63,18 +63,24 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
 
-  // Filter nav items based on roles
+  // Filter nav items based on roles. These MUST match the requiredRoles on the
+  // corresponding routes in App.tsx:
+  //  - dashboard / settings        -> admin-level (isAdmin)
+  //  - course builder              -> ops/training management (isOpsTrainingAdmin)
+  //  - training portal             -> trainer-level (isTrainer)
+  //  - staff management            -> admin-level (isAdmin), restricted from ops/trainer
+  //  - integrations                -> super_admin only (restricted)
   const getVisibleNavItems = (): NavItem[] => {
     return adminNavItems.filter(item => {
       switch (item.href) {
         case '/admin-portal/dashboard':
           return isAdmin;
         case '/admin-portal/courses':
-          return isSuperAdmin || isOpsTrainingAdmin;
+          return isOpsTrainingAdmin;
         case '/admin-portal/trainer':
           return isTrainer;
         case '/admin-portal/staff-management':
-          return isSuperAdmin;
+          return isAdmin;
         case '/admin-portal/integrations':
           return isSuperAdmin;
         case '/admin-portal/settings':
