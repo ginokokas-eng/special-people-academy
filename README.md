@@ -1,73 +1,71 @@
-# Welcome to your Lovable project
+# Special People Training Academy
+
+A learning platform for Special People Training: course catalogue, learner dashboard,
+admin and trainer portals, SCORM lessons, quizzes, practical sign-offs, certificates,
+Stripe checkout, and Outlook calendar sync.
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+- **Lovable project**: https://lovable.dev/projects/edd3e58d-bed9-45da-a486-cb4829ce6793
+- **GitHub repository**: https://github.com/ginokokas-eng/special-people-academy.git
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies
 
 This project is built with:
 
 - Vite
 - TypeScript
 - React
-- shadcn-ui
+- shadcn/ui
 - Tailwind CSS
+- Supabase (database, auth, storage, edge functions)
+- Stripe (checkout & billing)
+- SCORM (HeyGen course lessons)
+
+## How can I edit this code?
+
+**Use Lovable**
+
+Visit the [Lovable Project](https://lovable.dev/projects/edd3e58d-bed9-45da-a486-cb4829ce6793)
+and start prompting. Changes made via Lovable are committed automatically to this repo.
+
+**Use your preferred IDE**
+
+Clone the repo, make changes locally, and push. Pushed changes sync back to Lovable.
+You need Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+
+```sh
+# 1. Clone the repository
+git clone https://github.com/ginokokas-eng/special-people-academy.git
+
+# 2. Navigate to the project directory
+cd special-people-academy
+
+# 3. Install dependencies
+npm ci
+
+# 4. Start the dev server
+npm run dev
+```
+
+## Local verification
+
+Before pushing changes, confirm the project installs, lints, and builds cleanly:
+
+```sh
+npm ci          # clean, lockfile-faithful install
+npm run lint    # eslint
+npm run build   # production build
+```
+
+All three should complete without errors.
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Open [Lovable](https://lovable.dev/projects/edd3e58d-bed9-45da-a486-cb4829ce6793)
+and click Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain?
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Yes. Navigate to Project > Settings > Domains and click Connect Domain.
+Read more: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
