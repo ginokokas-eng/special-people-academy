@@ -177,25 +177,31 @@ export default function AdminDashboard() {
         .from('profiles')
         .select('user_id, full_name, department');
 
-      // Get enrollment counts and enrolled courses per user
-      const usersWithEnrollments: User[] = [];
-      for (const profile of profilesData || []) {
-        const { data: enrollmentsData, count } = await supabase
-          .from('enrollments')
-          .select('course_id', { count: 'exact' })
-          .eq('user_id', profile.user_id);
+      // Fetch ALL enrollments once and group them by user (no per-user N+1).
+      const { data: allEnrollments } = await supabase
+        .from('enrollments')
+        .select('user_id, course_id');
 
-        usersWithEnrollments.push({
+      const enrollmentsByUser = new Map<string, string[]>();
+      for (const e of allEnrollments || []) {
+        const list = enrollmentsByUser.get(e.user_id) || [];
+        list.push(e.course_id);
+        enrollmentsByUser.set(e.user_id, list);
+      }
+
+      const usersWithEnrollments: User[] = (profilesData || []).map(profile => {
+        const enrolledCourses = enrollmentsByUser.get(profile.user_id) || [];
+        return {
           id: profile.user_id,
           email: '',
           profile: {
             full_name: profile.full_name,
             department: profile.department,
           },
-          enrollments: count || 0,
-          enrolledCourses: enrollmentsData?.map(e => e.course_id) || [],
-        });
-      }
+          enrollments: enrolledCourses.length,
+          enrolledCourses,
+        };
+      });
       setUsers(usersWithEnrollments);
 
       // Calculate enhanced stats
