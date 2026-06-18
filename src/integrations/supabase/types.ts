@@ -1059,6 +1059,57 @@ export type Database = {
           },
         ]
       }
+      lesson_issue_reports: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          issue_type: string
+          lesson_id: string | null
+          message: string | null
+          playback_time_seconds: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          issue_type?: string
+          lesson_id?: string | null
+          message?: string | null
+          playback_time_seconds?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          issue_type?: string
+          lesson_id?: string | null
+          message?: string | null
+          playback_time_seconds?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_issue_reports_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_issue_reports_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null
@@ -1163,6 +1214,97 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "lesson_steps_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_transcripts: {
+        Row: {
+          created_at: string
+          id: string
+          language_code: string
+          language_label: string
+          lesson_id: string
+          segments: Json | null
+          transcript_text: string | null
+          updated_at: string
+          vtt_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language_code?: string
+          language_label?: string
+          lesson_id: string
+          segments?: Json | null
+          transcript_text?: string | null
+          updated_at?: string
+          vtt_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language_code?: string
+          language_label?: string
+          lesson_id?: string
+          segments?: Json | null
+          transcript_text?: string | null
+          updated_at?: string
+          vtt_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_transcripts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_video_sources: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          is_default: boolean
+          lesson_id: string
+          mime_type: string | null
+          quality_label: string
+          source_url: string
+          updated_at: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_default?: boolean
+          lesson_id: string
+          mime_type?: string | null
+          quality_label?: string
+          source_url: string
+          updated_at?: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_default?: boolean
+          lesson_id?: string
+          mime_type?: string | null
+          quality_label?: string
+          source_url?: string
+          updated_at?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_video_sources_lesson_id_fkey"
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
