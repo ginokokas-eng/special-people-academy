@@ -339,6 +339,46 @@ Deno.serve(async (req) => {
         html = headInjection + html;
       }
 
+      // Cosmetic overrides injected at the END of <head> so they win over the
+      // package's own styles. Goal: a smooth, centred, letter-boxed player on
+      // every screen and a clean launch state (no overlapping floating controls
+      // or stretched video) — especially on mobile. Purely presentational; the
+      // SCORM runtime, video element and progress tracking are untouched.
+      const overrideStyle = `<style id="spta-scorm-overrides">
+  html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: #000; }
+  body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #videoContainer {
+    width: 100% !important; max-width: 100% !important; height: 100% !important;
+    margin: 0 !important; display: flex; align-items: center; justify-content: center;
+  }
+  #videoContainer video, video#miVideo {
+    width: 100% !important; height: 100% !important;
+    max-width: 100% !important; max-height: 100% !important;
+    object-fit: contain; background: #000; display: block;
+  }
+  /* Slim, less intrusive floating language/speed chips on desktop. */
+  .controls-container { top: 10px !important; right: 10px !important; gap: 6px !important; }
+  .controls-container select { padding: 4px 8px !important; font-size: 12px !important; border-width: 1px !important; border-radius: 6px !important; }
+  .controls-container label { font-size: 12px !important; padding: 3px 6px !important; border-radius: 6px !important; }
+  /* On touch / small screens the floating bar overlaps the video and looks
+     broken during launch. The native control bar still exposes volume,
+     fullscreen and speed, so hide the custom overlay there for a clean start. */
+  @media (max-width: 640px), (hover: none) and (pointer: coarse) {
+    .controls-container { display: none !important; }
+  }
+</style>`;
+      if (html.includes("</head>")) {
+        html = html.replace("</head>", overrideStyle + "</head>");
+      } else if (html.includes("</HEAD>")) {
+        html = html.replace("</HEAD>", overrideStyle + "</HEAD>");
+      } else if (html.includes("<body")) {
+        html = html.replace("<body", overrideStyle + "<body");
+      } else {
+        html = overrideStyle + html;
+      }
+
+
+
 
       // Rewrite relative src/href attributes to include token
       // This handles <script src="...">, <link href="...">, <img src="..."> etc.
