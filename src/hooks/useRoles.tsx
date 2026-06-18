@@ -57,11 +57,10 @@ export function useRoles(): UseRolesReturn {
   }, [user, authLoading]);
 
   const hasRole = (role: AppRole) => roles.includes(role);
-  
-  const isSuperAdmin = hasRole('super_admin') || hasRole('admin');
-  const isOpsTrainingAdmin = isSuperAdmin || hasRole('ops_training_admin') || hasRole('trainer');
-  const isAdmin = hasRole('admin') || hasRole('super_admin');
-  const isTrainer = hasRole('trainer') || hasRole('ops_training_admin') || isSuperAdmin;
+
+  // All capability flags come from the centralised helper.
+  // isSuperAdmin is STRICT (super_admin only); isAdmin is admin-level.
+  const { isSuperAdmin, isAdmin, isOpsTrainingAdmin, isTrainer } = computeRoleFlags(roles);
 
   return {
     roles,
