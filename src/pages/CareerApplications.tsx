@@ -47,7 +47,7 @@ const statusLabels: Record<string, string> = {
 export default function CareerApplications() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { isSuperAdmin, loading: rolesLoading } = useRoles();
+  const { isAdmin, loading: rolesLoading } = useRoles();
   const [applications, setApplications] = useState<CareerApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplication, setSelectedApplication] = useState<CareerApplication | null>(null);
@@ -59,13 +59,13 @@ export default function CareerApplications() {
     if (!authLoading && !rolesLoading) {
       if (!user) {
         navigate('/auth');
-      } else if (!isSuperAdmin) {
+      } else if (!isAdmin) {
         navigate('/access-denied');
       } else {
         fetchApplications();
       }
     }
-  }, [user, authLoading, rolesLoading, isSuperAdmin, navigate]);
+  }, [user, authLoading, rolesLoading, isAdmin, navigate]);
 
   const fetchApplications = async () => {
     setLoading(true);

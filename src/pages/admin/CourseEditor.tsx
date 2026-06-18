@@ -48,7 +48,7 @@ export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isSuperAdmin, isOpsTrainingAdmin, loading: rolesLoading } = useRoles();
+  const { isAdmin, isSuperAdmin, isOpsTrainingAdmin, loading: rolesLoading } = useRoles();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -223,7 +223,7 @@ export default function CourseEditor() {
             <CoursePublishingTab 
               course={course} 
               onUpdate={updateCourse}
-              isSuperAdmin={isSuperAdmin}
+              isSuperAdmin={isAdmin}
               userEmail={user?.email || ''}
             />
           </TabsContent>
