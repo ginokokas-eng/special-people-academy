@@ -152,32 +152,23 @@ export default function Auth() {
     }
 
     if (!result.redirected) {
-      // Check if user needs role assignment based on email
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (authUser?.email) {
-        await assignRoleByEmail(authUser.email, authUser.id);
-        
-        // Now fetch the roles and redirect
+      if (authUser?.id) {
+        // Server-side, DB-backed staff role assignment based on an active
+        // staff profile matching the signed-in email. No hard-coded emails.
+        await supabase.rpc('sync_staff_role');
+
         const { data: rolesData } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', authUser.id);
-        
+
         const roles = rolesData?.map(r => r.role) || [];
-        
+
         toast.success('Welcome!');
-        
-        if (roles.includes('super_admin') || roles.includes('admin')) {
-          navigate('/admin-portal/dashboard');
-        } else if (roles.includes('ops_training_admin')) {
-          navigate('/admin-portal/courses');
-        } else if (roles.includes('trainer')) {
-          navigate('/admin-portal/trainer');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate(landingForRoles(roles));
       } else {
-          navigate(loginRedirectUrl);
+        navigate(loginRedirectUrl);
       }
     }
     setIsSubmitting(false);
