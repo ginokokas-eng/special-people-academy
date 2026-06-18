@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -68,6 +69,7 @@ const App = () => (
           <CartProvider>
             <Toaster />
             <Sonner />
+            <ConfirmDialogHost />
             <BrowserRouter>
               <ScrollToTop />
               <Routes>
