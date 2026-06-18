@@ -50,6 +50,7 @@ import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
+import { SystemStatusPanel } from '@/components/admin/SystemStatusPanel';
 import { AdminOverviewCards } from '@/components/admin/AdminOverviewCards';
 import { AdminTableControls } from '@/components/admin/AdminTableControls';
 import { toast } from 'sonner';
@@ -674,6 +675,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses" className="mt-6">
@@ -952,6 +954,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="payments" className="mt-6">
             <PaymentsHealthPanel />
+          </TabsContent>
+
+          <TabsContent value="system" className="mt-6">
+            <SystemStatusPanel />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
