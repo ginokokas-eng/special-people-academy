@@ -605,7 +605,7 @@ export default function CourseLearn() {
       <div className="flex min-h-0 flex-1">
         {/* Main */}
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className={cn('mx-auto px-4 py-6 lg:px-8', theatre ? 'max-w-6xl' : 'max-w-4xl')}>
+          <div className={cn('mx-auto px-4 py-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
             {activeLesson && (
               <div className="mb-4">
                 <div className="mb-1.5 flex flex-wrap items-center gap-2">
