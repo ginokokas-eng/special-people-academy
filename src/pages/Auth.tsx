@@ -47,26 +47,25 @@ export default function Auth() {
     }
   }, [user, loading]);
 
+  // Decide where to send a user after auth, based on their role.
+  const landingForRoles = (roles: string[]): string => {
+    const flags = computeRoleFlags(roles);
+    if (flags.isAdmin) return '/admin-portal/dashboard';
+    if (flags.isOpsTrainingAdmin) return '/admin-portal/courses';
+    if (flags.isTrainer) return '/admin-portal/trainer';
+    return loginRedirectUrl;
+  };
+
   const redirectBasedOnRole = async () => {
     if (!user) return;
-    
-    // Check roles in database
+
     const { data: rolesData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
-    
+
     const roles = rolesData?.map(r => r.role) || [];
-    
-    if (roles.includes('super_admin') || roles.includes('admin')) {
-      navigate('/admin-portal/dashboard');
-    } else if (roles.includes('ops_training_admin')) {
-      navigate('/admin-portal/courses');
-    } else if (roles.includes('trainer')) {
-      navigate('/admin-portal/trainer');
-    } else {
-      navigate(loginRedirectUrl);
-    }
+    navigate(landingForRoles(roles));
   };
 
   const handleLogin = async (e: React.FormEvent) => {
