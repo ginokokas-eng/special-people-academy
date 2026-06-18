@@ -926,7 +926,11 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeleteCourse(course.id)}
+                                onClick={() => askConfirm(
+                                  'Delete course?',
+                                  `This will permanently delete "${course.title}". This cannot be undone.`,
+                                  () => handleDeleteCourse(course.id),
+                                )}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -1128,7 +1132,11 @@ export default function AdminDashboard() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleDeleteLesson(lesson.id)}
+                              onClick={() => askConfirm(
+                                'Delete lesson?',
+                                `This will permanently delete "${lesson.title}". This cannot be undone.`,
+                                () => handleDeleteLesson(lesson.id),
+                              )}
                               className="text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
