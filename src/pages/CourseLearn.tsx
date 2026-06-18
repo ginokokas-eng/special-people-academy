@@ -431,35 +431,31 @@ export default function CourseLearn() {
               </div>
             )}
           </div>
-          {/* Wrapper-level controls for SCORM */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" disabled={!prevLesson} onClick={() => prevLesson && goToLesson(prevLesson.id)}>
-              <ChevronLeft className="mr-1 h-4 w-4" /> Previous
+          {/* Wrapper-level tools for SCORM. Lesson Previous/Next live in the
+              shared nav below, so we only surface the player tools here to
+              avoid duplicate controls (cleaner on mobile). */}
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={openTranscript}>
+              <FileText className="mr-1.5 h-4 w-4" /> Transcript
             </Button>
-            <Button variant="outline" size="sm" disabled={!nextLesson} onClick={() => nextLesson && goToLesson(nextLesson.id)}>
-              Next <ChevronRight className="ml-1 h-4 w-4" />
+            <Button
+              variant={theatre ? 'secondary' : 'outline'}
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={toggleTheatre}
+            >
+              <RectangleHorizontal className="mr-1.5 h-4 w-4" /> Theatre
             </Button>
-            <div className="ml-auto flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={openTranscript}>
-                <FileText className="mr-1.5 h-4 w-4" /> Transcript
-              </Button>
-              <Button
-                variant={theatre ? 'secondary' : 'outline'}
-                size="sm"
-                onClick={toggleTheatre}
-              >
-                <RectangleHorizontal className="mr-1.5 h-4 w-4" /> Theatre
-              </Button>
-              <Button variant="outline" size="sm" onClick={toggleScormFullscreen}>
-                {scormFullscreen ? (
-                  <Minimize className="mr-1.5 h-4 w-4" />
-                ) : (
-                  <Maximize className="mr-1.5 h-4 w-4" />
-                )}
-                Fullscreen
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={toggleScormFullscreen}>
+              {scormFullscreen ? (
+                <Minimize className="mr-1.5 h-4 w-4" />
+              ) : (
+                <Maximize className="mr-1.5 h-4 w-4" />
+              )}
+              Fullscreen
+            </Button>
           </div>
+
         </div>
       );
     }
