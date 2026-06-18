@@ -313,6 +313,7 @@ export function VideoPlayer({
           src={activeSrc}
           className="h-full w-full bg-black"
           playsInline
+          crossOrigin={vttUrl ? 'anonymous' : undefined}
           onClick={togglePlay}
           onPlay={() => {
             setPlaying(true);
