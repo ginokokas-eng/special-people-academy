@@ -171,25 +171,39 @@ Deno.serve(async (req) => {
         .select('id, lesson_id')
         .in('lesson_id', quizLessons.map(l => l.id));
 
-      if (quizzes && quizzes.length > 0) {
-        // Check for passing attempts on all quizzes
+      // Only graded quizzes (those that actually have authored questions) gate
+      // completion. Empty "knowledge check" quizzes are informational and are
+      // completed via lesson_progress instead.
+      let gradedQuizzes = quizzes || [];
+      if (gradedQuizzes.length > 0) {
+        const { data: qCounts } = await supabaseAdmin
+          .from('quiz_questions')
+          .select('quiz_id')
+          .in('quiz_id', gradedQuizzes.map(q => q.id));
+        const quizzesWithQuestions = new Set((qCounts || []).map(q => q.quiz_id));
+        gradedQuizzes = gradedQuizzes.filter(q => quizzesWithQuestions.has(q.id));
+      }
+
+      if (gradedQuizzes.length > 0) {
+        // Check for passing attempts on all graded quizzes
         const { data: attempts } = await supabaseAdmin
           .from('quiz_attempts')
           .select('quiz_id, passed')
           .eq('user_id', userId)
-          .in('quiz_id', quizzes.map(q => q.id))
+          .in('quiz_id', gradedQuizzes.map(q => q.id))
           .eq('passed', true);
 
         const passedQuizIds = new Set(attempts?.map(a => a.quiz_id) || []);
-        const allQuizzesPassed = quizzes.every(q => passedQuizIds.has(q.id));
+        const allQuizzesPassed = gradedQuizzes.every(q => passedQuizIds.has(q.id));
 
-        console.log(`Quizzes passed: ${passedQuizIds.size}/${quizzes.length}`);
+        console.log(`Quizzes passed: ${passedQuizIds.size}/${gradedQuizzes.length}`);
+
 
         if (!allQuizzesPassed) {
           return new Response(JSON.stringify({ 
             completed: false, 
             reason: 'Not all quizzes passed',
-            progress: { quizzes: { passed: passedQuizIds.size, total: quizzes.length } }
+            progress: { quizzes: { passed: passedQuizIds.size, total: gradedQuizzes.length } }
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });

@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
+import { CourseProgressReport } from '@/components/admin/CourseProgressReport';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
@@ -673,6 +674,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="featured">Featured</TabsTrigger>
             <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
@@ -1016,6 +1018,11 @@ export default function AdminDashboard() {
           <TabsContent value="certificates" className="mt-6">
             <CertificateReporting />
           </TabsContent>
+
+          <TabsContent value="progress" className="mt-6">
+            <CourseProgressReport />
+          </TabsContent>
+
 
           <TabsContent value="offerings" className="mt-6">
             <CourseOfferingsManager />
