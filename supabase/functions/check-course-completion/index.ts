@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
           return new Response(JSON.stringify({ 
             completed: false, 
             reason: 'Not all quizzes passed',
-            progress: { quizzes: { passed: passedQuizIds.size, total: quizzes.length } }
+            progress: { quizzes: { passed: passedQuizIds.size, total: gradedQuizzes.length } }
           }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
