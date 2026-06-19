@@ -37,6 +37,7 @@ export interface LearnCourse {
   requires_practical_signoff: boolean | null;
   practical_details: string | null;
   certificate_details: string | null;
+  scope_notes: string | null;
 }
 
 export interface LessonVideoSource {
