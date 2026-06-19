@@ -674,6 +674,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="featured">Featured</TabsTrigger>
             <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
