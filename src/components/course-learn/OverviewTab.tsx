@@ -22,6 +22,15 @@ export function OverviewTab({
         </div>
       )}
 
+      {course.scope_notes && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+          <h4 className="text-sm font-semibold text-destructive mb-1">Scope &amp; Safety</h4>
+          <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
+            {course.scope_notes}
+          </p>
+        </div>
+      )}
+
       <div className="border-t pt-5">
         <h4 className="text-sm font-semibold text-foreground mb-2">About this course</h4>
         {course.overview || course.description ? (
