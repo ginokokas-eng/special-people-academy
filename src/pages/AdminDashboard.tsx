@@ -1017,6 +1017,11 @@ export default function AdminDashboard() {
             <CertificateReporting />
           </TabsContent>
 
+          <TabsContent value="progress" className="mt-6">
+            <CourseProgressReport />
+          </TabsContent>
+
+
           <TabsContent value="offerings" className="mt-6">
             <CourseOfferingsManager />
           </TabsContent>
