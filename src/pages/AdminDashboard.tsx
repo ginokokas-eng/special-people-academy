@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
+import { CourseProgressReport } from '@/components/admin/CourseProgressReport';
 import { FeaturedCoursesManager } from '@/components/admin/FeaturedCoursesManager';
 import { CourseOfferingsManager } from '@/components/admin/CourseOfferingsManager';
 import { PaymentsHealthPanel } from '@/components/admin/PaymentsHealthPanel';
