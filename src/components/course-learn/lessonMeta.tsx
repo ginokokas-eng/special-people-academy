@@ -94,7 +94,8 @@ export function lessonMetaLabel(lesson: LearnLesson): string {
   switch (lesson.lesson_type) {
     case 'scorm':
     case 'video':
-      return formatDuration(lesson.duration_minutes);
+      // Exact media duration only; never the legacy placeholder minutes.
+      return videoDurationLabel(lesson);
     case 'quiz': {
       const count = lesson.question_count ?? 0;
       return count > 0 ? `${count} question${count === 1 ? '' : 's'}` : 'Info';
@@ -112,21 +113,22 @@ export function lessonMetaLabel(lesson: LearnLesson): string {
     case 'scenario':
       return 'Info';
     default:
-      return formatDuration(lesson.duration_minutes);
+      return videoDurationLabel(lesson);
   }
 }
 
 export function totalDuration(lessons: LearnLesson[]): string {
-  // Only timed media (SCORM/video) contributes to module/course duration.
+  // Only timed media (SCORM/video) contributes to module/course duration,
+  // and only from the exact uploaded media duration (duration_seconds).
   // Resources, quizzes, practicals and certificates never add minutes.
-  const total = lessons.reduce(
+  const seconds = lessons.reduce(
     (sum, l) =>
       l.lesson_type === 'scorm' || l.lesson_type === 'video'
-        ? sum + (l.duration_minutes || 0)
+        ? sum + (l.duration_seconds || 0)
         : sum,
     0
   );
-  return formatDuration(total);
+  return formatDuration(videoDurationMinutes(seconds));
 }
 
 export { Play };
