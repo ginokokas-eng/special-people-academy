@@ -113,18 +113,25 @@ export default function CourseLearn() {
   // Learner-facing lessons: hide relocated lessons, empty quiz placeholders, and
   // empty reading/scenario/pdf placeholders. Required media (SCORM/video) and
   // practical lessons always show.
-  const visibleLessons = useMemo(
-    () =>
-      lessons.filter((l) => {
+  const visibleLessons = useMemo(() => {
+    const moduleOrder = new Map(modules.map((m, i) => [m.id, m.order_index ?? i]));
+    return lessons
+      .filter((l) => {
         if (RELOCATED_LESSON_IDS.has(l.id)) return false;
         if (l.lesson_type === 'quiz') return (l.question_count ?? 0) > 0;
         if (l.lesson_type === 'text' || l.lesson_type === 'scenario' || l.lesson_type === 'pdf') {
           return !!(l.description && l.description.trim());
         }
         return true;
-      }),
-    [lessons, RELOCATED_LESSON_IDS]
-  );
+      })
+      .sort((a, b) => {
+        const ma = a.module_id ? moduleOrder.get(a.module_id) ?? 9999 : 9999;
+        const mb = b.module_id ? moduleOrder.get(b.module_id) ?? 9999 : 9999;
+        if (ma !== mb) return ma - mb;
+        return (a.order_index ?? 0) - (b.order_index ?? 0);
+      });
+  }, [lessons, modules, RELOCATED_LESSON_IDS]);
+
 
   const activeLesson = useMemo(
     () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
