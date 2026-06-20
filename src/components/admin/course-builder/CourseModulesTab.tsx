@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -46,6 +46,8 @@ interface Lesson {
   lesson_type: LessonType;
   order_index: number;
   duration_minutes: number | null;
+  duration_seconds: number | null;
+  video_url: string | null;
   scorm_package_id: string | null;
 }
 
@@ -63,6 +65,7 @@ interface LessonForm {
   description: string;
   lesson_type: LessonType;
   duration_minutes: number;
+  duration_seconds: number | null;
   scorm_package_id: string;
 }
 
@@ -80,17 +83,30 @@ function normalizeLessonType(value: string | null): LessonType {
   return LESSON_TYPE_VALUES.includes(value as LessonType) ? (value as LessonType) : 'video';
 }
 
+/** Only video/SCORM lessons carry a media duration. */
+function isTimedMedia(type: LessonType): boolean {
+  return type === 'video' || type === 'scorm';
+}
+
+/** Whole-minute display from exact seconds: <60s -> 1 min, else round up. */
+function secondsToMinutes(seconds: number | null | undefined): number {
+  if (!seconds || seconds <= 0) return 0;
+  if (seconds < 60) return 1;
+  return Math.ceil(seconds / 60);
+}
+
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncingDuration, setSyncingDuration] = useState(false);
   const [moduleDialog, setModuleDialog] = useState<{ open: boolean; module: Module | null }>({ open: false, module: null });
   const [lessonDialog, setLessonDialog] = useState<{ open: boolean; lesson: Lesson | null; moduleId: string | null }>({ open: false, lesson: null, moduleId: null });
   const [saving, setSaving] = useState(false);
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
-  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
+  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
@@ -210,6 +226,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         description: lessonForm.description || null,
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
+        duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
         order_index: moduleLessons.length,
       };
       if (lessonForm.lesson_type === 'scorm' && lessonForm.scorm_package_id) {
@@ -220,7 +237,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       if (error) throw error;
       toast.success('Lesson created');
       setLessonDialog({ open: false, lesson: null, moduleId: null });
-      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
+      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
       fetchData();
     } catch (error) {
       console.error('Error creating lesson:', error);
@@ -244,6 +261,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         description: lessonForm.description || null,
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
+        duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
       };
       updateData.scorm_package_id = lessonForm.lesson_type === 'scorm'
         ? lessonForm.scorm_package_id
@@ -279,6 +297,49 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
     }
   };
 
+  // Reads the exact media duration (seconds) from the uploaded video and stores it.
+  const handleSyncDuration = async () => {
+    if (lessonForm.lesson_type === 'scorm') {
+      toast.message('SCORM duration cannot be read automatically — set the exact seconds manually.');
+      return;
+    }
+    // Resolve a playable source: lesson.video_url or the default lesson_video_sources entry.
+    let src = lessonDialog.lesson?.video_url || '';
+    if (!src && lessonDialog.lesson?.id) {
+      const { data } = await supabase
+        .from('lesson_video_sources')
+        .select('source_url, is_default')
+        .eq('lesson_id', lessonDialog.lesson.id)
+        .order('is_default', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      src = data?.source_url || '';
+    }
+    if (!src) {
+      toast.error('No uploaded video found for this lesson — set the duration manually.');
+      return;
+    }
+    setSyncingDuration(true);
+    try {
+      const seconds = await new Promise<number>((resolve, reject) => {
+        const v = document.createElement('video');
+        v.preload = 'metadata';
+        v.onloadedmetadata = () => resolve(v.duration);
+        v.onerror = () => reject(new Error('Could not load video metadata'));
+        v.src = src;
+      });
+      if (!isFinite(seconds) || seconds <= 0) throw new Error('Invalid duration');
+      const rounded = Math.round(seconds);
+      setLessonForm((f) => ({ ...f, duration_seconds: rounded }));
+      toast.success(`Duration synced: ${rounded}s (${secondsToMinutes(rounded)} min)`);
+    } catch (e) {
+      console.error('Sync duration failed:', e);
+      toast.error('Could not read video duration — set it manually.');
+    } finally {
+      setSyncingDuration(false);
+    }
+  };
+
   const openEditModule = (module: Module) => {
     setModuleForm({ title: module.title, description: module.description || '' });
     setModuleDialog({ open: true, module });
@@ -290,13 +351,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       description: lesson.description || '',
       lesson_type: lesson.lesson_type || 'video',
       duration_minutes: lesson.duration_minutes || 0,
+      duration_seconds: lesson.duration_seconds ?? null,
       scorm_package_id: lesson.scorm_package_id || '',
     });
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
   };
 
   const openAddLesson = (moduleId: string) => {
-    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, scorm_package_id: '' });
+    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
     setLessonDialog({ open: true, lesson: null, moduleId });
   };
 
@@ -496,15 +558,49 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lesson-duration">Duration (minutes)</Label>
-              <Input
-                id="lesson-duration"
-                type="number"
-                value={lessonForm.duration_minutes}
-                onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: parseInt(e.target.value) || 0 })}
-              />
-            </div>
+            {isTimedMedia(lessonForm.lesson_type) && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="lesson-duration-seconds">Exact duration (seconds)</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSyncDuration}
+                    disabled={syncingDuration}
+                  >
+                    {syncingDuration ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    )}
+                    Sync duration from video
+                  </Button>
+                </div>
+                <Input
+                  id="lesson-duration-seconds"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 37"
+                  value={lessonForm.duration_seconds ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    setLessonForm({ ...lessonForm, duration_seconds: v === '' ? null : parseInt(v) || 0 });
+                  }}
+                />
+                {lessonForm.duration_seconds && lessonForm.duration_seconds > 0 ? (
+                  <p className="flex items-center gap-1.5 text-xs text-success">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    Sidebar will show {secondsToMinutes(lessonForm.duration_seconds)} min ({lessonForm.duration_seconds}s stored).
+                  </p>
+                ) : (
+                  <p className="flex items-start gap-1.5 text-xs rounded-md bg-warning/10 text-warning p-2">
+                    <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                    Duration missing — please set manually. No placeholder duration will be shown to learners.
+                  </p>
+                )}
+              </div>
+            )}
             {lessonForm.lesson_type === 'scorm' && (
               <div className="space-y-2">
                 <Label htmlFor="lesson-scorm">SCORM Package</Label>
