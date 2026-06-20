@@ -341,6 +341,7 @@ export default function CourseLearn() {
     const loadScorm = async () => {
       cleanup();
       setScormHtml('');
+      setScormFrameReady(false);
       if (!activeLesson || activeLesson.lesson_type !== 'scorm' || !user || !courseId) return;
       if (!activeLesson.scorm_package_id) return;
 
