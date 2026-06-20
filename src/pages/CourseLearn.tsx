@@ -236,8 +236,8 @@ export default function CourseLearn() {
         question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
       }));
 
-      const assessors = (trainersData || [])
-        .map((t: any) => t.staff_profiles?.full_name?.split(' ')[0])
+      const assessors = (assessorRows || [])
+        .map((t: any) => (t.full_name as string)?.split(' ')[0])
         .filter(Boolean) as string[];
 
       setModules(modulesData || []);
