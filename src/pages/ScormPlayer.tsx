@@ -62,7 +62,7 @@ export default function ScormPlayer() {
         .single();
 
       if (pkgError || !pkg) {
-        toast.error('SCORM package not found');
+        toast.error('Video not found');
         navigate(-1);
         return;
       }
@@ -85,7 +85,7 @@ export default function ScormPlayer() {
         setIframeSrc(await resp.text());
       } catch (e) {
         console.error('Error fetching SCORM html:', e);
-        toast.error('Failed to load SCORM content');
+        toast.error('Failed to load video');
       }
 
       // Create SCORM API adapter
@@ -113,7 +113,7 @@ export default function ScormPlayer() {
       }
     } catch (err) {
       console.error('Error loading SCORM:', err);
-      toast.error('Failed to load SCORM content');
+      toast.error('Failed to load video');
     } finally {
       setLoading(false);
     }
@@ -148,7 +148,7 @@ export default function ScormPlayer() {
         }
       }
 
-      toast.success('SCORM module completed!');
+      toast.success('Video completed!');
     } catch (err) {
       console.error('Completion error:', err);
     }
@@ -198,7 +198,7 @@ export default function ScormPlayer() {
       <div className="flex items-center justify-between px-4 py-2 border-b bg-card shadow-sm">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold truncate max-w-md">
-            {scormPackage?.title || 'SCORM Content'}
+            {scormPackage?.title || 'Video'}
           </h1>
           <Badge
             variant="outline"
@@ -224,7 +224,7 @@ export default function ScormPlayer() {
           <iframe
             srcDoc={iframeSrc}
             className="w-full h-full border-0"
-            title="SCORM Content"
+            title="Video"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
           />

@@ -15,13 +15,11 @@ export function OverviewTab({
     competencyAssessors.length > 0 ? competencyAssessors.join(' or ') : 'an authorised assessor';
 
   const pathwaySteps = [
-    'Complete all required SCORM/video lessons',
+    'Complete all required video lessons',
     'Pass the Final Assessment with 80% or above',
     'Receive Certificate of Completion',
-    ...(course.requires_practical_signoff
-      ? ['Complete practical competency sign-off if required']
-      : []),
-    `Receive Competency Sign-Off Certificate only when marked Competent by ${assessorLabel}`,
+    'Complete practical competency sign-off, where required',
+    `Receive Competency Sign-Off Certificate when marked Competent by ${assessorLabel}`,
   ];
 
   return (
