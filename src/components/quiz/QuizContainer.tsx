@@ -30,6 +30,7 @@ interface QuizQuestion {
   options: string[];
   correct_answer: number;
   order_index: number;
+  explanation?: string | null;
 }
 
 interface QuizAttempt {
