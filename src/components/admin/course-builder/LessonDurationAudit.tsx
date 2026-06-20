@@ -322,7 +322,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
     }
     setApplying(true);
     try {
-      const ops: Promise<any>[] = [];
+      const ops: PromiseLike<{ error: unknown } | any>[] = [];
       for (const [id, change] of Object.entries(pending)) {
         if (change._delete) {
           ops.push(supabase.from('lessons').delete().eq('id', id));
