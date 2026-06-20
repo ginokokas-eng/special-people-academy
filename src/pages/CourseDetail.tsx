@@ -475,7 +475,7 @@ export default function CourseDetail() {
         .single();
 
       if (!lessonData?.scorm_package_id) {
-        toast.error('No SCORM package attached to this lesson');
+        toast.error('No video attached to this lesson');
         return;
       }
 
@@ -496,7 +496,7 @@ export default function CourseDetail() {
       navigate(`/scorm/launch/${newReg.id}`);
     } catch (err) {
       console.error('Error launching SCORM:', err);
-      toast.error('Failed to launch SCORM content');
+      toast.error('Failed to launch video');
     }
   };
 
