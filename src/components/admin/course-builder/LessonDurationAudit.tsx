@@ -40,6 +40,7 @@ export interface AuditLessonInput {
   scorm_package_id: string | null;
   video_url?: string | null;
   content?: string | null;
+  resource_page_count?: number | null;
 }
 
 interface AuditModule {
@@ -58,11 +59,19 @@ interface Props {
 
 type PendingChange = {
   duration_seconds?: number | null;
+  resource_page_count?: number | null;
   lesson_type?: string;
   _delete?: boolean;
 };
 
-type Status = 'OK' | 'Duration missing' | 'Placeholder duration detected' | 'Needs manual check' | 'Will delete';
+type Status =
+  | 'OK'
+  | 'Duration missing'
+  | 'Placeholder duration detected'
+  | 'Resource missing page count'
+  | 'Assessment missing question count'
+  | 'Manual review needed'
+  | 'Will delete';
 
 const TIMED = (t: string) => t === 'video' || t === 'scorm';
 
