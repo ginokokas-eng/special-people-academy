@@ -73,6 +73,7 @@ export default function CourseLearn() {
   const [loading, setLoading] = useState(true);
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
+  const [scormFrameReady, setScormFrameReady] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
