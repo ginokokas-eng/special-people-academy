@@ -21,6 +21,8 @@ export interface LearnLesson {
   completed?: boolean;
   /** Number of authored questions when lesson_type === 'quiz'. */
   question_count?: number;
+  /** Admin-set page count for resource lessons. NULL = estimate from content. */
+  resource_page_count?: number | null;
 }
 
 export interface LearnModule {
