@@ -1319,10 +1319,13 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number | null
+          footer_note: string | null
           id: string
+          is_required: boolean
           lesson_type: string | null
           module_id: string | null
           order_index: number
+          pdf_filename: string | null
           scorm_package_id: string | null
           title: string
           updated_at: string
@@ -1334,10 +1337,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          footer_note?: string | null
           id?: string
+          is_required?: boolean
           lesson_type?: string | null
           module_id?: string | null
           order_index?: number
+          pdf_filename?: string | null
           scorm_package_id?: string | null
           title: string
           updated_at?: string
@@ -1349,10 +1355,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          footer_note?: string | null
           id?: string
+          is_required?: boolean
           lesson_type?: string | null
           module_id?: string | null
           order_index?: number
+          pdf_filename?: string | null
           scorm_package_id?: string | null
           title?: string
           updated_at?: string
