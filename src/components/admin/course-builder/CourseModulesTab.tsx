@@ -260,6 +260,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         description: lessonForm.description || null,
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
+        duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
       };
       updateData.scorm_package_id = lessonForm.lesson_type === 'scorm'
         ? lessonForm.scorm_package_id
