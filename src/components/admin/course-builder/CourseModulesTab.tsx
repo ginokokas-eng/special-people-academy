@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
