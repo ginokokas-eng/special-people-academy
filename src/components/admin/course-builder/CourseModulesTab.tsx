@@ -46,6 +46,8 @@ interface Lesson {
   lesson_type: LessonType;
   order_index: number;
   duration_minutes: number | null;
+  duration_seconds: number | null;
+  video_url: string | null;
   scorm_package_id: string | null;
 }
 
