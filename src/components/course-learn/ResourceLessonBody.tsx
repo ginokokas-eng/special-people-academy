@@ -95,20 +95,20 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
         y += opts.gapAfter;
       };
 
-      write(lesson.title, { size: 16, style: 'bold', gapAfter: 5 });
-      if (summary) write(summary, { size: 9.5, style: 'italic', gapAfter: 9 });
+      write(lesson.title, { size: 16, style: 'bold', gapAfter: 4 });
+      if (summary) write(summary, { size: 9.5, style: 'italic', gapAfter: 7 });
 
       for (const block of blocks) {
         if (block.kind === 'heading') {
           y += 1;
-          write(block.text, { size: 11.5, style: 'bold', gapAfter: 3 });
+          write(block.text, { size: 11.5, style: 'bold', gapAfter: 2.5 });
         } else if (block.kind === 'paragraph') {
-          write(block.text, { size: 10, style: 'normal', gapAfter: 5 });
+          write(block.text, { size: 10, style: 'normal', gapAfter: 4 });
         } else {
           for (const item of block.items) {
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            const lineHeight = 10 * 1.28;
+            const lineHeight = 10 * 1.22;
             const wrapped = doc.splitTextToSize(item, maxWidth - 18);
             wrapped.forEach((line: string, i: number) => {
               ensureSpace(lineHeight);
@@ -117,9 +117,10 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
               y += lineHeight;
             });
           }
-          y += 5;
+          y += 4;
         }
       }
+
 
       if (footer) {
         y += 4;
