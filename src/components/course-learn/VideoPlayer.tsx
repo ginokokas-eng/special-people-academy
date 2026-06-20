@@ -390,7 +390,7 @@ export function VideoPlayer({
         {/* Control bar */}
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-3 pb-2 pt-8 transition-opacity duration-200',
+            'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-2 pt-8 transition-opacity duration-300',
             controlsVisible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
           )}
         >
