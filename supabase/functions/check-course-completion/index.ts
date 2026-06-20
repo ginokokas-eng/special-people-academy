@@ -175,13 +175,14 @@ Deno.serve(async (req) => {
       // Get quizzes for these lessons
       const { data: quizzes } = await supabaseAdmin
         .from('quizzes')
-        .select('id, lesson_id')
+        .select('id, lesson_id, passing_score')
         .in('lesson_id', quizLessons.map(l => l.id));
 
-      // Only graded quizzes (those that actually have authored questions) gate
-      // completion. Empty "knowledge check" quizzes are informational and are
-      // completed via lesson_progress instead.
-      let gradedQuizzes = quizzes || [];
+      // Only graded quizzes gate completion. A quiz is graded when it has a
+      // real pass mark (passing_score > 0) AND authored questions. Ungraded
+      // checks such as the Pre-Course Knowledge Check (passing_score = 0) and
+      // empty "knowledge check" placeholders never gate the certificate.
+      let gradedQuizzes = (quizzes || []).filter(q => (q.passing_score ?? 0) > 0);
       if (gradedQuizzes.length > 0) {
         const { data: qCounts } = await supabaseAdmin
           .from('quiz_questions')
