@@ -450,7 +450,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
                             className="h-7 w-20"
                             autoFocus
                           />
-                          <span className="text-muted-foreground">s</span>
+                          <span className="text-muted-foreground">{editMode === 'pages' ? 'pages' : 's'}</span>
                           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => commitEdit(l)}>
                             <Check className="h-3.5 w-3.5" />
                           </Button>
