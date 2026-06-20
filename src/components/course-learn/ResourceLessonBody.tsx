@@ -64,8 +64,8 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
   const downloadPdf = () => {
     try {
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const marginX = 56;
-      const marginTop = 56;
+      const marginX = 52;
+      const marginTop = 44;
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const maxWidth = pageWidth - marginX * 2;
@@ -84,7 +84,7 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
       ) => {
         doc.setFont('helvetica', opts.style);
         doc.setFontSize(opts.size);
-        const lineHeight = opts.size * 1.35;
+        const lineHeight = opts.size * 1.28;
         const indent = opts.indent ?? 0;
         const wrapped = doc.splitTextToSize(text, maxWidth - indent);
         for (const line of wrapped) {
@@ -95,20 +95,20 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
         y += opts.gapAfter;
       };
 
-      write(lesson.title, { size: 17, style: 'bold', gapAfter: 6 });
-      if (summary) write(summary, { size: 10, style: 'italic', gapAfter: 12 });
+      write(lesson.title, { size: 16, style: 'bold', gapAfter: 5 });
+      if (summary) write(summary, { size: 9.5, style: 'italic', gapAfter: 9 });
 
       for (const block of blocks) {
         if (block.kind === 'heading') {
-          y += 2;
-          write(block.text, { size: 12, style: 'bold', gapAfter: 4 });
+          y += 1;
+          write(block.text, { size: 11.5, style: 'bold', gapAfter: 3 });
         } else if (block.kind === 'paragraph') {
-          write(block.text, { size: 10.5, style: 'normal', gapAfter: 8 });
+          write(block.text, { size: 10, style: 'normal', gapAfter: 5 });
         } else {
           for (const item of block.items) {
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10.5);
-            const lineHeight = 10.5 * 1.35;
+            doc.setFontSize(10);
+            const lineHeight = 10 * 1.28;
             const wrapped = doc.splitTextToSize(item, maxWidth - 18);
             wrapped.forEach((line: string, i: number) => {
               ensureSpace(lineHeight);
@@ -117,18 +117,19 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
               y += lineHeight;
             });
           }
-          y += 8;
+          y += 5;
         }
       }
 
       if (footer) {
-        y += 6;
-        ensureSpace(14);
+        y += 4;
+        ensureSpace(24);
         doc.setDrawColor(180);
         doc.line(marginX, y, pageWidth - marginX, y);
-        y += 12;
+        y += 10;
         write(footer, { size: 9, style: 'italic', gapAfter: 0 });
       }
+
 
       doc.save(fileName);
       toast.success('Downloading PDF');
