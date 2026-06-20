@@ -219,11 +219,11 @@ export default function ScormPlayer() {
       </div>
 
       {/* SCORM iframe */}
-      <div className="flex-1">
+      <div className="flex-1 bg-card">
         {iframeSrc && (
           <iframe
             srcDoc={iframeSrc}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 bg-card animate-fade-in"
             title="Video"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
