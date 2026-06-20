@@ -367,6 +367,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
         }
         const update: Record<string, unknown> = {};
         if (change.duration_seconds !== undefined) update.duration_seconds = change.duration_seconds;
+        if (change.resource_page_count !== undefined) update.resource_page_count = change.resource_page_count;
         if (change.lesson_type !== undefined) update.lesson_type = change.lesson_type;
         if (Object.keys(update).length > 0) ops.push(supabase.from('lessons').update(update).eq('id', id));
       }
