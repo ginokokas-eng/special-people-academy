@@ -558,15 +558,49 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lesson-duration">Duration (minutes)</Label>
-              <Input
-                id="lesson-duration"
-                type="number"
-                value={lessonForm.duration_minutes}
-                onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: parseInt(e.target.value) || 0 })}
-              />
-            </div>
+            {isTimedMedia(lessonForm.lesson_type) && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="lesson-duration-seconds">Exact duration (seconds)</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSyncDuration}
+                    disabled={syncingDuration}
+                  >
+                    {syncingDuration ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    )}
+                    Sync duration from video
+                  </Button>
+                </div>
+                <Input
+                  id="lesson-duration-seconds"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 37"
+                  value={lessonForm.duration_seconds ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    setLessonForm({ ...lessonForm, duration_seconds: v === '' ? null : parseInt(v) || 0 });
+                  }}
+                />
+                {lessonForm.duration_seconds && lessonForm.duration_seconds > 0 ? (
+                  <p className="flex items-center gap-1.5 text-xs text-success">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    Sidebar will show {secondsToMinutes(lessonForm.duration_seconds)} min ({lessonForm.duration_seconds}s stored).
+                  </p>
+                ) : (
+                  <p className="flex items-start gap-1.5 text-xs rounded-md bg-warning/10 text-warning p-2">
+                    <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                    Duration missing — please set manually. No placeholder duration will be shown to learners.
+                  </p>
+                )}
+              </div>
+            )}
             {lessonForm.lesson_type === 'scorm' && (
               <div className="space-y-2">
                 <Label htmlFor="lesson-scorm">SCORM Package</Label>
