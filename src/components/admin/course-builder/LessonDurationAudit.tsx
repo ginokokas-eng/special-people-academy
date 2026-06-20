@@ -156,6 +156,13 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   const effSeconds = (l: AuditLessonInput) =>
     pending[l.id]?.duration_seconds !== undefined ? pending[l.id]!.duration_seconds : l.duration_seconds;
 
+  // Effective resource page count: pending edit > admin-set column > content estimate.
+  const effPages = (l: AuditLessonInput): number => {
+    const p = pending[l.id]?.resource_page_count;
+    if (p !== undefined && p !== null) return p;
+    return resourcePageCount({ ...l, resource_page_count: l.resource_page_count } as any);
+  };
+
   const currentLabel = (l: AuditLessonInput): string => {
     switch (l.lesson_type) {
       case 'scorm':
@@ -189,7 +196,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
       return `${c} question${c === 1 ? '' : 's'}`;
     }
     if (type === 'resource') {
-      const p = resourcePageCount(l as any);
+      const p = effPages(l);
       return `${p} page${p === 1 ? '' : 's'}`;
     }
     if (type === 'practical') return 'Practical';
@@ -206,10 +213,10 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
       if ((l.duration_minutes ?? 0) > 0) return 'Placeholder duration detected';
       return 'Duration missing';
     }
-    if (type === 'quiz') return (questionCounts.get(l.id) ?? 0) > 0 ? 'OK' : 'Needs manual check';
-    if (type === 'resource') return resourcePageCount(l as any) > 0 ? 'OK' : 'Needs manual check';
+    if (type === 'quiz') return (questionCounts.get(l.id) ?? 0) > 0 ? 'OK' : 'Assessment missing question count';
+    if (type === 'resource') return effPages(l) > 0 ? 'OK' : 'Resource missing page count';
     if (type === 'practical' || type === 'certificate') return 'OK';
-    return 'Needs manual check';
+    return 'Manual review needed';
   };
 
   const statusBadge = (s: Status) => {
@@ -220,10 +227,14 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
         return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Placeholder</Badge>;
       case 'Duration missing':
         return <Badge variant="destructive">Duration missing</Badge>;
+      case 'Resource missing page count':
+        return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Missing page count</Badge>;
+      case 'Assessment missing question count':
+        return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Missing questions</Badge>;
       case 'Will delete':
         return <Badge variant="destructive">Will hide</Badge>;
       default:
-        return <Badge variant="secondary">Needs check</Badge>;
+        return <Badge variant="secondary">Manual review</Badge>;
     }
   };
 
