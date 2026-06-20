@@ -630,7 +630,7 @@ export default function CourseLearn() {
     <CourseContentSidebar
       courseId={course.id}
       modules={modules}
-      lessons={lessons}
+      lessons={visibleLessons}
       resources={resources}
       activeLessonId={activeLesson?.id}
       onSelect={goToLesson}
