@@ -155,7 +155,9 @@ function LessonRow({
           </span>
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
             {lessonTypeIcon(lesson.lesson_type)}
-            {formatDuration(lesson.duration_minutes)}
+            {lesson.lesson_type === 'quiz'
+              ? `${lesson.question_count ?? 0} question${(lesson.question_count ?? 0) === 1 ? '' : 's'}`
+              : formatDuration(lesson.duration_minutes)}
           </span>
         </span>
       </button>
