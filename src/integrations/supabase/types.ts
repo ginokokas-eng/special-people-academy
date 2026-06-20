@@ -1314,6 +1314,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          content: string | null
           course_id: string
           created_at: string
           description: string | null
@@ -1328,6 +1329,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          content?: string | null
           course_id: string
           created_at?: string
           description?: string | null
@@ -1342,6 +1344,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          content?: string | null
           course_id?: string
           created_at?: string
           description?: string | null
