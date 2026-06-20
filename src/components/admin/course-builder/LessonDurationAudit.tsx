@@ -418,9 +418,9 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
               <TableRow>
                 <TableHead>Module</TableHead>
                 <TableHead>Lesson</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Current</TableHead>
-                <TableHead>Actual / count</TableHead>
+                <TableHead>Learner-facing type</TableHead>
+                <TableHead>Current label</TableHead>
+                <TableHead>Detected duration / count</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
