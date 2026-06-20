@@ -22,6 +22,7 @@ interface QuizQuestion {
   options: string[];
   correct_answer: number;
   order_index: number;
+  explanation?: string | null;
 }
 
 interface QuizPlayerProps {
@@ -321,6 +322,11 @@ export function QuizPlayer({
               {feedback === 'correct' 
                 ? "Correct! Well done." 
                 : `Incorrect. The correct answer is: ${currentQuestion.options[currentQuestion.correct_answer]}`}
+              {currentQuestion.explanation && (
+                <span className="block mt-2 text-foreground/80 font-normal">
+                  {currentQuestion.explanation}
+                </span>
+              )}
             </AlertDescription>
           </Alert>
         )}
