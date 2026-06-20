@@ -138,18 +138,25 @@ Deno.serve(async (req) => {
       .select('id, lesson_type')
       .eq('course_id', course_id);
 
-    const totalLessons = lessons?.length || 0;
+    // Required learning content only gates completion: SCORM/video lessons.
+    // Informational text lessons and ungraded checks (e.g. the Pre-Course
+    // Knowledge Check) do NOT count toward course completion.
+    const requiredLessons = (lessons || []).filter(
+      l => l.lesson_type === 'scorm' || l.lesson_type === 'video'
+    );
+    const totalLessons = requiredLessons.length;
 
     // Get lesson progress
     const { data: progress } = await supabaseAdmin
       .from('lesson_progress')
       .select('lesson_id, completed')
       .eq('user_id', userId)
-      .in('lesson_id', lessons?.map(l => l.id) || []);
+      .in('lesson_id', requiredLessons.map(l => l.id));
 
-    const completedLessons = progress?.filter(p => p.completed).length || 0;
+    const completedSet = new Set((progress || []).filter(p => p.completed).map(p => p.lesson_id));
+    const completedLessons = requiredLessons.filter(l => completedSet.has(l.id)).length;
 
-    console.log(`Lessons: ${completedLessons}/${totalLessons}`);
+    console.log(`Required lessons: ${completedLessons}/${totalLessons}`);
 
     if (completedLessons < totalLessons) {
       return new Response(JSON.stringify({ 
