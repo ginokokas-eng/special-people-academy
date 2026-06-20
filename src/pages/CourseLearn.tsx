@@ -431,10 +431,10 @@ export default function CourseLearn() {
     setActiveTab('overview');
   };
 
-  const currentIndex = lessons.findIndex((l) => l.id === activeLesson?.id);
-  const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+  const currentIndex = visibleLessons.findIndex((l) => l.id === activeLesson?.id);
+  const prevLesson = currentIndex > 0 ? visibleLessons[currentIndex - 1] : null;
   const nextLesson =
-    currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+    currentIndex >= 0 && currentIndex < visibleLessons.length - 1 ? visibleLessons[currentIndex + 1] : null;
 
   const openTranscript = () => setActiveTab('transcript');
   const toggleTheatre = () => setPrefs({ theatre: !prefs.theatre });
