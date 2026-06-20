@@ -289,7 +289,7 @@ export function VideoPlayer({
 
   if (!activeSrc) {
     return (
-      <div className="aspect-video w-full rounded-lg overflow-hidden border bg-foreground/90 flex items-center justify-center text-background/70 text-sm">
+      <div className="aspect-video w-full rounded-lg overflow-hidden border bg-muted flex items-center justify-center text-muted-foreground text-sm">
         No video available for this lesson.
       </div>
     );
