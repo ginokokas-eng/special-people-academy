@@ -90,6 +90,7 @@ export function VideoPlayer({
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [waiting, setWaiting] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   // Build the quality options. Always offer an "Auto / Original" entry.
@@ -288,7 +289,7 @@ export function VideoPlayer({
 
   if (!activeSrc) {
     return (
-      <div className="aspect-video w-full rounded-lg overflow-hidden border bg-foreground/90 flex items-center justify-center text-background/70 text-sm">
+      <div className="aspect-video w-full rounded-lg overflow-hidden border bg-muted flex items-center justify-center text-muted-foreground text-sm">
         No video available for this lesson.
       </div>
     );
@@ -303,7 +304,7 @@ export function VideoPlayer({
         onMouseMove={showControls}
         onMouseLeave={() => playing && setControlsVisible(false)}
         className={cn(
-          'group relative w-full overflow-hidden rounded-lg border bg-black outline-none focus-visible:ring-2 focus-visible:ring-primary',
+          'group relative w-full overflow-hidden rounded-lg border bg-card shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-primary',
           fullscreen ? 'h-screen rounded-none' : 'aspect-video'
         )}
       >
@@ -311,7 +312,10 @@ export function VideoPlayer({
           ref={videoRef}
           key={activeSrc}
           src={activeSrc}
-          className="h-full w-full bg-black"
+          className={cn(
+            'h-full w-full bg-card object-contain transition-opacity duration-500',
+            loaded ? 'opacity-100' : 'opacity-0'
+          )}
           playsInline
           crossOrigin={vttUrl ? 'anonymous' : undefined}
           onClick={togglePlay}
@@ -329,6 +333,8 @@ export function VideoPlayer({
             setDuration(e.currentTarget.duration);
             e.currentTarget.playbackRate = prefs.speed;
           }}
+          onLoadedData={() => setLoaded(true)}
+          onCanPlay={() => setLoaded(true)}
           onProgress={(e) => {
             const v = e.currentTarget;
             if (v.buffered.length) setBuffered(v.buffered.end(v.buffered.length - 1));
@@ -352,30 +358,39 @@ export function VideoPlayer({
           )}
         </video>
 
+        {/* Skeleton / loading state before the video is ready */}
+        {!loaded && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-muted">
+            <div className="absolute inset-0 animate-pulse bg-muted" />
+            <Loader2 className="relative h-10 w-10 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
         {/* Buffering spinner */}
-        {waiting && (
+        {loaded && waiting && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <Loader2 className="h-10 w-10 animate-spin text-white/80" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         )}
 
         {/* Center play overlay when paused */}
-        {!playing && !waiting && (
+        {loaded && !playing && !waiting && (
           <button
             onClick={togglePlay}
             aria-label="Play"
-            className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
+            className="absolute inset-0 flex items-center justify-center bg-foreground/5 transition-colors duration-200 hover:bg-foreground/10"
           >
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105">
               <Play className="ml-1 h-8 w-8" fill="currentColor" />
             </span>
           </button>
         )}
 
+
         {/* Control bar */}
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-3 pb-2 pt-8 transition-opacity duration-200',
+            'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-2 pt-8 transition-opacity duration-300',
             controlsVisible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
           )}
         >

@@ -73,6 +73,7 @@ export default function CourseLearn() {
   const [loading, setLoading] = useState(true);
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
+  const [scormFrameReady, setScormFrameReady] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -340,6 +341,7 @@ export default function CourseLearn() {
     const loadScorm = async () => {
       cleanup();
       setScormHtml('');
+      setScormFrameReady(false);
       if (!activeLesson || activeLesson.lesson_type !== 'scorm' || !user || !courseId) return;
       if (!activeLesson.scorm_package_id) return;
 
@@ -481,25 +483,35 @@ export default function CourseLearn() {
           <div
             ref={scormFrameWrapRef}
             className={cn(
-              'w-full overflow-hidden rounded-lg border bg-black',
+              'relative w-full overflow-hidden rounded-lg border bg-card shadow-sm',
               scormFullscreen ? 'h-screen rounded-none' : 'aspect-video'
             )}
           >
-            {scormLoading ? (
-              <div className="flex h-full items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary-foreground/70" />
-              </div>
-            ) : scormHtml ? (
+            {scormHtml ? (
               <iframe
                 srcDoc={scormHtml}
-                className="h-full w-full border-0"
+                onLoad={() => setScormFrameReady(true)}
+                className={cn(
+                  'h-full w-full border-0 bg-card transition-opacity duration-500',
+                  scormFrameReady ? 'opacity-100' : 'opacity-0'
+                )}
                 title={activeLesson.title}
                 allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-modals allow-downloads"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-primary-foreground/70">
-                Unable to load this module.
+              !scormLoading && (
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                  Unable to load this module.
+                </div>
+              )
+            )}
+
+            {/* Skeleton / loading state until the video frame is ready */}
+            {(scormLoading || (scormHtml && !scormFrameReady)) && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-muted">
+                <div className="absolute inset-0 animate-pulse bg-muted" />
+                <Loader2 className="relative h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             )}
           </div>
