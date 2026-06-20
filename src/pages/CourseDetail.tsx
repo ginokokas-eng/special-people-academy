@@ -299,7 +299,7 @@ export default function CourseDetail() {
         const progressMap = new Map(progressData?.map(p => [p.lesson_id, p.completed]) || []);
         
         const lessonsWithProgress = (lessonsData || []).map(lesson => ({
-          ...lesson,
+          ...withQuestionCount(lesson),
           lesson_type: lesson.lesson_type || 'video',
           completed: progressMap.get(lesson.id) || false,
         }));
@@ -400,7 +400,7 @@ export default function CourseDetail() {
 
       } else {
         setLessons((lessonsData || []).map(lesson => ({ 
-          ...lesson, 
+          ...withQuestionCount(lesson), 
           lesson_type: lesson.lesson_type || 'video',
           completed: false 
         })));
