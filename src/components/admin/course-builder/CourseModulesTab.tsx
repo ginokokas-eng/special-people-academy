@@ -296,6 +296,49 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
     }
   };
 
+  // Reads the exact media duration (seconds) from the uploaded video and stores it.
+  const handleSyncDuration = async () => {
+    if (lessonForm.lesson_type === 'scorm') {
+      toast.message('SCORM duration cannot be read automatically — set the exact seconds manually.');
+      return;
+    }
+    // Resolve a playable source: lesson.video_url or the default lesson_video_sources entry.
+    let src = lessonDialog.lesson?.video_url || '';
+    if (!src && lessonDialog.lesson?.id) {
+      const { data } = await supabase
+        .from('lesson_video_sources')
+        .select('source_url, is_default')
+        .eq('lesson_id', lessonDialog.lesson.id)
+        .order('is_default', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      src = data?.source_url || '';
+    }
+    if (!src) {
+      toast.error('No uploaded video found for this lesson — set the duration manually.');
+      return;
+    }
+    setSyncingDuration(true);
+    try {
+      const seconds = await new Promise<number>((resolve, reject) => {
+        const v = document.createElement('video');
+        v.preload = 'metadata';
+        v.onloadedmetadata = () => resolve(v.duration);
+        v.onerror = () => reject(new Error('Could not load video metadata'));
+        v.src = src;
+      });
+      if (!isFinite(seconds) || seconds <= 0) throw new Error('Invalid duration');
+      const rounded = Math.round(seconds);
+      setLessonForm((f) => ({ ...f, duration_seconds: rounded }));
+      toast.success(`Duration synced: ${rounded}s (${secondsToMinutes(rounded)} min)`);
+    } catch (e) {
+      console.error('Sync duration failed:', e);
+      toast.error('Could not read video duration — set it manually.');
+    } finally {
+      setSyncingDuration(false);
+    }
+  };
+
   const openEditModule = (module: Module) => {
     setModuleForm({ title: module.title, description: module.description || '' });
     setModuleDialog({ open: true, module });
