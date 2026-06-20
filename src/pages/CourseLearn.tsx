@@ -68,6 +68,7 @@ export default function CourseLearn() {
   const [modules, setModules] = useState<LearnModule[]>([]);
   const [lessons, setLessons] = useState<LearnLesson[]>([]);
   const [resources, setResources] = useState<LearnResource[]>([]);
+  const [competencyAssessors, setCompetencyAssessors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
