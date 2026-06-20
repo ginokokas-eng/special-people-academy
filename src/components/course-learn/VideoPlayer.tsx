@@ -318,7 +318,10 @@ export function VideoPlayer({
           )}
           playsInline
           crossOrigin={vttUrl ? 'anonymous' : undefined}
-          onClick={togglePlay}
+          onClick={() => {
+            containerRef.current?.focus();
+            togglePlay();
+          }}
           onPlay={() => {
             setPlaying(true);
             showControls();
