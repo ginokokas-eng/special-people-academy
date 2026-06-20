@@ -96,7 +96,15 @@ export function lessonMetaLabel(lesson: LearnLesson): string {
 }
 
 export function totalDuration(lessons: LearnLesson[]): string {
-  const total = lessons.reduce((sum, l) => sum + (l.duration_minutes || 0), 0);
+  // Only timed media (SCORM/video) contributes to module/course duration.
+  // Resources, quizzes, practicals and certificates never add minutes.
+  const total = lessons.reduce(
+    (sum, l) =>
+      l.lesson_type === 'scorm' || l.lesson_type === 'video'
+        ? sum + (l.duration_minutes || 0)
+        : sum,
+    0
+  );
   return formatDuration(total);
 }
 
