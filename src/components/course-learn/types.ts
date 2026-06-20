@@ -4,6 +4,8 @@ export interface LearnLesson {
   description: string | null;
   video_url: string | null;
   duration_minutes: number | null;
+  /** Exact media duration in seconds (video/scorm). NULL = unknown, no placeholder. */
+  duration_seconds?: number | null;
   order_index: number;
   lesson_type: string;
   module_id: string | null;
