@@ -1,4 +1,4 @@
-import { Play, FileText, HelpCircle, ClipboardCheck, MessageSquareWarning, FileType2, Video } from 'lucide-react';
+import { Play, FileText, HelpCircle, ClipboardCheck, MessageSquareWarning, FileType2, Video, BookOpen } from 'lucide-react';
 import type { LearnLesson } from './types';
 
 export function lessonTypeIcon(type: string, className = 'h-3.5 w-3.5') {
