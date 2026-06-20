@@ -175,7 +175,7 @@ export default function CourseLearn() {
       const questionCountByLesson = new Map<string, number>();
       if (quizLessonIds.length > 0) {
         const { data: quizzesData } = await sb.from('quizzes').select('id, lesson_id').in('lesson_id', quizLessonIds);
-        const quizIdToLesson = new Map((quizzesData || []).map((q: any) => [q.id, q.lesson_id]));
+        const quizIdToLesson = new Map<string, string>((quizzesData || []).map((q: any) => [q.id as string, q.lesson_id as string]));
         if ((quizzesData || []).length > 0) {
           const { data: qq } = await sb
             .from('quiz_questions')
