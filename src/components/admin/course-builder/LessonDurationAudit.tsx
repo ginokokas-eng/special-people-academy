@@ -111,6 +111,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   const [applying, setApplying] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [editMode, setEditMode] = useState<'seconds' | 'pages'>('seconds');
 
   useEffect(() => {
     if (!open) return;
