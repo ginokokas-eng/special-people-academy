@@ -153,12 +153,15 @@ function LessonRow({
           <span className={`block text-sm leading-snug ${active ? 'text-primary font-medium' : 'text-foreground'}`}>
             {lesson.title}
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-            {lessonTypeIcon(lesson.lesson_type)}
-            {lesson.lesson_type === 'quiz'
-              ? `${lesson.question_count ?? 0} question${(lesson.question_count ?? 0) === 1 ? '' : 's'}`
-              : formatDuration(lesson.duration_minutes)}
-          </span>
+          {(() => {
+            const meta = lessonMetaLabel(lesson);
+            return (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+                {lessonTypeIcon(lesson.lesson_type)}
+                {meta && <span>{meta}</span>}
+              </span>
+            );
+          })()}
         </span>
       </button>
       {resources.length > 0 && (
