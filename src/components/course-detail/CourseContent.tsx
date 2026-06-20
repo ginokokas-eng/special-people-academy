@@ -62,7 +62,7 @@ const lessonTypeLabels: Record<string, string> = {
   practical: 'Practical',
   text: 'Text',
   scenario: 'Scenario',
-  scorm: 'SCORM',
+  scorm: 'Video',
 };
 
 export function CourseContent({ 
