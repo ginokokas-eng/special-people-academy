@@ -84,7 +84,7 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
       ) => {
         doc.setFont('helvetica', opts.style);
         doc.setFontSize(opts.size);
-        const lineHeight = opts.size * 1.28;
+        const lineHeight = opts.size * 1.22;
         const indent = opts.indent ?? 0;
         const wrapped = doc.splitTextToSize(text, maxWidth - indent);
         for (const line of wrapped) {
