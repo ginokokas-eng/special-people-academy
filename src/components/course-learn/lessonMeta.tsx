@@ -12,6 +12,8 @@ export function lessonTypeIcon(type: string, className = 'h-3.5 w-3.5') {
       return <ClipboardCheck className={className} />;
     case 'scenario':
       return <MessageSquareWarning className={className} />;
+    case 'resource':
+      return <BookOpen className={className} />;
     case 'pdf':
       return <FileType2 className={className} />;
     default:
