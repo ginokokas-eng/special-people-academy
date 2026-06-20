@@ -189,10 +189,17 @@ export function CourseContent({
               {lessonTypeIcons[lesson.lesson_type || 'video']}
               <span className="ml-1">{lessonTypeLabels[lesson.lesson_type || 'video']}</span>
             </Badge>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatDuration(lesson.duration_minutes)}
-            </span>
+            {(() => {
+              const meta = lessonMeta(lesson);
+              if (!meta) return null;
+              const isVideo = lesson.lesson_type === 'video' || lesson.lesson_type === 'scorm';
+              return (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  {isVideo && <Clock className="h-3 w-3" />}
+                  {meta}
+                </span>
+              );
+            })()}
           </div>
         </div>
 
