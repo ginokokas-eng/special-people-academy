@@ -590,6 +590,10 @@ export default function CourseLearn() {
       );
     }
 
+    if (activeLesson.lesson_type === 'resource') {
+      return <ResourceLessonBody lesson={activeLesson} onMarkRead={markComplete} />;
+    }
+
     // text / scenario / pdf
     return (
       <div className="rounded-lg border bg-card p-6">
