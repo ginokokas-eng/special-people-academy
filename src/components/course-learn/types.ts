@@ -10,6 +10,12 @@ export interface LearnLesson {
   scorm_package_id: string | null;
   /** On-page reading content for resource/reading lessons. */
   content?: string | null;
+  /** Footer note shown below resource content and in the generated PDF. */
+  footer_note?: string | null;
+  /** Custom PDF download filename for resource lessons. */
+  pdf_filename?: string | null;
+  /** Whether this lesson is required reading. */
+  is_required?: boolean | null;
   completed?: boolean;
   /** Number of authored questions when lesson_type === 'quiz'. */
   question_count?: number;
