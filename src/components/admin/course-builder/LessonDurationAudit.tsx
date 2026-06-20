@@ -491,6 +491,19 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
                                 </Button>
                               </>
                             )}
+                            {type === 'resource' && (
+                              <Button size="sm" variant="outline" onClick={() => startEditPages(l)}>
+                                <FileText className="h-3.5 w-3.5 mr-1" />
+                                <span className="hidden sm:inline">Set page count</span>
+                                <span className="sm:hidden">Pages</span>
+                              </Button>
+                            )}
+                            {type === 'quiz' && (questionCounts.get(l.id) ?? 0) > 0 && (
+                              <Button size="sm" variant="ghost" onClick={() => confirmQuestionCount(l)}>
+                                <Check className="h-3.5 w-3.5 mr-1" />
+                                <span className="hidden sm:inline">Confirm count</span>
+                              </Button>
+                            )}
                             {isInfoOnly && (
                               <Button size="sm" variant="ghost" onClick={() => markAsResource(l)}>
                                 <BookOpen className="h-3.5 w-3.5 mr-1" />
