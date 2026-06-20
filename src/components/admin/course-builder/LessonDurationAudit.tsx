@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
-import { Loader2, RefreshCw, Check, X, BookOpen, EyeOff, Pencil } from 'lucide-react';
+import { Loader2, RefreshCw, Check, X, BookOpen, EyeOff, Pencil, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   formatDuration,
