@@ -49,7 +49,7 @@ export function OverviewTab({
       )}
 
       <div className="border-t pt-5">
-        <h4 className="text-sm font-semibold text-foreground mb-2">About this course</h4>
+        <h4 className="text-sm font-semibold text-foreground mb-2">Course purpose</h4>
         {course.overview || course.description ? (
           <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
             {course.overview || course.description}
