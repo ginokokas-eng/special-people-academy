@@ -107,9 +107,11 @@ export function QuizContainer({
         return;
       }
 
+      const ungraded = (quizData.passing_score ?? 0) === 0;
+      setIsUngraded(ungraded);
       const loadedQuiz: Quiz = {
         ...quizData,
-        passing_score: quizData.passing_score || coursePassMark,
+        passing_score: ungraded ? 0 : (quizData.passing_score || coursePassMark),
         attempts_allowed: quizData.attempts_allowed ?? null,
       };
       setQuiz(loadedQuiz);
