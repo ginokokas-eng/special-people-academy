@@ -31,7 +31,7 @@ export function ContentInfoDialog({
   const rows: [string, React.ReactNode][] = [
     ['Lesson', lesson.title],
     ['Type', lessonTypeLabel(lesson.lesson_type)],
-    ['Duration', formatDuration(lesson.duration_minutes) || '—'],
+    ['Details', lessonMetaLabel(lesson) || '—'],
     ['Module', moduleName || '—'],
     [
       'Status',
