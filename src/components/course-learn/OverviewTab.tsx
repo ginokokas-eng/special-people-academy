@@ -1,12 +1,29 @@
+import { CheckCircle2, Award } from 'lucide-react';
 import type { LearnCourse, LearnLesson } from './types';
 
 export function OverviewTab({
   course,
   activeLesson,
+  competencyAssessors = [],
 }: {
   course: LearnCourse;
   activeLesson: LearnLesson | undefined;
+  competencyAssessors?: string[];
 }) {
+  const outcomes = Array.isArray(course.learning_outcomes) ? course.learning_outcomes : [];
+  const assessorLabel =
+    competencyAssessors.length > 0 ? competencyAssessors.join(' or ') : 'an authorised assessor';
+
+  const pathwaySteps = [
+    'Complete all required SCORM/video lessons',
+    'Pass the Final Assessment with 80% or above',
+    'Receive Certificate of Completion',
+    ...(course.requires_practical_signoff
+      ? ['Attend practical competency sign-off where required']
+      : []),
+    `Competency Sign-Off Certificate is issued only when ${assessorLabel} marks the learner as Competent`,
+  ];
+
   return (
     <div className="space-y-6">
       {activeLesson && (
@@ -41,6 +58,39 @@ export function OverviewTab({
           <p className="text-sm text-muted-foreground">No course overview available.</p>
         )}
       </div>
+
+      {outcomes.length > 0 && (
+        <div className="border-t pt-5">
+          <h4 className="text-sm font-semibold text-foreground mb-3">Learning outcomes</h4>
+          <ul className="space-y-2">
+            {outcomes.map((outcome, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-status-success-foreground" />
+                <span className="leading-relaxed">{outcome}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {course.has_certificate && (
+        <div className="border-t pt-5">
+          <div className="mb-3 flex items-center gap-2">
+            <Award className="h-4 w-4 text-primary" />
+            <h4 className="text-sm font-semibold text-foreground">Certification pathway</h4>
+          </div>
+          <ol className="space-y-2">
+            {pathwaySteps.map((step, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   );
 }
