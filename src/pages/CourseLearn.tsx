@@ -197,7 +197,7 @@ export default function CourseLearn() {
         return;
       }
 
-      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }, { data: trainersData }] =
+      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }, { data: assessorRows }] =
         await Promise.all([
           supabase.from('modules').select('id, title, order_index').eq('course_id', courseData.id).order('order_index'),
           supabase.from('lessons').select('*').eq('course_id', courseData.id).order('order_index'),
@@ -207,11 +207,7 @@ export default function CourseLearn() {
             .select('id, title, description, resource_type, url, order_index, lesson_id')
             .eq('course_id', courseData.id)
             .order('order_index'),
-          sb
-            .from('course_trainers')
-            .select('can_sign_off, staff_profiles(full_name)')
-            .eq('course_id', courseData.id)
-            .eq('can_sign_off', true),
+          sb.rpc('get_course_competency_assessors', { _course_id: courseData.id }),
         ]);
 
       // Question counts for quiz lessons (drives "N questions" labels and which
