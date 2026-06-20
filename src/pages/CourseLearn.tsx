@@ -131,7 +131,7 @@ export default function CourseLearn() {
       const { data: courseData, error: courseError } = await sb
         .from('courses')
         .select(
-          'id, title, subtitle, description, overview, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes'
+          'id, title, subtitle, description, overview, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes, learning_outcomes'
         )
         .eq(lookupField, id)
         .single();
