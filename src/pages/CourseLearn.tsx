@@ -40,6 +40,7 @@ import { CertificateTab } from '@/components/course-learn/CertificateTab';
 import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
 import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
+import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
@@ -119,6 +120,9 @@ export default function CourseLearn() {
       .filter((l) => {
         if (RELOCATED_LESSON_IDS.has(l.id)) return false;
         if (l.lesson_type === 'quiz') return (l.question_count ?? 0) > 0;
+        // A resource is only shown once it has reading content; empty
+        // resources stay hidden from learners until completed by an admin.
+        if (l.lesson_type === 'resource') return !!(l.content && l.content.trim());
         if (l.lesson_type === 'text' || l.lesson_type === 'scenario' || l.lesson_type === 'pdf') {
           return !!(l.description && l.description.trim());
         }
@@ -586,6 +590,10 @@ export default function CourseLearn() {
       );
     }
 
+    if (activeLesson.lesson_type === 'resource') {
+      return <ResourceLessonBody lesson={activeLesson} onMarkRead={markComplete} />;
+    }
+
     // text / scenario / pdf
     return (
       <div className="rounded-lg border bg-card p-6">
@@ -699,6 +707,7 @@ export default function CourseLearn() {
                 <div className="flex items-center gap-2">
                   {activeLesson.lesson_type !== 'quiz' &&
                     activeLesson.lesson_type !== 'scorm' &&
+                    activeLesson.lesson_type !== 'resource' &&
                     !activeLesson.completed && (
                       <Button variant="secondary" onClick={() => markComplete(activeLesson.id)}>
                         <CheckCircle2 className="mr-1 h-4 w-4" /> Mark complete
