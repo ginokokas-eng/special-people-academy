@@ -40,7 +40,9 @@ export interface LearnCourse {
   practical_details: string | null;
   certificate_details: string | null;
   scope_notes: string | null;
+  learning_outcomes: string[] | null;
 }
+
 
 export interface LessonVideoSource {
   id: string;
