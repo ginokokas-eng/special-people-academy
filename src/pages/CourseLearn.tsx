@@ -152,7 +152,7 @@ export default function CourseLearn() {
         return;
       }
 
-      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }] =
+      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }, { data: trainersData }] =
         await Promise.all([
           supabase.from('modules').select('id, title, order_index').eq('course_id', courseData.id).order('order_index'),
           supabase.from('lessons').select('*').eq('course_id', courseData.id).order('order_index'),
@@ -162,21 +162,48 @@ export default function CourseLearn() {
             .select('id, title, description, resource_type, url, order_index, lesson_id')
             .eq('course_id', courseData.id)
             .order('order_index'),
+          sb
+            .from('course_trainers')
+            .select('can_sign_off, staff_profiles(full_name)')
+            .eq('course_id', courseData.id)
+            .eq('can_sign_off', true),
         ]);
+
+      // Question counts for quiz lessons (drives "N questions" labels and which
+      // empty placeholder quizzes are hidden from the learner).
+      const quizLessonIds = (lessonsData || []).filter((l: any) => l.lesson_type === 'quiz').map((l: any) => l.id);
+      const questionCountByLesson = new Map<string, number>();
+      if (quizLessonIds.length > 0) {
+        const { data: quizzesData } = await sb.from('quizzes').select('id, lesson_id').in('lesson_id', quizLessonIds);
+        const quizIdToLesson = new Map((quizzesData || []).map((q: any) => [q.id, q.lesson_id]));
+        if ((quizzesData || []).length > 0) {
+          const { data: qq } = await sb
+            .from('quiz_questions')
+            .select('quiz_id')
+            .in('quiz_id', (quizzesData || []).map((q: any) => q.id));
+          (qq || []).forEach((row: any) => {
+            const lessonId = quizIdToLesson.get(row.quiz_id);
+            if (lessonId) questionCountByLesson.set(lessonId, (questionCountByLesson.get(lessonId) || 0) + 1);
+          });
+        }
+      }
 
       const progressMap = new Map(progressData?.map((p) => [p.lesson_id, p.completed]) || []);
       const withProgress: LearnLesson[] = (lessonsData || []).map((l: any) => ({
         ...l,
         completed: progressMap.get(l.id) || false,
+        question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
       }));
+
+      const assessors = (trainersData || [])
+        .map((t: any) => t.staff_profiles?.full_name?.split(' ')[0])
+        .filter(Boolean) as string[];
 
       setModules(modulesData || []);
       setLessons(withProgress);
       setResources(resourcesData || []);
+      setCompetencyAssessors(assessors);
 
-      if (!searchParams.get('lesson') && withProgress.length > 0) {
-        setSearchParams({ lesson: withProgress[0].id }, { replace: true });
-      }
     } catch (err) {
       console.error('Error loading course:', err);
       toast.error('Failed to load course');
