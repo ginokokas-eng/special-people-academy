@@ -379,9 +379,12 @@ export function VideoPlayer({
         {/* Center play overlay when paused */}
         {loaded && !playing && !waiting && (
           <button
-            onClick={togglePlay}
-            aria-label="Play"
-            className="absolute inset-0 flex items-center justify-center bg-foreground/5 transition-colors duration-200 hover:bg-foreground/10"
+            onClick={() => {
+              containerRef.current?.focus();
+              togglePlay();
+            }}
+            aria-label="Play video"
+            className="absolute inset-0 flex items-center justify-center bg-foreground/5 transition-colors duration-200 hover:bg-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
           >
             <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105">
               <Play className="ml-1 h-8 w-8" fill="currentColor" />
