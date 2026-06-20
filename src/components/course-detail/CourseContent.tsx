@@ -244,7 +244,7 @@ export function CourseContent({
             {modules.map((module) => {
               const moduleLessons = lessons.filter(l => l.module_id === module.id);
               const moduleCompleted = moduleLessons.filter(l => l.completed).length;
-              const moduleDuration = moduleLessons.reduce((acc, l) => acc + (l.duration_minutes || 0), 0);
+              const moduleDuration = videoTotalMinutes(moduleLessons);
 
               return (
                 <AccordionItem 
