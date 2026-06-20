@@ -20,10 +20,64 @@ interface Lesson {
   title: string;
   description: string | null;
   duration_minutes: number;
+  duration_seconds?: number | null;
+  content?: string | null;
+  question_count?: number;
   lesson_type: string;
   order_index: number;
   completed?: boolean;
   module_id?: string;
+}
+
+/** Whole minutes from exact media seconds: <60s -> 1, else round up. */
+function videoMinutes(seconds: number | null | undefined): number {
+  if (!seconds || seconds <= 0) return 0;
+  if (seconds < 60) return 1;
+  return Math.ceil(seconds / 60);
+}
+
+/** Estimated printed pages for a resource/reading lesson (min 1). */
+function resourcePages(lesson: Lesson): number {
+  const len = (lesson.content || '').trim().length;
+  if (len === 0) return 0;
+  return Math.max(1, Math.ceil(len / 2400));
+}
+
+/** Sidebar meta label: video=minutes, quiz=questions, resource=pages, etc. */
+function lessonMeta(lesson: Lesson): string {
+  switch (lesson.lesson_type) {
+    case 'scorm':
+    case 'video': {
+      const m = videoMinutes(lesson.duration_seconds);
+      return m > 0 ? `${m} min` : '';
+    }
+    case 'quiz': {
+      const c = lesson.question_count ?? 0;
+      return c > 0 ? `${c} question${c === 1 ? '' : 's'}` : '';
+    }
+    case 'resource': {
+      const p = resourcePages(lesson);
+      return p > 0 ? `Resource · ${p} page${p === 1 ? '' : 's'}` : 'Resource';
+    }
+    case 'practical':
+      return 'Practical';
+    case 'certificate':
+      return 'Certificate';
+    default:
+      return '';
+  }
+}
+
+/** Sum video-only minutes for a set of lessons. */
+function videoTotalMinutes(items: Lesson[]): number {
+  const seconds = items.reduce(
+    (sum, l) =>
+      l.lesson_type === 'scorm' || l.lesson_type === 'video'
+        ? sum + (l.duration_seconds || 0)
+        : sum,
+    0
+  );
+  return videoMinutes(seconds);
 }
 
 interface Module {
