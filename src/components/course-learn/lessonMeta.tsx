@@ -48,6 +48,37 @@ export function formatDuration(minutes: number | null | undefined): string {
   return m ? `${h}h ${m}m` : `${h}h`;
 }
 
+/**
+ * Metadata label shown under a lesson title in the learner sidebar.
+ * - SCORM/video: estimated duration if available (e.g. "12 min"), else nothing.
+ * - quiz/assessment: number of questions (e.g. "5 questions"); never minutes.
+ *   An empty quiz (no authored questions) is treated as info-only.
+ * - practical sign-off: "Practical".
+ * - certificate: "Certificate".
+ * - info-only pages (text/pdf/scenario): "Info", never a fake duration.
+ */
+export function lessonMetaLabel(lesson: LearnLesson): string {
+  switch (lesson.lesson_type) {
+    case 'scorm':
+    case 'video':
+      return formatDuration(lesson.duration_minutes);
+    case 'quiz': {
+      const count = lesson.question_count ?? 0;
+      return count > 0 ? `${count} question${count === 1 ? '' : 's'}` : 'Info';
+    }
+    case 'practical':
+      return 'Practical';
+    case 'certificate':
+      return 'Certificate';
+    case 'text':
+    case 'pdf':
+    case 'scenario':
+      return 'Info';
+    default:
+      return formatDuration(lesson.duration_minutes);
+  }
+}
+
 export function totalDuration(lessons: LearnLesson[]): string {
   const total = lessons.reduce((sum, l) => sum + (l.duration_minutes || 0), 0);
   return formatDuration(total);
