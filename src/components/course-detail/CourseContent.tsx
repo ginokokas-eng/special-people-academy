@@ -140,7 +140,7 @@ export function CourseContent({
 
   // Calculate totals
   const totalLessons = lessons.length;
-  const totalDuration = lessons.reduce((acc, l) => acc + (l.duration_minutes || 0), 0);
+  const totalDuration = videoTotalMinutes(lessons);
   const completedCount = lessons.filter(l => l.completed).length;
 
   // Determine if lessons should appear locked
