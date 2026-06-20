@@ -412,11 +412,17 @@ export function QuizContainer({
           {/* Instructions */}
           <div className="text-sm text-muted-foreground space-y-1">
             <p>• Answer each question and receive instant feedback</p>
-            <p>• You must score {quiz.passing_score}% or higher to pass</p>
+            {isUngraded ? (
+              <p>• This check is not graded — it won’t affect your final grade, certificate, or completion</p>
+            ) : (
+              <p>• You must score {quiz.passing_score}% or higher to pass</p>
+            )}
             <p>
-              {attemptsAllowed !== null
-                ? `• You have ${attemptsAllowed} attempt${attemptsAllowed === 1 ? '' : 's'} for this assessment`
-                : '• You can retake this quiz as many times as needed'}
+              {isUngraded
+                ? '• Answer honestly — it simply helps identify your starting point'
+                : attemptsAllowed !== null
+                  ? `• You have ${attemptsAllowed} attempt${attemptsAllowed === 1 ? '' : 's'} for this assessment`
+                  : '• You can retake this quiz as many times as needed'}
             </p>
           </div>
         </CardContent>
