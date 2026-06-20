@@ -98,10 +98,47 @@ export default function CourseLearn() {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
   const activeLessonId = searchParams.get('lesson') ?? undefined;
-  const activeLesson = useMemo(
-    () => lessons.find((l) => l.id === activeLessonId) || lessons[0],
-    [lessons, activeLessonId]
+
+  // Lessons whose content has been relocated into the Overview tab and should
+  // no longer appear as standalone learner lessons.
+  const RELOCATED_LESSON_IDS = useMemo(
+    () =>
+      new Set<string>([
+        '7361160e-1892-488c-820e-461c8f03eb35', // Learning Outcomes -> Overview
+        '2d366681-397f-4f0d-96a7-e8cff0729586', // Understanding Your Certification Pathway -> Overview
+      ]),
+    []
   );
+
+  // Learner-facing lessons: hide relocated lessons, empty quiz placeholders, and
+  // empty reading/scenario/pdf placeholders. Required media (SCORM/video) and
+  // practical lessons always show.
+  const visibleLessons = useMemo(
+    () =>
+      lessons.filter((l) => {
+        if (RELOCATED_LESSON_IDS.has(l.id)) return false;
+        if (l.lesson_type === 'quiz') return (l.question_count ?? 0) > 0;
+        if (l.lesson_type === 'text' || l.lesson_type === 'scenario' || l.lesson_type === 'pdf') {
+          return !!(l.description && l.description.trim());
+        }
+        return true;
+      }),
+    [lessons, RELOCATED_LESSON_IDS]
+  );
+
+  const activeLesson = useMemo(
+    () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
+    [visibleLessons, activeLessonId]
+  );
+
+  // Default to the first visible lesson once data is loaded.
+  useEffect(() => {
+    if (!activeLessonId && visibleLessons.length > 0) {
+      setSearchParams({ lesson: visibleLessons[0].id }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLessonId, visibleLessons]);
+
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
   const canSeek = isVideoLesson;
