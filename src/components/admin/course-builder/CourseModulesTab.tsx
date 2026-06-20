@@ -83,6 +83,18 @@ function normalizeLessonType(value: string | null): LessonType {
   return LESSON_TYPE_VALUES.includes(value as LessonType) ? (value as LessonType) : 'video';
 }
 
+/** Only video/SCORM lessons carry a media duration. */
+function isTimedMedia(type: LessonType): boolean {
+  return type === 'video' || type === 'scorm';
+}
+
+/** Whole-minute display from exact seconds: <60s -> 1 min, else round up. */
+function secondsToMinutes(seconds: number | null | undefined): number {
+  if (!seconds || seconds <= 0) return 0;
+  if (seconds < 60) return 1;
+  return Math.ceil(seconds / 60);
+}
+
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
