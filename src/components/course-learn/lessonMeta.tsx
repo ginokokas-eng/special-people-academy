@@ -93,9 +93,12 @@ export function resourcePageCount(lesson: LearnLesson): number {
 export function lessonMetaLabel(lesson: LearnLesson): string {
   switch (lesson.lesson_type) {
     case 'scorm':
-    case 'video':
+    case 'video': {
       // Exact media duration only; never the legacy placeholder minutes.
-      return videoDurationLabel(lesson);
+      // Prefixed with the type for a consistent "Video · 1 min" style.
+      const d = videoDurationLabel(lesson);
+      return d ? `Video · ${d}` : 'Video';
+    }
     case 'quiz': {
       const count = lesson.question_count ?? 0;
       return count > 0 ? `${count} question${count === 1 ? '' : 's'}` : 'Info';
