@@ -381,13 +381,23 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
               <CardTitle>Modules & Lessons</CardTitle>
               <CardDescription>Organize your course content</CardDescription>
             </div>
-            <Button onClick={() => {
-              setModuleForm({ title: '', description: '' });
-              setModuleDialog({ open: true, module: null });
-            }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Module
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setAuditOpen(true)}
+                disabled={lessons.length === 0}
+              >
+                <ListChecks className="h-4 w-4 mr-2" />
+                Audit lesson durations
+              </Button>
+              <Button onClick={() => {
+                setModuleForm({ title: '', description: '' });
+                setModuleDialog({ open: true, module: null });
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Module
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
