@@ -57,6 +57,8 @@ export function QuizContainer({
   const [hasPassed, setHasPassed] = useState(false);
   // True for "knowledge check" lessons that have no authored questions.
   const [isInformational, setIsInformational] = useState(false);
+  // True for ungraded self-checks (passing_score = 0) e.g. Pre-Course checks.
+  const [isUngraded, setIsUngraded] = useState(false);
   const [infoCompleted, setInfoCompleted] = useState(false);
   const [marking, setMarking] = useState(false);
 
