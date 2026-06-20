@@ -19,9 +19,9 @@ export function OverviewTab({
     'Pass the Final Assessment with 80% or above',
     'Receive Certificate of Completion',
     ...(course.requires_practical_signoff
-      ? ['Attend practical competency sign-off where required']
+      ? ['Complete practical competency sign-off if required']
       : []),
-    `Competency Sign-Off Certificate is issued only when ${assessorLabel} marks the learner as Competent`,
+    `Receive Competency Sign-Off Certificate only when marked Competent by ${assessorLabel}`,
   ];
 
   return (
@@ -49,7 +49,7 @@ export function OverviewTab({
       )}
 
       <div className="border-t pt-5">
-        <h4 className="text-sm font-semibold text-foreground mb-2">About this course</h4>
+        <h4 className="text-sm font-semibold text-foreground mb-2">Course purpose</h4>
         {course.overview || course.description ? (
           <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
             {course.overview || course.description}
