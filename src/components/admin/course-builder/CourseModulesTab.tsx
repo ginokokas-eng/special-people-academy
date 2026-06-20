@@ -27,9 +27,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import { LessonDurationAudit, type AuditLessonInput } from './LessonDurationAudit';
 
 interface Module {
   id: string;
@@ -100,6 +101,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncingDuration, setSyncingDuration] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
   const [moduleDialog, setModuleDialog] = useState<{ open: boolean; module: Module | null }>({ open: false, module: null });
   const [lessonDialog, setLessonDialog] = useState<{ open: boolean; lesson: Lesson | null; moduleId: string | null }>({ open: false, lesson: null, moduleId: null });
   const [saving, setSaving] = useState(false);
@@ -379,13 +381,23 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
               <CardTitle>Modules & Lessons</CardTitle>
               <CardDescription>Organize your course content</CardDescription>
             </div>
-            <Button onClick={() => {
-              setModuleForm({ title: '', description: '' });
-              setModuleDialog({ open: true, module: null });
-            }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Module
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setAuditOpen(true)}
+                disabled={lessons.length === 0}
+              >
+                <ListChecks className="h-4 w-4 mr-2" />
+                Audit lesson durations
+              </Button>
+              <Button onClick={() => {
+                setModuleForm({ title: '', description: '' });
+                setModuleDialog({ open: true, module: null });
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Module
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -660,6 +672,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <LessonDurationAudit
+        open={auditOpen}
+        onOpenChange={setAuditOpen}
+        lessons={lessons as unknown as AuditLessonInput[]}
+        modules={modules}
+        onApplied={fetchData}
+      />
     </div>
   );
 }
