@@ -33,6 +33,8 @@ export function lessonTypeLabel(type: string): string {
       return 'Practical';
     case 'scenario':
       return 'Scenario';
+    case 'resource':
+      return 'Resource';
     case 'pdf':
       return 'Document';
     case 'text':
