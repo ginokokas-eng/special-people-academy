@@ -314,15 +314,31 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   };
 
   const startEdit = (l: AuditLessonInput) => {
+    setEditMode('seconds');
     setEditId(l.id);
     setEditValue(String(effSeconds(l) ?? ''));
   };
 
+  const startEditPages = (l: AuditLessonInput) => {
+    setEditMode('pages');
+    setEditId(l.id);
+    setEditValue(String(effPages(l) || ''));
+  };
+
   const commitEdit = (l: AuditLessonInput) => {
     const v = editValue.trim();
-    const seconds = v === '' ? null : Math.max(0, parseInt(v) || 0);
-    setChange(l.id, { duration_seconds: seconds });
+    const n = v === '' ? null : Math.max(0, parseInt(v) || 0);
+    if (editMode === 'pages') {
+      setChange(l.id, { resource_page_count: n });
+    } else {
+      setChange(l.id, { duration_seconds: n });
+    }
     setEditId(null);
+  };
+
+  const confirmQuestionCount = (l: AuditLessonInput) => {
+    const c = questionCounts.get(l.id) ?? 0;
+    toast.success(`${l.title}: question count confirmed (${c})`);
   };
 
   const markAsResource = (l: AuditLessonInput) => setChange(l.id, { lesson_type: 'resource' });
