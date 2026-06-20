@@ -101,6 +101,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncingDuration, setSyncingDuration] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
   const [moduleDialog, setModuleDialog] = useState<{ open: boolean; module: Module | null }>({ open: false, module: null });
   const [lessonDialog, setLessonDialog] = useState<{ open: boolean; lesson: Lesson | null; moduleId: string | null }>({ open: false, lesson: null, moduleId: null });
   const [saving, setSaving] = useState(false);
