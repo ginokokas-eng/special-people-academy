@@ -33,6 +33,9 @@ interface Lesson {
   description: string | null;
   video_url: string | null;
   duration_minutes: number;
+  duration_seconds?: number | null;
+  content?: string | null;
+  question_count?: number;
   order_index: number;
   lesson_type: string;
   module_id: string | null;
