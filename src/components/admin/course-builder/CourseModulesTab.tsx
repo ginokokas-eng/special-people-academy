@@ -293,6 +293,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       description: lesson.description || '',
       lesson_type: lesson.lesson_type || 'video',
       duration_minutes: lesson.duration_minutes || 0,
+      duration_seconds: lesson.duration_seconds ?? null,
       scorm_package_id: lesson.scorm_package_id || '',
     });
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
