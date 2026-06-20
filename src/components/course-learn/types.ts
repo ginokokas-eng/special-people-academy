@@ -8,6 +8,8 @@ export interface LearnLesson {
   lesson_type: string;
   module_id: string | null;
   scorm_package_id: string | null;
+  /** On-page reading content for resource/reading lessons. */
+  content?: string | null;
   completed?: boolean;
   /** Number of authored questions when lesson_type === 'quiz'. */
   question_count?: number;
