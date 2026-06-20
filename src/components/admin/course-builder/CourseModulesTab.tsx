@@ -65,6 +65,7 @@ interface LessonForm {
   description: string;
   lesson_type: LessonType;
   duration_minutes: number;
+  duration_seconds: number | null;
   scorm_package_id: string;
 }
 
