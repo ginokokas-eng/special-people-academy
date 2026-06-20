@@ -52,6 +52,27 @@ export function formatDuration(minutes: number | null | undefined): string {
   return m ? `${h}h ${m}m` : `${h}h`;
 }
 
+/**
+ * Convert an exact media duration (seconds) into whole minutes.
+ * - under 60s -> 1 (display "1 min")
+ * - over 60s  -> round up to the nearest minute
+ * - missing   -> 0 (no duration known; never a placeholder)
+ */
+export function videoDurationMinutes(seconds: number | null | undefined): number {
+  if (!seconds || seconds <= 0) return 0;
+  if (seconds < 60) return 1;
+  return Math.ceil(seconds / 60);
+}
+
+/**
+ * Sidebar duration label for a video/SCORM lesson.
+ * Uses the exact uploaded media duration (duration_seconds) only — never the
+ * legacy duration_minutes placeholder. Returns '' when duration is unknown.
+ */
+export function videoDurationLabel(lesson: LearnLesson): string {
+  return formatDuration(videoDurationMinutes(lesson.duration_seconds));
+}
+
 /** Estimated printed pages for a resource/reading lesson (min 1). */
 export function resourcePageCount(lesson: LearnLesson): number {
   const len = (lesson.content || '').trim().length;
