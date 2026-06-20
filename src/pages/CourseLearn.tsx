@@ -714,7 +714,7 @@ export default function CourseLearn() {
                 <div className="-mx-1 overflow-x-auto px-1 pb-1">{tabList}</div>
                 <div className="mt-5">
                   <TabsContent value="overview">
-                    <OverviewTab course={course} activeLesson={activeLesson} />
+                    <OverviewTab course={course} activeLesson={activeLesson} competencyAssessors={competencyAssessors} />
                   </TabsContent>
                   <TabsContent value="qa">
                     <QnaTab courseId={course.id} activeLesson={activeLesson} />
