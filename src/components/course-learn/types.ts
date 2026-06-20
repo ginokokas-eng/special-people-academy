@@ -9,6 +9,8 @@ export interface LearnLesson {
   module_id: string | null;
   scorm_package_id: string | null;
   completed?: boolean;
+  /** Number of authored questions when lesson_type === 'quiz'. */
+  question_count?: number;
 }
 
 export interface LearnModule {
