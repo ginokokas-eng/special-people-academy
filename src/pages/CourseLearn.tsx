@@ -707,6 +707,7 @@ export default function CourseLearn() {
                 <div className="flex items-center gap-2">
                   {activeLesson.lesson_type !== 'quiz' &&
                     activeLesson.lesson_type !== 'scorm' &&
+                    activeLesson.lesson_type !== 'resource' &&
                     !activeLesson.completed && (
                       <Button variant="secondary" onClick={() => markComplete(activeLesson.id)}>
                         <CheckCircle2 className="mr-1 h-4 w-4" /> Mark complete
