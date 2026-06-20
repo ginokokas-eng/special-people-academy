@@ -672,6 +672,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <LessonDurationAudit
+        open={auditOpen}
+        onOpenChange={setAuditOpen}
+        lessons={lessons as unknown as AuditLessonInput[]}
+        modules={modules}
+        onApplied={fetchData}
+      />
     </div>
   );
 }
