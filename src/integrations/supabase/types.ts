@@ -1319,6 +1319,7 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number | null
+          duration_seconds: number | null
           footer_note: string | null
           id: string
           is_required: boolean
@@ -1337,6 +1338,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          duration_seconds?: number | null
           footer_note?: string | null
           id?: string
           is_required?: boolean
@@ -1355,6 +1357,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          duration_seconds?: number | null
           footer_note?: string | null
           id?: string
           is_required?: boolean
