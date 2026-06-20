@@ -1327,6 +1327,7 @@ export type Database = {
           module_id: string | null
           order_index: number
           pdf_filename: string | null
+          resource_page_count: number | null
           scorm_package_id: string | null
           title: string
           updated_at: string
@@ -1346,6 +1347,7 @@ export type Database = {
           module_id?: string | null
           order_index?: number
           pdf_filename?: string | null
+          resource_page_count?: number | null
           scorm_package_id?: string | null
           title: string
           updated_at?: string
@@ -1365,6 +1367,7 @@ export type Database = {
           module_id?: string | null
           order_index?: number
           pdf_filename?: string | null
+          resource_page_count?: number | null
           scorm_package_id?: string | null
           title?: string
           updated_at?: string

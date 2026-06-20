@@ -73,8 +73,15 @@ export function videoDurationLabel(lesson: LearnLesson): string {
   return formatDuration(videoDurationMinutes(lesson.duration_seconds));
 }
 
-/** Estimated printed pages for a resource/reading lesson (min 1). */
+/**
+ * Printed pages for a resource/reading lesson (min 1 when present).
+ * Prefers an admin-set manual count (resource_page_count); otherwise
+ * estimates from the on-page content length.
+ */
 export function resourcePageCount(lesson: LearnLesson): number {
+  if (lesson.resource_page_count != null && lesson.resource_page_count > 0) {
+    return lesson.resource_page_count;
+  }
   const len = (lesson.content || '').trim().length;
   if (len === 0) return 0;
   return Math.max(1, Math.ceil(len / 2400));

@@ -1,0 +1,2 @@
+ALTER TABLE public.lessons ADD COLUMN IF NOT EXISTS resource_page_count integer;
+COMMENT ON COLUMN public.lessons.resource_page_count IS 'Admin-set page count for resource lessons. When NULL, page count is estimated from content length.';

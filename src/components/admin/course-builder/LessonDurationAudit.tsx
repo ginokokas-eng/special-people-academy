@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
-import { Loader2, RefreshCw, Check, X, BookOpen, EyeOff, Pencil } from 'lucide-react';
+import { Loader2, RefreshCw, Check, X, BookOpen, EyeOff, Pencil, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   formatDuration,
@@ -40,6 +40,7 @@ export interface AuditLessonInput {
   scorm_package_id: string | null;
   video_url?: string | null;
   content?: string | null;
+  resource_page_count?: number | null;
 }
 
 interface AuditModule {
@@ -58,11 +59,19 @@ interface Props {
 
 type PendingChange = {
   duration_seconds?: number | null;
+  resource_page_count?: number | null;
   lesson_type?: string;
   _delete?: boolean;
 };
 
-type Status = 'OK' | 'Duration missing' | 'Placeholder duration detected' | 'Needs manual check' | 'Will delete';
+type Status =
+  | 'OK'
+  | 'Duration missing'
+  | 'Placeholder duration detected'
+  | 'Resource missing page count'
+  | 'Assessment missing question count'
+  | 'Manual review needed'
+  | 'Will delete';
 
 const TIMED = (t: string) => t === 'video' || t === 'scorm';
 
@@ -102,6 +111,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   const [applying, setApplying] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [editMode, setEditMode] = useState<'seconds' | 'pages'>('seconds');
 
   useEffect(() => {
     if (!open) return;
@@ -147,6 +157,13 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   const effSeconds = (l: AuditLessonInput) =>
     pending[l.id]?.duration_seconds !== undefined ? pending[l.id]!.duration_seconds : l.duration_seconds;
 
+  // Effective resource page count: pending edit > admin-set column > content estimate.
+  const effPages = (l: AuditLessonInput): number => {
+    const p = pending[l.id]?.resource_page_count;
+    if (p !== undefined && p !== null) return p;
+    return resourcePageCount({ ...l, resource_page_count: l.resource_page_count } as any);
+  };
+
   const currentLabel = (l: AuditLessonInput): string => {
     switch (l.lesson_type) {
       case 'scorm':
@@ -180,7 +197,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
       return `${c} question${c === 1 ? '' : 's'}`;
     }
     if (type === 'resource') {
-      const p = resourcePageCount(l as any);
+      const p = effPages(l);
       return `${p} page${p === 1 ? '' : 's'}`;
     }
     if (type === 'practical') return 'Practical';
@@ -197,10 +214,10 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
       if ((l.duration_minutes ?? 0) > 0) return 'Placeholder duration detected';
       return 'Duration missing';
     }
-    if (type === 'quiz') return (questionCounts.get(l.id) ?? 0) > 0 ? 'OK' : 'Needs manual check';
-    if (type === 'resource') return resourcePageCount(l as any) > 0 ? 'OK' : 'Needs manual check';
+    if (type === 'quiz') return (questionCounts.get(l.id) ?? 0) > 0 ? 'OK' : 'Assessment missing question count';
+    if (type === 'resource') return effPages(l) > 0 ? 'OK' : 'Resource missing page count';
     if (type === 'practical' || type === 'certificate') return 'OK';
-    return 'Needs manual check';
+    return 'Manual review needed';
   };
 
   const statusBadge = (s: Status) => {
@@ -211,10 +228,14 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
         return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Placeholder</Badge>;
       case 'Duration missing':
         return <Badge variant="destructive">Duration missing</Badge>;
+      case 'Resource missing page count':
+        return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Missing page count</Badge>;
+      case 'Assessment missing question count':
+        return <Badge className="bg-warning/15 text-warning hover:bg-warning/15">Missing questions</Badge>;
       case 'Will delete':
         return <Badge variant="destructive">Will hide</Badge>;
       default:
-        return <Badge variant="secondary">Needs check</Badge>;
+        return <Badge variant="secondary">Manual review</Badge>;
     }
   };
 
@@ -293,15 +314,31 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
   };
 
   const startEdit = (l: AuditLessonInput) => {
+    setEditMode('seconds');
     setEditId(l.id);
     setEditValue(String(effSeconds(l) ?? ''));
   };
 
+  const startEditPages = (l: AuditLessonInput) => {
+    setEditMode('pages');
+    setEditId(l.id);
+    setEditValue(String(effPages(l) || ''));
+  };
+
   const commitEdit = (l: AuditLessonInput) => {
     const v = editValue.trim();
-    const seconds = v === '' ? null : Math.max(0, parseInt(v) || 0);
-    setChange(l.id, { duration_seconds: seconds });
+    const n = v === '' ? null : Math.max(0, parseInt(v) || 0);
+    if (editMode === 'pages') {
+      setChange(l.id, { resource_page_count: n });
+    } else {
+      setChange(l.id, { duration_seconds: n });
+    }
     setEditId(null);
+  };
+
+  const confirmQuestionCount = (l: AuditLessonInput) => {
+    const c = questionCounts.get(l.id) ?? 0;
+    toast.success(`${l.title}: question count confirmed (${c})`);
   };
 
   const markAsResource = (l: AuditLessonInput) => setChange(l.id, { lesson_type: 'resource' });
@@ -330,6 +367,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
         }
         const update: Record<string, unknown> = {};
         if (change.duration_seconds !== undefined) update.duration_seconds = change.duration_seconds;
+        if (change.resource_page_count !== undefined) update.resource_page_count = change.resource_page_count;
         if (change.lesson_type !== undefined) update.lesson_type = change.lesson_type;
         if (Object.keys(update).length > 0) ops.push(supabase.from('lessons').update(update).eq('id', id));
       }
@@ -380,9 +418,9 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
               <TableRow>
                 <TableHead>Module</TableHead>
                 <TableHead>Lesson</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Current</TableHead>
-                <TableHead>Actual / count</TableHead>
+                <TableHead>Learner-facing type</TableHead>
+                <TableHead>Current label</TableHead>
+                <TableHead>Detected duration / count</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
@@ -412,7 +450,7 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
                             className="h-7 w-20"
                             autoFocus
                           />
-                          <span className="text-muted-foreground">s</span>
+                          <span className="text-muted-foreground">{editMode === 'pages' ? 'pages' : 's'}</span>
                           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => commitEdit(l)}>
                             <Check className="h-3.5 w-3.5" />
                           </Button>
@@ -452,6 +490,19 @@ export function LessonDurationAudit({ open, onOpenChange, lessons, modules, onAp
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
                               </>
+                            )}
+                            {type === 'resource' && (
+                              <Button size="sm" variant="outline" onClick={() => startEditPages(l)}>
+                                <FileText className="h-3.5 w-3.5 mr-1" />
+                                <span className="hidden sm:inline">Set page count</span>
+                                <span className="sm:hidden">Pages</span>
+                              </Button>
+                            )}
+                            {type === 'quiz' && (questionCounts.get(l.id) ?? 0) > 0 && (
+                              <Button size="sm" variant="ghost" onClick={() => confirmQuestionCount(l)}>
+                                <Check className="h-3.5 w-3.5 mr-1" />
+                                <span className="hidden sm:inline">Confirm count</span>
+                              </Button>
                             )}
                             {isInfoOnly && (
                               <Button size="sm" variant="ghost" onClick={() => markAsResource(l)}>

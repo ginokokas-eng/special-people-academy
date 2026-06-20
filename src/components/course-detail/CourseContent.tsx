@@ -23,6 +23,7 @@ interface Lesson {
   duration_seconds?: number | null;
   content?: string | null;
   question_count?: number;
+  resource_page_count?: number | null;
   lesson_type: string;
   order_index: number;
   completed?: boolean;
@@ -36,8 +37,11 @@ function videoMinutes(seconds: number | null | undefined): number {
   return Math.ceil(seconds / 60);
 }
 
-/** Estimated printed pages for a resource/reading lesson (min 1). */
+/** Printed pages: admin-set count if present, else estimate from content. */
 function resourcePages(lesson: Lesson): number {
+  if (lesson.resource_page_count != null && lesson.resource_page_count > 0) {
+    return lesson.resource_page_count;
+  }
   const len = (lesson.content || '').trim().length;
   if (len === 0) return 0;
   return Math.max(1, Math.ceil(len / 2400));
