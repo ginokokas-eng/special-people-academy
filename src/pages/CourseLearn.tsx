@@ -120,6 +120,9 @@ export default function CourseLearn() {
       .filter((l) => {
         if (RELOCATED_LESSON_IDS.has(l.id)) return false;
         if (l.lesson_type === 'quiz') return (l.question_count ?? 0) > 0;
+        // A resource is only shown once it has reading content; empty
+        // resources stay hidden from learners until completed by an admin.
+        if (l.lesson_type === 'resource') return !!(l.content && l.content.trim());
         if (l.lesson_type === 'text' || l.lesson_type === 'scenario' || l.lesson_type === 'pdf') {
           return !!(l.description && l.description.trim());
         }
