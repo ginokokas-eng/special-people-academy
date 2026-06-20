@@ -33,6 +33,9 @@ interface Lesson {
   description: string | null;
   video_url: string | null;
   duration_minutes: number;
+  duration_seconds?: number | null;
+  content?: string | null;
+  question_count?: number;
   order_index: number;
   lesson_type: string;
   module_id: string | null;
@@ -221,6 +224,35 @@ export default function CourseDetail() {
         .eq('course_id', courseData.id)
         .order('order_index');
 
+      // Question counts for quiz lessons -> drives "N questions" labels.
+      const quizLessonIdsForCount = (lessonsData || [])
+        .filter((l: any) => l.lesson_type === 'quiz')
+        .map((l: any) => l.id);
+      const questionCountByLesson = new Map<string, number>();
+      if (quizLessonIdsForCount.length > 0) {
+        const { data: quizzesForCount } = await supabase
+          .from('quizzes')
+          .select('id, lesson_id')
+          .in('lesson_id', quizLessonIdsForCount);
+        const quizIdToLesson = new Map<string, string>(
+          (quizzesForCount || []).map((q: any) => [q.id as string, q.lesson_id as string])
+        );
+        if ((quizzesForCount || []).length > 0) {
+          const { data: qqRows } = await supabase
+            .from('quiz_questions')
+            .select('quiz_id')
+            .in('quiz_id', (quizzesForCount || []).map((q: any) => q.id));
+          (qqRows || []).forEach((row: any) => {
+            const lessonId = quizIdToLesson.get(row.quiz_id);
+            if (lessonId) questionCountByLesson.set(lessonId, (questionCountByLesson.get(lessonId) || 0) + 1);
+          });
+        }
+      }
+      const withQuestionCount = (l: any) => ({
+        ...l,
+        question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
+      });
+
       // Fetch instructor if exists
       if (parsedCourse.instructor_id) {
         const { data: instructorData } = await supabase
@@ -270,7 +302,7 @@ export default function CourseDetail() {
         const progressMap = new Map(progressData?.map(p => [p.lesson_id, p.completed]) || []);
         
         const lessonsWithProgress = (lessonsData || []).map(lesson => ({
-          ...lesson,
+          ...withQuestionCount(lesson),
           lesson_type: lesson.lesson_type || 'video',
           completed: progressMap.get(lesson.id) || false,
         }));
@@ -371,7 +403,7 @@ export default function CourseDetail() {
 
       } else {
         setLessons((lessonsData || []).map(lesson => ({ 
-          ...lesson, 
+          ...withQuestionCount(lesson), 
           lesson_type: lesson.lesson_type || 'video',
           completed: false 
         })));
