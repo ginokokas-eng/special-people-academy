@@ -2403,6 +2403,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_course_competency_assessors: {
+        Args: { _course_id: string }
+        Returns: {
+          full_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

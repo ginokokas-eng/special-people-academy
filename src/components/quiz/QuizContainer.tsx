@@ -57,6 +57,8 @@ export function QuizContainer({
   const [hasPassed, setHasPassed] = useState(false);
   // True for "knowledge check" lessons that have no authored questions.
   const [isInformational, setIsInformational] = useState(false);
+  // True for ungraded self-checks (passing_score = 0) e.g. Pre-Course checks.
+  const [isUngraded, setIsUngraded] = useState(false);
   const [infoCompleted, setInfoCompleted] = useState(false);
   const [marking, setMarking] = useState(false);
 
@@ -105,9 +107,11 @@ export function QuizContainer({
         return;
       }
 
+      const ungraded = (quizData.passing_score ?? 0) === 0;
+      setIsUngraded(ungraded);
       const loadedQuiz: Quiz = {
         ...quizData,
-        passing_score: quizData.passing_score || coursePassMark,
+        passing_score: ungraded ? 0 : (quizData.passing_score || coursePassMark),
         attempts_allowed: quizData.attempts_allowed ?? null,
       };
       setQuiz(loadedQuiz);
@@ -312,7 +316,9 @@ export function QuizContainer({
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">{quiz.title}</CardTitle>
           <CardDescription>
-            Test your knowledge and understanding of the material
+            {isUngraded
+              ? 'A quick self-check of your starting point — this is not graded and does not affect your final grade or certificate.'
+              : 'Test your knowledge and understanding of the material'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -320,8 +326,8 @@ export function QuizContainer({
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-4 rounded-lg bg-muted/30">
               <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-semibold">{quiz.passing_score}%</div>
-              <div className="text-xs text-muted-foreground">Pass mark</div>
+              <div className="text-2xl font-semibold">{isUngraded ? 'Not graded' : `${quiz.passing_score}%`}</div>
+              <div className="text-xs text-muted-foreground">{isUngraded ? 'Self-check' : 'Pass mark'}</div>
             </div>
             <div className="p-4 rounded-lg bg-muted/30">
               <Clock className="h-6 w-6 mx-auto mb-2 text-primary" />
@@ -406,11 +412,17 @@ export function QuizContainer({
           {/* Instructions */}
           <div className="text-sm text-muted-foreground space-y-1">
             <p>• Answer each question and receive instant feedback</p>
-            <p>• You must score {quiz.passing_score}% or higher to pass</p>
+            {isUngraded ? (
+              <p>• This check is not graded — it won’t affect your final grade, certificate, or completion</p>
+            ) : (
+              <p>• You must score {quiz.passing_score}% or higher to pass</p>
+            )}
             <p>
-              {attemptsAllowed !== null
-                ? `• You have ${attemptsAllowed} attempt${attemptsAllowed === 1 ? '' : 's'} for this assessment`
-                : '• You can retake this quiz as many times as needed'}
+              {isUngraded
+                ? '• Answer honestly — it simply helps identify your starting point'
+                : attemptsAllowed !== null
+                  ? `• You have ${attemptsAllowed} attempt${attemptsAllowed === 1 ? '' : 's'} for this assessment`
+                  : '• You can retake this quiz as many times as needed'}
             </p>
           </div>
         </CardContent>

@@ -138,18 +138,25 @@ Deno.serve(async (req) => {
       .select('id, lesson_type')
       .eq('course_id', course_id);
 
-    const totalLessons = lessons?.length || 0;
+    // Required learning content only gates completion: SCORM/video lessons.
+    // Informational text lessons and ungraded checks (e.g. the Pre-Course
+    // Knowledge Check) do NOT count toward course completion.
+    const requiredLessons = (lessons || []).filter(
+      l => l.lesson_type === 'scorm' || l.lesson_type === 'video'
+    );
+    const totalLessons = requiredLessons.length;
 
     // Get lesson progress
     const { data: progress } = await supabaseAdmin
       .from('lesson_progress')
       .select('lesson_id, completed')
       .eq('user_id', userId)
-      .in('lesson_id', lessons?.map(l => l.id) || []);
+      .in('lesson_id', requiredLessons.map(l => l.id));
 
-    const completedLessons = progress?.filter(p => p.completed).length || 0;
+    const completedSet = new Set((progress || []).filter(p => p.completed).map(p => p.lesson_id));
+    const completedLessons = requiredLessons.filter(l => completedSet.has(l.id)).length;
 
-    console.log(`Lessons: ${completedLessons}/${totalLessons}`);
+    console.log(`Required lessons: ${completedLessons}/${totalLessons}`);
 
     if (completedLessons < totalLessons) {
       return new Response(JSON.stringify({ 
@@ -168,13 +175,14 @@ Deno.serve(async (req) => {
       // Get quizzes for these lessons
       const { data: quizzes } = await supabaseAdmin
         .from('quizzes')
-        .select('id, lesson_id')
+        .select('id, lesson_id, passing_score')
         .in('lesson_id', quizLessons.map(l => l.id));
 
-      // Only graded quizzes (those that actually have authored questions) gate
-      // completion. Empty "knowledge check" quizzes are informational and are
-      // completed via lesson_progress instead.
-      let gradedQuizzes = quizzes || [];
+      // Only graded quizzes gate completion. A quiz is graded when it has a
+      // real pass mark (passing_score > 0) AND authored questions. Ungraded
+      // checks such as the Pre-Course Knowledge Check (passing_score = 0) and
+      // empty "knowledge check" placeholders never gate the certificate.
+      let gradedQuizzes = (quizzes || []).filter(q => (q.passing_score ?? 0) > 0);
       if (gradedQuizzes.length > 0) {
         const { data: qCounts } = await supabaseAdmin
           .from('quiz_questions')

@@ -68,6 +68,7 @@ export default function CourseLearn() {
   const [modules, setModules] = useState<LearnModule[]>([]);
   const [lessons, setLessons] = useState<LearnLesson[]>([]);
   const [resources, setResources] = useState<LearnResource[]>([]);
+  const [competencyAssessors, setCompetencyAssessors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
@@ -97,10 +98,54 @@ export default function CourseLearn() {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
   const activeLessonId = searchParams.get('lesson') ?? undefined;
-  const activeLesson = useMemo(
-    () => lessons.find((l) => l.id === activeLessonId) || lessons[0],
-    [lessons, activeLessonId]
+
+  // Lessons whose content has been relocated into the Overview tab and should
+  // no longer appear as standalone learner lessons.
+  const RELOCATED_LESSON_IDS = useMemo(
+    () =>
+      new Set<string>([
+        '7361160e-1892-488c-820e-461c8f03eb35', // Learning Outcomes -> Overview
+        '2d366681-397f-4f0d-96a7-e8cff0729586', // Understanding Your Certification Pathway -> Overview
+      ]),
+    []
   );
+
+  // Learner-facing lessons: hide relocated lessons, empty quiz placeholders, and
+  // empty reading/scenario/pdf placeholders. Required media (SCORM/video) and
+  // practical lessons always show.
+  const visibleLessons = useMemo(() => {
+    const moduleOrder = new Map(modules.map((m, i) => [m.id, m.order_index ?? i]));
+    return lessons
+      .filter((l) => {
+        if (RELOCATED_LESSON_IDS.has(l.id)) return false;
+        if (l.lesson_type === 'quiz') return (l.question_count ?? 0) > 0;
+        if (l.lesson_type === 'text' || l.lesson_type === 'scenario' || l.lesson_type === 'pdf') {
+          return !!(l.description && l.description.trim());
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const ma = a.module_id ? moduleOrder.get(a.module_id) ?? 9999 : 9999;
+        const mb = b.module_id ? moduleOrder.get(b.module_id) ?? 9999 : 9999;
+        if (ma !== mb) return ma - mb;
+        return (a.order_index ?? 0) - (b.order_index ?? 0);
+      });
+  }, [lessons, modules, RELOCATED_LESSON_IDS]);
+
+
+  const activeLesson = useMemo(
+    () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
+    [visibleLessons, activeLessonId]
+  );
+
+  // Default to the first visible lesson once data is loaded.
+  useEffect(() => {
+    if (!activeLessonId && visibleLessons.length > 0) {
+      setSearchParams({ lesson: visibleLessons[0].id }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLessonId, visibleLessons]);
+
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
   const canSeek = isVideoLesson;
@@ -131,7 +176,7 @@ export default function CourseLearn() {
       const { data: courseData, error: courseError } = await sb
         .from('courses')
         .select(
-          'id, title, subtitle, description, overview, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes'
+          'id, title, subtitle, description, overview, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes, learning_outcomes'
         )
         .eq(lookupField, id)
         .single();
@@ -152,7 +197,7 @@ export default function CourseLearn() {
         return;
       }
 
-      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }] =
+      const [{ data: modulesData }, { data: lessonsData }, { data: progressData }, { data: resourcesData }, { data: assessorRows }] =
         await Promise.all([
           supabase.from('modules').select('id, title, order_index').eq('course_id', courseData.id).order('order_index'),
           supabase.from('lessons').select('*').eq('course_id', courseData.id).order('order_index'),
@@ -162,21 +207,44 @@ export default function CourseLearn() {
             .select('id, title, description, resource_type, url, order_index, lesson_id')
             .eq('course_id', courseData.id)
             .order('order_index'),
+          sb.rpc('get_course_competency_assessors', { _course_id: courseData.id }),
         ]);
+
+      // Question counts for quiz lessons (drives "N questions" labels and which
+      // empty placeholder quizzes are hidden from the learner).
+      const quizLessonIds = (lessonsData || []).filter((l: any) => l.lesson_type === 'quiz').map((l: any) => l.id);
+      const questionCountByLesson = new Map<string, number>();
+      if (quizLessonIds.length > 0) {
+        const { data: quizzesData } = await sb.from('quizzes').select('id, lesson_id').in('lesson_id', quizLessonIds);
+        const quizIdToLesson = new Map<string, string>((quizzesData || []).map((q: any) => [q.id as string, q.lesson_id as string]));
+        if ((quizzesData || []).length > 0) {
+          const { data: qq } = await sb
+            .from('quiz_questions')
+            .select('quiz_id')
+            .in('quiz_id', (quizzesData || []).map((q: any) => q.id));
+          (qq || []).forEach((row: any) => {
+            const lessonId = quizIdToLesson.get(row.quiz_id);
+            if (lessonId) questionCountByLesson.set(lessonId, (questionCountByLesson.get(lessonId) || 0) + 1);
+          });
+        }
+      }
 
       const progressMap = new Map(progressData?.map((p) => [p.lesson_id, p.completed]) || []);
       const withProgress: LearnLesson[] = (lessonsData || []).map((l: any) => ({
         ...l,
         completed: progressMap.get(l.id) || false,
+        question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
       }));
+
+      const assessors = (assessorRows || [])
+        .map((t: any) => (t.full_name as string)?.split(' ')[0])
+        .filter(Boolean) as string[];
 
       setModules(modulesData || []);
       setLessons(withProgress);
       setResources(resourcesData || []);
+      setCompetencyAssessors(assessors);
 
-      if (!searchParams.get('lesson') && withProgress.length > 0) {
-        setSearchParams({ lesson: withProgress[0].id }, { replace: true });
-      }
     } catch (err) {
       console.error('Error loading course:', err);
       toast.error('Failed to load course');
@@ -366,10 +434,10 @@ export default function CourseLearn() {
     setActiveTab('overview');
   };
 
-  const currentIndex = lessons.findIndex((l) => l.id === activeLesson?.id);
-  const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+  const currentIndex = visibleLessons.findIndex((l) => l.id === activeLesson?.id);
+  const prevLesson = currentIndex > 0 ? visibleLessons[currentIndex - 1] : null;
   const nextLesson =
-    currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+    currentIndex >= 0 && currentIndex < visibleLessons.length - 1 ? visibleLessons[currentIndex + 1] : null;
 
   const openTranscript = () => setActiveTab('transcript');
   const toggleTheatre = () => setPrefs({ theatre: !prefs.theatre });
@@ -565,7 +633,7 @@ export default function CourseLearn() {
     <CourseContentSidebar
       courseId={course.id}
       modules={modules}
-      lessons={lessons}
+      lessons={visibleLessons}
       resources={resources}
       activeLessonId={activeLesson?.id}
       onSelect={goToLesson}
@@ -649,7 +717,7 @@ export default function CourseLearn() {
                 <div className="-mx-1 overflow-x-auto px-1 pb-1">{tabList}</div>
                 <div className="mt-5">
                   <TabsContent value="overview">
-                    <OverviewTab course={course} activeLesson={activeLesson} />
+                    <OverviewTab course={course} activeLesson={activeLesson} competencyAssessors={competencyAssessors} />
                   </TabsContent>
                   <TabsContent value="qa">
                     <QnaTab courseId={course.id} activeLesson={activeLesson} />
