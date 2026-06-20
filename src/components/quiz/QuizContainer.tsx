@@ -316,7 +316,9 @@ export function QuizContainer({
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">{quiz.title}</CardTitle>
           <CardDescription>
-            Test your knowledge and understanding of the material
+            {isUngraded
+              ? 'A quick self-check of your starting point — this is not graded and does not affect your final grade or certificate.'
+              : 'Test your knowledge and understanding of the material'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -324,8 +326,8 @@ export function QuizContainer({
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-4 rounded-lg bg-muted/30">
               <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-semibold">{quiz.passing_score}%</div>
-              <div className="text-xs text-muted-foreground">Pass mark</div>
+              <div className="text-2xl font-semibold">{isUngraded ? 'Not graded' : `${quiz.passing_score}%`}</div>
+              <div className="text-xs text-muted-foreground">{isUngraded ? 'Self-check' : 'Pass mark'}</div>
             </div>
             <div className="p-4 rounded-lg bg-muted/30">
               <Clock className="h-6 w-6 mx-auto mb-2 text-primary" />
