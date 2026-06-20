@@ -65,7 +65,7 @@ export function ResourceLessonBody({ lesson, onMarkRead }: Props) {
     try {
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
       const marginX = 52;
-      const marginTop = 44;
+      const marginTop = 40;
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const maxWidth = pageWidth - marginX * 2;
