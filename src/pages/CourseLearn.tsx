@@ -42,10 +42,12 @@ import { CertificateTab } from '@/components/course-learn/CertificateTab';
 import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
 import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
+import { MobileCoursePlayer } from '@/components/course-learn/MobileCoursePlayer';
 import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
 import type {
   LearnCourse,
@@ -66,6 +68,7 @@ export default function CourseLearn() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { prefs, setPrefs } = useLearnerPrefs();
+  const isMobile = useIsMobile();
 
   const [course, setCourse] = useState<LearnCourse | null>(null);
   const [modules, setModules] = useState<LearnModule[]>([]);
@@ -758,6 +761,47 @@ export default function CourseLearn() {
       onSelect={goToLesson}
     />
   );
+
+  // Mobile-only course player (≤768px): video on top, then Lectures / More tabs.
+  // Desktop & tablet keep the existing two-column layout untouched.
+  if (isMobile) {
+    return (
+      <>
+        <MobileCoursePlayer
+          course={course}
+          modules={modules}
+          visibleLessons={visibleLessons}
+          lessons={lessons}
+          resources={resources}
+          activeLesson={activeLesson}
+          competencyAssessors={competencyAssessors}
+          canSeek={canSeek}
+          controllerRef={mediaRef}
+          lessonBody={renderLessonBody()}
+          prevLesson={prevLesson}
+          nextLesson={nextLesson}
+          onSelectLesson={goToLesson}
+          onBack={() => navigate(`/courses/${courseId || id}`)}
+          onMarkComplete={markComplete}
+        />
+        <ContentInfoDialog
+          open={contentInfoOpen}
+          onOpenChange={setContentInfoOpen}
+          lesson={activeLesson}
+          moduleName={activeModuleName}
+          hasTranscript={hasTranscript}
+          hasResources={lessonHasResources}
+        />
+        <ReportProblemDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          courseId={course.id}
+          lessonId={activeLesson?.id}
+          playbackTime={reportTime}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="flex h-screen flex-col bg-background">
