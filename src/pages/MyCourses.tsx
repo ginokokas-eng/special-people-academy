@@ -37,7 +37,7 @@ export default function MyCourses() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { itemCount } = useCart();
-  const { organisationName, learnerCoursesNavDestination } = useGeneralSettings();
+  const { organisationName } = useGeneralSettings();
   const [courses, setCourses] = useState<MyCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
