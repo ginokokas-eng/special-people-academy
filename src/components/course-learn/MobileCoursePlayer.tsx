@@ -283,7 +283,7 @@ export function MobileCoursePlayer({
           <h2 className="text-lg font-bold leading-snug text-foreground">
             {activeLesson?.title ?? course.title}
           </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">{PROVIDER_NAME}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{providerName}</p>
           {total > 0 && (
             <div className="mt-3">
               <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
