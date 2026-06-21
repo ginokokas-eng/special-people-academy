@@ -1,7 +1,9 @@
-import { useState, type ReactNode, type MutableRefObject } from 'react';
+import { useEffect, useState, type ReactNode, type MutableRefObject } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeft,
