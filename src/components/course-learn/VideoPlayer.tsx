@@ -455,8 +455,8 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* Center play overlay when paused */}
-        {loaded && !playing && !waiting && (
+        {/* Center play overlay when paused (desktop only) */}
+        {!isMobile && loaded && !playing && !waiting && (
           <button
             onClick={() => {
               containerRef.current?.focus();
@@ -470,6 +470,148 @@ export function VideoPlayer({
             </span>
           </button>
         )}
+
+        {/* ===== Mobile controls overlay ===== */}
+        {isMobile && loaded && (
+          <div
+            onClick={toggleControlsOnTap}
+            className={cn(
+              'absolute inset-0 transition-opacity duration-300',
+              controlsVisible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
+          >
+            {/* Subtle scrim only while controls are visible */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+
+            {/* Top bar */}
+            <div className="absolute inset-x-0 top-0 flex items-center justify-end gap-0.5 px-2 pt-2">
+              {castAvailable && (
+                <MobileBtn label="Cast" onClick={startCast}>
+                  <Cast className="h-5 w-5" />
+                </MobileBtn>
+              )}
+              {hasCaptions && (
+                <MobileBtn
+                  label="Captions"
+                  active={prefs.captions}
+                  onClick={() => setPrefs({ captions: !prefs.captions })}
+                >
+                  {prefs.captions ? <Captions className="h-5 w-5" /> : <CaptionsOff className="h-5 w-5" />}
+                </MobileBtn>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  cycleSpeed();
+                }}
+                aria-label="Playback speed"
+                className="flex h-9 min-w-11 items-center justify-center rounded-full px-2 text-xs font-bold text-white active:bg-white/20"
+              >
+                {formatSpeed(prefs.speed)}
+              </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="More options"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-white active:bg-white/20"
+                  >
+                    <MoreVertical className="h-5 w-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-64 p-2"
+                >
+                  <SettingsPanel
+                    qualities={qualities}
+                    qualityIdx={qualityIdx}
+                    onQuality={changeQuality}
+                    speed={prefs.speed}
+                    onSpeed={setSpeed}
+                    autoplay={prefs.autoplay}
+                    onAutoplay={(v) => setPrefs({ autoplay: v })}
+                    onShortcuts={() => setShortcutsOpen(true)}
+                    onContentInfo={onContentInfo}
+                    onReport={() => onReport(videoRef.current?.currentTime ?? 0)}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Centre transport: rewind 15 / play-pause / forward 15 */}
+            {!waiting && (
+              <div className="absolute inset-0 flex items-center justify-center gap-7">
+                <MobileSeekBtn label="Rewind 15 seconds" onClick={() => seekBy(-15)}>
+                  <RotateCcw className="h-7 w-7" />
+                </MobileSeekBtn>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlay();
+                  }}
+                  aria-label={playing ? 'Pause' : 'Play'}
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-200 active:scale-95"
+                >
+                  {playing ? (
+                    <Pause className="h-8 w-8" fill="currentColor" />
+                  ) : (
+                    <Play className="ml-1 h-8 w-8" fill="currentColor" />
+                  )}
+                </button>
+                <MobileSeekBtn label="Forward 15 seconds" onClick={() => seekBy(15)}>
+                  <RotateCw className="h-7 w-7" />
+                </MobileSeekBtn>
+              </div>
+            )}
+
+            {/* Bottom bar: progress + time + fullscreen */}
+            <div className="absolute inset-x-0 bottom-0 px-3 pb-2">
+              <div className="flex items-center gap-2 text-white">
+                <span className="select-none text-[11px] tabular-nums text-white/90">
+                  {formatTime(current)}
+                </span>
+                <div
+                  className="flex-1"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <Slider
+                    value={[current]}
+                    min={0}
+                    max={duration || 100}
+                    step={0.1}
+                    onValueChange={(v) => {
+                      const vid = videoRef.current;
+                      if (vid) {
+                        vid.currentTime = v[0];
+                        setCurrent(v[0]);
+                      }
+                    }}
+                    aria-label="Seek"
+                    className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                  />
+                </div>
+                <span className="select-none text-[11px] tabular-nums text-white/90">
+                  {formatTime(duration)}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFullscreen();
+                  }}
+                  aria-label="Fullscreen"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white active:bg-white/20"
+                >
+                  {fullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
 
 
         {/* Control bar */}
