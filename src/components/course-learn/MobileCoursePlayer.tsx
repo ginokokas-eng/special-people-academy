@@ -147,6 +147,8 @@ export function MobileCoursePlayer({
   };
 
   const hasResources = resources.length > 0;
+  const hasTranscript =
+    !!transcript && (!!transcript.transcript_text || (transcript.segments?.length ?? 0) > 0);
 
   type MoreMenuItem = {
     key: MoreView | 'share' | 'favourite';
