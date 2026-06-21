@@ -28,7 +28,7 @@ import { MobileLectureList } from './MobileLectureList';
 import { OverviewTab } from './OverviewTab';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
-import { ResourcesTab } from './ResourcesTab';
+import { MobileResources } from './MobileResources';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
 import type { LearnCourse, LearnLesson, LearnModule, LearnResource, MediaController } from './types';
@@ -221,7 +221,7 @@ export function MobileCoursePlayer({
     certificate: 'Course Certificate',
     qa: 'Q&A',
     notes: 'Notes',
-    resources: 'Resources',
+    resources: 'Course Resources',
     announcements: 'Announcements',
   };
 
@@ -380,7 +380,7 @@ export function MobileCoursePlayer({
                   />
                 )}
                 {moreView === 'resources' && (
-                  <ResourcesTab courseId={course.id} resources={resources} lessons={lessons} />
+                  <MobileResources courseId={course.id} resources={resources} lessons={lessons} />
                 )}
                 {moreView === 'announcements' && (
                   <div className="rounded-lg border bg-card p-8 text-center">
