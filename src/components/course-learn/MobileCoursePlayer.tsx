@@ -221,7 +221,7 @@ export function MobileCoursePlayer({
     certificate: 'Course Certificate',
     qa: 'Q&A',
     notes: 'Notes',
-    resources: 'Resources',
+    resources: 'Course Resources',
     announcements: 'Announcements',
   };
 
