@@ -214,7 +214,7 @@ export function MobileCoursePlayer({
       enabled: true,
       drillIn: false,
     },
-  ].filter((item) => item.enabled);
+  ] as MoreMenuItem[]).filter((item) => item.enabled);
 
   const moreTitles: Record<Exclude<MoreView, 'menu'>, string> = {
     about: 'About this Course',
