@@ -778,6 +778,8 @@ export default function CourseLearn() {
           canSeek={canSeek}
           controllerRef={mediaRef}
           lessonBody={renderLessonBody()}
+          transcript={transcript}
+          transcriptLoading={transcriptLoading}
           prevLesson={prevLesson}
           nextLesson={nextLesson}
           onSelectLesson={goToLesson}

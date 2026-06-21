@@ -21,6 +21,7 @@ import {
   Paperclip,
   Megaphone,
   Heart,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,9 +30,17 @@ import { MobileAbout } from './MobileAbout';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
 import { MobileResources } from './MobileResources';
+import { MobileTranscript } from './MobileTranscript';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
-import type { LearnCourse, LearnLesson, LearnModule, LearnResource, MediaController } from './types';
+import type {
+  LearnCourse,
+  LearnLesson,
+  LearnModule,
+  LearnResource,
+  LessonTranscript,
+  MediaController,
+} from './types';
 
 const PROVIDER_NAME = 'Special People Training';
 
@@ -46,6 +55,8 @@ interface Props {
   canSeek: boolean;
   controllerRef: MutableRefObject<MediaController | null>;
   lessonBody: ReactNode;
+  transcript: LessonTranscript | null;
+  transcriptLoading: boolean;
   prevLesson: LearnLesson | null;
   nextLesson: LearnLesson | null;
   onSelectLesson: (lessonId: string) => void;
@@ -59,6 +70,7 @@ type MoreView =
   | 'certificate'
   | 'qa'
   | 'notes'
+  | 'transcript'
   | 'resources'
   | 'announcements';
 
@@ -73,6 +85,8 @@ export function MobileCoursePlayer({
   canSeek,
   controllerRef,
   lessonBody,
+  transcript,
+  transcriptLoading,
   prevLesson,
   nextLesson,
   onSelectLesson,
@@ -133,6 +147,8 @@ export function MobileCoursePlayer({
   };
 
   const hasResources = resources.length > 0;
+  const hasTranscript =
+    !!transcript && (!!transcript.transcript_text || (transcript.segments?.length ?? 0) > 0);
 
   type MoreMenuItem = {
     key: MoreView | 'share' | 'favourite';
@@ -189,6 +205,15 @@ export function MobileCoursePlayer({
       drillIn: true,
     },
     {
+      key: 'transcript',
+      label: 'Transcript',
+      subtitle: hasTranscript ? undefined : 'Not available for this lesson yet',
+      icon: <FileText className="h-5 w-5" />,
+      onClick: () => setMoreView('transcript'),
+      enabled: true,
+      drillIn: true,
+    },
+    {
       key: 'resources',
       label: 'Resources',
       subtitle: hasResources ? undefined : 'No resources for this course yet',
@@ -221,6 +246,7 @@ export function MobileCoursePlayer({
     certificate: 'Course Certificate',
     qa: 'Q&A',
     notes: 'Notes',
+    transcript: 'Transcript',
     resources: 'Course Resources',
     announcements: 'Announcements',
   };
@@ -382,6 +408,15 @@ export function MobileCoursePlayer({
                     lessons={lessons}
                     canSeek={canSeek}
                     controllerRef={controllerRef}
+                  />
+                )}
+                {moreView === 'transcript' && (
+                  <MobileTranscript
+                    transcript={transcript}
+                    loading={transcriptLoading}
+                    canSeek={canSeek}
+                    controllerRef={controllerRef}
+                    lessonTitle={activeLesson?.title}
                   />
                 )}
                 {moreView === 'resources' && (
