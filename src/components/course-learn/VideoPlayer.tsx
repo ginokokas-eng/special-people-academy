@@ -91,6 +91,7 @@ export function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMobile = useIsMobile();
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -101,6 +102,8 @@ export function VideoPlayer({
   const [waiting, setWaiting] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [castAvailable, setCastAvailable] = useState(false);
+
 
   // Build the quality options. Always offer an "Auto / Original" entry.
   const qualities: QualityOption[] = [];
