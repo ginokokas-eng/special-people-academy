@@ -790,6 +790,62 @@ function CtrlBtn({
   );
 }
 
+// Top-bar icon button for the mobile overlay (larger tap target, no hover state).
+function MobileBtn({
+  children,
+  label,
+  onClick,
+  active,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      className={cn(
+        'flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors active:bg-white/20',
+        active && 'text-primary'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Centre 15-second seek button for the mobile overlay.
+function MobileSeekBtn({
+  children,
+  label,
+  onClick,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      className="relative flex h-12 w-12 items-center justify-center rounded-full text-white transition-transform duration-200 active:scale-95 active:bg-white/15"
+    >
+      {children}
+      <span className="absolute text-[9px] font-bold">15</span>
+    </button>
+  );
+}
+
+
+
 function SettingsPanel({
   qualities,
   qualityIdx,
