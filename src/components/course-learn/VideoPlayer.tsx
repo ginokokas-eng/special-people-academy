@@ -394,8 +394,12 @@ export function VideoPlayer({
           playsInline
           crossOrigin={vttUrl ? 'anonymous' : undefined}
           onClick={() => {
-            containerRef.current?.focus();
-            togglePlay();
+            if (isMobile) {
+              toggleControlsOnTap();
+            } else {
+              containerRef.current?.focus();
+              togglePlay();
+            }
           }}
           onPlay={() => {
             setPlaying(true);
