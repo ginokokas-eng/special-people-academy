@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -42,7 +43,7 @@ import type {
   MediaController,
 } from './types';
 
-const PROVIDER_NAME = 'Special People Training';
+const DEFAULT_PROVIDER_NAME = 'Special People Training';
 
 interface Props {
   course: LearnCourse;
@@ -94,6 +95,8 @@ export function MobileCoursePlayer({
   onMarkComplete,
 }: Props) {
   const { user } = useAuth();
+  const { organisationName } = useGeneralSettings();
+  const providerName = organisationName || DEFAULT_PROVIDER_NAME;
   const [tab, setTab] = useState<'lectures' | 'more'>('lectures');
   const [moreView, setMoreView] = useState<MoreView>('menu');
   const [favourite, setFavourite] = useState(false);
@@ -280,7 +283,7 @@ export function MobileCoursePlayer({
           <h2 className="text-lg font-bold leading-snug text-foreground">
             {activeLesson?.title ?? course.title}
           </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">{PROVIDER_NAME}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{providerName}</p>
           {total > 0 && (
             <div className="mt-3">
               <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">

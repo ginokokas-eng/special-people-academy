@@ -231,10 +231,18 @@ function LessonRow({
           >
             {lesson.title}
           </span>
-          {label && (
+          {(label || resources.length > 0) && (
             <span className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
               {lessonTypeIcon(lesson.lesson_type)}
-              <span>{label}</span>
+              <span>
+                {label}
+                {resources.length > 0 && (
+                  <>
+                    {label ? ' · ' : ''}
+                    Resources ({resources.length})
+                  </>
+                )}
+              </span>
             </span>
           )}
         </span>
