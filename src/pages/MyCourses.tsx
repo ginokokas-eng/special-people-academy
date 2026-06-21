@@ -9,6 +9,10 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Clock, CheckCircle2, Loader2, Play, ArrowRight, Mail } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useCart } from '@/hooks/useCart';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
+import { MobileMyCourses, MobileCourseItem } from '@/components/course-learn/MobileMyCourses';
 
 interface MyCourse {
   id: string;
@@ -22,7 +26,11 @@ interface MyCourse {
   enrolledAt: string;
   completedAt: string | null;
   isAssigned: boolean; // true if admin-assigned, false if purchased/self-enrolled
+  hasCertificate: boolean;
+  certificateEarned: boolean;
+  requiresPracticalSignoff: boolean;
 }
+
 
 export default function MyCourses() {
   const { user, loading: authLoading } = useAuth();
