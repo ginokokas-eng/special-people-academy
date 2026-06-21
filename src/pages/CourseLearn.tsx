@@ -434,6 +434,17 @@ export default function CourseLearn() {
     return () => document.removeEventListener('fullscreenchange', onFs);
   }, []);
 
+  // Safety net: `srcDoc` iframes do not always fire `onLoad` reliably on some
+  // mobile browsers, which can leave the video frame hidden (opacity-0) behind
+  // the loading overlay and look like the video "isn't working". Reveal the
+  // frame shortly after the content is set so it is never stuck invisible.
+  // This is presentation-only and does not touch playback or completion.
+  useEffect(() => {
+    if (!scormHtml) return;
+    const t = setTimeout(() => setScormFrameReady(true), 1200);
+    return () => clearTimeout(t);
+  }, [scormHtml]);
+
   const goToLesson = (lessonId: string) => {
     setSearchParams({ lesson: lessonId });
     setMobileNavOpen(false);
