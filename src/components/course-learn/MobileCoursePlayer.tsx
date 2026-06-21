@@ -43,7 +43,7 @@ import type {
   MediaController,
 } from './types';
 
-const PROVIDER_NAME = 'Special People Training';
+const DEFAULT_PROVIDER_NAME = 'Special People Training';
 
 interface Props {
   course: LearnCourse;
