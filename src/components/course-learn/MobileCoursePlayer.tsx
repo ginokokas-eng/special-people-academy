@@ -203,6 +203,15 @@ export function MobileCoursePlayer({
       drillIn: true,
     },
     {
+      key: 'transcript',
+      label: 'Transcript',
+      subtitle: hasTranscript ? undefined : 'Not available for this lesson yet',
+      icon: <FileText className="h-5 w-5" />,
+      onClick: () => setMoreView('transcript'),
+      enabled: true,
+      drillIn: true,
+    },
+    {
       key: 'resources',
       label: 'Resources',
       subtitle: hasResources ? undefined : 'No resources for this course yet',
