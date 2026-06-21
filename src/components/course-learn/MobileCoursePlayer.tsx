@@ -343,13 +343,16 @@ export function MobileCoursePlayer({
                   <li key={item.key}>
                     <button
                       onClick={item.onClick}
-                      className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50 active:bg-muted"
+                      className="flex min-h-[60px] w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted"
                     >
-                      <span className="text-muted-foreground">{item.icon}</span>
-                      <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
-                      {item.key !== 'share' && item.key !== 'favourite' && (
-                        <ChevronRightSmall className="h-4 w-4 text-muted-foreground" />
-                      )}
+                      <span className="shrink-0 text-muted-foreground">{item.icon}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium text-foreground">{item.label}</span>
+                        {item.subtitle && (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">{item.subtitle}</span>
+                        )}
+                      </span>
+                      {item.drillIn && <ChevronRightSmall className="h-4 w-4 shrink-0 text-muted-foreground" />}
                     </button>
                   </li>
                 ))}
