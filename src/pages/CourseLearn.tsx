@@ -348,6 +348,7 @@ export default function CourseLearn() {
       cleanup();
       setScormHtml('');
       setScormFrameReady(false);
+      setScormVideoError(false);
       if (!activeLesson || activeLesson.lesson_type !== 'scorm' || !user || !courseId) return;
       if (!activeLesson.scorm_package_id) return;
 
