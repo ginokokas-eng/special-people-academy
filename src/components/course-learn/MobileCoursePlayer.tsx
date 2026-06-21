@@ -1,7 +1,9 @@
-import { useState, type ReactNode, type MutableRefObject } from 'react';
+import { useEffect, useState, type ReactNode, type MutableRefObject } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -77,9 +79,32 @@ export function MobileCoursePlayer({
   onBack,
   onMarkComplete,
 }: Props) {
+  const { user } = useAuth();
   const [tab, setTab] = useState<'lectures' | 'more'>('lectures');
   const [moreView, setMoreView] = useState<MoreView>('menu');
   const [favourite, setFavourite] = useState(false);
+  const [certificateEarned, setCertificateEarned] = useState(false);
+
+  // Whether this learner has earned a certificate for the course yet — drives
+  // the "Course Certificate" row subtitle. Read-only; never changes cert logic.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user || !course.has_certificate) {
+      setCertificateEarned(false);
+      return;
+    }
+    (async () => {
+      const { count } = await (supabase as any)
+        .from('certificates')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('course_id', course.id);
+      if (!cancelled) setCertificateEarned((count ?? 0) > 0);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, course.id, course.has_certificate]);
 
   const completedCount = visibleLessons.filter((l) => l.completed).length;
   const total = visibleLessons.length;
@@ -107,62 +132,89 @@ export function MobileCoursePlayer({
     });
   };
 
-  const moreMenu: Array<{
+  const hasResources = resources.length > 0;
+
+  type MoreMenuItem = {
     key: MoreView | 'share' | 'favourite';
     label: string;
+    subtitle?: string;
     icon: ReactNode;
     onClick: () => void;
-    trailing?: ReactNode;
-  }> = [
+    enabled: boolean;
+    drillIn: boolean;
+  };
+
+  const moreMenu: MoreMenuItem[] = ([
     {
       key: 'about',
       label: 'About this Course',
       icon: <BookOpen className="h-5 w-5" />,
       onClick: () => setMoreView('about'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'certificate',
       label: 'Course Certificate',
+      subtitle: certificateEarned
+        ? 'Tap to view and download'
+        : 'Certificate available after course completion',
       icon: <Award className="h-5 w-5" />,
       onClick: () => setMoreView('certificate'),
+      enabled: !!course.has_certificate,
+      drillIn: true,
     },
     {
       key: 'share',
       label: 'Share this Course',
       icon: <Share2 className="h-5 w-5" />,
       onClick: handleShare,
+      enabled: true,
+      drillIn: false,
     },
     {
       key: 'qa',
       label: 'Q&A',
       icon: <MessageCircleQuestion className="h-5 w-5" />,
       onClick: () => setMoreView('qa'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'notes',
       label: 'Notes',
       icon: <StickyNote className="h-5 w-5" />,
       onClick: () => setMoreView('notes'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'resources',
       label: 'Resources',
+      subtitle: hasResources ? undefined : 'No resources for this course yet',
       icon: <Paperclip className="h-5 w-5" />,
       onClick: () => setMoreView('resources'),
+      enabled: hasResources,
+      drillIn: true,
     },
     {
       key: 'announcements',
       label: 'Announcements',
+      subtitle: 'No announcements yet',
       icon: <Megaphone className="h-5 w-5" />,
       onClick: () => setMoreView('announcements'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'favourite',
       label: favourite ? 'Remove from Favourites' : 'Add Course to Favourites',
       icon: <Heart className={cn('h-5 w-5', favourite && 'fill-primary text-primary')} />,
       onClick: toggleFavourite,
+      enabled: true,
+      drillIn: false,
     },
-  ];
+  ] as MoreMenuItem[]).filter((item) => item.enabled);
 
   const moreTitles: Record<Exclude<MoreView, 'menu'>, string> = {
     about: 'About this Course',
@@ -291,13 +343,16 @@ export function MobileCoursePlayer({
                   <li key={item.key}>
                     <button
                       onClick={item.onClick}
-                      className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50 active:bg-muted"
+                      className="flex min-h-[60px] w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 active:bg-muted"
                     >
-                      <span className="text-muted-foreground">{item.icon}</span>
-                      <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
-                      {item.key !== 'share' && item.key !== 'favourite' && (
-                        <ChevronRightSmall className="h-4 w-4 text-muted-foreground" />
-                      )}
+                      <span className="shrink-0 text-muted-foreground">{item.icon}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium text-foreground">{item.label}</span>
+                        {item.subtitle && (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">{item.subtitle}</span>
+                        )}
+                      </span>
+                      {item.drillIn && <ChevronRightSmall className="h-4 w-4 shrink-0 text-muted-foreground" />}
                     </button>
                   </li>
                 ))}
