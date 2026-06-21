@@ -25,7 +25,7 @@ import {
 import { toast } from 'sonner';
 
 import { MobileLectureList } from './MobileLectureList';
-import { OverviewTab } from './OverviewTab';
+import { MobileAbout } from './MobileAbout';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
 import { MobileResources } from './MobileResources';
