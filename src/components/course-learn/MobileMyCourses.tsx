@@ -156,7 +156,7 @@ export function MobileMyCourses({ courses, providerName, cartCount, cartEnabled 
         )}
 
         {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto px-4 pb-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {CHIPS.map((chip) => (
             <button
               key={chip.key}
