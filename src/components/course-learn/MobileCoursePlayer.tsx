@@ -55,6 +55,8 @@ interface Props {
   canSeek: boolean;
   controllerRef: MutableRefObject<MediaController | null>;
   lessonBody: ReactNode;
+  transcript: LessonTranscript | null;
+  transcriptLoading: boolean;
   prevLesson: LearnLesson | null;
   nextLesson: LearnLesson | null;
   onSelectLesson: (lessonId: string) => void;
@@ -68,6 +70,7 @@ type MoreView =
   | 'certificate'
   | 'qa'
   | 'notes'
+  | 'transcript'
   | 'resources'
   | 'announcements';
 
@@ -82,6 +85,8 @@ export function MobileCoursePlayer({
   canSeek,
   controllerRef,
   lessonBody,
+  transcript,
+  transcriptLoading,
   prevLesson,
   nextLesson,
   onSelectLesson,
