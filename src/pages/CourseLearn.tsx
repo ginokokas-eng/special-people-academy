@@ -27,6 +27,8 @@ import {
   RectangleHorizontal,
   Maximize,
   Minimize,
+  VideoOff,
+  RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -74,6 +76,11 @@ export default function CourseLearn() {
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
   const [scormFrameReady, setScormFrameReady] = useState(false);
+  // True when the embedded player's <video> reports an unplayable source
+  // (e.g. a browser/webview without standard MP4/H.264 codec support).
+  const [scormVideoError, setScormVideoError] = useState(false);
+  // Bumped to force a fresh reload of the SCORM lesson on "Retry".
+  const [scormReloadKey, setScormReloadKey] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -91,6 +98,7 @@ export default function CourseLearn() {
   const apiRef = useRef<ScormApiAdapter | null>(null);
   const mediaRef = useRef<MediaController | null>(null);
   const scormFrameWrapRef = useRef<HTMLDivElement>(null);
+  const scormIframeRef = useRef<HTMLIFrameElement>(null);
   const [scormFullscreen, setScormFullscreen] = useState(false);
 
   const courseId = course?.id ?? null;
@@ -342,6 +350,7 @@ export default function CourseLearn() {
       cleanup();
       setScormHtml('');
       setScormFrameReady(false);
+      setScormVideoError(false);
       if (!activeLesson || activeLesson.lesson_type !== 'scorm' || !user || !courseId) return;
       if (!activeLesson.scorm_package_id) return;
 
@@ -425,7 +434,7 @@ export default function CourseLearn() {
       cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLesson?.id]);
+  }, [activeLesson?.id, scormReloadKey]);
 
   useEffect(() => {
     const onFs = () =>
@@ -444,6 +453,57 @@ export default function CourseLearn() {
     const t = setTimeout(() => setScormFrameReady(true), 1200);
     return () => clearTimeout(t);
   }, [scormHtml]);
+
+  // Detect when the embedded player's <video> cannot play its source so we can
+  // show the learner a clear message + Retry instead of a confusing broken
+  // image. The SCORM HTML is rendered via `srcDoc` with `allow-same-origin`, so
+  // the inner document shares our origin and is accessible here. Read-only —
+  // we never touch the SCORM runtime, the video source, or completion tracking.
+  useEffect(() => {
+    if (!scormFrameReady || !scormHtml) return;
+    let cancelled = false;
+    let cleanupFns: Array<() => void> = [];
+
+    const attach = () => {
+      const doc = scormIframeRef.current?.contentDocument;
+      if (!doc) return false;
+      const videos = Array.from(doc.querySelectorAll('video')) as HTMLVideoElement[];
+      if (videos.length === 0) return false;
+      videos.forEach((v) => {
+        // MEDIA_ERR_SRC_NOT_SUPPORTED (4) / DECODE (3) → unplayable in this browser.
+        if (v.error && (v.error.code === 3 || v.error.code === 4)) {
+          if (!cancelled) setScormVideoError(true);
+        }
+        const onErr = () => {
+          const code = v.error?.code;
+          if (!cancelled && (code === 3 || code === 4)) setScormVideoError(true);
+        };
+        v.addEventListener('error', onErr, true);
+        cleanupFns.push(() => v.removeEventListener('error', onErr, true));
+      });
+      return true;
+    };
+
+    // The HeyGen wrapper sets the <video> source slightly after load; poll a few
+    // times until the element exists, then rely on its error event.
+    let tries = 0;
+    const poll = setInterval(() => {
+      tries += 1;
+      try {
+        if (attach() || tries > 10) clearInterval(poll);
+      } catch {
+        clearInterval(poll);
+      }
+    }, 500);
+
+    return () => {
+      cancelled = true;
+      clearInterval(poll);
+      cleanupFns.forEach((fn) => fn());
+      cleanupFns = [];
+    };
+  }, [scormFrameReady, scormHtml]);
+
 
   const goToLesson = (lessonId: string) => {
     setSearchParams({ lesson: lessonId });
@@ -500,11 +560,12 @@ export default function CourseLearn() {
           >
             {scormHtml ? (
               <iframe
+                ref={scormIframeRef}
                 srcDoc={scormHtml}
                 onLoad={() => setScormFrameReady(true)}
                 className={cn(
                   'h-full w-full border-0 bg-card transition-opacity duration-500',
-                  scormFrameReady ? 'opacity-100' : 'opacity-0'
+                  scormFrameReady && !scormVideoError ? 'opacity-100' : 'opacity-0'
                 )}
                 title={activeLesson.title}
                 allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
@@ -519,12 +580,39 @@ export default function CourseLearn() {
             )}
 
             {/* Skeleton / loading state until the video frame is ready */}
-            {(scormLoading || (scormHtml && !scormFrameReady)) && (
+            {(scormLoading || (scormHtml && !scormFrameReady)) && !scormVideoError && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-muted">
                 <div className="absolute inset-0 animate-pulse bg-muted" />
                 <Loader2 className="relative h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             )}
+
+            {/* Friendly fallback when the embedded video can't play in this
+                browser (e.g. an in-app browser without standard video support). */}
+            {scormVideoError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card px-6 text-center">
+                <VideoOff className="h-9 w-9 text-muted-foreground" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    This video couldn’t play in your current browser.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    If you opened this from another app (email, Teams, Outlook), try opening it in
+                    Chrome or Safari. You can also retry below.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setScormVideoError(false);
+                    setScormReloadKey((k) => k + 1);
+                  }}
+                >
+                  <RotateCcw className="mr-1.5 h-4 w-4" /> Retry
+                </Button>
+              </div>
+            )}
+
           </div>
           {/* Wrapper-level tools for SCORM. Lesson Previous/Next live in the
               shared nav below, so we only surface the player tools here to
