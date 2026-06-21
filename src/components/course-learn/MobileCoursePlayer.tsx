@@ -79,9 +79,32 @@ export function MobileCoursePlayer({
   onBack,
   onMarkComplete,
 }: Props) {
+  const { user } = useAuth();
   const [tab, setTab] = useState<'lectures' | 'more'>('lectures');
   const [moreView, setMoreView] = useState<MoreView>('menu');
   const [favourite, setFavourite] = useState(false);
+  const [certificateEarned, setCertificateEarned] = useState(false);
+
+  // Whether this learner has earned a certificate for the course yet — drives
+  // the "Course Certificate" row subtitle. Read-only; never changes cert logic.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user || !course.has_certificate) {
+      setCertificateEarned(false);
+      return;
+    }
+    (async () => {
+      const { count } = await (supabase as any)
+        .from('certificates')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('course_id', course.id);
+      if (!cancelled) setCertificateEarned((count ?? 0) > 0);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, course.id, course.has_certificate]);
 
   const completedCount = visibleLessons.filter((l) => l.completed).length;
   const total = visibleLessons.length;
