@@ -9,6 +9,10 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Clock, CheckCircle2, Loader2, Play, ArrowRight, Mail } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useCart } from '@/hooks/useCart';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
+import { MobileMyCourses, MobileCourseItem } from '@/components/course-learn/MobileMyCourses';
 
 interface MyCourse {
   id: string;
@@ -22,11 +26,18 @@ interface MyCourse {
   enrolledAt: string;
   completedAt: string | null;
   isAssigned: boolean; // true if admin-assigned, false if purchased/self-enrolled
+  hasCertificate: boolean;
+  certificateEarned: boolean;
+  requiresPracticalSignoff: boolean;
 }
+
 
 export default function MyCourses() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { itemCount } = useCart();
+  const { organisationName } = useGeneralSettings();
   const [courses, setCourses] = useState<MyCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,12 +63,20 @@ export default function MyCourses() {
         .select(`
           enrolled_at,
           completed_at,
-          course:courses(id, title, category, thumbnail_url, duration_minutes, level, delivery_type, is_internal)
+          course:courses(id, title, category, thumbnail_url, duration_minutes, level, delivery_type, is_internal, has_certificate, requires_practical_signoff)
         `)
         .eq('user_id', user.id)
         .order('enrolled_at', { ascending: false });
 
+      // Certificates this learner has earned (drives "Certificate available" status)
+      const { data: earnedCerts } = await supabase
+        .from('certificates')
+        .select('course_id')
+        .eq('user_id', user.id);
+      const earnedCertIds = new Set((earnedCerts || []).map((c) => c.course_id));
+
       const coursesWithProgress: MyCourse[] = [];
+
 
       for (const enrollment of enrollments || []) {
         const course = enrollment.course as {
@@ -69,6 +88,8 @@ export default function MyCourses() {
           level: string;
           delivery_type: string | null;
           is_internal: boolean | null;
+          has_certificate: boolean | null;
+          requires_practical_signoff: boolean | null;
         } | null;
 
         if (!course) continue;
@@ -103,6 +124,9 @@ export default function MyCourses() {
           enrolledAt: enrollment.enrolled_at,
           completedAt: enrollment.completed_at,
           isAssigned: course.is_internal ?? false,
+          hasCertificate: course.has_certificate ?? false,
+          certificateEarned: earnedCertIds.has(course.id),
+          requiresPracticalSignoff: course.requires_practical_signoff ?? false,
         });
       }
 
@@ -143,6 +167,29 @@ export default function MyCourses() {
       </DashboardLayout>
     );
   }
+
+  // Mobile learning-app experience (<= 768px). Desktop layout below is unchanged.
+  if (isMobile) {
+    const mobileCourses: MobileCourseItem[] = courses.map((c) => ({
+      id: c.id,
+      title: c.title,
+      thumbnail_url: c.thumbnail_url,
+      progress: c.progress,
+      completedAt: c.completedAt,
+      hasCertificate: c.hasCertificate,
+      certificateEarned: c.certificateEarned,
+      requiresPracticalSignoff: c.requiresPracticalSignoff,
+    }));
+    return (
+      <MobileMyCourses
+        courses={mobileCourses}
+        providerName={organisationName || 'Special People Training'}
+        cartCount={itemCount}
+        cartEnabled={true}
+      />
+    );
+  }
+
 
   const CourseCard = ({ course }: { course: MyCourse }) => (
     <Card 
