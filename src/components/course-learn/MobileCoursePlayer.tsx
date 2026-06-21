@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeft,
