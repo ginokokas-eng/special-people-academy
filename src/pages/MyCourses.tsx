@@ -185,7 +185,7 @@ export default function MyCourses() {
         courses={mobileCourses}
         providerName={organisationName || 'Special People Training'}
         cartCount={itemCount}
-        cartEnabled={learnerCoursesNavDestination !== 'catalog'}
+        cartEnabled={true}
       />
     );
   }
