@@ -95,6 +95,8 @@ export function MobileCoursePlayer({
   onMarkComplete,
 }: Props) {
   const { user } = useAuth();
+  const { organisationName } = useGeneralSettings();
+  const providerName = organisationName || DEFAULT_PROVIDER_NAME;
   const [tab, setTab] = useState<'lectures' | 'more'>('lectures');
   const [moreView, setMoreView] = useState<MoreView>('menu');
   const [favourite, setFavourite] = useState(false);
