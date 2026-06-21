@@ -1,0 +1,1 @@
+DELETE FROM public.lesson_video_sources WHERE lesson_id = '4e417a0e-1c22-4d2c-848c-3079db4f4c57' AND source_url = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
