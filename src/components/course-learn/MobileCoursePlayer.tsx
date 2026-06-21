@@ -21,6 +21,7 @@ import {
   Paperclip,
   Megaphone,
   Heart,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,9 +30,17 @@ import { MobileAbout } from './MobileAbout';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
 import { MobileResources } from './MobileResources';
+import { MobileTranscript } from './MobileTranscript';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
-import type { LearnCourse, LearnLesson, LearnModule, LearnResource, MediaController } from './types';
+import type {
+  LearnCourse,
+  LearnLesson,
+  LearnModule,
+  LearnResource,
+  LessonTranscript,
+  MediaController,
+} from './types';
 
 const PROVIDER_NAME = 'Special People Training';
 
