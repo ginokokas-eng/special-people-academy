@@ -168,6 +168,29 @@ export default function MyCourses() {
     );
   }
 
+  // Mobile learning-app experience (<= 768px). Desktop layout below is unchanged.
+  if (isMobile) {
+    const mobileCourses: MobileCourseItem[] = courses.map((c) => ({
+      id: c.id,
+      title: c.title,
+      thumbnail_url: c.thumbnail_url,
+      progress: c.progress,
+      completedAt: c.completedAt,
+      hasCertificate: c.hasCertificate,
+      certificateEarned: c.certificateEarned,
+      requiresPracticalSignoff: c.requiresPracticalSignoff,
+    }));
+    return (
+      <MobileMyCourses
+        courses={mobileCourses}
+        providerName={organisationName || 'Special People Training'}
+        cartCount={itemCount}
+        cartEnabled={learnerCoursesNavDestination !== 'catalog'}
+      />
+    );
+  }
+
+
   const CourseCard = ({ course }: { course: MyCourse }) => (
     <Card 
       className="hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
