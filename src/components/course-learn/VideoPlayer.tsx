@@ -261,6 +261,57 @@ export function VideoPlayer({
     }, 2800);
   }, []);
 
+  // Tap the video frame to toggle controls (mobile). Tapping the centre button
+  // still plays/pauses. Playback + completion tracking are untouched.
+  const toggleControlsOnTap = useCallback(() => {
+    containerRef.current?.focus();
+    setControlsVisible((visible) => {
+      if (visible) {
+        if (hideTimer.current) clearTimeout(hideTimer.current);
+        return false;
+      }
+      showControls();
+      return true;
+    });
+  }, [showControls]);
+
+  // Cycle through the mobile playback-speed presets on each tap.
+  const cycleSpeed = useCallback(() => {
+    const idx = MOBILE_SPEED_CYCLE.indexOf(prefs.speed);
+    const next = MOBILE_SPEED_CYCLE[(idx + 1) % MOBILE_SPEED_CYCLE.length] ?? 1;
+    const v = videoRef.current;
+    if (v) v.playbackRate = next;
+    setPrefs({ speed: next });
+  }, [prefs.speed, setPrefs]);
+
+  // Remote Playback (cast) availability — only show the button when supported.
+  useEffect(() => {
+    const v = videoRef.current as (HTMLVideoElement & { remote?: any }) | null;
+    const remote = v?.remote;
+    if (!remote || typeof remote.watchAvailability !== 'function') {
+      setCastAvailable(false);
+      return;
+    }
+    let callbackId: number | undefined;
+    remote
+      .watchAvailability((available: boolean) => setCastAvailable(available))
+      .then((id: number) => {
+        callbackId = id;
+      })
+      .catch(() => setCastAvailable(false));
+    return () => {
+      if (callbackId !== undefined && typeof remote.cancelWatchAvailability === 'function') {
+        remote.cancelWatchAvailability(callbackId).catch(() => {});
+      }
+    };
+  }, [activeSrc]);
+
+  const startCast = useCallback(() => {
+    const remote = (videoRef.current as (HTMLVideoElement & { remote?: any }) | null)?.remote;
+    if (remote && typeof remote.prompt === 'function') remote.prompt().catch(() => {});
+  }, []);
+
+
   // Keyboard shortcuts scoped to the player container.
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
