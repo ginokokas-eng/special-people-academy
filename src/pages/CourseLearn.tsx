@@ -96,6 +96,7 @@ export default function CourseLearn() {
   const apiRef = useRef<ScormApiAdapter | null>(null);
   const mediaRef = useRef<MediaController | null>(null);
   const scormFrameWrapRef = useRef<HTMLDivElement>(null);
+  const scormIframeRef = useRef<HTMLIFrameElement>(null);
   const [scormFullscreen, setScormFullscreen] = useState(false);
 
   const courseId = course?.id ?? null;
