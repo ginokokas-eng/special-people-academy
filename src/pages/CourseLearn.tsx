@@ -432,7 +432,7 @@ export default function CourseLearn() {
       cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLesson?.id]);
+  }, [activeLesson?.id, scormReloadKey]);
 
   useEffect(() => {
     const onFs = () =>
