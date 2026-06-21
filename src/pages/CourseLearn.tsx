@@ -74,6 +74,11 @@ export default function CourseLearn() {
   const [scormHtml, setScormHtml] = useState('');
   const [scormLoading, setScormLoading] = useState(false);
   const [scormFrameReady, setScormFrameReady] = useState(false);
+  // True when the embedded player's <video> reports an unplayable source
+  // (e.g. a browser/webview without standard MP4/H.264 codec support).
+  const [scormVideoError, setScormVideoError] = useState(false);
+  // Bumped to force a fresh reload of the SCORM lesson on "Retry".
+  const [scormReloadKey, setScormReloadKey] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
