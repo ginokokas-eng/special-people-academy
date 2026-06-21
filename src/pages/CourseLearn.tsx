@@ -762,6 +762,47 @@ export default function CourseLearn() {
     />
   );
 
+  // Mobile-only course player (≤768px): video on top, then Lectures / More tabs.
+  // Desktop & tablet keep the existing two-column layout untouched.
+  if (isMobile) {
+    return (
+      <>
+        <MobileCoursePlayer
+          course={course}
+          modules={modules}
+          visibleLessons={visibleLessons}
+          lessons={lessons}
+          resources={resources}
+          activeLesson={activeLesson}
+          competencyAssessors={competencyAssessors}
+          canSeek={canSeek}
+          controllerRef={mediaRef}
+          lessonBody={renderLessonBody()}
+          prevLesson={prevLesson}
+          nextLesson={nextLesson}
+          onSelectLesson={goToLesson}
+          onBack={() => navigate(`/courses/${courseId || id}`)}
+          onMarkComplete={markComplete}
+        />
+        <ContentInfoDialog
+          open={contentInfoOpen}
+          onOpenChange={setContentInfoOpen}
+          lesson={activeLesson}
+          moduleName={activeModuleName}
+          hasTranscript={hasTranscript}
+          hasResources={lessonHasResources}
+        />
+        <ReportProblemDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          courseId={course.id}
+          lessonId={activeLesson?.id}
+          playbackTime={reportTime}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
