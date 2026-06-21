@@ -380,7 +380,7 @@ export function MobileCoursePlayer({
                   />
                 )}
                 {moreView === 'resources' && (
-                  <ResourcesTab courseId={course.id} resources={resources} lessons={lessons} />
+                  <MobileResources courseId={course.id} resources={resources} lessons={lessons} />
                 )}
                 {moreView === 'announcements' && (
                   <div className="rounded-lg border bg-card p-8 text-center">
