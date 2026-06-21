@@ -35,6 +35,9 @@ interface MyCourse {
 export default function MyCourses() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { itemCount } = useCart();
+  const { organisationName, learnerCoursesNavDestination } = useGeneralSettings();
   const [courses, setCourses] = useState<MyCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
