@@ -28,7 +28,7 @@ import { MobileLectureList } from './MobileLectureList';
 import { OverviewTab } from './OverviewTab';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
-import { ResourcesTab } from './ResourcesTab';
+import { MobileResources } from './MobileResources';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
 import type { LearnCourse, LearnLesson, LearnModule, LearnResource, MediaController } from './types';
