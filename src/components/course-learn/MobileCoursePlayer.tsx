@@ -132,62 +132,87 @@ export function MobileCoursePlayer({
     });
   };
 
+  const hasResources = resources.length > 0;
+
   const moreMenu: Array<{
     key: MoreView | 'share' | 'favourite';
     label: string;
+    subtitle?: string;
     icon: ReactNode;
     onClick: () => void;
-    trailing?: ReactNode;
+    enabled: boolean;
+    drillIn: boolean;
   }> = [
     {
       key: 'about',
       label: 'About this Course',
       icon: <BookOpen className="h-5 w-5" />,
       onClick: () => setMoreView('about'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'certificate',
       label: 'Course Certificate',
+      subtitle: certificateEarned
+        ? 'Tap to view and download'
+        : 'Certificate available after course completion',
       icon: <Award className="h-5 w-5" />,
       onClick: () => setMoreView('certificate'),
+      enabled: !!course.has_certificate,
+      drillIn: true,
     },
     {
       key: 'share',
       label: 'Share this Course',
       icon: <Share2 className="h-5 w-5" />,
       onClick: handleShare,
+      enabled: true,
+      drillIn: false,
     },
     {
       key: 'qa',
       label: 'Q&A',
       icon: <MessageCircleQuestion className="h-5 w-5" />,
       onClick: () => setMoreView('qa'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'notes',
       label: 'Notes',
       icon: <StickyNote className="h-5 w-5" />,
       onClick: () => setMoreView('notes'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'resources',
       label: 'Resources',
+      subtitle: hasResources ? undefined : 'No resources for this course yet',
       icon: <Paperclip className="h-5 w-5" />,
       onClick: () => setMoreView('resources'),
+      enabled: hasResources,
+      drillIn: true,
     },
     {
       key: 'announcements',
       label: 'Announcements',
+      subtitle: 'No announcements yet',
       icon: <Megaphone className="h-5 w-5" />,
       onClick: () => setMoreView('announcements'),
+      enabled: true,
+      drillIn: true,
     },
     {
       key: 'favourite',
       label: favourite ? 'Remove from Favourites' : 'Add Course to Favourites',
       icon: <Heart className={cn('h-5 w-5', favourite && 'fill-primary text-primary')} />,
       onClick: toggleFavourite,
+      enabled: true,
+      drillIn: false,
     },
-  ];
+  ].filter((item) => item.enabled);
 
   const moreTitles: Record<Exclude<MoreView, 'menu'>, string> = {
     about: 'About this Course',
