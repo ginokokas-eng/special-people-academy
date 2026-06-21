@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { CourseContentSidebar } from './CourseContentSidebar';
+import { MobileLectureList } from './MobileLectureList';
 import { OverviewTab } from './OverviewTab';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
@@ -274,7 +274,7 @@ export function MobileCoursePlayer({
           </TabsList>
 
           <TabsContent value="lectures" className="mt-0 min-h-0 flex-1 overflow-y-auto">
-            <CourseContentSidebar
+            <MobileLectureList
               courseId={course.id}
               modules={modules}
               lessons={visibleLessons}
