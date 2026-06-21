@@ -614,7 +614,8 @@ export function VideoPlayer({
 
 
 
-        {/* Control bar */}
+        {/* Control bar (desktop / tablet) */}
+        {!isMobile && (
         <div
           className={cn(
             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-2 pt-8 transition-opacity duration-300',
