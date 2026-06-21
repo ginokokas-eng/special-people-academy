@@ -755,7 +755,9 @@ export function VideoPlayer({
             </div>
           </div>
         </div>
+        )}
       </div>
+
 
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </>
