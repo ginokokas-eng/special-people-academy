@@ -27,6 +27,8 @@ import {
   RectangleHorizontal,
   Maximize,
   Minimize,
+  VideoOff,
+  RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
