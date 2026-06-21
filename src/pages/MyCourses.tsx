@@ -124,6 +124,9 @@ export default function MyCourses() {
           enrolledAt: enrollment.enrolled_at,
           completedAt: enrollment.completed_at,
           isAssigned: course.is_internal ?? false,
+          hasCertificate: course.has_certificate ?? false,
+          certificateEarned: earnedCertIds.has(course.id),
+          requiresPracticalSignoff: course.requires_practical_signoff ?? false,
         });
       }
 
