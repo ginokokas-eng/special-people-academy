@@ -25,7 +25,7 @@ import {
 import { toast } from 'sonner';
 
 import { MobileLectureList } from './MobileLectureList';
-import { OverviewTab } from './OverviewTab';
+import { MobileAbout } from './MobileAbout';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
 import { MobileResources } from './MobileResources';
@@ -366,7 +366,12 @@ export function MobileCoursePlayer({
                   <ArrowLeft className="h-4 w-4" /> {moreTitles[moreView]}
                 </button>
                 {moreView === 'about' && (
-                  <OverviewTab course={course} activeLesson={activeLesson} competencyAssessors={competencyAssessors} />
+                  <MobileAbout
+                    course={course}
+                    modules={modules}
+                    lessons={visibleLessons}
+                    competencyAssessors={competencyAssessors}
+                  />
                 )}
                 {moreView === 'certificate' && <CertificateTab course={course} />}
                 {moreView === 'qa' && <QnaTab courseId={course.id} activeLesson={activeLesson} />}
