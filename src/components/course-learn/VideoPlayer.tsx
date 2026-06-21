@@ -140,6 +140,18 @@ export function VideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSrc]);
 
+  // Reset + safety-net reveal on source change. Some mobile browsers can be
+  // slow to fire `loadeddata`/`canplay`; this makes sure the video is never
+  // left hidden behind the loading skeleton. Presentation-only — playback and
+  // completion tracking are untouched.
+  useEffect(() => {
+    setLoaded(false);
+    if (!activeSrc) return;
+    const t = setTimeout(() => setLoaded(true), 2500);
+    return () => clearTimeout(t);
+  }, [activeSrc]);
+
+
   // Captions on/off.
   useEffect(() => {
     const v = videoRef.current;
