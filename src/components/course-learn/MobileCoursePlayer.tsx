@@ -410,6 +410,15 @@ export function MobileCoursePlayer({
                     controllerRef={controllerRef}
                   />
                 )}
+                {moreView === 'transcript' && (
+                  <MobileTranscript
+                    transcript={transcript}
+                    loading={transcriptLoading}
+                    canSeek={canSeek}
+                    controllerRef={controllerRef}
+                    lessonTitle={activeLesson?.title}
+                  />
+                )}
                 {moreView === 'resources' && (
                   <MobileResources courseId={course.id} resources={resources} lessons={lessons} />
                 )}
