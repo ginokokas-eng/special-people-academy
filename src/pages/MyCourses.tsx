@@ -88,6 +88,8 @@ export default function MyCourses() {
           level: string;
           delivery_type: string | null;
           is_internal: boolean | null;
+          has_certificate: boolean | null;
+          requires_practical_signoff: boolean | null;
         } | null;
 
         if (!course) continue;
