@@ -134,7 +134,7 @@ export function MobileCoursePlayer({
 
   const hasResources = resources.length > 0;
 
-  const moreMenu: Array<{
+  type MoreMenuItem = {
     key: MoreView | 'share' | 'favourite';
     label: string;
     subtitle?: string;
@@ -142,7 +142,9 @@ export function MobileCoursePlayer({
     onClick: () => void;
     enabled: boolean;
     drillIn: boolean;
-  }> = [
+  };
+
+  const moreMenu: MoreMenuItem[] = ([
     {
       key: 'about',
       label: 'About this Course',
