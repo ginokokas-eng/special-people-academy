@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { CourseContentSidebar } from './CourseContentSidebar';
+import { MobileLectureList } from './MobileLectureList';
 import { OverviewTab } from './OverviewTab';
 import { QnaTab } from './QnaTab';
 import { NotesTab } from './NotesTab';
