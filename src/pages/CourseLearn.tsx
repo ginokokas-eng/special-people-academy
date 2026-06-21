@@ -47,6 +47,7 @@ import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
 import type {
   LearnCourse,
