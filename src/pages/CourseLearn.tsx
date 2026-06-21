@@ -68,6 +68,7 @@ export default function CourseLearn() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { prefs, setPrefs } = useLearnerPrefs();
+  const isMobile = useIsMobile();
 
   const [course, setCourse] = useState<LearnCourse | null>(null);
   const [modules, setModules] = useState<LearnModule[]>([]);
