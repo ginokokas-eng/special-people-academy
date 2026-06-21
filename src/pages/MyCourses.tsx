@@ -63,12 +63,20 @@ export default function MyCourses() {
         .select(`
           enrolled_at,
           completed_at,
-          course:courses(id, title, category, thumbnail_url, duration_minutes, level, delivery_type, is_internal)
+          course:courses(id, title, category, thumbnail_url, duration_minutes, level, delivery_type, is_internal, has_certificate, requires_practical_signoff)
         `)
         .eq('user_id', user.id)
         .order('enrolled_at', { ascending: false });
 
+      // Certificates this learner has earned (drives "Certificate available" status)
+      const { data: earnedCerts } = await supabase
+        .from('certificates')
+        .select('course_id')
+        .eq('user_id', user.id);
+      const earnedCertIds = new Set((earnedCerts || []).map((c) => c.course_id));
+
       const coursesWithProgress: MyCourse[] = [];
+
 
       for (const enrollment of enrollments || []) {
         const course = enrollment.course as {
