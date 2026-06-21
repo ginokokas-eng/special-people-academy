@@ -42,6 +42,7 @@ import { CertificateTab } from '@/components/course-learn/CertificateTab';
 import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
 import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
+import { MobileCoursePlayer } from '@/components/course-learn/MobileCoursePlayer';
 import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
