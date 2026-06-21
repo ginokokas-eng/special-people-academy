@@ -21,6 +21,10 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader2,
+  RotateCcw,
+  RotateCw,
+  Cast,
+  MoreVertical,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -33,8 +37,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SPEED_OPTIONS, formatTime, type LearnerPrefs } from './useLearnerPrefs';
 import type { LessonVideoSource, MediaController } from './types';
+
+// Speed values the mobile quick-toggle cycles through on each tap.
+const MOBILE_SPEED_CYCLE = [0.75, 1, 1.25, 1.5, 2];
+const formatSpeed = (s: number) => (Number.isInteger(s) ? `${s}.0x` : `${s}x`);
 
 interface Props {
   title: string;
