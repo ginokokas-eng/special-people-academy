@@ -21,6 +21,10 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader2,
+  RotateCcw,
+  RotateCw,
+  Cast,
+  MoreVertical,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -33,8 +37,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SPEED_OPTIONS, formatTime, type LearnerPrefs } from './useLearnerPrefs';
 import type { LessonVideoSource, MediaController } from './types';
+
+// Speed values the mobile quick-toggle cycles through on each tap.
+const MOBILE_SPEED_CYCLE = [0.75, 1, 1.25, 1.5, 2];
+const formatSpeed = (s: number) => (Number.isInteger(s) ? `${s}.0x` : `${s}x`);
 
 interface Props {
   title: string;
@@ -82,6 +91,7 @@ export function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMobile = useIsMobile();
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -92,6 +102,8 @@ export function VideoPlayer({
   const [waiting, setWaiting] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [castAvailable, setCastAvailable] = useState(false);
+
 
   // Build the quality options. Always offer an "Auto / Original" entry.
   const qualities: QualityOption[] = [];
@@ -249,6 +261,57 @@ export function VideoPlayer({
     }, 2800);
   }, []);
 
+  // Tap the video frame to toggle controls (mobile). Tapping the centre button
+  // still plays/pauses. Playback + completion tracking are untouched.
+  const toggleControlsOnTap = useCallback(() => {
+    containerRef.current?.focus();
+    setControlsVisible((visible) => {
+      if (visible) {
+        if (hideTimer.current) clearTimeout(hideTimer.current);
+        return false;
+      }
+      showControls();
+      return true;
+    });
+  }, [showControls]);
+
+  // Cycle through the mobile playback-speed presets on each tap.
+  const cycleSpeed = useCallback(() => {
+    const idx = MOBILE_SPEED_CYCLE.indexOf(prefs.speed);
+    const next = MOBILE_SPEED_CYCLE[(idx + 1) % MOBILE_SPEED_CYCLE.length] ?? 1;
+    const v = videoRef.current;
+    if (v) v.playbackRate = next;
+    setPrefs({ speed: next });
+  }, [prefs.speed, setPrefs]);
+
+  // Remote Playback (cast) availability — only show the button when supported.
+  useEffect(() => {
+    const v = videoRef.current as (HTMLVideoElement & { remote?: any }) | null;
+    const remote = v?.remote;
+    if (!remote || typeof remote.watchAvailability !== 'function') {
+      setCastAvailable(false);
+      return;
+    }
+    let callbackId: number | undefined;
+    remote
+      .watchAvailability((available: boolean) => setCastAvailable(available))
+      .then((id: number) => {
+        callbackId = id;
+      })
+      .catch(() => setCastAvailable(false));
+    return () => {
+      if (callbackId !== undefined && typeof remote.cancelWatchAvailability === 'function') {
+        remote.cancelWatchAvailability(callbackId).catch(() => {});
+      }
+    };
+  }, [activeSrc]);
+
+  const startCast = useCallback(() => {
+    const remote = (videoRef.current as (HTMLVideoElement & { remote?: any }) | null)?.remote;
+    if (remote && typeof remote.prompt === 'function') remote.prompt().catch(() => {});
+  }, []);
+
+
   // Keyboard shortcuts scoped to the player container.
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -331,8 +394,12 @@ export function VideoPlayer({
           playsInline
           crossOrigin={vttUrl ? 'anonymous' : undefined}
           onClick={() => {
-            containerRef.current?.focus();
-            togglePlay();
+            if (isMobile) {
+              toggleControlsOnTap();
+            } else {
+              containerRef.current?.focus();
+              togglePlay();
+            }
           }}
           onPlay={() => {
             setPlaying(true);
@@ -388,8 +455,8 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* Center play overlay when paused */}
-        {loaded && !playing && !waiting && (
+        {/* Center play overlay when paused (desktop only) */}
+        {!isMobile && loaded && !playing && !waiting && (
           <button
             onClick={() => {
               containerRef.current?.focus();
@@ -404,8 +471,151 @@ export function VideoPlayer({
           </button>
         )}
 
+        {/* ===== Mobile controls overlay ===== */}
+        {isMobile && loaded && (
+          <div
+            onClick={toggleControlsOnTap}
+            className={cn(
+              'absolute inset-0 transition-opacity duration-300',
+              controlsVisible || !playing ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
+          >
+            {/* Subtle scrim only while controls are visible */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
-        {/* Control bar */}
+            {/* Top bar */}
+            <div className="absolute inset-x-0 top-0 flex items-center justify-end gap-0.5 px-2 pt-2">
+              {castAvailable && (
+                <MobileBtn label="Cast" onClick={startCast}>
+                  <Cast className="h-5 w-5" />
+                </MobileBtn>
+              )}
+              {hasCaptions && (
+                <MobileBtn
+                  label="Captions"
+                  active={prefs.captions}
+                  onClick={() => setPrefs({ captions: !prefs.captions })}
+                >
+                  {prefs.captions ? <Captions className="h-5 w-5" /> : <CaptionsOff className="h-5 w-5" />}
+                </MobileBtn>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  cycleSpeed();
+                }}
+                aria-label="Playback speed"
+                className="flex h-9 min-w-11 items-center justify-center rounded-full px-2 text-xs font-bold text-white active:bg-white/20"
+              >
+                {formatSpeed(prefs.speed)}
+              </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="More options"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-white active:bg-white/20"
+                  >
+                    <MoreVertical className="h-5 w-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-64 p-2"
+                >
+                  <SettingsPanel
+                    qualities={qualities}
+                    qualityIdx={qualityIdx}
+                    onQuality={changeQuality}
+                    speed={prefs.speed}
+                    onSpeed={setSpeed}
+                    autoplay={prefs.autoplay}
+                    onAutoplay={(v) => setPrefs({ autoplay: v })}
+                    onShortcuts={() => setShortcutsOpen(true)}
+                    onContentInfo={onContentInfo}
+                    onReport={() => onReport(videoRef.current?.currentTime ?? 0)}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Centre transport: rewind 15 / play-pause / forward 15 */}
+            {!waiting && (
+              <div className="absolute inset-0 flex items-center justify-center gap-7">
+                <MobileSeekBtn label="Rewind 15 seconds" onClick={() => seekBy(-15)}>
+                  <RotateCcw className="h-7 w-7" />
+                </MobileSeekBtn>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlay();
+                  }}
+                  aria-label={playing ? 'Pause' : 'Play'}
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-200 active:scale-95"
+                >
+                  {playing ? (
+                    <Pause className="h-8 w-8" fill="currentColor" />
+                  ) : (
+                    <Play className="ml-1 h-8 w-8" fill="currentColor" />
+                  )}
+                </button>
+                <MobileSeekBtn label="Forward 15 seconds" onClick={() => seekBy(15)}>
+                  <RotateCw className="h-7 w-7" />
+                </MobileSeekBtn>
+              </div>
+            )}
+
+            {/* Bottom bar: progress + time + fullscreen */}
+            <div className="absolute inset-x-0 bottom-0 px-3 pb-2">
+              <div className="flex items-center gap-2 text-white">
+                <span className="select-none text-[11px] tabular-nums text-white/90">
+                  {formatTime(current)}
+                </span>
+                <div
+                  className="flex-1"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <Slider
+                    value={[current]}
+                    min={0}
+                    max={duration || 100}
+                    step={0.1}
+                    onValueChange={(v) => {
+                      const vid = videoRef.current;
+                      if (vid) {
+                        vid.currentTime = v[0];
+                        setCurrent(v[0]);
+                      }
+                    }}
+                    aria-label="Seek"
+                    className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                  />
+                </div>
+                <span className="select-none text-[11px] tabular-nums text-white/90">
+                  {formatTime(duration)}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFullscreen();
+                  }}
+                  aria-label="Fullscreen"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white active:bg-white/20"
+                >
+                  {fullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+
+
+        {/* Control bar (desktop / tablet) */}
+        {!isMobile && (
         <div
           className={cn(
             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-2 pt-8 transition-opacity duration-300',
@@ -545,7 +755,9 @@ export function VideoPlayer({
             </div>
           </div>
         </div>
+        )}
       </div>
+
 
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </>
@@ -577,6 +789,62 @@ function CtrlBtn({
     </button>
   );
 }
+
+// Top-bar icon button for the mobile overlay (larger tap target, no hover state).
+function MobileBtn({
+  children,
+  label,
+  onClick,
+  active,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      className={cn(
+        'flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors active:bg-white/20',
+        active && 'text-primary'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Centre 15-second seek button for the mobile overlay.
+function MobileSeekBtn({
+  children,
+  label,
+  onClick,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      className="relative flex h-12 w-12 items-center justify-center rounded-full text-white transition-transform duration-200 active:scale-95 active:bg-white/15"
+    >
+      {children}
+      <span className="absolute text-[9px] font-bold">15</span>
+    </button>
+  );
+}
+
+
 
 function SettingsPanel({
   qualities,
