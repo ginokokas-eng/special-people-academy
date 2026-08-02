@@ -40,6 +40,7 @@ import {
   ApertureOffice,
   ApertureOk,
   ApertureOnCall,
+  ApertureOutdoors,
   AperturePhotoConsent,
   AperturePlan,
   AperturePrivacy,
@@ -120,11 +121,8 @@ export const BatteryCharging = as(ApertureEnergy);
 export const Utensils = as(ApertureFoodDrink);
 export const Coffee = as(ApertureFoodDrink);
 export const CupSoda = as(ApertureFoodDrink);
-export const Leaf = as(ApertureOutdoorsAlias());
-function ApertureOutdoorsAlias() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require('./aperture').ApertureOutdoors;
-}
+export const Leaf = as(ApertureOutdoors);
+export const Sprout = as(ApertureOutdoors);
 export const Palette = as(ApertureCreative);
 export const Camera = as(AperturePhotoConsent);
 export const Accessibility = as(ApertureAccessibility);
