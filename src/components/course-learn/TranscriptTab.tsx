@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { FileText, Search, Play } from 'lucide-react';
+import { FileText, Search, Play } from '@/components/icons';
 import { formatTime } from './useLearnerPrefs';
 import type { LessonTranscript, MediaController } from './types';
 

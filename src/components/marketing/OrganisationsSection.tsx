@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, Home, HeartHandshake, Stethoscope, ArrowRight, Check } from "lucide-react";
+import { Building2, Home, HeartHandshake, Stethoscope, ArrowRight, Check } from "@/components/icons";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

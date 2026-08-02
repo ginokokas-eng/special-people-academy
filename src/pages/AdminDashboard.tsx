@@ -44,7 +44,7 @@ import {
   UserPlus,
   GraduationCap,
   Shield
-} from 'lucide-react';
+} from '@/components/icons';
 import { PracticalSessionsManager } from '@/components/admin/PracticalSessionsManager';
 import { CertificateReporting } from '@/components/admin/CertificateReporting';
 import { CourseProgressReport } from '@/components/admin/CourseProgressReport';

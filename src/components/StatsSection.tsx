@@ -1,4 +1,4 @@
-import { BookOpen, Users, Trophy, TrendingUp } from "lucide-react";
+import { BookOpen, Users, Trophy, TrendingUp } from "@/components/icons";
 
 interface StatCardProps {
   icon: React.ReactNode;

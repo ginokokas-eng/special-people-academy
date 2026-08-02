@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Save, Upload, Image, Type, Globe, X } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Image, Type, Globe, X } from '@/components/icons';
 import { useBrandingSettings, type BrandingSettings } from '@/hooks/useBrandingSettings';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';

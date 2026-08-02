@@ -14,7 +14,7 @@ import {
   CreditCard,
   BarChart3,
   Play
-} from 'lucide-react';
+} from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 
 interface CourseSidebarProps {

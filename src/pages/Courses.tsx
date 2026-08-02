@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, BookOpen, Loader2, ArrowRight } from 'lucide-react';
+import { Search, BookOpen, Loader2, ArrowRight } from '@/components/icons';
 import { EditorialCourseCard, type EditorialCourse } from '@/components/courses/EditorialCourseCard';
 
 interface Course extends EditorialCourse {

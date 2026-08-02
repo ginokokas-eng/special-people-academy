@@ -1,4 +1,4 @@
-import { CheckCircle2, Award } from 'lucide-react';
+import { CheckCircle2, Award } from '@/components/icons';
 import type { LearnCourse, LearnLesson } from './types';
 
 export function OverviewTab({

@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Award, Download, Loader2, FileText, Calendar } from 'lucide-react';
+import { Award, Download, Loader2, FileText, Calendar } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Course {

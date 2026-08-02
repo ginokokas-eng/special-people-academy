@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw, ListChecks } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Loader2, CheckCircle2, AlertTriangle, Info, RefreshCw, ListChecks } from '@/components/icons';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { LessonDurationAudit, type AuditLessonInput } from './LessonDurationAudit';

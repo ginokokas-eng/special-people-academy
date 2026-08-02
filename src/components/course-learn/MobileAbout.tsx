@@ -1,4 +1,4 @@
-import { CheckCircle2, Award, BookOpen, Users, ListTree, ShieldAlert, GraduationCap } from 'lucide-react';
+import { CheckCircle2, Award, BookOpen, Users, ListTree, ShieldAlert, GraduationCap } from '@/components/icons';
 import { totalDuration } from './lessonMeta';
 import type { LearnCourse, LearnLesson, LearnModule } from './types';
 

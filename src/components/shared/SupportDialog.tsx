@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Mail, Copy, Check } from 'lucide-react';
+import { Mail, Copy, Check } from '@/components/icons';
 import { toast } from '@/hooks/use-toast';
 
 interface SupportDialogProps {

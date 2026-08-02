@@ -3,7 +3,7 @@ import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, User, Clock, ArrowRight } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, ArrowRight } from "@/components/icons";
 import { getBlogPostBySlug, blogPosts } from "@/data/blogPosts";
 
 export default function BlogPost() {

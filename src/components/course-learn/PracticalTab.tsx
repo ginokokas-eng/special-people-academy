@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ClipboardCheck, CheckCircle2, XCircle, Clock, Info } from 'lucide-react';
+import { Loader2, ClipboardCheck, CheckCircle2, XCircle, Clock, Info } from '@/components/icons';
 import type { LearnCourse } from './types';
 
 const sb = supabase as any;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, ShieldCheck, BadgeCheck, Clock, Award, TrendingUp } from "lucide-react";
+import { ArrowRight, Play, ShieldCheck, BadgeCheck, Clock, Award, TrendingUp } from "@/components/icons";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 

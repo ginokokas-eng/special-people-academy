@@ -3,7 +3,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { CTABanner } from "@/components/marketing/CTABanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Quote, CheckCircle, Target, Lightbulb } from "lucide-react";
+import { Quote, CheckCircle, Target, Lightbulb } from "@/components/icons";
 
 const caseStudies = [
   {

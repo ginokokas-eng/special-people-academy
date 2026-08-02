@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Search, MoreHorizontal, Eye, Edit, Copy, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Eye, Edit, Copy, Loader2 } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Course {

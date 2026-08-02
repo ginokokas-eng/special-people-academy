@@ -11,7 +11,7 @@ import {
   Home,
   LogOut,
   Phone,
-} from 'lucide-react';
+} from '@/components/icons';
 import defaultLogo from '@/assets/logo.svg';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import { NotificationsSheet } from '@/components/shared/NotificationsSheet';
@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from '@/components/icons';
 import { adminNavItems, adminDropdownItems, type NavItem } from '@/config/navigation';
 
 interface PortalLayoutProps {

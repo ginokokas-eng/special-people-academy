@@ -12,7 +12,7 @@ import {
   Bell,
   LayoutDashboard,
   Phone,
-} from 'lucide-react';
+} from '@/components/icons';
 import defaultLogo from '@/assets/logo.svg';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import { useGeneralSettings } from '@/hooks/useGeneralSettings';

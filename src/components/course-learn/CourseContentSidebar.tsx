@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CheckCircle2, Circle, ChevronDown, Paperclip, Download, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronDown, Paperclip, Download, Loader2 } from '@/components/icons';
 import { lessonTypeIcon, lessonMetaLabel, totalDuration } from './lessonMeta';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnLesson, LearnModule, LearnResource } from './types';

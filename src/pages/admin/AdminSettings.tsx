@@ -2,13 +2,13 @@ import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Settings, Shield, Bell, Palette, ChevronRight, ArrowRight } from 'lucide-react';
+import { Settings, Shield, Bell, Palette, ChevronRight, ArrowRight } from '@/components/icons';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from '@/components/icons';
 import { ReactNode } from 'react';
 
 interface SectionData {

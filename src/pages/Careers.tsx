@@ -25,7 +25,7 @@ import {
   Clock,
   CheckCircle,
   ArrowRight
-} from "lucide-react";
+} from "@/components/icons";
 import { ApplicationForm } from "@/components/careers/ApplicationForm";
 
 const whyWorkHere = [

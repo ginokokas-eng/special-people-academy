@@ -14,7 +14,7 @@ import {
   Calendar,
   ArrowRight,
   BookOpen
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface PurchasedCourse {
   id: string;

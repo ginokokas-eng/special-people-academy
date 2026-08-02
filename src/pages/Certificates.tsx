@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Award, Download, Share2, Loader2, GraduationCap } from 'lucide-react';
+import { Award, Download, Share2, Loader2, GraduationCap } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Certificate {

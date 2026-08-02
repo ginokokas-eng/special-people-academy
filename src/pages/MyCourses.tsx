@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Clock, CheckCircle2, Loader2, Play, ArrowRight, Mail } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle2, Loader2, Play, ArrowRight, Mail } from '@/components/icons';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCart } from '@/hooks/useCart';
 import { useGeneralSettings } from '@/hooks/useGeneralSettings';

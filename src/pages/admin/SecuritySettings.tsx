@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, KeyRound, Globe, Clock, History, LogOut, Plus, X, ArrowLeft, Info } from 'lucide-react';
+import { Shield, KeyRound, Globe, Clock, History, LogOut, Plus, X, ArrowLeft, Info } from '@/components/icons';
 import { useSecuritySettings, type SecuritySettings as SecuritySettingsType } from '@/hooks/useSecuritySettings';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';

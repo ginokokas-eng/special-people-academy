@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, Info } from 'lucide-react';
+import { CheckCircle2, Info } from '@/components/icons';
 
 interface CourseOverviewProps {
   overview?: string;

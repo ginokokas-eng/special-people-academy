@@ -29,7 +29,7 @@ import {
   Minimize,
   VideoOff,
   RotateCcw,
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 
 import { CourseContentSidebar } from '@/components/course-learn/CourseContentSidebar';

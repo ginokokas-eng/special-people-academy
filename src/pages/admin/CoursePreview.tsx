@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Clock, BookOpen, Award, Users, Play, FileText, HelpCircle, Loader2 } from 'lucide-react';
+import { Clock, BookOpen, Award, Users, Play, FileText, HelpCircle, Loader2 } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Course {

@@ -1,4 +1,4 @@
-import { Check, CircleCheck, Star, Box, Briefcase, Globe } from "lucide-react";
+import { Check, CircleCheck, Star, Box, Briefcase, Globe } from "@/components/icons";
 
 const accreditations = [
   { icon: Check, name: "CPD Certified", sub: "The CPD Standards Office" },

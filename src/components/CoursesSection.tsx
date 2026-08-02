@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, GraduationCap } from "lucide-react";
+import { ArrowRight, GraduationCap } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { EditorialCourseCard, type EditorialCourse } from "@/components/courses/EditorialCourseCard";

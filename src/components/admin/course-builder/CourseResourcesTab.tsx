@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Trash2, FileText, Image, Video, File, Loader2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, FileText, Image, Video, File, Loader2, ExternalLink } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Resource {

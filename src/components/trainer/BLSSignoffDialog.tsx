@@ -28,7 +28,7 @@ import {
   Eye,
   Calendar,
   MapPin,
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface BLSSignoffDialogProps {
   open: boolean;

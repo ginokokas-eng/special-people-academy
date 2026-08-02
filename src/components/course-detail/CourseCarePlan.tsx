@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, CheckCircle2, Users, ClipboardList } from 'lucide-react';
+import { FileText, CheckCircle2, Users, ClipboardList } from '@/components/icons';
 
 interface CourseCarePlanProps {
   category?: string;

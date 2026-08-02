@@ -6,7 +6,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle } from '@/components/icons';
 import { lessonTypeLabel, lessonMetaLabel } from './lessonMeta';
 import type { LearnLesson } from './types';
 

@@ -22,7 +22,7 @@ import {
   UserCog,
   FileText,
   CheckCircle
-} from "lucide-react";
+} from "@/components/icons";
 
 const enterpriseNeeds = [
   {

@@ -12,7 +12,7 @@ import {
   CreditCard,
   Webhook,
   Clock
-} from "lucide-react";
+} from "@/components/icons";
 import { supabase } from "@/integrations/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 

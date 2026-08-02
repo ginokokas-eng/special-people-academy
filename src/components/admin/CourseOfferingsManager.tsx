@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Monitor, Users, GraduationCap, Layers } from 'lucide-react';
+import { Monitor, Users, GraduationCap, Layers } from '@/components/icons';
 
 interface CourseOffering {
   id: string;

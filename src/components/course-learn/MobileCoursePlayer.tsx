@@ -23,7 +23,7 @@ import {
   Megaphone,
   Heart,
   FileText,
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 
 import { MobileLectureList } from './MobileLectureList';

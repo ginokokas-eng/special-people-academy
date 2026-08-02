@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Loader2, Save } from 'lucide-react';
+import { Eye, Loader2, Save } from '@/components/icons';
 import { toast } from 'sonner';
 import { CourseOverviewTab } from '@/components/admin/course-builder/CourseOverviewTab';
 import { CourseModulesTab } from '@/components/admin/course-builder/CourseModulesTab';

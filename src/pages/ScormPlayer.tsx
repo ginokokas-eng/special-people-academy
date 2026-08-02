@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScormApiAdapter } from '@/lib/scorm-api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, X, CheckCircle2, Clock } from 'lucide-react';
+import { Loader2, X, CheckCircle2, Clock } from '@/components/icons';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;

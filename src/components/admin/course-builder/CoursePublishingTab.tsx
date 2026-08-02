@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Course {

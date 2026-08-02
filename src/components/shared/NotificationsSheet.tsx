@@ -6,7 +6,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Circle, ExternalLink } from 'lucide-react';
+import { Bell, CheckCheck, Circle, ExternalLink } from '@/components/icons';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';

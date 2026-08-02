@@ -5,7 +5,7 @@ import {
   GraduationCap, 
   Calendar, 
   Award 
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface AdminOverviewCardsProps {
   totalLearners: number;

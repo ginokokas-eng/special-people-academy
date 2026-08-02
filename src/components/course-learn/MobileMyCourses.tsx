@@ -15,7 +15,7 @@ import {
   ClipboardCheck,
   PlayCircle,
   X,
-} from 'lucide-react';
+} from '@/components/icons';
 
 export interface MobileCourseItem {
   id: string;

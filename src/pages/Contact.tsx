@@ -25,7 +25,7 @@ import {
   Headphones,
   Users,
   HelpCircle
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 

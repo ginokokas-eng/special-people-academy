@@ -28,7 +28,7 @@ import {
   Eye,
   Calendar,
   MapPin
-} from 'lucide-react';
+} from '@/components/icons';
 import { MedicationChecklistSection } from './medication-signoff/MedicationChecklistSection';
 import { MedicationActionPlanSection } from './medication-signoff/MedicationActionPlanSection';
 

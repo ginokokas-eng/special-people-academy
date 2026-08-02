@@ -16,7 +16,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Check, X, ArrowRight, Clock, Users, Rocket, HeartHandshake, Loader2 } from "lucide-react";
+import { Check, X, ArrowRight, Clock, Users, Rocket, HeartHandshake, Loader2 } from "@/components/icons";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,6 +1,6 @@
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle, Cookie, Settings, BarChart3, Megaphone } from "lucide-react";
+import { AlertTriangle, Cookie, Settings, BarChart3, Megaphone } from "@/components/icons";
 import { Link } from "react-router-dom";
 
 const cookieTypes = [

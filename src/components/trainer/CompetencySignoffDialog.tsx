@@ -25,7 +25,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
   Eye
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface CompetencySignoffDialogProps {
   open: boolean;

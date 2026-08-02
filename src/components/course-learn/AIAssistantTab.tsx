@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Send, Loader2, ShieldAlert } from 'lucide-react';
+import { Sparkles, Send, Loader2, ShieldAlert } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface ChatMessage {
