@@ -15,7 +15,7 @@ import {
   ChevronRight,
   SlidersHorizontal,
   X
-} from 'lucide-react';
+} from '@/components/icons';
 import { format } from 'date-fns';
 
 interface AdminTableControlsProps {

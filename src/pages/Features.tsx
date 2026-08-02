@@ -20,7 +20,7 @@ import {
   BarChart3,
   Layers,
   Settings
-} from "lucide-react";
+} from "@/components/icons";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 

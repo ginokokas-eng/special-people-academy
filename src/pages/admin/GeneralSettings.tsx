@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Building2, GraduationCap, Layout, ToggleRight } from 'lucide-react';
+import { Loader2, Building2, GraduationCap, Layout, ToggleRight } from '@/components/icons';
 import { useGeneralSettingsAdmin, type GeneralSettings } from '@/hooks/useGeneralSettings';
 import { Textarea } from '@/components/ui/textarea';
 

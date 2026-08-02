@@ -17,7 +17,7 @@ import {
   Plus,
   CornerDownRight,
   ChevronDown,
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
 import type { LearnLesson } from './types';

@@ -7,7 +7,7 @@ import {
   Settings2, 
   RefreshCw,
   ExternalLink 
-} from 'lucide-react';
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,

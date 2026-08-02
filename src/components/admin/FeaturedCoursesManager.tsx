@@ -21,7 +21,7 @@ import {
   RefreshCw,
   ArrowUp,
   ArrowDown
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 
 interface FeaturedCourse {

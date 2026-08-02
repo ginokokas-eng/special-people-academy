@@ -13,7 +13,7 @@ import {
   BookOpen,
   Gamepad2,
   Package
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface Lesson {
   id: string;

@@ -30,7 +30,7 @@ import {
   Mail,
   Clock,
   ExternalLink
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 

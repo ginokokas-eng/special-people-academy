@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Package, Loader2, CheckCircle2, Info, FileArchive } from 'lucide-react';
+import { Upload, Package, Loader2, CheckCircle2, Info, FileArchive } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface ScormPackage {

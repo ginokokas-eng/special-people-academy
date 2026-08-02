@@ -17,7 +17,7 @@ import {
   Loader2,
   Layers,
   Check
-} from 'lucide-react';
+} from '@/components/icons';
 import {
   Tooltip,
   TooltipContent,

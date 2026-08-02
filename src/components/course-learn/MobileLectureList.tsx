@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CheckCircle2, ChevronDown, Download, Loader2, Lock } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Download, Loader2, Lock } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import {
   lessonTypeIcon,

@@ -13,7 +13,7 @@ import {
   Heart,
   ShieldCheck,
   Sparkles
-} from 'lucide-react';
+} from '@/components/icons';
 
 interface CourseHeroProps {
   title: string;

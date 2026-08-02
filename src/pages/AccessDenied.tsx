@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ShieldX, ArrowLeft, Home } from 'lucide-react';
+import { ShieldX, ArrowLeft, Home } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 
 export default function AccessDenied() {

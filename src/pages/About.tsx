@@ -12,7 +12,7 @@ import {
   Target,
   CheckCircle,
   Shield
-} from "lucide-react";
+} from "@/components/icons";
 
 const values = [
   {

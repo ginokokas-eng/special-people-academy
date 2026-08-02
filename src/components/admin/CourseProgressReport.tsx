@@ -10,7 +10,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { Loader2, Download, BarChart3 } from 'lucide-react';
+import { Loader2, Download, BarChart3 } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Course { id: string; title: string; }

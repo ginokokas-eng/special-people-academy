@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Shield, Scale, FileText, Heart } from 'lucide-react';
+import { AlertTriangle, Shield, Scale, FileText, Heart } from '@/components/icons';
 
 interface CourseSafetyGovernanceProps {
   category: string;

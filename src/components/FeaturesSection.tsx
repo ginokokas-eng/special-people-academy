@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck, Globe, CalendarClock, UserCheck, Layers, FileCheck2 } from "lucide-react";
+import { ShieldCheck, Globe, CalendarClock, UserCheck, Layers, FileCheck2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

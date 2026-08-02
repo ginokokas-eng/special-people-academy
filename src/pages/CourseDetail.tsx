@@ -5,7 +5,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/icons';
 import { toast } from 'sonner';
 
 import { CourseHero } from '@/components/course-detail/CourseHero';

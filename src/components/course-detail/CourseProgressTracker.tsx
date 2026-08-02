@@ -12,7 +12,7 @@ import {
   Award,
   Loader2,
   Trophy
-} from 'lucide-react';
+} from '@/components/icons';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';

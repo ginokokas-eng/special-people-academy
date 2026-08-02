@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, CheckCircle2, BookOpen } from 'lucide-react';
+import { Download, CheckCircle2, BookOpen } from '@/components/icons';
 import { toast } from 'sonner';
 import type { LearnLesson } from './types';
 

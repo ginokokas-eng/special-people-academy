@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Bell, Mail, ArrowLeft, Info, Save, SendHorizonal,
   Plus, X, AlertTriangle, Users, GraduationCap, Shield
-} from 'lucide-react';
+} from '@/components/icons';
 import { useNotificationSettings, type NotificationSettings } from '@/hooks/useNotificationSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Download, Check } from 'lucide-react';
+import { Copy, Download, Check } from '@/components/icons';
 import { toast } from 'sonner';
 import { TranscriptTab } from './TranscriptTab';
 import { formatTime } from './useLearnerPrefs';

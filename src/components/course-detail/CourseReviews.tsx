@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Star, MessageSquare } from 'lucide-react';
+import { Star, MessageSquare } from '@/components/icons';
 
 interface Review {
   id: string;

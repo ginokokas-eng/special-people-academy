@@ -21,7 +21,7 @@ import {
   Users,
   Layers,
   GraduationCap
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 
 const REGULATED_CERT_FEE = 15;

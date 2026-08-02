@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 
 // KB content lookup by course slug - rich knowledge base entries
 const kbContentBySlug: Record<string, KnowledgeBaseInfo> = {

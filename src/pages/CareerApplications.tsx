@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, FileText, Mail, Calendar, ExternalLink, Briefcase } from 'lucide-react';
+import { Loader2, FileText, Mail, Calendar, ExternalLink, Briefcase } from '@/components/icons';
 import { format } from 'date-fns';
 
 interface CareerApplication {

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, GraduationCap, Search, RefreshCw } from 'lucide-react';
+import { Loader2, GraduationCap, Search, RefreshCw } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Learner {

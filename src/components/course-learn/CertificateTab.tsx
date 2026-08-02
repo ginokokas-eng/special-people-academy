@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Award, GraduationCap, Download, Clock, ShieldCheck } from 'lucide-react';
+import { Loader2, Award, GraduationCap, Download, Clock, ShieldCheck } from '@/components/icons';
 import { toast } from 'sonner';
 import type { LearnCourse } from './types';
 

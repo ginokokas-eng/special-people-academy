@@ -20,7 +20,7 @@ import {
   Mail,
   MessageCircle,
   Clock
-} from "lucide-react";
+} from "@/components/icons";
 import { Link } from "react-router-dom";
 
 interface Article {

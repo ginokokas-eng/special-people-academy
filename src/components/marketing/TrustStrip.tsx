@@ -1,4 +1,4 @@
-import { Building2, Home, HeartHandshake, Stethoscope, ShieldCheck, Award } from "lucide-react";
+import { Building2, Home, HeartHandshake, Stethoscope, ShieldCheck, Award } from "@/components/icons";
 
 const sectors = [
   { label: "Care Homes", icon: Building2 },

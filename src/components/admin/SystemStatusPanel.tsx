@@ -11,7 +11,7 @@ import {
   Package,
   AlertTriangle,
   RefreshCw,
-} from 'lucide-react';
+} from '@/components/icons';
 
 type Health = 'ok' | 'warn' | 'error' | 'idle';
 

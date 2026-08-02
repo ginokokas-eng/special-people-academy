@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, Plus } from 'lucide-react';
+import { X, Plus } from '@/components/icons';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 

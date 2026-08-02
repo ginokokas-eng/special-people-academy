@@ -48,7 +48,7 @@ import {
   Clock,
   ClipboardList,
   ShieldCheck
-} from 'lucide-react';
+} from '@/components/icons';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Save } from 'lucide-react';
+import { User, Loader2, Save } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Profile {

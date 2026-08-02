@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Pencil, Trash2, StickyNote, Save, X, Clock, Play } from 'lucide-react';
+import { Loader2, Pencil, Trash2, StickyNote, Save, X, Clock, Play } from '@/components/icons';
 import { toast } from 'sonner';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { formatTime } from './useLearnerPrefs';

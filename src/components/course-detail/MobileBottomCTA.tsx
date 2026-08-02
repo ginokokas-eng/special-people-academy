@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Lock, CreditCard } from 'lucide-react';
+import { Lock, CreditCard } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 
 interface MobileBottomCTAProps {

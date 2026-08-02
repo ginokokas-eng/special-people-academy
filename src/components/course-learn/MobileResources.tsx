@@ -11,7 +11,7 @@ import {
   Link as LinkIcon,
   Paperclip,
   ExternalLink,
-} from 'lucide-react';
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnResource, LearnLesson } from './types';

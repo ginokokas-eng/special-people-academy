@@ -6,8 +6,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Trophy, Clock, TrendingUp, ArrowRight, Play } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { BookOpen, Trophy, Clock, TrendingUp, ArrowRight, Play } from '@/components/icons';
+import { Loader2 } from '@/components/icons';
 
 interface DashboardStats {
   enrolledCourses: number;

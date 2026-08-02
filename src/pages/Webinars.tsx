@@ -4,7 +4,7 @@ import { FAQSection } from "@/components/marketing/FAQSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Video, Play, ArrowRight, Users } from "lucide-react";
+import { Calendar, Clock, User, Video, Play, ArrowRight, Users } from "@/components/icons";
 import { Link } from "react-router-dom";
 
 const upcomingWebinars = [

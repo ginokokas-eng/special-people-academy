@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Video, Loader2, ExternalLink, Save } from 'lucide-react';
+import { Video, Loader2, ExternalLink, Save } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Lesson {

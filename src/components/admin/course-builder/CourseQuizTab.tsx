@@ -27,7 +27,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Plus, Trash2, Edit, Loader2, HelpCircle, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, Edit, Loader2, HelpCircle, CheckCircle } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface Quiz {

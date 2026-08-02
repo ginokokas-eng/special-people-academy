@@ -1,4 +1,4 @@
-import { ArrowRight, Play, Circle, BadgeCheck, Clock, ShieldCheck, Award, TrendingUp, BookOpen, Zap, Video } from "lucide-react";
+import { ArrowRight, Play, Circle, BadgeCheck, Clock, ShieldCheck, Award, TrendingUp, BookOpen, Zap, Video } from "@/components/icons";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 

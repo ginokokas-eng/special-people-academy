@@ -1,4 +1,4 @@
-import { Download, Loader2, FileText, FileSpreadsheet, FileImage, File, Paperclip } from 'lucide-react';
+import { Download, Loader2, FileText, FileSpreadsheet, FileImage, File, Paperclip } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnResource, LearnLesson } from './types';

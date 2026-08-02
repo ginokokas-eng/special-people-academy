@@ -4,7 +4,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, User, BookOpen } from "lucide-react";
+import { ArrowRight, Calendar, User, BookOpen } from "@/components/icons";
 import { Link } from "react-router-dom";
 import { blogPosts, blogCategories } from "@/data/blogPosts";
 

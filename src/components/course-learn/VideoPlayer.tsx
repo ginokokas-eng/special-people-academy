@@ -25,7 +25,7 @@ import {
   RotateCw,
   Cast,
   MoreVertical,
-} from 'lucide-react';
+} from '@/components/icons';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

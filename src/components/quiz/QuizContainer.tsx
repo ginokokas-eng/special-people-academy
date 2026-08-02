@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Play, Clock, Target, Award, RotateCcw, Lock, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, Play, Clock, Target, Award, RotateCcw, Lock, CheckCircle2, AlertTriangle } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface QuizContainerProps {

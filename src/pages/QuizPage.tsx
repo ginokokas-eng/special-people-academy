@@ -6,7 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { QuizContainer } from '@/components/quiz/QuizContainer';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, BookOpen } from 'lucide-react';
+import { Loader2, ArrowLeft, BookOpen } from '@/components/icons';
 
 export default function QuizPage() {
   const { courseId } = useParams<{ courseId: string }>();

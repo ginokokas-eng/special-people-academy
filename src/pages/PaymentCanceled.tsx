@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { XCircle, ArrowLeft, HelpCircle } from "lucide-react";
+import { XCircle, ArrowLeft, HelpCircle } from "@/components/icons";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

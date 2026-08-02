@@ -14,7 +14,7 @@ import {
   Award,
   Info,
   CheckCircle2
-} from 'lucide-react';
+} from '@/components/icons';
 import {
   Tooltip,
   TooltipContent,
