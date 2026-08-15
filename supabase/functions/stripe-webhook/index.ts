@@ -44,15 +44,41 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   // Handle course purchase
   if (checkoutType === "course_purchase") {
-    const cartItemsJson = session.metadata?.cart_items;
-    if (cartItemsJson) {
-      const cartItems = JSON.parse(cartItemsJson) as Array<{
-        course_id: string;
-        offering_id: string;
-        offering_type: string;
-        participants_count: number;
-        regulated_certification: boolean;
-      }>;
+    type CartMetaItem = {
+      course_id: string;
+      offering_id: string;
+      offering_type: string;
+      participants_count: number;
+      regulated_certification: boolean;
+    };
+
+    let cartItems: CartMetaItem[] = [];
+
+    if (session.metadata?.cart_v === "2") {
+      const chunkCount = Number(session.metadata?.cart_chunks || 0);
+      let compact = "";
+      for (let i = 0; i < chunkCount; i++) {
+        compact += session.metadata?.[`cart_${i}`] || "";
+      }
+      cartItems = compact
+        .split(";")
+        .filter(Boolean)
+        .map((row) => {
+          const [course_id, offering_id, offering_type, participants, regulated] = row.split("|");
+          return {
+            course_id,
+            offering_id,
+            offering_type,
+            participants_count: Number(participants) || 1,
+            regulated_certification: regulated === "1",
+          };
+        });
+    } else if (session.metadata?.cart_items) {
+      cartItems = JSON.parse(session.metadata.cart_items) as CartMetaItem[];
+    }
+
+    if (cartItems.length > 0) {
+
 
       console.log(`[WEBHOOK] Processing ${cartItems.length} course purchases`);
 
@@ -112,7 +138,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         plan_name: session.metadata?.plan_name,
         subscription_id: session.subscription,
         type: checkoutType,
-        cart_items: session.metadata?.cart_items,
+        cart_items: session.metadata?.cart_items ?? null,
       },
     }, { onConflict: "stripe_session_id" });
 
