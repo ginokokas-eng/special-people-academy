@@ -117,14 +117,31 @@ serve(async (req) => {
 
     logStep("Line items created", { count: lineItems.length });
 
-    // Create metadata for fulfillment
-    const cartMetadata = cart_items.map(item => ({
-      course_id: item.course_id,
-      offering_id: item.offering_id,
-      offering_type: item.offering_type,
-      participants_count: item.participants_count,
-      regulated_certification: item.regulated_certification,
-    }));
+    // Create compact metadata for fulfillment (Stripe limits each value to 500 chars)
+    // Format per item: course_id|offering_id|offering_type|participants|regulated(0/1), items joined by ";"
+    const compactCart = cart_items
+      .map(item => [
+        item.course_id,
+        item.offering_id,
+        item.offering_type,
+        item.participants_count,
+        item.regulated_certification ? 1 : 0,
+      ].join("|"))
+      .join(";");
+
+    // Chunk into 400-char pieces spread over multiple metadata keys
+    const chunks: string[] = [];
+    for (let i = 0; i < compactCart.length; i += 400) {
+      chunks.push(compactCart.slice(i, i + 400));
+    }
+
+    const cartMetadata: Record<string, string> = {
+      cart_v: "2",
+      cart_chunks: String(chunks.length),
+    };
+    chunks.forEach((chunk, i) => {
+      cartMetadata[`cart_${i}`] = chunk;
+    });
 
     const origin = req.headers.get("origin") || "http://localhost:5173";
 
@@ -138,7 +155,7 @@ serve(async (req) => {
       cancel_url: `${origin}/cart`,
       metadata: {
         user_id: user.id,
-        cart_items: JSON.stringify(cartMetadata),
+        ...cartMetadata,
         type: "course_purchase",
       },
       payment_intent_data: {
@@ -148,6 +165,7 @@ serve(async (req) => {
         },
       },
     });
+
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
