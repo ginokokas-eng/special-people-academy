@@ -138,7 +138,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         plan_name: session.metadata?.plan_name,
         subscription_id: session.subscription,
         type: checkoutType,
-        cart_items: session.metadata?.cart_items,
+        cart_items: session.metadata?.cart_items ?? null,
       },
     }, { onConflict: "stripe_session_id" });
 
