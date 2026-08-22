@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Loader2 } from '@/components/icons';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
-import type { MediaController } from '@/components/course-learn/types';
+import type { MediaController, TranscriptSegment } from '@/components/course-learn/types';
+import { segmentsToVttUrl } from '@/lib/vtt';
 import { videoEmbedUrl, type VideoPayload } from './types';
 
 interface Props {
