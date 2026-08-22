@@ -314,9 +314,11 @@ export function MobileCoursePlayer({
               >
                 <ChevronLeft className="mr-1 h-4 w-4" /> Previous
               </Button>
+              {/* quiz, scorm, resource and blocks lessons complete themselves in-body. */}
               {activeLesson.lesson_type !== 'quiz' &&
                 activeLesson.lesson_type !== 'scorm' &&
                 activeLesson.lesson_type !== 'resource' &&
+                activeLesson.lesson_type !== 'blocks' &&
                 !activeLesson.completed && (
                   <Button variant="secondary" size="sm" onClick={() => onMarkComplete(activeLesson.id)}>
                     <CheckCircle2 className="h-4 w-4" />

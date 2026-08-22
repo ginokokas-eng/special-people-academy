@@ -111,6 +111,8 @@ const lessonTypeIcons: Record<string, React.ReactNode> = {
   text: <BookOpen className="h-4 w-4" />,
   scenario: <Gamepad2 className="h-4 w-4" />,
   scorm: <Package className="h-4 w-4" />,
+  resource: <BookOpen className="h-4 w-4" />,
+  blocks: <BookOpen className="h-4 w-4" />,
 };
 
 const lessonTypeLabels: Record<string, string> = {
@@ -121,6 +123,8 @@ const lessonTypeLabels: Record<string, string> = {
   text: 'Text',
   scenario: 'Scenario',
   scorm: 'Video',
+  resource: 'Resource',
+  blocks: 'Interactive',
 };
 
 export function CourseContent({ 
