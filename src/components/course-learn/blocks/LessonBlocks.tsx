@@ -4,12 +4,22 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Info, AlertTriangle, ShieldCheck, Sparkles } from '@/components/icons';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { BlockVideo } from './BlockVideo';
+import {
+  isInteractive,
   parseBlockText,
+  type AccordionPayload,
   type CalloutPayload,
   type CardDeckPayload,
   type ImagePayload,
   type LessonBlock,
   type TextPayload,
+  type VideoPayload,
 } from './types';
 
 interface LessonBlocksProps {
@@ -161,6 +171,84 @@ function CardDeckBlock({
   );
 }
 
+/* -------------------------------- accordion ------------------------------- */
+
+function ParsedText({ text }: { text: string }) {
+  const chunks = useMemo(() => parseBlockText(text), [text]);
+  return (
+    <div className="space-y-3">
+      {chunks.map((chunk, i) =>
+        chunk.kind === 'list' ? (
+          <ul key={i} className="ml-5 list-disc space-y-1.5 text-sm leading-relaxed text-foreground">
+            {chunk.items.map((item, j) => (
+              <li key={j}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p key={i} className="text-sm leading-relaxed text-foreground">
+            {chunk.text}
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
+function AccordionBlock({
+  payload,
+  onAllOpened,
+  showProgress,
+}: {
+  payload: AccordionPayload;
+  onAllOpened: (allOpened: boolean) => void;
+  showProgress: boolean;
+}) {
+  const items = payload.items ?? [];
+  const [opened, setOpened] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    onAllOpened(items.length === 0 || items.every((it) => opened.has(it.id)));
+  }, [opened, items, onAllOpened]);
+
+  return (
+    <div className="space-y-3">
+      {payload.heading?.trim() && (
+        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+      )}
+      {showProgress && (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm text-muted-foreground">Open each section to continue.</p>
+          <Badge variant="outline">
+            {opened.size}/{items.length} opened
+          </Badge>
+        </div>
+      )}
+      <Accordion
+        type="multiple"
+        className="rounded-lg border bg-card px-2"
+        onValueChange={(values) =>
+          setOpened((prev) => {
+            const next = new Set(prev);
+            (values as string[]).forEach((v) => next.add(v));
+            return next;
+          })
+        }
+      >
+        {items.map((item, i) => (
+          <AccordionItem key={item.id} value={item.id}>
+            <AccordionTrigger className="text-left text-sm font-medium">
+              {item.title || `Section ${i + 1}`}
+            </AccordionTrigger>
+            <AccordionContent>
+              <ParsedText text={item.body} />
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+}
+
 /* ---------------------------------- image --------------------------------- */
 
 function ImageBlock({ payload }: { payload: ImagePayload }) {
@@ -204,10 +292,23 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
 export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonBlocksProps) {
   const [deckState, setDeckState] = useState<Record<string, boolean>>({});
 
+  const setSignal = (id: string, done: boolean) =>
+    setDeckState((prev) => (prev[id] === done ? prev : { ...prev, [id]: done }));
+
   const interactiveRequired = blocks.filter(
-    (b) => b.contributes_to_completion && b.block_type === 'card_deck'
+    (b) => b.contributes_to_completion && isInteractive(b.block_type)
   );
   const allSatisfied = interactiveRequired.every((b) => deckState[b.id]);
+  const pendingTypes = new Set(
+    interactiveRequired.filter((b) => !deckState[b.id]).map((b) => b.block_type)
+  );
+  const reasons: string[] = [];
+  if (pendingTypes.has('card_deck')) reasons.push('reveal every card');
+  if (pendingTypes.has('accordion')) reasons.push('open every section');
+  if (pendingTypes.has('video')) reasons.push('watch the video');
+  const disabledReason = reasons.length
+    ? `Please ${reasons.join(', ')} above to finish this lesson.`
+    : '';
 
   if (!blocks.length) {
     return (
@@ -230,11 +331,21 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
             {block.block_type === 'card_deck' && (
               <CardDeckBlock
                 payload={block.payload as CardDeckPayload}
-                onAllRevealed={(done) =>
-                  setDeckState((prev) =>
-                    prev[block.id] === done ? prev : { ...prev, [block.id]: done }
-                  )
-                }
+                onAllRevealed={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'accordion' && (
+              <AccordionBlock
+                payload={block.payload as AccordionPayload}
+                showProgress={block.contributes_to_completion}
+                onAllOpened={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'video' && (
+              <BlockVideo
+                payload={block.payload as VideoPayload}
+                preview={preview}
+                onWatched={(done) => setSignal(block.id, done)}
               />
             )}
           </div>
@@ -253,10 +364,8 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Mark as complete
               </Button>
-              {!allSatisfied && (
-                <p className="text-xs text-muted-foreground">
-                  Reveal every card above to finish this lesson.
-                </p>
+              {!allSatisfied && disabledReason && (
+                <p className="text-xs text-muted-foreground">{disabledReason}</p>
               )}
             </>
           )}

@@ -63,6 +63,8 @@ function lessonMeta(lesson: Lesson): string {
       const p = resourcePages(lesson);
       return p > 0 ? `Resource · ${p} page${p === 1 ? '' : 's'}` : 'Resource';
     }
+    case 'blocks':
+      return 'Interactive';
     case 'practical':
       return 'Practical';
     case 'certificate':
