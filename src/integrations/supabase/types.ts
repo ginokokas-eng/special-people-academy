@@ -1059,6 +1059,50 @@ export type Database = {
           },
         ]
       }
+      lesson_blocks: {
+        Row: {
+          block_type: string
+          contributes_to_completion: boolean
+          created_at: string
+          id: string
+          is_graded: boolean
+          lesson_id: string
+          order_index: number
+          payload: Json
+          updated_at: string
+        }
+        Insert: {
+          block_type: string
+          contributes_to_completion?: boolean
+          created_at?: string
+          id?: string
+          is_graded?: boolean
+          lesson_id: string
+          order_index?: number
+          payload?: Json
+          updated_at?: string
+        }
+        Update: {
+          block_type?: string
+          contributes_to_completion?: boolean
+          created_at?: string
+          id?: string
+          is_graded?: boolean
+          lesson_id?: string
+          order_index?: number
+          payload?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_blocks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_issue_reports: {
         Row: {
           course_id: string
