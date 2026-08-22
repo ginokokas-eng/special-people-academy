@@ -18,6 +18,11 @@ import { useBranding } from '@/hooks/useBrandingSettings';
 import defaultLogo from '@/assets/logo.svg';
 
 const emailSchema = z.string().email('Please enter a valid email address');
+// Sign-in accepts internal/staff addresses (e.g. name@local) that are valid
+// accounts but not public-domain emails.
+const loginEmailSchema = z
+  .string()
+  .regex(/^[^\s@]+@[^\s@]+$/, 'Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 
