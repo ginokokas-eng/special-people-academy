@@ -82,13 +82,71 @@ export interface VideoPayload {
   file_name?: string;
 }
 
+/** Multiple-choice knowledge check. Formative only — never touches quizzes. */
+export interface McqOption {
+  id: string;
+  label: string;
+}
+
+export interface McqPayload {
+  question: string;
+  options: McqOption[];
+  correct_id: string;
+  explanation?: string;
+}
+
+/** Drag-and-drop matching. Grading is a pure comparison of item.target_id. */
+export interface DragMatchTarget {
+  id: string;
+  label: string;
+}
+
+export interface DragMatchItem {
+  id: string;
+  label: string;
+  target_id: string;
+}
+
+export interface DragMatchPayload {
+  prompt: string;
+  targets: DragMatchTarget[];
+  items: DragMatchItem[];
+  shuffle: boolean;
+  feedback: { correct: string; incorrect: string };
+}
+
+/** Flip cards — same content shape as a card deck, flip-in-place presentation. */
+export interface FlipCardsPayload {
+  heading?: string;
+  instruction?: string;
+  cards: DeckCard[];
+}
+
+/** Read-only practical checklist. Learners cannot tick it; no sign-off link. */
+export interface ChecklistStep {
+  id: string;
+  step_title: string;
+  instruction?: string;
+  safety_note?: string;
+}
+
+export interface ChecklistPayload {
+  heading?: string;
+  caption?: string;
+  steps: ChecklistStep[];
+}
+
 export type BlockPayload =
   | TextPayload
   | CalloutPayload
   | CardDeckPayload
   | AccordionPayload
   | ImagePayload
-  | VideoPayload;
+  | VideoPayload
+  | McqPayload
+  | DragMatchPayload
+  | FlipCardsPayload
+  | ChecklistPayload;
 
 export interface LessonBlock {
   id: string;
