@@ -215,6 +215,36 @@ export function BlockDragMatch({
     else returnToPool(itemId);
   };
 
+  const labelOf = (id: string | number | undefined | null) =>
+    id == null ? 'Item' : byId.get(String(id))?.label || 'Item';
+  const targetLabelOf = (id: string | number | undefined | null) =>
+    id == null ? 'group' : targets.find((t) => t.id === String(id))?.label || 'group';
+
+  /**
+   * Custom screen-reader announcements — dnd-kit's defaults read raw ids, which
+   * are UUIDs. These read the authored item and group LABELS instead, matching
+   * the messages written by the tap/keyboard path into the same live region.
+   */
+  const announcements = {
+    onDragStart({ active }: { active: { id: string | number } }) {
+      return `${labelOf(active.id)} picked up. Move it over a group to place it.`;
+    },
+    onDragOver({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) {
+      return over
+        ? `${labelOf(active.id)} is over ${targetLabelOf(over.id)}.`
+        : `${labelOf(active.id)} is no longer over a group.`;
+    },
+    onDragEnd({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) {
+      return over
+        ? `${labelOf(active.id)} placed in ${targetLabelOf(over.id)}.`
+        : `${labelOf(active.id)} returned to the pool.`;
+    },
+    onDragCancel({ active }: { active: { id: string | number } }) {
+      return `${labelOf(active.id)} returned to the pool.`;
+    },
+  };
+
+
   const allPlaced = items.every((i) => placements[i.id]);
 
   const check = () => {
