@@ -11,7 +11,11 @@ import {
   type BlockPayload,
   type CalloutPayload,
   type CardDeckPayload,
+  type ChecklistPayload,
+  type DragMatchPayload,
+  type FlipCardsPayload,
   type ImagePayload,
+  type McqPayload,
   type TextPayload,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
@@ -23,6 +27,12 @@ import {
   TextBlockForm,
   VideoBlockForm,
 } from './forms/BlockForms';
+import {
+  ChecklistBlockForm,
+  DragMatchBlockForm,
+  FlipCardsBlockForm,
+  McqBlockForm,
+} from './forms/InteractiveBlockForms';
 
 interface BlockListProps {
   blocks: BlockDraft[];
