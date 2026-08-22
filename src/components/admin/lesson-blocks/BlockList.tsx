@@ -11,7 +11,11 @@ import {
   type BlockPayload,
   type CalloutPayload,
   type CardDeckPayload,
+  type ChecklistPayload,
+  type DragMatchPayload,
+  type FlipCardsPayload,
   type ImagePayload,
+  type McqPayload,
   type TextPayload,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
@@ -23,6 +27,12 @@ import {
   TextBlockForm,
   VideoBlockForm,
 } from './forms/BlockForms';
+import {
+  ChecklistBlockForm,
+  DragMatchBlockForm,
+  FlipCardsBlockForm,
+  McqBlockForm,
+} from './forms/InteractiveBlockForms';
 
 interface BlockListProps {
   blocks: BlockDraft[];
@@ -149,6 +159,34 @@ export function BlockList({
             {block.block_type === 'image' && (
               <ImageBlockForm
                 payload={block.payload as ImagePayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'flip_cards' && (
+              <FlipCardsBlockForm
+                payload={block.payload as FlipCardsPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'mcq' && (
+              <McqBlockForm
+                payload={block.payload as McqPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'drag_match' && (
+              <DragMatchBlockForm
+                payload={block.payload as DragMatchPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'checklist' && (
+              <ChecklistBlockForm
+                payload={block.payload as ChecklistPayload}
                 onChange={setPayload}
                 idPrefix={idPrefix}
               />

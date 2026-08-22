@@ -1059,6 +1059,60 @@ export type Database = {
           },
         ]
       }
+      lesson_block_responses: {
+        Row: {
+          attempt_count: number
+          block_id: string
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          lesson_id: string
+          response: Json | null
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          block_id: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          lesson_id: string
+          response?: Json | null
+          state?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          block_id?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          lesson_id?: string
+          response?: Json | null
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_block_responses_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_block_responses_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_blocks: {
         Row: {
           block_type: string

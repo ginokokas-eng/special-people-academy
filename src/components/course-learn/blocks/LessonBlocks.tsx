@@ -10,14 +10,22 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
+import { BlockMcq } from './BlockMcq';
+import { BlockDragMatch } from './BlockDragMatch';
+import { BlockFlipCards } from './BlockFlipCards';
+import { BlockChecklist } from './BlockChecklist';
 import {
   isInteractive,
   parseBlockText,
   type AccordionPayload,
   type CalloutPayload,
   type CardDeckPayload,
+  type ChecklistPayload,
+  type DragMatchPayload,
+  type FlipCardsPayload,
   type ImagePayload,
   type LessonBlock,
+  type McqPayload,
   type TextPayload,
   type VideoPayload,
 } from './types';
@@ -304,8 +312,11 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   );
   const reasons: string[] = [];
   if (pendingTypes.has('card_deck')) reasons.push('reveal every card');
+  if (pendingTypes.has('flip_cards')) reasons.push('flip every card');
   if (pendingTypes.has('accordion')) reasons.push('open every section');
   if (pendingTypes.has('video')) reasons.push('watch the video');
+  if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
+  if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   const disabledReason = reasons.length
     ? `Please ${reasons.join(', ')} above to finish this lesson.`
     : '';
@@ -347,6 +358,34 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
                 preview={preview}
                 onWatched={(done) => setSignal(block.id, done)}
               />
+            )}
+            {block.block_type === 'flip_cards' && (
+              <BlockFlipCards
+                payload={block.payload as FlipCardsPayload}
+                showProgress={block.contributes_to_completion}
+                onAllFlipped={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'mcq' && (
+              <BlockMcq
+                payload={block.payload as McqPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                preview={preview}
+                onAnswered={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'drag_match' && (
+              <BlockDragMatch
+                payload={block.payload as DragMatchPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                preview={preview}
+                onSolved={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'checklist' && (
+              <BlockChecklist payload={block.payload as ChecklistPayload} />
             )}
           </div>
         ))}
