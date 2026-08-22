@@ -41,7 +41,8 @@ serve(async (req: Request): Promise<Response> => {
     });
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: claims, error: claimsError } = await supabaseUser.auth.getClaims();
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claims, error: claimsError } = await supabaseUser.auth.getClaims(token);
     const userId = claims?.claims?.sub as string | undefined;
     if (claimsError || !userId) {
       return json({ error: "Invalid or expired token" }, 401);
