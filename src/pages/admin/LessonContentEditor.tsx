@@ -9,7 +9,10 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { ArrowLeft, Eye, Loader2, Save } from '@/components/icons';
 import { BlockPalette } from '@/components/admin/lesson-blocks/BlockPalette';
 import { BlockList } from '@/components/admin/lesson-blocks/BlockList';
+import { TemplatePicker } from '@/components/admin/lesson-blocks/TemplatePicker';
+import type { LessonTemplate } from '@/components/admin/lesson-blocks/templates';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
+
 import {
   defaultContributesToCompletion,
   defaultPayload,
@@ -36,6 +39,8 @@ export default function LessonContentEditor() {
   const [lesson, setLesson] = useState<{ title: string; lesson_type: string } | null>(null);
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [templateDismissed, setTemplateDismissed] = useState(false);
+
 
   // Guards against re-initialising block state (auth/token-refresh renders must
   // never wipe unsaved work).
@@ -101,6 +106,20 @@ export default function LessonContentEditor() {
         contributes_to_completion: defaultContributesToCompletion(type),
       },
     ]);
+
+  /**
+   * Seeds the lesson from a template. The seeded blocks are ordinary drafts —
+   * the template choice is not recorded anywhere.
+   */
+  const applyTemplate = (template: LessonTemplate) => {
+    setTemplateDismissed(true);
+    const seeded = template.build();
+    if (!seeded.length) return;
+    mutate(() => seeded);
+    toast.success(`${template.name} template added — replace the guidance text with your own words`);
+  };
+
+
 
   const changeBlock = (index: number, patch: Partial<BlockDraft>) =>
     mutate((prev) => prev.map((b, i) => (i === index ? { ...b, ...patch } : b)));
@@ -262,7 +281,9 @@ export default function LessonContentEditor() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
+          {!blocks.length && !templateDismissed && <TemplatePicker onPick={applyTemplate} />}
           <BlockList
+
             blocks={blocks}
             onChange={changeBlock}
             onMove={moveBlock}

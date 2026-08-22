@@ -186,7 +186,7 @@ export function BlockDragMatch({
         return next;
       });
       setChecked(false);
-      setAnnouncement(`${byId.get(itemId)?.label || 'Item'} returned to the list.`);
+      setAnnouncement(`${byId.get(itemId)?.label || 'Item'} returned to the pool.`);
     },
     [byId, lockedIds]
   );
@@ -214,6 +214,36 @@ export function BlockDragMatch({
     if (targetId) place(itemId, targetId);
     else returnToPool(itemId);
   };
+
+  const labelOf = (id: string | number | undefined | null) =>
+    id == null ? 'Item' : byId.get(String(id))?.label || 'Item';
+  const targetLabelOf = (id: string | number | undefined | null) =>
+    id == null ? 'group' : targets.find((t) => t.id === String(id))?.label || 'group';
+
+  /**
+   * Custom screen-reader announcements — dnd-kit's defaults read raw ids, which
+   * are UUIDs. These read the authored item and group LABELS instead, matching
+   * the messages written by the tap/keyboard path into the same live region.
+   */
+  const announcements = {
+    onDragStart({ active }: { active: { id: string | number } }) {
+      return `${labelOf(active.id)} picked up. Move it over a group to place it.`;
+    },
+    onDragOver({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) {
+      return over
+        ? `${labelOf(active.id)} is over ${targetLabelOf(over.id)}.`
+        : `${labelOf(active.id)} is no longer over a group.`;
+    },
+    onDragEnd({ active, over }: { active: { id: string | number }; over: { id: string | number } | null }) {
+      return over
+        ? `${labelOf(active.id)} placed in ${targetLabelOf(over.id)}.`
+        : `${labelOf(active.id)} returned to the pool.`;
+    },
+    onDragCancel({ active }: { active: { id: string | number } }) {
+      return `${labelOf(active.id)} returned to the pool.`;
+    },
+  };
+
 
   const allPlaced = items.every((i) => placements[i.id]);
 
@@ -258,7 +288,11 @@ export function BlockDragMatch({
         Drag an item into a group, or tap it and then tap a group. Tap a placed item to send it back.
       </p>
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        accessibility={{ announcements }}
+      >
         <div className="rounded-lg border bg-card p-3">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Items
@@ -336,7 +370,7 @@ export function BlockDragMatch({
         )}
       </div>
 
-      <p aria-live="polite" className="sr-only">
+      <p aria-live="polite" role="status" className="sr-only">
         {announcement}
       </p>
     </div>

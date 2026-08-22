@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock } from '@/components/icons';
+import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock, RefreshCw } from '@/components/icons';
 import { toast } from 'sonner';
+import { evaluatePublishChecks, type PublishCheck } from './publishChecks';
 
 interface Course {
   id: string;
@@ -38,15 +39,52 @@ const CLINICAL_CATEGORIES = [
 
 export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail }: CoursePublishingTabProps) {
   const [saving, setSaving] = useState(false);
+  const [checks, setChecks] = useState<PublishCheck[]>([]);
+  const [checking, setChecking] = useState(true);
 
   const isClinicalCourse = CLINICAL_CATEGORIES.includes(course.category);
   const isMarina = userEmail.toLowerCase() === 'marina@specialpeople.org.uk';
   const canPublishClinical = isSuperAdmin || isMarina;
-  const canPublish = isClinicalCourse ? canPublishClinical : true;
+  const permittedToPublish = isClinicalCourse ? canPublishClinical : true;
+
+  const failing = checks.filter((c) => !c.passed);
+  const readyToPublish = !checking && failing.length === 0;
+  // Publishing is blocked while any check fails. Draft/review moves stay open.
+  const canPublish = permittedToPublish && readyToPublish;
+
+  const runChecks = useCallback(async () => {
+    setChecking(true);
+    try {
+      setChecks(await evaluatePublishChecks(course.id));
+    } catch (error) {
+      console.error('Error running publish checks:', error);
+      toast.error('Could not check publish readiness');
+      setChecks([]);
+    } finally {
+      setChecking(false);
+    }
+  }, [course.id]);
+
+  useEffect(() => {
+    void runChecks();
+  }, [runChecks]);
+
 
   const handleStatusChange = async (newStatus: string) => {
+    // Only the transition to published is gated.
+    if (newStatus === 'published') {
+      if (!permittedToPublish) {
+        toast.error('You do not have permission to publish this course');
+        return;
+      }
+      if (!readyToPublish) {
+        toast.error('Fix the “Ready to publish” checklist first');
+        return;
+      }
+    }
     setSaving(true);
     try {
+
       const updates: any = { status: newStatus };
       
       // If moving to published, also set is_published
@@ -145,6 +183,20 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
             </Alert>
           )}
 
+          {!course.is_published && permittedToPublish && !checking && failing.length > 0 && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Not ready to publish yet</AlertTitle>
+              <AlertDescription>
+                {failing.length} {failing.length === 1 ? 'item still needs' : 'items still need'}{' '}
+                attention — see the “Ready to publish” list below. You can still save as draft or
+                send for review.
+              </AlertDescription>
+            </Alert>
+          )}
+
+
+
           {!course.is_published && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -211,33 +263,68 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Publishing Checklist</CardTitle>
-          <CardDescription>Ensure your course is ready for learners</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle>Ready to publish</CardTitle>
+            <CardDescription>
+              Checked against this course's real content. Publishing stays locked until everything
+              passes — saving as draft or sending for review is always allowed.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => void runChecks()} disabled={checking}>
+            {checking ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Re-check
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { label: 'Course title and description', done: !!course.title },
-              { label: 'Category assigned', done: course.category !== 'Uncategorized' },
-              { label: 'At least one module created', done: true }, // Would need to check from DB
-              { label: 'Quiz questions added (if applicable)', done: true },
-              { label: 'Resources uploaded', done: true },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-3">
-                {item.done ? (
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                ) : (
-                  <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-                )}
-                <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
-                  {item.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          {checking ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Checking this course…
+            </div>
+          ) : checks.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Checks are unavailable right now. Try Re-check.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {checks.map((check) => (
+                <div key={check.id} className="flex items-start gap-3">
+                  {check.passed ? (
+                    <CheckCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                  ) : (
+                    <AlertTriangle
+                      className="h-5 w-5 shrink-0 text-destructive"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <div className="space-y-0.5">
+                    <p
+                      className={
+                        check.passed
+                          ? 'text-sm text-foreground'
+                          : 'text-sm font-medium text-foreground'
+                      }
+                    >
+                      {check.label}
+                    </p>
+                    {!check.passed && (
+                      <p className="text-sm text-muted-foreground">
+                        {check.detail} Fix this in the “{check.tab}” tab.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
     </div>
   );
 }
