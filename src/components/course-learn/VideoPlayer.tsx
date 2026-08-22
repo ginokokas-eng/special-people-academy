@@ -220,11 +220,28 @@ export function VideoPlayer({
     else v.pause();
   }, []);
 
-  const seekBy = useCallback((delta: number) => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.currentTime = Math.min(Math.max(0, v.currentTime + delta), v.duration || 0);
-  }, []);
+  const seekBy = useCallback(
+    (delta: number) => {
+      const v = videoRef.current;
+      if (!v) return;
+      const target = Math.min(Math.max(0, v.currentTime + delta), v.duration || 0);
+      v.currentTime = clampTime(target);
+    },
+    [clampTime]
+  );
+
+  /** Commit a scrub from the seek slider, respecting the ceiling. */
+  const seekTo = useCallback(
+    (t: number) => {
+      const v = videoRef.current;
+      if (!v) return;
+      const next = clampTime(t);
+      v.currentTime = next;
+      setCurrent(next);
+    },
+    [clampTime]
+  );
+
 
   const changeVolume = useCallback(
     (val: number) => {
