@@ -77,6 +77,9 @@ export default function MyLearning() {
             .from('lessons')
             .select('id, course_id')
             .in('course_id', courseIds)
+            // Progress counts required lessons only — same rule as the
+            // certificate gate (see src/lib/progress.ts).
+            .eq('is_required', true)
         : { data: [] as { id: string; course_id: string }[] };
 
       const lessonIds = (allLessons || []).map(l => l.id);
