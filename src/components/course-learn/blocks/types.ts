@@ -6,7 +6,7 @@
  * discriminated union keyed on `block_type`.
  */
 
-export const BLOCK_TYPES = ['text', 'callout', 'card_deck', 'image'] as const;
+export const BLOCK_TYPES = ['text', 'callout', 'card_deck', 'accordion', 'image', 'video'] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export interface TextPayload {
