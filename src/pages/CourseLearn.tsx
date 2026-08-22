@@ -848,7 +848,7 @@ export default function CourseLearn() {
           prevLesson={prevLesson}
           nextLesson={nextLesson}
           onSelectLesson={goToLesson}
-          onBack={() => navigate(`/courses/${courseId || id}`)}
+          onBack={() => setSearchParams({}, { replace: false })}
           onMarkComplete={markComplete}
         />
         <ContentInfoDialog
