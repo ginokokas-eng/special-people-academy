@@ -50,13 +50,14 @@ interface Lesson {
   duration_seconds: number | null;
   video_url: string | null;
   scorm_package_id: string | null;
+  is_required: boolean;
 }
 
 interface CourseModulesTabProps {
   courseId: string;
 }
 
-const LESSON_TYPE_VALUES = ['video', 'text', 'pdf', 'quiz', 'practical', 'scenario', 'scorm'] as const;
+const LESSON_TYPE_VALUES = ['video', 'text', 'pdf', 'quiz', 'practical', 'scenario', 'scorm', 'resource', 'blocks'] as const;
 type LessonType = typeof LESSON_TYPE_VALUES[number];
 type LessonInsert = Database['public']['Tables']['lessons']['Insert'];
 type LessonUpdate = Database['public']['Tables']['lessons']['Update'];
@@ -68,11 +69,14 @@ interface LessonForm {
   duration_minutes: number;
   duration_seconds: number | null;
   scorm_package_id: string;
+  is_required: boolean;
 }
 
 const LESSON_TYPES: Array<{ value: LessonType; label: string }> = [
   { value: 'video', label: 'Video' },
+  { value: 'blocks', label: 'Interactive lesson (blocks)' },
   { value: 'text', label: 'Text/Article' },
+  { value: 'resource', label: 'Reading / Resource' },
   { value: 'pdf', label: 'PDF' },
   { value: 'quiz', label: 'Quiz' },
   { value: 'practical', label: 'Practical Session' },
@@ -80,8 +84,14 @@ const LESSON_TYPES: Array<{ value: LessonType; label: string }> = [
   { value: 'scorm', label: 'SCORM Package' },
 ];
 
+/**
+ * Keeps whatever type the row already has. Older content uses types that are not
+ * in the builder list (e.g. seeded variants); silently retyping them to 'video'
+ * would rewrite live learner content on an unrelated dialog save.
+ */
 function normalizeLessonType(value: string | null): LessonType {
-  return LESSON_TYPE_VALUES.includes(value as LessonType) ? (value as LessonType) : 'video';
+  if (!value) return 'video';
+  return value as LessonType;
 }
 
 /** Only video/SCORM lessons carry a media duration. */
@@ -95,6 +105,7 @@ function secondsToMinutes(seconds: number | null | undefined): number {
   if (seconds < 60) return 1;
   return Math.ceil(seconds / 60);
 }
+
 
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [modules, setModules] = useState<Module[]>([]);
