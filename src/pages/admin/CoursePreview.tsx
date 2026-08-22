@@ -103,6 +103,11 @@ export default function CoursePreview() {
         return <Play className="h-4 w-4" />;
       case 'quiz':
         return <HelpCircle className="h-4 w-4" />;
+      case 'scorm':
+        return <Play className="h-4 w-4" />;
+      case 'resource':
+      case 'blocks':
+        return <BookOpen className="h-4 w-4" />;
       default:
         return <FileText className="h-4 w-4" />;
     }
