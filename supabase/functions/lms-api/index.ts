@@ -132,19 +132,27 @@ async function handleCatalog(admin: SupabaseClient, url: URL) {
 
   const courseIds = (courses ?? []).map((c) => c.id);
   const lessonCountByCourse = new Map<string, number>();
+  // Lessons that gate completion (lessons.is_required) — same rule as the
+  // certificate gate and every learner-facing progress bar. lesson_count keeps
+  // its original meaning (all lessons) so existing consumers don't shift.
+  const requiredCountByCourse = new Map<string, number>();
   if (courseIds.length) {
     const { data: lessons } = await admin
       .from('lessons')
-      .select('id, course_id')
+      .select('id, course_id, is_required')
       .in('course_id', courseIds);
     for (const l of lessons ?? []) {
       lessonCountByCourse.set(l.course_id, (lessonCountByCourse.get(l.course_id) ?? 0) + 1);
+      if (l.is_required === true) {
+        requiredCountByCourse.set(l.course_id, (requiredCountByCourse.get(l.course_id) ?? 0) + 1);
+      }
     }
   }
 
   const data = (courses ?? []).map((c) => ({
     ...c,
     lesson_count: lessonCountByCourse.get(c.id) ?? 0,
+    required_lesson_count: requiredCountByCourse.get(c.id) ?? 0,
   }));
 
   return json({ data });
@@ -299,10 +307,13 @@ async function handleProgress(admin: SupabaseClient, req: Request, url: URL) {
       .in('id', enrolledCourseIds);
     for (const c of courseRows ?? []) courseTitleById.set(c.id, c.title);
 
+    // Progress is measured over required lessons only, matching the
+    // certificate gate and the learner-facing percentages in the app.
     const { data: lessons } = await admin
       .from('lessons')
-      .select('id, course_id')
-      .in('course_id', enrolledCourseIds);
+      .select('id, course_id, is_required')
+      .in('course_id', enrolledCourseIds)
+      .eq('is_required', true);
     for (const l of lessons ?? []) {
       const arr = lessonsByCourse.get(l.course_id) ?? [];
       arr.push(l.id);
