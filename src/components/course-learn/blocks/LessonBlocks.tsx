@@ -355,10 +355,14 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
             {block.block_type === 'video' && (
               <BlockVideo
                 payload={block.payload as VideoPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                lessonCompleted={lessonCompleted}
                 preview={preview}
                 onWatched={(done) => setSignal(block.id, done)}
               />
             )}
+
             {block.block_type === 'flip_cards' && (
               <BlockFlipCards
                 payload={block.payload as FlipCardsPayload}
