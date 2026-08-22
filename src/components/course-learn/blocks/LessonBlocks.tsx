@@ -27,6 +27,7 @@ import {
   type LessonBlock,
   type McqPayload,
   type TextPayload,
+  videoCheckpoints,
   type VideoPayload,
 } from './types';
 
