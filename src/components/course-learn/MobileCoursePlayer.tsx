@@ -34,9 +34,10 @@ import { MobileResources } from './MobileResources';
 import { MobileTranscript } from './MobileTranscript';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
-import type {
 import { progressPercent, requiredLessons } from '@/lib/progress';
+import type {
   LearnCourse,
+
   LearnLesson,
   LearnModule,
   LearnResource,
