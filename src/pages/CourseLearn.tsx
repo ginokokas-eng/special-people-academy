@@ -42,6 +42,7 @@ import { CertificateTab } from '@/components/course-learn/CertificateTab';
 import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
 import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
+import { CourseHome } from '@/components/course-learn/CourseHome';
 import { MobileCoursePlayer } from '@/components/course-learn/MobileCoursePlayer';
 import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
@@ -158,13 +159,10 @@ export default function CourseLearn() {
     [visibleLessons, activeLessonId]
   );
 
-  // Default to the first visible lesson once data is loaded.
-  useEffect(() => {
-    if (!activeLessonId && visibleLessons.length > 0) {
-      setSearchParams({ lesson: visibleLessons[0].id }, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLessonId, visibleLessons]);
+  // No ?lesson= means the learner is on the course home (module hub). We
+  // deliberately do NOT auto-fill the first lesson: choosing where to start is
+  // the point of the hub. Deep links with ?lesson= are unaffected.
+  const showHub = !activeLessonId;
 
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
@@ -814,7 +812,24 @@ export default function CourseLearn() {
 
   // Mobile-only course player (≤768px): video on top, then Lectures / More tabs.
   // Desktop & tablet keep the existing two-column layout untouched.
+  const courseHome = (
+    <CourseHome
+      courseTitle={course.title}
+      courseSubtitle={course.subtitle}
+      modules={modules}
+      lessons={visibleLessons}
+      hasCertificate={course.has_certificate}
+      onSelectLesson={goToLesson}
+      onBackToCourse={() => navigate(`/courses/${courseId || id}`)}
+      onOpenCertificate={() => {
+        if (visibleLessons.length) goToLesson(visibleLessons[0].id);
+        setActiveTab('certificate');
+      }}
+    />
+  );
+
   if (isMobile) {
+    if (showHub) return <div className="min-h-screen bg-background">{courseHome}</div>;
     return (
       <>
         <MobileCoursePlayer
@@ -884,7 +899,20 @@ export default function CourseLearn() {
       <div className="flex min-h-0 flex-1">
         {/* Main */}
         <main className="min-w-0 flex-1 overflow-y-auto">
+          {showHub ? (
+            courseHome
+          ) : (
           <div className={cn('mx-auto px-4 py-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
+            <div className="mb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ml-2"
+                onClick={() => setSearchParams({}, { replace: false })}
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" /> Back to modules
+              </Button>
+            </div>
             {activeLesson && (
               <div className="mb-4">
                 <div className="mb-1.5 flex flex-wrap items-center gap-2">
@@ -972,6 +1000,7 @@ export default function CourseLearn() {
               </Tabs>
             </div>
           </div>
+          )}
         </main>
 
         {/* Desktop sidebar — hidden in theatre mode */}
