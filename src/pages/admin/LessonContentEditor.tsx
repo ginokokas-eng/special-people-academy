@@ -55,7 +55,7 @@ export default function LessonContentEditor() {
         (blocksRes.data || []).map((row) => ({
           id: row.id,
           block_type: row.block_type as BlockType,
-          payload: (row.payload ?? {}) as BlockPayload,
+          payload: (row.payload ?? {}) as unknown as BlockPayload,
           contributes_to_completion: row.contributes_to_completion,
         }))
       );
