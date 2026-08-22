@@ -186,7 +186,7 @@ export function BlockDragMatch({
         return next;
       });
       setChecked(false);
-      setAnnouncement(`${byId.get(itemId)?.label || 'Item'} returned to the list.`);
+      setAnnouncement(`${byId.get(itemId)?.label || 'Item'} returned to the pool.`);
     },
     [byId, lockedIds]
   );
@@ -288,7 +288,11 @@ export function BlockDragMatch({
         Drag an item into a group, or tap it and then tap a group. Tap a placed item to send it back.
       </p>
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        accessibility={{ announcements }}
+      >
         <div className="rounded-lg border bg-card p-3">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Items
@@ -366,7 +370,7 @@ export function BlockDragMatch({
         )}
       </div>
 
-      <p aria-live="polite" className="sr-only">
+      <p aria-live="polite" role="status" className="sr-only">
         {announcement}
       </p>
     </div>
