@@ -163,6 +163,34 @@ export function BlockList({
                 idPrefix={idPrefix}
               />
             )}
+            {block.block_type === 'flip_cards' && (
+              <FlipCardsBlockForm
+                payload={block.payload as FlipCardsPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'mcq' && (
+              <McqBlockForm
+                payload={block.payload as McqPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'drag_match' && (
+              <DragMatchBlockForm
+                payload={block.payload as DragMatchPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'checklist' && (
+              <ChecklistBlockForm
+                payload={block.payload as ChecklistPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
 
             {isInteractive(block.block_type) && (
               <div className="mt-3 flex items-center gap-2 border-t pt-3">
