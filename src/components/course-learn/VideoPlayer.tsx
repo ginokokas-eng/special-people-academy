@@ -151,22 +151,31 @@ export function VideoPlayer({
   const [qualityIdx, setQualityIdx] = useState(defaultIdx);
   const activeSrc = qualities[qualityIdx]?.url ?? fallbackUrl ?? '';
 
-  // Expose imperative controller for notes / transcript seeking.
+  // Expose imperative controller for notes / transcript seeking and checkpoints.
   useEffect(() => {
     controllerRef.current = {
       seekTo: (s: number) => {
         const v = videoRef.current;
         if (!v) return;
-        v.currentTime = Math.max(0, s);
+        v.currentTime = clampTime(s);
         v.play().catch(() => {});
       },
       getCurrentTime: () => videoRef.current?.currentTime ?? 0,
       isAvailable: () => true,
+      pause: () => videoRef.current?.pause(),
+      play: () => {
+        videoRef.current?.play().catch(() => {});
+      },
+      getDuration: () => {
+        const d = videoRef.current?.duration ?? 0;
+        return Number.isFinite(d) ? d : 0;
+      },
     };
     return () => {
       controllerRef.current = null;
     };
-  }, [controllerRef]);
+  }, [controllerRef, clampTime]);
+
 
   // Apply persisted speed / volume on mount + source change.
   useEffect(() => {
