@@ -249,33 +249,68 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Publishing Checklist</CardTitle>
-          <CardDescription>Ensure your course is ready for learners</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle>Ready to publish</CardTitle>
+            <CardDescription>
+              Checked against this course's real content. Publishing stays locked until everything
+              passes — saving as draft or sending for review is always allowed.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => void runChecks()} disabled={checking}>
+            {checking ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Re-check
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { label: 'Course title and description', done: !!course.title },
-              { label: 'Category assigned', done: course.category !== 'Uncategorized' },
-              { label: 'At least one module created', done: true }, // Would need to check from DB
-              { label: 'Quiz questions added (if applicable)', done: true },
-              { label: 'Resources uploaded', done: true },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-3">
-                {item.done ? (
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                ) : (
-                  <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-                )}
-                <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
-                  {item.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          {checking ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Checking this course…
+            </div>
+          ) : checks.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Checks are unavailable right now. Try Re-check.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {checks.map((check) => (
+                <div key={check.id} className="flex items-start gap-3">
+                  {check.passed ? (
+                    <CheckCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                  ) : (
+                    <AlertTriangle
+                      className="h-5 w-5 shrink-0 text-destructive"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <div className="space-y-0.5">
+                    <p
+                      className={
+                        check.passed
+                          ? 'text-sm text-foreground'
+                          : 'text-sm font-medium text-foreground'
+                      }
+                    >
+                      {check.label}
+                    </p>
+                    {!check.passed && (
+                      <p className="text-sm text-muted-foreground">
+                        {check.detail} Fix this in the “{check.tab}” tab.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
     </div>
   );
 }
