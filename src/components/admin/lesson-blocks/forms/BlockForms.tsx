@@ -389,6 +389,8 @@ export function VideoBlockForm({
       setProgress(100);
       onChange({ ...payload, source: 'storage', path, file_name: file.name, url: '' });
       toast.success('Video uploaded');
+      // Kick off browser-side audio extraction + transcription for this file.
+      setTranscribeFile(file);
     } catch (err) {
       console.error('Video upload failed:', err);
       setError('Upload failed. Please check your connection and try again.');
