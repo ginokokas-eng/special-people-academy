@@ -31,6 +31,7 @@ export function RevealOnScroll({ children, index = 0, opacityOnly }: Props) {
   const reduced = useRef(prefersReducedMotion()).current;
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(reduced);
+  const [settled, setSettled] = useState(reduced);
 
   useEffect(() => {
     if (reduced || shown) return;
@@ -56,22 +57,19 @@ export function RevealOnScroll({ children, index = 0, opacityOnly }: Props) {
 
   const delay = Math.min(index * STAGGER_MS, MAX_STAGGER_MS);
 
+  // Once the reveal has finished, every inline transition/transform is dropped so
+  // no stale containing block (fullscreen) or transform offset (dnd rects) remains.
+  const style = settled
+    ? { opacity: 1 }
+    : {
+        opacity: shown ? 1 : 0,
+        transform: opacityOnly ? undefined : shown ? 'translateY(0)' : 'translateY(8px)',
+        transition: `opacity 420ms ease-out ${delay}ms, transform 420ms ease-out ${delay}ms`,
+        willChange: 'opacity',
+      };
+
   return (
-    <div
-      ref={ref}
-      style={
-        shown
-          ? // Inline transition/transform are cleared once revealed so no stale
-            // containing block or transform offset is left behind.
-            { opacity: 1 }
-          : {
-              opacity: 0,
-              transform: opacityOnly ? undefined : 'translateY(8px)',
-              transition: `opacity 420ms ease-out ${delay}ms, transform 420ms ease-out ${delay}ms`,
-              willChange: 'opacity',
-            }
-      }
-    >
+    <div ref={ref} style={style} onTransitionEnd={() => shown && setSettled(true)}>
       {children}
     </div>
   );
