@@ -44,6 +44,8 @@ import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
 import { MobileCoursePlayer } from '@/components/course-learn/MobileCoursePlayer';
 import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
+import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
+import type { BlockPayload, BlockType, LessonBlock } from '@/components/course-learn/blocks/types';
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
@@ -91,6 +93,8 @@ export default function CourseLearn() {
   const [transcript, setTranscript] = useState<LessonTranscript | null>(null);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [videoSources, setVideoSources] = useState<LessonVideoSource[]>([]);
+  /** Blocks for the active 'blocks' lesson (empty for every other lesson type). */
+  const [lessonBlocks, setLessonBlocks] = useState<LessonBlock[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
 
   // Dialogs
@@ -301,6 +305,42 @@ export default function CourseLearn() {
       cancelled = true;
     };
   }, [activeLesson?.id]);
+
+  // Load block content for the active lesson (only 'blocks' lessons have any).
+  useEffect(() => {
+    let cancelled = false;
+    if (!activeLesson?.id || activeLesson.lesson_type !== 'blocks') {
+      setLessonBlocks([]);
+      return;
+    }
+    (async () => {
+      const { data, error } = await supabase
+        .from('lesson_blocks')
+        .select('*')
+        .eq('lesson_id', activeLesson.id)
+        .order('order_index');
+      if (cancelled) return;
+      if (error) {
+        console.error('Error loading lesson blocks:', error);
+        setLessonBlocks([]);
+        return;
+      }
+      setLessonBlocks(
+        (data || []).map((row) => ({
+          id: row.id,
+          lesson_id: row.lesson_id,
+          order_index: row.order_index,
+          block_type: row.block_type as BlockType,
+          payload: (row.payload ?? {}) as unknown as BlockPayload,
+          is_graded: row.is_graded,
+          contributes_to_completion: row.contributes_to_completion,
+        }))
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLesson?.id, activeLesson?.lesson_type]);
 
   // Poll current time while the transcript tab is open (for active-segment highlight)
   useEffect(() => {
@@ -701,6 +741,16 @@ export default function CourseLearn() {
             your status and next steps.
           </p>
         </div>
+      );
+    }
+
+    if (activeLesson.lesson_type === 'blocks') {
+      return (
+        <LessonBlocks
+          blocks={lessonBlocks}
+          completed={!!activeLesson.completed}
+          onComplete={() => markComplete(activeLesson.id)}
+        />
       );
     }
 
