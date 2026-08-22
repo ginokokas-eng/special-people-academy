@@ -183,6 +183,20 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
             </Alert>
           )}
 
+          {!course.is_published && permittedToPublish && !checking && failing.length > 0 && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Not ready to publish yet</AlertTitle>
+              <AlertDescription>
+                {failing.length} {failing.length === 1 ? 'item still needs' : 'items still need'}{' '}
+                attention — see the “Ready to publish” list below. You can still save as draft or
+                send for review.
+              </AlertDescription>
+            </Alert>
+          )}
+
+
+
           {!course.is_published && (
             <div className="space-y-4">
               <div className="space-y-2">
