@@ -352,6 +352,8 @@ export function VideoBlockForm({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  /** Handed to the transcript panel after a successful upload (browser-side audio extraction). */
+  const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const source = payload.source === 'url' ? 'url' : 'storage';
 
