@@ -64,7 +64,18 @@ interface Props {
   onContentInfo: () => void;
   onReport: (time: number) => void;
   controllerRef: React.MutableRefObject<MediaController | null>;
+  /**
+   * Rendered as the top-most layer INSIDE the player container, so it survives
+   * fullscreen. Used by in-video checkpoint questions.
+   */
+  overlay?: React.ReactNode;
+  /**
+   * Hard seek limit in seconds. Any attempt to move past it (slider, keyboard,
+   * mobile skip buttons, native seeking) snaps back to the ceiling.
+   */
+  seekCeiling?: number | null;
 }
+
 
 interface QualityOption {
   label: string;
