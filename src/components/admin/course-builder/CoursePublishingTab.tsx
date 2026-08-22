@@ -71,8 +71,20 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
 
 
   const handleStatusChange = async (newStatus: string) => {
+    // Only the transition to published is gated.
+    if (newStatus === 'published') {
+      if (!permittedToPublish) {
+        toast.error('You do not have permission to publish this course');
+        return;
+      }
+      if (!readyToPublish) {
+        toast.error('Fix the “Ready to publish” checklist first');
+        return;
+      }
+    }
     setSaving(true);
     try {
+
       const updates: any = { status: newStatus };
       
       // If moving to published, also set is_published
