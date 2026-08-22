@@ -14,6 +14,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from '@/components/icons';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { TranscriptReviewPanel } from '@/components/admin/lesson-blocks/TranscriptReviewPanel';
 import {
   VIDEO_ACCEPT,
   VIDEO_ALLOWED_EXT,
