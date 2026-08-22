@@ -357,7 +357,7 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
                 payload={block.payload as VideoPayload}
                 blockId={block.id}
                 lessonId={block.lesson_id}
-                lessonCompleted={lessonCompleted}
+                lessonCompleted={completed}
                 preview={preview}
                 onWatched={(done) => setSignal(block.id, done)}
               />
