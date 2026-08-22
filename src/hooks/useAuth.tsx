@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,6 +31,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOpsTrainingAdmin, setIsOpsTrainingAdmin] = useState(false);
   
+  // Tracks the signed-in user id so repeat SIGNED_IN/TOKEN_REFRESHED events for
+  // the same user are ignored.
+  const currentUserIdRef = useRef<string | null>(null);
+
   // Get query client for cache clearing on logout
   const queryClient = useQueryClient();
 
@@ -76,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setSession(session);
         setUser(session?.user ?? null);
+        currentUserIdRef.current = session?.user?.id ?? null;
 
         // Fetch role BEFORE setting loading false
         if (session?.user) {
@@ -96,9 +101,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
-        
-        console.log('[Auth] State change:', event, session?.user?.email);
-        
+
+        const previousUserId = currentUserIdRef.current;
+        const nextUserId = session?.user?.id ?? null;
+        currentUserIdRef.current = nextUserId;
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -106,18 +113,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Clear all cached data on logout
           clearRoles();
           queryClient.clear();
-          console.log('[Auth] User signed out, cache cleared');
         } else if (session?.user) {
-          // Use setTimeout to avoid potential deadlock
-          setTimeout(() => {
-            if (isMounted) {
-              checkUserRoles(session.user.id);
-            }
-          }, 0);
+          // Token refresh / tab refocus for the SAME user must not re-enter the
+          // roles-loading state: guards unmount their children while loading,
+          // which would destroy in-progress editor state.
+          if (nextUserId !== previousUserId) {
+            setTimeout(() => {
+              if (isMounted) {
+                checkUserRoles(session.user.id);
+              }
+            }, 0);
+          }
         } else {
           clearRoles();
         }
-        
+
         setLoading(false);
       }
     );

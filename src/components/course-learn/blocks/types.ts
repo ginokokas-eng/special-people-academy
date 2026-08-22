@@ -104,18 +104,43 @@ export type TextChunk =
   | { kind: 'paragraph'; text: string }
   | { kind: 'list'; items: string[] };
 
+const BULLET_RE = /^[•\-*]\s+/;
+
 export function parseBlockText(text: string): TextChunk[] {
   const chunks: TextChunk[] = [];
   const parts = (text || '').replace(/\r\n/g, '\n').split(/\n\s*\n/);
+
   for (const raw of parts) {
     const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
     if (!lines.length) continue;
-    const bullets = lines.filter((l) => /^[•\-*]\s+/.test(l));
-    if (bullets.length === lines.length) {
-      chunks.push({ kind: 'list', items: lines.map((l) => l.replace(/^[•\-*]\s+/, '')) });
-    } else {
-      chunks.push({ kind: 'paragraph', text: lines.join(' ') });
+
+    // Line-level parsing INSIDE a chunk: consecutive dash lines become a list,
+    // surrounding non-dash lines stay paragraphs. So an intro line followed by
+    // dash lines renders as a paragraph + bullet list, matching the editor hint.
+    let paragraph: string[] = [];
+    let items: string[] = [];
+
+    const flushParagraph = () => {
+      if (paragraph.length) chunks.push({ kind: 'paragraph', text: paragraph.join(' ') });
+      paragraph = [];
+    };
+    const flushList = () => {
+      if (items.length) chunks.push({ kind: 'list', items });
+      items = [];
+    };
+
+    for (const line of lines) {
+      if (BULLET_RE.test(line)) {
+        flushParagraph();
+        items.push(line.replace(BULLET_RE, ''));
+      } else {
+        flushList();
+        paragraph.push(line);
+      }
     }
+    flushParagraph();
+    flushList();
   }
+
   return chunks;
 }

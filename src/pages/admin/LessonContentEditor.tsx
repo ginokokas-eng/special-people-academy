@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { ArrowLeft, Eye, Loader2, Save } from '@/components/icons';
 import { BlockPalette } from '@/components/admin/lesson-blocks/BlockPalette';
 import { BlockList } from '@/components/admin/lesson-blocks/BlockList';
@@ -36,8 +37,15 @@ export default function LessonContentEditor() {
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
 
-  const load = useCallback(async () => {
+  // Guards against re-initialising block state (auth/token-refresh renders must
+  // never wipe unsaved work).
+  const initialisedLessonIdRef = useRef<string | null>(null);
+  const dirtyRef = useRef(false);
+  dirtyRef.current = dirty;
+
+  const load = useCallback(async (force = false) => {
     if (!lessonId) return;
+    if (!force && dirtyRef.current) return;
     setLoading(true);
     try {
       const [lessonRes, blocksRes] = await Promise.all([
@@ -70,8 +78,13 @@ export default function LessonContentEditor() {
   }, [lessonId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!lessonId) return;
+    if (initialisedLessonIdRef.current === lessonId) return;
+    initialisedLessonIdRef.current = lessonId;
+    load(true);
+  }, [lessonId, load]);
+
+  useUnsavedChangesGuard(dirty);
 
   const mutate = (updater: (prev: BlockDraft[]) => BlockDraft[]) => {
     setBlocks(updater);
@@ -163,7 +176,9 @@ export default function LessonContentEditor() {
       }
 
       toast.success('Lesson content saved');
-      await load();
+      setDirty(false);
+      dirtyRef.current = false;
+      await load(true);
     } catch (error) {
       console.error('Error saving lesson content:', error);
       toast.error('Failed to save lesson content');
@@ -211,7 +226,18 @@ export default function LessonContentEditor() {
         </div>
         <div className="flex items-center gap-2">
           {dirty && <Badge variant="outline">Unsaved changes</Badge>}
-          <Button variant="outline" onClick={() => navigate(`/admin-portal/courses/${courseId}/edit`)}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (
+                dirty &&
+                !window.confirm('You have unsaved changes. Leave this page and discard them?')
+              )
+                return;
+              setDirty(false);
+              navigate(`/admin-portal/courses/${courseId}/edit`);
+            }}
+          >
             Close
           </Button>
           <Button onClick={handleSave} disabled={saving || !dirty}>
