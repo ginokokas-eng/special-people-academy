@@ -66,6 +66,21 @@ export interface AccordionPayload {
 }
 
 /**
+ * An in-video checkpoint question. The player pauses at `at_s`, the question
+ * overlays inside the player container, and playback resumes once answered.
+ * Formative only — never touches `quizzes` / `quiz_attempts`.
+ */
+export interface VideoCheckpoint {
+  id: string;
+  /** Cue time in seconds. */
+  at_s: number;
+  question: string;
+  options: { id: string; label: string }[];
+  correct_id: string;
+  explanation?: string;
+}
+
+/**
  * Video block. Media is stored BY REFERENCE only — never inlined.
  * `storage` sources hold a `lesson-media` object path and are played through a
  * short-lived signed URL; `url` sources hold an external/direct link.
@@ -80,7 +95,12 @@ export interface VideoPayload {
   caption?: string;
   /** Original file name, shown to authors so they can recognise the upload. */
   file_name?: string;
+  /** Optional in-video checkpoint questions. Absent on every pre-Phase-5 block. */
+  checkpoints?: VideoCheckpoint[];
+  /** Stop learners scrubbing past an unanswered checkpoint. Defaults to true. */
+  lock_seek?: boolean;
 }
+
 
 /** Multiple-choice knowledge check. Formative only — never touches quizzes. */
 export interface McqOption {
