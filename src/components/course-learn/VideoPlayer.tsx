@@ -59,6 +59,8 @@ interface Props {
   onPrev?: () => void;
   onNext?: () => void;
   onEnded?: () => void;
+  /** Media failed to load (e.g. an expired signed URL) — caller may re-sign. */
+  onMediaError?: () => void;
   onContentInfo: () => void;
   onReport: (time: number) => void;
   controllerRef: React.MutableRefObject<MediaController | null>;
@@ -84,6 +86,7 @@ export function VideoPlayer({
   onPrev,
   onNext,
   onEnded,
+  onMediaError,
   onContentInfo,
   onReport,
   controllerRef,
@@ -420,6 +423,10 @@ export function VideoPlayer({
           onProgress={(e) => {
             const v = e.currentTarget;
             if (v.buffered.length) setBuffered(v.buffered.end(v.buffered.length - 1));
+          }}
+          onError={() => {
+            setWaiting(false);
+            onMediaError?.();
           }}
           onWaiting={() => setWaiting(true)}
           onPlaying={() => setWaiting(false)}
