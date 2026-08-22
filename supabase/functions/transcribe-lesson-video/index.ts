@@ -120,7 +120,8 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: claims } = await supabase.auth.getClaims();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claims } = await supabase.auth.getClaims(token);
     const userId = claims?.claims?.sub as string | undefined;
     if (!userId) return json({ error: 'Not signed in' }, 401);
 
