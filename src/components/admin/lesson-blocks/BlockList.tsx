@@ -6,18 +6,22 @@ import { ArrowDown, ArrowUp, Copy, Trash2 } from '@/components/icons';
 import {
   BLOCK_LABELS,
   isInteractive,
+  type AccordionPayload,
   type BlockDraft,
   type BlockPayload,
   type CalloutPayload,
   type CardDeckPayload,
   type ImagePayload,
   type TextPayload,
+  type VideoPayload,
 } from '@/components/course-learn/blocks/types';
 import {
+  AccordionBlockForm,
   CalloutBlockForm,
   CardDeckBlockForm,
   ImageBlockForm,
   TextBlockForm,
+  VideoBlockForm,
 } from './forms/BlockForms';
 
 interface BlockListProps {
@@ -26,10 +30,21 @@ interface BlockListProps {
   onMove: (index: number, direction: -1 | 1) => void;
   onDuplicate: (index: number) => void;
   onRemove: (index: number) => void;
+  /** Used by the video block to build storage paths for uploads. */
+  courseId?: string;
+  lessonId?: string;
 }
 
 /** Ordered, editable list of the lesson's blocks. */
-export function BlockList({ blocks, onChange, onMove, onDuplicate, onRemove }: BlockListProps) {
+export function BlockList({
+  blocks,
+  onChange,
+  onMove,
+  onDuplicate,
+  onRemove,
+  courseId,
+  lessonId,
+}: BlockListProps) {
   if (!blocks.length) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -113,6 +128,22 @@ export function BlockList({ blocks, onChange, onMove, onDuplicate, onRemove }: B
                 payload={block.payload as CardDeckPayload}
                 onChange={setPayload}
                 idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'accordion' && (
+              <AccordionBlockForm
+                payload={block.payload as AccordionPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'video' && (
+              <VideoBlockForm
+                payload={block.payload as VideoPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+                courseId={courseId}
+                lessonId={lessonId}
               />
             )}
             {block.block_type === 'image' && (

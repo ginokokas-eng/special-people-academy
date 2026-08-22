@@ -11,8 +11,8 @@ import { BlockPalette } from '@/components/admin/lesson-blocks/BlockPalette';
 import { BlockList } from '@/components/admin/lesson-blocks/BlockList';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import {
+  defaultContributesToCompletion,
   defaultPayload,
-  isInteractive,
   type BlockDraft,
   type BlockPayload,
   type BlockType,
@@ -98,7 +98,7 @@ export default function LessonContentEditor() {
         id: null,
         block_type: type,
         payload: defaultPayload(type),
-        contributes_to_completion: isInteractive(type),
+        contributes_to_completion: defaultContributesToCompletion(type),
       },
     ]);
 
@@ -268,6 +268,8 @@ export default function LessonContentEditor() {
             onMove={moveBlock}
             onDuplicate={duplicateBlock}
             onRemove={removeBlock}
+            courseId={courseId}
+            lessonId={lessonId}
           />
           <Card>
             <CardHeader>
