@@ -462,6 +462,17 @@ export function VideoPlayer({
             setControlsVisible(true);
           }}
           onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+          onSeeking={(e) => {
+            // Native seek (keyboard, gestures, media keys): snap back when the
+            // learner tries to move past an unanswered checkpoint.
+            const v = e.currentTarget;
+            const ceil = ceilingRef.current;
+            if (typeof ceil === 'number' && v.currentTime > ceil + 0.25) {
+              v.currentTime = ceil;
+              setCurrent(ceil);
+            }
+          }}
+
           onDurationChange={(e) => setDuration(e.currentTarget.duration)}
           onLoadedMetadata={(e) => {
             setDuration(e.currentTarget.duration);
