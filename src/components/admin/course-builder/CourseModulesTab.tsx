@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Switch } from '@/components/ui/switch';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,13 +53,14 @@ interface Lesson {
   duration_seconds: number | null;
   video_url: string | null;
   scorm_package_id: string | null;
+  is_required: boolean;
 }
 
 interface CourseModulesTabProps {
   courseId: string;
 }
 
-const LESSON_TYPE_VALUES = ['video', 'text', 'pdf', 'quiz', 'practical', 'scenario', 'scorm'] as const;
+const LESSON_TYPE_VALUES = ['video', 'text', 'pdf', 'quiz', 'practical', 'scenario', 'scorm', 'resource', 'blocks'] as const;
 type LessonType = typeof LESSON_TYPE_VALUES[number];
 type LessonInsert = Database['public']['Tables']['lessons']['Insert'];
 type LessonUpdate = Database['public']['Tables']['lessons']['Update'];
@@ -68,11 +72,14 @@ interface LessonForm {
   duration_minutes: number;
   duration_seconds: number | null;
   scorm_package_id: string;
+  is_required: boolean;
 }
 
 const LESSON_TYPES: Array<{ value: LessonType; label: string }> = [
   { value: 'video', label: 'Video' },
+  { value: 'blocks', label: 'Interactive lesson (blocks)' },
   { value: 'text', label: 'Text/Article' },
+  { value: 'resource', label: 'Reading / Resource' },
   { value: 'pdf', label: 'PDF' },
   { value: 'quiz', label: 'Quiz' },
   { value: 'practical', label: 'Practical Session' },
@@ -80,8 +87,14 @@ const LESSON_TYPES: Array<{ value: LessonType; label: string }> = [
   { value: 'scorm', label: 'SCORM Package' },
 ];
 
+/**
+ * Keeps whatever type the row already has. Older content uses types that are not
+ * in the builder list (e.g. seeded variants); silently retyping them to 'video'
+ * would rewrite live learner content on an unrelated dialog save.
+ */
 function normalizeLessonType(value: string | null): LessonType {
-  return LESSON_TYPE_VALUES.includes(value as LessonType) ? (value as LessonType) : 'video';
+  if (!value) return 'video';
+  return value as LessonType;
 }
 
 /** Only video/SCORM lessons carry a media duration. */
@@ -96,6 +109,7 @@ function secondsToMinutes(seconds: number | null | undefined): number {
   return Math.ceil(seconds / 60);
 }
 
+
 export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -108,13 +122,24 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
-  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
+  /** Learners already enrolled — changing which lessons are required moves their progress bar. */
+  const [enrollmentCount, setEnrollmentCount] = useState(0);
 
   useEffect(() => {
     fetchData();
     fetchScormPackages();
+    fetchEnrollmentCount();
   }, [courseId]);
+
+  const fetchEnrollmentCount = async () => {
+    const { count } = await supabase
+      .from('enrollments')
+      .select('id', { count: 'exact', head: true })
+      .eq('course_id', courseId);
+    setEnrollmentCount(count || 0);
+  };
 
   const fetchScormPackages = async () => {
     const { data } = await supabase.from('scorm_packages').select('id, title').order('created_at', { ascending: false });
@@ -229,6 +254,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
         duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
+        is_required: lessonForm.is_required,
         order_index: moduleLessons.length,
       };
       if (lessonForm.lesson_type === 'scorm' && lessonForm.scorm_package_id) {
@@ -239,7 +265,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       if (error) throw error;
       toast.success('Lesson created');
       setLessonDialog({ open: false, lesson: null, moduleId: null });
-      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
       fetchData();
     } catch (error) {
       console.error('Error creating lesson:', error);
@@ -264,6 +290,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
         duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
+        is_required: lessonForm.is_required,
       };
       updateData.scorm_package_id = lessonForm.lesson_type === 'scorm'
         ? lessonForm.scorm_package_id
@@ -355,12 +382,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       duration_minutes: lesson.duration_minutes || 0,
       duration_seconds: lesson.duration_seconds ?? null,
       scorm_package_id: lesson.scorm_package_id || '',
+      is_required: lesson.is_required ?? false,
     });
+
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
   };
 
   const openAddLesson = (moduleId: string) => {
-    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
     setLessonDialog({ open: true, lesson: null, moduleId });
   };
 
@@ -462,6 +491,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                                 )}
                               </div>
                               <div className="flex gap-2">
+                                {lesson.lesson_type === 'blocks' && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/admin-portal/courses/${courseId}/lessons/${lesson.id}/content`}>
+                                      <ListChecks className="h-4 w-4 mr-1" />
+                                      Edit content
+                                    </Link>
+                                  </Button>
+                                )}
                                 <Button variant="ghost" size="sm" onClick={() => openEditLesson(lesson)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -651,6 +688,27 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                 )}
               </div>
             )}
+            <div className="space-y-2 rounded-lg border p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label htmlFor="lesson-required">Required for completion</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Learners must finish this lesson before the course counts as complete.
+                  </p>
+                </div>
+                <Switch
+                  id="lesson-required"
+                  checked={lessonForm.is_required}
+                  onCheckedChange={(checked) => setLessonForm({ ...lessonForm, is_required: checked })}
+                />
+              </div>
+              {enrollmentCount > 0 && lessonDialog.lesson && lessonForm.is_required !== lessonDialog.lesson.is_required && (
+                <p className="flex items-start gap-1.5 text-xs text-warning">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  {enrollmentCount} learner{enrollmentCount === 1 ? ' is' : 's are'} already enrolled — changing this will shift their progress percentage.
+                </p>
+              )}
+            </div>
             <div className="space-y-2">
               <Label htmlFor="lesson-description">Description</Label>
               <Textarea

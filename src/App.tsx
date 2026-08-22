@@ -46,6 +46,7 @@ import StaffManagement from "./pages/StaffManagement";
 import Learners from "./pages/admin/Learners";
 import CourseBuilder from "./pages/admin/CourseBuilder";
 import CourseEditor from "./pages/admin/CourseEditor";
+import LessonContentEditor from "./pages/admin/LessonContentEditor";
 import CoursePreview from "./pages/admin/CoursePreview";
 import IntegrationsStatus from "./pages/admin/IntegrationsStatus";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -93,6 +94,7 @@ const App = () => (
                 <Route path="/admin-portal/staff-management" element={<ProtectedRoute requiredRoles={['admin']}><StaffManagement /></ProtectedRoute>} />
                 <Route path="/admin-portal/courses" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CourseBuilder /></ProtectedRoute>} />
                 <Route path="/admin-portal/courses/:id/edit" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CourseEditor /></ProtectedRoute>} />
+                <Route path="/admin-portal/courses/:id/lessons/:lessonId/content" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><LessonContentEditor /></ProtectedRoute>} />
                 <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CoursePreview /></ProtectedRoute>} />
                 <Route path="/admin-portal/learners" element={<ProtectedRoute requiredRoles={['admin']}><Learners /></ProtectedRoute>} />
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />

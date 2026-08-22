@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { progressPercent } from '@/lib/progress';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,11 +95,13 @@ export default function MyCourses() {
 
         if (!course) continue;
 
-        // Get lessons count
+        // Required lessons only — the same rule the certificate gate uses
+        // (see src/lib/progress.ts), so percentages agree everywhere.
         const { data: lessons } = await supabase
           .from('lessons')
           .select('id')
-          .eq('course_id', course.id);
+          .eq('course_id', course.id)
+          .eq('is_required', true);
 
         // Get completed lessons
         const { data: completedLessons } = await supabase
@@ -108,9 +111,7 @@ export default function MyCourses() {
           .in('lesson_id', lessons?.map(l => l.id) || [])
           .eq('completed', true);
 
-        const progress = lessons?.length
-          ? Math.round((completedLessons?.length || 0) / lessons.length * 100)
-          : 0;
+        const progress = progressPercent(completedLessons?.length || 0, lessons?.length || 0);
 
         coursesWithProgress.push({
           id: course.id,

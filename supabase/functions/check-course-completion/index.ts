@@ -135,15 +135,15 @@ Deno.serve(async (req) => {
     // Get all lessons for the course
     const { data: lessons } = await supabaseAdmin
       .from('lessons')
-      .select('id, lesson_type')
+      .select('id, lesson_type, is_required')
       .eq('course_id', course_id);
 
-    // Required learning content only gates completion: SCORM/video lessons.
-    // Informational text lessons and ungraded checks (e.g. the Pre-Course
-    // Knowledge Check) do NOT count toward course completion.
-    const requiredLessons = (lessons || []).filter(
-      l => l.lesson_type === 'scorm' || l.lesson_type === 'video'
-    );
+    // Completion is gated by the lessons an author flagged as required
+    // (lessons.is_required) — the single source of truth shared with every
+    // learner-facing progress bar. Type is no longer part of the rule, so
+    // required readings and interactive block lessons count too. Ungraded
+    // checks (e.g. the Pre-Course Knowledge Check) stay is_required = false.
+    const requiredLessons = (lessons || []).filter(l => l.is_required === true);
     const totalLessons = requiredLessons.length;
 
     // Get lesson progress

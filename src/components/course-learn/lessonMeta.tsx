@@ -13,6 +13,7 @@ export function lessonTypeIcon(type: string, className = 'h-3.5 w-3.5') {
     case 'scenario':
       return <MessageSquareWarning className={className} />;
     case 'resource':
+    case 'blocks':
       return <BookOpen className={className} />;
     case 'pdf':
       return <FileType2 className={className} />;
@@ -35,6 +36,8 @@ export function lessonTypeLabel(type: string): string {
       return 'Scenario';
     case 'resource':
       return 'Resource';
+    case 'blocks':
+      return 'Interactive';
     case 'pdf':
       return 'Document';
     case 'text':
