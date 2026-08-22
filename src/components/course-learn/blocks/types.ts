@@ -298,10 +298,73 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
   return type === 'card_deck' || type === 'mcq' || type === 'drag_match';
 }
 
-/** Blocks whose learner answers are persisted to lesson_block_responses. */
-export function persistsResponse(type: BlockType): boolean {
-  return type === 'mcq' || type === 'drag_match';
+/**
+ * Blocks whose learner answers are persisted to lesson_block_responses.
+ * Payload-aware: a video block only persists once it carries checkpoints.
+ */
+export function persistsResponse(type: BlockType, payload?: BlockPayload): boolean {
+  if (type === 'mcq' || type === 'drag_match') return true;
+  if (type === 'video') return videoCheckpoints(payload as VideoPayload | undefined).length > 0;
+  return false;
 }
+
+/** Authored checkpoints, sorted by cue time at read time (never on save). */
+export function videoCheckpoints(payload?: VideoPayload | null): VideoCheckpoint[] {
+  const list = payload?.checkpoints ?? [];
+  return [...list].sort((a, b) => (a.at_s ?? 0) - (b.at_s ?? 0));
+}
+
+/** Whether checkpoints are technically possible for this video source. */
+export function supportsCheckpoints(payload?: VideoPayload | null): boolean {
+  if (!payload) return false;
+  return payload.source !== 'url';
+}
+
+/** Author-facing problems with a checkpoint. Empty array = valid. */
+export function checkpointIssues(cp: VideoCheckpoint, durationSeconds?: number | null): string[] {
+  const issues: string[] = [];
+  if (!Number.isFinite(cp.at_s) || cp.at_s <= 0) issues.push('Set a time after the start.');
+  if (durationSeconds && cp.at_s >= durationSeconds)
+    issues.push('This time is past the end of the video.');
+  if (!cp.question?.trim()) issues.push('Add a question.');
+  const options = cp.options ?? [];
+  if (options.length < 2) issues.push('Add at least two options.');
+  if (options.length > 4) issues.push('Use no more than four options.');
+  if (options.some((o) => !o.label?.trim())) issues.push('Every option needs a label.');
+  if (!options.some((o) => o.id === cp.correct_id)) issues.push('Mark the correct answer.');
+  return issues;
+}
+
+export function newCheckpoint(at_s = 0): VideoCheckpoint {
+  const first = crypto.randomUUID();
+  return {
+    id: crypto.randomUUID(),
+    at_s,
+    question: '',
+    options: [
+      { id: first, label: '' },
+      { id: crypto.randomUUID(), label: '' },
+    ],
+    correct_id: first,
+    explanation: '',
+  };
+}
+
+/** mm:ss helpers for the authoring timestamp field. */
+export function secondsToMmSs(total: number): string {
+  const s = Math.max(0, Math.round(total || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+export function mmSsToSeconds(value: string): number | null {
+  const raw = (value || '').trim();
+  if (!raw) return null;
+  const m = raw.match(/^(\d+):([0-5]?\d)$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  if (/^\d+$/.test(raw)) return Number(raw);
+  return null;
+}
+
 
 /** Upload limits for video blocks — surfaced verbatim in the editor UI. */
 export const VIDEO_MAX_MB = 200;
