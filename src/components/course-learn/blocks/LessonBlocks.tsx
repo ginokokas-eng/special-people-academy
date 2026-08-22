@@ -314,7 +314,20 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   if (pendingTypes.has('card_deck')) reasons.push('reveal every card');
   if (pendingTypes.has('flip_cards')) reasons.push('flip every card');
   if (pendingTypes.has('accordion')) reasons.push('open every section');
-  if (pendingTypes.has('video')) reasons.push('watch the video');
+  if (pendingTypes.has('video')) {
+    const videoHasCheckpoints = interactiveRequired.some(
+      (b) =>
+        b.block_type === 'video' &&
+        !deckState[b.id] &&
+        videoCheckpoints(b.payload as VideoPayload).length > 0
+    );
+    reasons.push(
+      videoHasCheckpoints
+        ? 'watch the video and answer its checkpoint questions'
+        : 'watch the video'
+    );
+  }
+
   if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
   if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   const disabledReason = reasons.length
