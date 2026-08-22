@@ -101,11 +101,23 @@ export function VideoPlayer({
   onContentInfo,
   onReport,
   controllerRef,
+  overlay,
+  seekCeiling,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useIsMobile();
+  const ceilingRef = useRef<number | null>(seekCeiling ?? null);
+  ceilingRef.current = typeof seekCeiling === 'number' ? seekCeiling : null;
+
+  /** Clamp a requested time to the seek ceiling (if any). */
+  const clampTime = useCallback((t: number) => {
+    const ceil = ceilingRef.current;
+    const safe = Math.max(0, t);
+    return typeof ceil === 'number' ? Math.min(safe, ceil) : safe;
+  }, []);
+
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
