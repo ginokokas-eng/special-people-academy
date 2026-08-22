@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock } from '@/components/icons';
+import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock, RefreshCw } from '@/components/icons';
 import { toast } from 'sonner';
+import { evaluatePublishChecks, type PublishCheck } from './publishChecks';
 
 interface Course {
   id: string;
@@ -38,11 +39,36 @@ const CLINICAL_CATEGORIES = [
 
 export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail }: CoursePublishingTabProps) {
   const [saving, setSaving] = useState(false);
+  const [checks, setChecks] = useState<PublishCheck[]>([]);
+  const [checking, setChecking] = useState(true);
 
   const isClinicalCourse = CLINICAL_CATEGORIES.includes(course.category);
   const isMarina = userEmail.toLowerCase() === 'marina@specialpeople.org.uk';
   const canPublishClinical = isSuperAdmin || isMarina;
-  const canPublish = isClinicalCourse ? canPublishClinical : true;
+  const permittedToPublish = isClinicalCourse ? canPublishClinical : true;
+
+  const failing = checks.filter((c) => !c.passed);
+  const readyToPublish = !checking && failing.length === 0;
+  // Publishing is blocked while any check fails. Draft/review moves stay open.
+  const canPublish = permittedToPublish && readyToPublish;
+
+  const runChecks = useCallback(async () => {
+    setChecking(true);
+    try {
+      setChecks(await evaluatePublishChecks(course.id));
+    } catch (error) {
+      console.error('Error running publish checks:', error);
+      toast.error('Could not check publish readiness');
+      setChecks([]);
+    } finally {
+      setChecking(false);
+    }
+  }, [course.id]);
+
+  useEffect(() => {
+    void runChecks();
+  }, [runChecks]);
+
 
   const handleStatusChange = async (newStatus: string) => {
     setSaving(true);
