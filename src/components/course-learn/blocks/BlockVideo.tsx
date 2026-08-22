@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, Loader2 } from '@/components/icons';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
-import type { MediaController } from '@/components/course-learn/types';
+import type { MediaController, TranscriptSegment } from '@/components/course-learn/types';
+import { segmentsToVttUrl } from '@/lib/vtt';
 import { videoEmbedUrl, type VideoPayload } from './types';
 
 interface Props {
@@ -31,6 +32,35 @@ export function BlockVideo({ payload, onWatched, preview }: Props) {
   const isStorage = payload.source !== 'url' && !!payload.path;
   const externalUrl = (payload.url || '').trim();
   const embedUrl = payload.source === 'url' ? videoEmbedUrl(externalUrl) : null;
+
+  // Captions are built client-side from the stored transcript segments — a
+  // signed bucket URL cannot be used as a plain <track src>.
+  const [vttUrl, setVttUrl] = useState<string | null>(null);
+  const lessonId = payload.path?.split('/')[1] ?? null;
+
+  useEffect(() => {
+    if (!lessonId) return;
+    let active = true;
+    let objectUrl: string | null = null;
+    (async () => {
+      const { data } = await supabase
+        .from('lesson_transcripts')
+        .select('segments')
+        .eq('lesson_id', lessonId)
+        .eq('language_code', 'en')
+        .maybeSingle();
+      if (!active) return;
+      objectUrl = segmentsToVttUrl(
+        (data?.segments as unknown as TranscriptSegment[] | null) ?? null
+      );
+      if (objectUrl) setVttUrl(objectUrl);
+    })();
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setVttUrl(null);
+    };
+  }, [lessonId]);
 
   const sign = useCallback(async () => {
     if (!payload.path) return;
@@ -99,7 +129,8 @@ export function BlockVideo({ payload, onWatched, preview }: Props) {
           title={payload.title?.trim() || 'Lesson video'}
           sources={[]}
           fallbackUrl={isStorage ? signedUrl : externalUrl}
-          hasCaptions={false}
+          vttUrl={vttUrl}
+          hasCaptions={!!vttUrl}
           prefs={prefs}
           setPrefs={setPrefs}
           theatre={false}

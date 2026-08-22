@@ -14,6 +14,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from '@/components/icons';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { TranscriptReviewPanel } from '@/components/admin/lesson-blocks/TranscriptReviewPanel';
 import {
   VIDEO_ACCEPT,
   VIDEO_ALLOWED_EXT,
@@ -352,6 +353,8 @@ export function VideoBlockForm({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  /** Handed to the transcript panel after a successful upload (browser-side audio extraction). */
+  const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const source = payload.source === 'url' ? 'url' : 'storage';
 
@@ -387,6 +390,8 @@ export function VideoBlockForm({
       setProgress(100);
       onChange({ ...payload, source: 'storage', path, file_name: file.name, url: '' });
       toast.success('Video uploaded');
+      // Kick off browser-side audio extraction + transcription for this file.
+      setTranscribeFile(file);
     } catch (err) {
       console.error('Video upload failed:', err);
       setError('Upload failed. Please check your connection and try again.');
@@ -443,6 +448,14 @@ export function VideoBlockForm({
             <p className="text-xs text-success">
               Uploaded: {payload.file_name || payload.path.split('/').pop()}
             </p>
+          )}
+          {payload.path && (
+            <TranscriptReviewPanel
+              lessonId={lessonId}
+              autoFile={transcribeFile}
+              onAutoFileConsumed={() => setTranscribeFile(null)}
+              videoTitle={payload.title}
+            />
           )}
         </div>
       ) : (
