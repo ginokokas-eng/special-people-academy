@@ -102,14 +102,18 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   text: 'Text',
   callout: 'Callout',
   card_deck: 'Card deck',
+  accordion: 'Accordion',
   image: 'Image',
+  video: 'Video',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   text: 'Headed paragraphs and bullet lists.',
   callout: 'A highlighted note — info, safety, warning or good practice.',
   card_deck: 'Tap-to-reveal cards. Learners must open every card.',
+  accordion: 'Collapsible sections learners open one at a time.',
   image: 'A picture with alt text and an optional caption.',
+  video: 'Upload a video file, or paste a YouTube, Vimeo or direct link.',
 };
 
 export function defaultPayload(type: BlockType): BlockPayload {
@@ -124,14 +128,47 @@ export function defaultPayload(type: BlockType): BlockPayload {
         instruction: 'Tap each card to reveal the answer.',
         cards: [{ id: crypto.randomUUID(), front: '', back: '' }],
       } satisfies CardDeckPayload;
+    case 'accordion':
+      return {
+        heading: '',
+        items: [{ id: crypto.randomUUID(), title: '', body: '' }],
+      } satisfies AccordionPayload;
     case 'image':
       return { url: '', alt: '', caption: '' } satisfies ImagePayload;
+    case 'video':
+      return { source: 'storage', path: '', url: '', title: '', caption: '' } satisfies VideoPayload;
   }
 }
 
 /** Blocks that need a learner interaction before the lesson can be completed. */
 export function isInteractive(type: BlockType): boolean {
+  return type === 'card_deck' || type === 'accordion' || type === 'video';
+}
+
+/**
+ * Whether the completion switch starts ON for a newly added block.
+ * Card decks default ON (P1 behaviour); video and accordion default OFF.
+ */
+export function defaultContributesToCompletion(type: BlockType): boolean {
   return type === 'card_deck';
+}
+
+/** Upload limits for video blocks — surfaced verbatim in the editor UI. */
+export const VIDEO_MAX_MB = 200;
+export const VIDEO_ACCEPT = 'video/mp4,video/webm,video/quicktime';
+export const VIDEO_ALLOWED_EXT = ['mp4', 'webm', 'mov'] as const;
+
+/** Recognise embed-only sources: no `onEnded` signal is available for these. */
+export function videoEmbedUrl(url: string): string | null {
+  const raw = (url || '').trim();
+  if (!raw) return null;
+  const yt = raw.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/
+  );
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = raw.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
 }
 
 /** Simple text parser shared by text blocks (same convention as reading lessons). */
