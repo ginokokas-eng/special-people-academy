@@ -649,13 +649,7 @@ export function VideoPlayer({
                     min={0}
                     max={duration || 100}
                     step={0.1}
-                    onValueChange={(v) => {
-                      const vid = videoRef.current;
-                      if (vid) {
-                        vid.currentTime = v[0];
-                        setCurrent(v[0]);
-                      }
-                    }}
+                    onValueChange={(v) => seekTo(v[0])}
                     aria-label="Seek"
                     className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                   />
@@ -696,13 +690,7 @@ export function VideoPlayer({
               min={0}
               max={duration || 100}
               step={0.1}
-              onValueChange={(v) => {
-                const vid = videoRef.current;
-                if (vid) {
-                  vid.currentTime = v[0];
-                  setCurrent(v[0]);
-                }
-              }}
+              onValueChange={(v) => seekTo(v[0])}
               aria-label="Seek"
               className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
             />
@@ -823,6 +811,9 @@ export function VideoPlayer({
           </div>
         </div>
         )}
+
+        {/* Top-most layer INSIDE the container so it survives fullscreen. */}
+        {overlay}
       </div>
 
 
