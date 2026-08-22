@@ -366,7 +366,9 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       duration_minutes: lesson.duration_minutes || 0,
       duration_seconds: lesson.duration_seconds ?? null,
       scorm_package_id: lesson.scorm_package_id || '',
+      is_required: lesson.is_required ?? false,
     });
+
     setLessonDialog({ open: true, lesson, moduleId: lesson.module_id });
   };
 
