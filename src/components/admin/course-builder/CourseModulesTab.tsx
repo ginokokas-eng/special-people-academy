@@ -119,7 +119,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
 
   // Form states
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
-  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+  const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
@@ -250,7 +250,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       if (error) throw error;
       toast.success('Lesson created');
       setLessonDialog({ open: false, lesson: null, moduleId: null });
-      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+      setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
       fetchData();
     } catch (error) {
       console.error('Error creating lesson:', error);
@@ -371,7 +371,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   };
 
   const openAddLesson = (moduleId: string) => {
-    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '' });
+    setLessonForm({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
     setLessonDialog({ open: true, lesson: null, moduleId });
   };
 
