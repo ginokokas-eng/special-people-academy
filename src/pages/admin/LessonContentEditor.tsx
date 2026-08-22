@@ -281,7 +281,9 @@ export default function LessonContentEditor() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
+          {!blocks.length && !templateDismissed && <TemplatePicker onPick={applyTemplate} />}
           <BlockList
+
             blocks={blocks}
             onChange={changeBlock}
             onMove={moveBlock}
