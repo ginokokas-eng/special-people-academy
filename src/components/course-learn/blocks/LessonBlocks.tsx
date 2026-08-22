@@ -10,14 +10,22 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
+import { BlockMcq } from './BlockMcq';
+import { BlockDragMatch } from './BlockDragMatch';
+import { BlockFlipCards } from './BlockFlipCards';
+import { BlockChecklist } from './BlockChecklist';
 import {
   isInteractive,
   parseBlockText,
   type AccordionPayload,
   type CalloutPayload,
   type CardDeckPayload,
+  type ChecklistPayload,
+  type DragMatchPayload,
+  type FlipCardsPayload,
   type ImagePayload,
   type LessonBlock,
+  type McqPayload,
   type TextPayload,
   type VideoPayload,
 } from './types';
