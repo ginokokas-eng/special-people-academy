@@ -96,9 +96,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
-        
-        console.log('[Auth] State change:', event, session?.user?.email);
-        
+
+        const previousUserId = currentUserIdRef.current;
+        const nextUserId = session?.user?.id ?? null;
+        currentUserIdRef.current = nextUserId;
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -106,18 +108,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Clear all cached data on logout
           clearRoles();
           queryClient.clear();
-          console.log('[Auth] User signed out, cache cleared');
         } else if (session?.user) {
-          // Use setTimeout to avoid potential deadlock
-          setTimeout(() => {
-            if (isMounted) {
-              checkUserRoles(session.user.id);
-            }
-          }, 0);
+          // Token refresh / tab refocus for the SAME user must not re-enter the
+          // roles-loading state: guards unmount their children while loading,
+          // which would destroy in-progress editor state.
+          if (nextUserId !== previousUserId) {
+            setTimeout(() => {
+              if (isMounted) {
+                checkUserRoles(session.user.id);
+              }
+            }, 0);
+          }
         } else {
           clearRoles();
         }
-        
+
         setLoading(false);
       }
     );
