@@ -78,7 +78,7 @@ export default function Auth() {
     e.preventDefault();
     
     try {
-      emailSchema.parse(loginEmail);
+      loginEmailSchema.parse(loginEmail);
       passwordSchema.parse(loginPassword);
     } catch (error) {
       if (error instanceof z.ZodError) {
