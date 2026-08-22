@@ -160,7 +160,7 @@ Reasoning: `quiz_attempts` is shaped for whole-quiz submissions (`quiz_id`, `sco
 
 ## Phasing — agreed, with two additions
 
-- **P1** `is_required` switch + backfill + `normalizeLessonType` fix + `lesson_blocks` schema + Text/Callout/Card deck/Image + editor page + learner renderer. **Add:** align the client-side progress percentages to required lessons only (see §3), and add `'blocks'` and `'resource'` to the builder's type list so `resource` lessons become editable at all.
+- **P1** additive `is_required` backfill + gate switch + `normalizeLessonType` fix + `lesson_blocks` schema + Text/Callout/Card deck/Image + editor page + learner renderer. **Add:** shared required-only progress helper applied to all five learner surfaces, `is_required = true` filter in `lms-api` progress plus a new `required_lesson_count` in catalog, an `is_required` toggle in the lesson dialog with the active-enrollment warning, and `'blocks'` + `'resource'` in the builder's type list so `resource` lessons become editable at all.
 - **P2** Video block + `lesson-media` bucket + signed-URL function; Accordion.
 - **P3** MCQ check, Drag-and-drop, Flip cards, Practical checklist + `lesson_block_responses` + roll-up completion.
 - **P4** Templates + publish validation.
