@@ -32,6 +32,35 @@ export function BlockVideo({ payload, onWatched, preview }: Props) {
   const externalUrl = (payload.url || '').trim();
   const embedUrl = payload.source === 'url' ? videoEmbedUrl(externalUrl) : null;
 
+  // Captions are built client-side from the stored transcript segments — a
+  // signed bucket URL cannot be used as a plain <track src>.
+  const [vttUrl, setVttUrl] = useState<string | null>(null);
+  const lessonId = payload.path?.split('/')[1] ?? null;
+
+  useEffect(() => {
+    if (!lessonId) return;
+    let active = true;
+    let objectUrl: string | null = null;
+    (async () => {
+      const { data } = await supabase
+        .from('lesson_transcripts')
+        .select('segments')
+        .eq('lesson_id', lessonId)
+        .eq('language_code', 'en')
+        .maybeSingle();
+      if (!active) return;
+      objectUrl = segmentsToVttUrl(
+        (data?.segments as unknown as TranscriptSegment[] | null) ?? null
+      );
+      if (objectUrl) setVttUrl(objectUrl);
+    })();
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setVttUrl(null);
+    };
+  }, [lessonId]);
+
   const sign = useCallback(async () => {
     if (!payload.path) return;
     setLoading(true);
