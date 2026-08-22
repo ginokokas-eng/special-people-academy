@@ -171,18 +171,26 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   text: 'Text',
   callout: 'Callout',
   card_deck: 'Card deck',
+  flip_cards: 'Flip cards',
   accordion: 'Accordion',
   image: 'Image',
   video: 'Video',
+  mcq: 'Knowledge check',
+  drag_match: 'Matching activity',
+  checklist: 'Practical checklist',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   text: 'Headed paragraphs and bullet lists.',
   callout: 'A highlighted note — info, safety, warning or good practice.',
   card_deck: 'Tap-to-reveal cards. Learners must open every card.',
+  flip_cards: 'Cards that flip over in place to show the answer.',
   accordion: 'Collapsible sections learners open one at a time.',
   image: 'A picture with alt text and an optional caption.',
   video: 'Upload a video file, or paste a YouTube, Vimeo or direct link.',
+  mcq: 'A single multiple-choice question with instant feedback.',
+  drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
+  checklist: 'Read-only practical steps learners can study before assessment.',
 };
 
 export function defaultPayload(type: BlockType): BlockPayload {
@@ -197,6 +205,12 @@ export function defaultPayload(type: BlockType): BlockPayload {
         instruction: 'Tap each card to reveal the answer.',
         cards: [{ id: crypto.randomUUID(), front: '', back: '' }],
       } satisfies CardDeckPayload;
+    case 'flip_cards':
+      return {
+        heading: '',
+        instruction: 'Tap a card to flip it over.',
+        cards: [{ id: crypto.randomUUID(), front: '', back: '' }],
+      } satisfies FlipCardsPayload;
     case 'accordion':
       return {
         heading: '',
@@ -206,20 +220,67 @@ export function defaultPayload(type: BlockType): BlockPayload {
       return { url: '', alt: '', caption: '' } satisfies ImagePayload;
     case 'video':
       return { source: 'storage', path: '', url: '', title: '', caption: '' } satisfies VideoPayload;
+    case 'mcq': {
+      const first = crypto.randomUUID();
+      return {
+        question: '',
+        options: [
+          { id: first, label: '' },
+          { id: crypto.randomUUID(), label: '' },
+        ],
+        correct_id: first,
+        explanation: '',
+      } satisfies McqPayload;
+    }
+    case 'drag_match': {
+      const target = crypto.randomUUID();
+      return {
+        prompt: '',
+        targets: [
+          { id: target, label: '' },
+          { id: crypto.randomUUID(), label: '' },
+        ],
+        items: [{ id: crypto.randomUUID(), label: '', target_id: target }],
+        shuffle: true,
+        feedback: {
+          correct: 'That’s right — well matched.',
+          incorrect: 'Not quite. The ones that don’t match are back in the list — try again.',
+        },
+      } satisfies DragMatchPayload;
+    }
+    case 'checklist':
+      return {
+        heading: '',
+        caption: 'Your assessor completes the real sign-off in person.',
+        steps: [{ id: crypto.randomUUID(), step_title: '', instruction: '', safety_note: '' }],
+      } satisfies ChecklistPayload;
   }
 }
 
 /** Blocks that need a learner interaction before the lesson can be completed. */
 export function isInteractive(type: BlockType): boolean {
-  return type === 'card_deck' || type === 'accordion' || type === 'video';
+  return (
+    type === 'card_deck' ||
+    type === 'flip_cards' ||
+    type === 'accordion' ||
+    type === 'video' ||
+    type === 'mcq' ||
+    type === 'drag_match'
+  );
 }
 
 /**
  * Whether the completion switch starts ON for a newly added block.
- * Card decks default ON (P1 behaviour); video and accordion default OFF.
+ * Card decks, knowledge checks and matching activities default ON; video,
+ * accordion, flip cards and the practical checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
-  return type === 'card_deck';
+  return type === 'card_deck' || type === 'mcq' || type === 'drag_match';
+}
+
+/** Blocks whose learner answers are persisted to lesson_block_responses. */
+export function persistsResponse(type: BlockType): boolean {
+  return type === 'mcq' || type === 'drag_match';
 }
 
 /** Upload limits for video blocks — surfaced verbatim in the editor UI. */
