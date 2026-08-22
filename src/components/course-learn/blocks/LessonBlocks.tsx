@@ -312,8 +312,11 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   );
   const reasons: string[] = [];
   if (pendingTypes.has('card_deck')) reasons.push('reveal every card');
+  if (pendingTypes.has('flip_cards')) reasons.push('flip every card');
   if (pendingTypes.has('accordion')) reasons.push('open every section');
   if (pendingTypes.has('video')) reasons.push('watch the video');
+  if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
+  if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   const disabledReason = reasons.length
     ? `Please ${reasons.join(', ')} above to finish this lesson.`
     : '';
