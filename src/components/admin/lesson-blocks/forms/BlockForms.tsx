@@ -448,6 +448,14 @@ export function VideoBlockForm({
               Uploaded: {payload.file_name || payload.path.split('/').pop()}
             </p>
           )}
+          {payload.path && (
+            <TranscriptReviewPanel
+              lessonId={lessonId}
+              autoFile={transcribeFile}
+              onAutoFileConsumed={() => setTranscribeFile(null)}
+              videoTitle={payload.title}
+            />
+          )}
         </div>
       ) : (
         <div className="space-y-1.5">
