@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,6 +31,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isOpsTrainingAdmin, setIsOpsTrainingAdmin] = useState(false);
   
+  // Tracks the signed-in user id so repeat SIGNED_IN/TOKEN_REFRESHED events for
+  // the same user are ignored.
+  const currentUserIdRef = useRef<string | null>(null);
+
   // Get query client for cache clearing on logout
   const queryClient = useQueryClient();
 
@@ -76,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setSession(session);
         setUser(session?.user ?? null);
+        currentUserIdRef.current = session?.user?.id ?? null;
 
         // Fetch role BEFORE setting loading false
         if (session?.user) {
