@@ -107,6 +107,20 @@ export default function LessonContentEditor() {
       },
     ]);
 
+  /**
+   * Seeds the lesson from a template. The seeded blocks are ordinary drafts —
+   * the template choice is not recorded anywhere.
+   */
+  const applyTemplate = (template: LessonTemplate) => {
+    setTemplateDismissed(true);
+    const seeded = template.build();
+    if (!seeded.length) return;
+    mutate(() => seeded);
+    toast.success(`${template.name} template added — replace the guidance text with your own words`);
+  };
+
+
+
   const changeBlock = (index: number, patch: Partial<BlockDraft>) =>
     mutate((prev) => prev.map((b, i) => (i === index ? { ...b, ...patch } : b)));
 
