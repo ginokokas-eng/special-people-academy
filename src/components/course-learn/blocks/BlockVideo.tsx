@@ -129,7 +129,8 @@ export function BlockVideo({ payload, onWatched, preview }: Props) {
           title={payload.title?.trim() || 'Lesson video'}
           sources={[]}
           fallbackUrl={isStorage ? signedUrl : externalUrl}
-          hasCaptions={false}
+          vttUrl={vttUrl}
+          hasCaptions={!!vttUrl}
           prefs={prefs}
           setPrefs={setPrefs}
           theatre={false}
