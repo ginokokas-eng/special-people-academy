@@ -14,6 +14,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from '@/components/icons';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { CheckpointEditor } from './CheckpointEditor';
 import { TranscriptReviewPanel } from '@/components/admin/lesson-blocks/TranscriptReviewPanel';
 import {
   VIDEO_ACCEPT,
@@ -492,6 +493,8 @@ export function VideoBlockForm({
           />
         </div>
       </div>
+
+      <CheckpointEditor payload={payload} onChange={onChange} idPrefix={idPrefix} />
 
       {error && <p className="text-xs font-medium text-destructive">{error}</p>}
     </div>
