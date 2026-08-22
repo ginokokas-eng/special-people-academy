@@ -359,6 +359,34 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
                 onWatched={(done) => setSignal(block.id, done)}
               />
             )}
+            {block.block_type === 'flip_cards' && (
+              <BlockFlipCards
+                payload={block.payload as FlipCardsPayload}
+                showProgress={block.contributes_to_completion}
+                onAllFlipped={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'mcq' && (
+              <BlockMcq
+                payload={block.payload as McqPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                preview={preview}
+                onAnswered={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'drag_match' && (
+              <BlockDragMatch
+                payload={block.payload as DragMatchPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                preview={preview}
+                onSolved={(done) => setSignal(block.id, done)}
+              />
+            )}
+            {block.block_type === 'checklist' && (
+              <BlockChecklist payload={block.payload as ChecklistPayload} />
+            )}
           </div>
         ))}
       </div>
