@@ -35,7 +35,7 @@ export function MobileAbout({ course, modules, lessons, competencyAssessors = []
     competencyAssessors.length > 0 ? competencyAssessors.join(' or ') : 'an approved assessor';
 
   const pathwaySteps = [
-    'Complete all required video lessons',
+    'Complete all required lessons',
     'Pass the Final Assessment with 80% or above',
     'Receive Certificate of Completion',
     'Complete practical competency sign-off, where required',

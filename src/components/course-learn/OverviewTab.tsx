@@ -15,7 +15,7 @@ export function OverviewTab({
     competencyAssessors.length > 0 ? competencyAssessors.join(' or ') : 'an authorised assessor';
 
   const pathwaySteps = [
-    'Complete all required video lessons',
+    'Complete all required lessons',
     'Pass the Final Assessment with 80% or above',
     'Receive Certificate of Completion',
     'Complete practical competency sign-off, where required',
