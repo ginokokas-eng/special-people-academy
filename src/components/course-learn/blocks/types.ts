@@ -42,7 +42,42 @@ export interface ImagePayload {
   caption?: string;
 }
 
-export type BlockPayload = TextPayload | CalloutPayload | CardDeckPayload | ImagePayload;
+export interface AccordionItemPayload {
+  id: string;
+  title: string;
+  /** Same plain-text conventions as a text block (blank line = paragraph, "-" = bullet). */
+  body: string;
+}
+
+export interface AccordionPayload {
+  heading?: string;
+  items: AccordionItemPayload[];
+}
+
+/**
+ * Video block. Media is stored BY REFERENCE only — never inlined.
+ * `storage` sources hold a `lesson-media` object path and are played through a
+ * short-lived signed URL; `url` sources hold an external/direct link.
+ */
+export interface VideoPayload {
+  source: 'storage' | 'url';
+  /** Object path in the private `lesson-media` bucket: {course_id}/{lesson_id}/{uuid}.{ext} */
+  path?: string;
+  /** External URL (YouTube / Vimeo / direct file). */
+  url?: string;
+  title?: string;
+  caption?: string;
+  /** Original file name, shown to authors so they can recognise the upload. */
+  file_name?: string;
+}
+
+export type BlockPayload =
+  | TextPayload
+  | CalloutPayload
+  | CardDeckPayload
+  | AccordionPayload
+  | ImagePayload
+  | VideoPayload;
 
 export interface LessonBlock {
   id: string;
