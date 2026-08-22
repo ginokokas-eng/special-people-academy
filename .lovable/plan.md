@@ -57,23 +57,31 @@ Reasoning: `text`/`scenario`/`pdf` currently fall through to a single `descripti
 
 Also in this phase: fix `normalizeLessonType()` (`CourseModulesTab.tsx:83`, used at `:137`). It coerces any unknown type to `'video'`, so editing a `resource` lesson silently rewrites it — and once `'blocks'` exists, the same bug would destroy block lessons on any dialog save. Fix: add `'resource'` and `'blocks'` to the allowed list, and make the fallback preserve the stored value rather than defaulting to `video` (fall back to `'text'` only when the value is null/empty).
 
-## 3. Completion gating — switch to `is_required`, with one caveat
+## 3. Completion gating — switch to `is_required` (additive backfill, owner-approved)
 
-The proposal is sound. Backfill:
+Correction accepted: `is_required` is NOT NULL DEFAULT **false**, and the 25 `true` flags are the deliberately-authored Enteral Feeding required readings. My unconditional `SET` would have wiped a real feature. The additive backfill is correct:
 
 ```sql
-update public.lessons
-set is_required = (lesson_type in ('scorm','video'));
-alter table public.lessons alter column is_required set default false;
+update public.lessons set is_required = true where lesson_type in ('scorm','video');
 ```
 
-Then `check-course-completion` selects `id, lesson_type, is_required` and filters on `is_required = true` instead of the hardcoded type list. Everything else in that function (graded-quiz rules, practical sign-off, certificate insert) stays as it is.
+No `alter column ... set default` needed — the default is already `false`, which is the right default for a new lesson.
 
-Parity check and risks:
+Verified against live data (current counts by type / flag): 39 scorm + 39 video all `false`; 25 resource `true`, 3 resource `false`; text 107, quiz 45, scenario 13, practical 8, pdf 3, all `false`. So the backfill flips exactly 78 rows and preserves the 25, giving 103 required lessons platform-wide.
 
-- **`lessons.is_required` is currently NOT NULL with a default of true** in the schema. Any lesson created before the backfill may already carry `true` for text/scenario/resource rows — that is precisely why the backfill must be an unconditional `set`, not a `where is_required is null`. After the backfill the required set is byte-for-byte the current type list, so no existing enrollment gains or loses a certificate at cutover.
-- **The real retroactive risk is afterwards, not at cutover:** the moment an author marks an existing lesson required (or adds a required block lesson to a live course), every already-certified learner on that course is fine (certificates are never revoked — `certificates` denies UPDATE/DELETE), but learners mid-course see their progress requirement grow. Recommend a warning in the builder when toggling `is_required` on a course that has active enrollments, and treating "add required lesson to a published course" as a deliberate act.
-- **Client-side progress bars do not use this rule.** `CourseLearn.tsx`, `MobileCoursePlayer.tsx`, `MyCourses.tsx`, `Dashboard.tsx`, and `MyLearning.tsx` compute percentages from *all* lessons. Today that already disagrees with the edge function; once `is_required` is the source of truth, align these to count required lessons only, or learners will hit 100% without a certificate (or vice versa). Worth folding into P1.
+Then `check-course-completion` selects `id, is_required` and filters on `is_required = true` instead of the hardcoded type list. Everything else in that function (graded-quiz rules, practical sign-off, certificate insert) stays as it is.
+
+**(a) Confirmed — type-agnostic.** The function's only per-lesson signal is `lesson_progress.completed` for the filtered lesson ids; it never branches on `lesson_type` inside that check. `resource` lessons flow through unchanged, and `ResourceLessonBody`'s mark-as-read writes the same `lesson_progress` row via the same upsert, so the mechanism is end-to-end today. No change needed beyond the filter.
+
+**(b) Confirmed, with one gap you should include in P1.** Single shared rule: *denominator = lessons where `is_required` is true; numerator = those with a completed `lesson_progress` row*. Applied in `CourseLearn.tsx`, `MobileCoursePlayer.tsx` (it receives counts as props, so it inherits the fix), `MyCourses.tsx`, `Dashboard.tsx`, `MyLearning.tsx`. Recommend one helper (e.g. `src/lib/progress.ts` `requiredProgress(lessons, completedIds)`) so the rule exists once rather than five times. EF learners' denominator becomes 39.
+  The gap: **`lms-api` does not use the rule either.** `handleProgress` selects `lessons(id, course_id)` with no filter and uses all lessons as the denominator, and `handleCatalog`'s computed `lesson_count` is likewise all lessons. To make Ariadne agree with the portal, add `is_required = true` to the progress lesson query, and either filter `lesson_count` the same way or add a separate `required_lesson_count` field. Changing `lesson_count`'s meaning is a contract change for the Ariadne consumer — my recommendation is to keep `lesson_count` as-is and add `required_lesson_count`, then have Ariadne switch over. That is a small addition to P1's scope.
+
+**(c) Other consequences of default-false + the 25 flags:**
+  - The builder warning should fire on **any** `is_required` change for a lesson in a course with active enrollments — including editing one of the 25 existing required readings (turning one *off* also shifts denominators, in the other direction). Scope the warning to the flag itself, not to "newly created lessons".
+  - The `normalizeLessonType` fix is protecting 28 live `resource` rows, not a hypothetical. It must ship before or with the backfill; a dialog save that retypes a required reading to `video` would corrupt both the content and the required set.
+  - Cutover risk is genuinely low as stated (13 enrollments, 2 on EF, 0 completions, certificates append-only). Recommend still checking after the backfill that no learner sits at a suddenly-lowered percentage they'd read as a regression — with 0 EF completions this is cosmetic only.
+  - The lesson-metadata dialog needs an `is_required` control at all (it currently writes only title/description/type/durations/order/scorm id), otherwise the flag stays SQL-only. Fold into P1.
+
 - **Per-block roll-up:** a block lesson is complete when every block with `contributes_to_completion = true` has a satisfying signal. Compute that client-side from `lesson_block_responses`, then write the existing single row via the current `lesson_progress` upsert (`onConflict: 'lesson_id,user_id'`) and call `check-course-completion` — exactly the path `markComplete` already uses. No change to `lesson_progress` shape, so nothing downstream breaks.
 
 ## 4. Authoring UX — dedicated editor page
@@ -152,7 +160,7 @@ Reasoning: `quiz_attempts` is shaped for whole-quiz submissions (`quiz_id`, `sco
 
 ## Phasing — agreed, with two additions
 
-- **P1** `is_required` switch + backfill + `normalizeLessonType` fix + `lesson_blocks` schema + Text/Callout/Card deck/Image + editor page + learner renderer. **Add:** align the client-side progress percentages to required lessons only (see §3), and add `'blocks'` and `'resource'` to the builder's type list so `resource` lessons become editable at all.
+- **P1** additive `is_required` backfill + gate switch + `normalizeLessonType` fix + `lesson_blocks` schema + Text/Callout/Card deck/Image + editor page + learner renderer. **Add:** shared required-only progress helper applied to all five learner surfaces, `is_required = true` filter in `lms-api` progress plus a new `required_lesson_count` in catalog, an `is_required` toggle in the lesson dialog with the active-enrollment warning, and `'blocks'` + `'resource'` in the builder's type list so `resource` lessons become editable at all.
 - **P2** Video block + `lesson-media` bucket + signed-URL function; Accordion.
 - **P3** MCQ check, Drag-and-drop, Flip cards, Practical checklist + `lesson_block_responses` + roll-up completion.
 - **P4** Templates + publish validation.
