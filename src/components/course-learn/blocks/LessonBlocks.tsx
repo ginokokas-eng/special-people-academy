@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
+import { RevealOnScroll } from './RevealOnScroll';
 import { BlockMcq } from './BlockMcq';
 import { BlockDragMatch } from './BlockDragMatch';
 import { BlockFlipCards } from './BlockFlipCards';
@@ -409,7 +410,7 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
             {block.block_type === 'checklist' && (
               <BlockChecklist payload={block.payload as ChecklistPayload} />
             )}
-          </div>
+          </RevealOnScroll>
         ))}
       </div>
 
