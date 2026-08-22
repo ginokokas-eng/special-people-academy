@@ -121,11 +121,22 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
   const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
+  /** Learners already enrolled — changing which lessons are required moves their progress bar. */
+  const [enrollmentCount, setEnrollmentCount] = useState(0);
 
   useEffect(() => {
     fetchData();
     fetchScormPackages();
+    fetchEnrollmentCount();
   }, [courseId]);
+
+  const fetchEnrollmentCount = async () => {
+    const { count } = await supabase
+      .from('enrollments')
+      .select('id', { count: 'exact', head: true })
+      .eq('course_id', courseId);
+    setEnrollmentCount(count || 0);
+  };
 
   const fetchScormPackages = async () => {
     const { data } = await supabase.from('scorm_packages').select('id, title').order('created_at', { ascending: false });
@@ -240,6 +251,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
         duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
+        is_required: lessonForm.is_required,
         order_index: moduleLessons.length,
       };
       if (lessonForm.lesson_type === 'scorm' && lessonForm.scorm_package_id) {
@@ -275,6 +287,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
         lesson_type: lessonForm.lesson_type,
         duration_minutes: lessonForm.duration_minutes || 0,
         duration_seconds: isTimedMedia(lessonForm.lesson_type) ? (lessonForm.duration_seconds ?? null) : null,
+        is_required: lessonForm.is_required,
       };
       updateData.scorm_package_id = lessonForm.lesson_type === 'scorm'
         ? lessonForm.scorm_package_id
@@ -475,6 +488,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                                 )}
                               </div>
                               <div className="flex gap-2">
+                                {lesson.lesson_type === 'blocks' && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/admin-portal/courses/${courseId}/lessons/${lesson.id}/content`}>
+                                      <ListChecks className="h-4 w-4 mr-1" />
+                                      Edit content
+                                    </Link>
+                                  </Button>
+                                )}
                                 <Button variant="ghost" size="sm" onClick={() => openEditLesson(lesson)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -664,6 +685,27 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                 )}
               </div>
             )}
+            <div className="space-y-2 rounded-lg border p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label htmlFor="lesson-required">Required for completion</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Learners must finish this lesson before the course counts as complete.
+                  </p>
+                </div>
+                <Switch
+                  id="lesson-required"
+                  checked={lessonForm.is_required}
+                  onCheckedChange={(checked) => setLessonForm({ ...lessonForm, is_required: checked })}
+                />
+              </div>
+              {enrollmentCount > 0 && lessonDialog.lesson && lessonForm.is_required !== lessonDialog.lesson.is_required && (
+                <p className="flex items-start gap-1.5 text-xs text-warning">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  {enrollmentCount} learner{enrollmentCount === 1 ? ' is' : 's are'} already enrolled — changing this will shift their progress percentage.
+                </p>
+              )}
+            </div>
             <div className="space-y-2">
               <Label htmlFor="lesson-description">Description</Label>
               <Textarea
