@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
+import { RevealOnScroll } from './RevealOnScroll';
 import { BlockMcq } from './BlockMcq';
 import { BlockDragMatch } from './BlockDragMatch';
 import { BlockFlipCards } from './BlockFlipCards';
@@ -27,6 +28,7 @@ import {
   type LessonBlock,
   type McqPayload,
   type TextPayload,
+  videoCheckpoints,
   type VideoPayload,
 } from './types';
 
@@ -314,7 +316,20 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   if (pendingTypes.has('card_deck')) reasons.push('reveal every card');
   if (pendingTypes.has('flip_cards')) reasons.push('flip every card');
   if (pendingTypes.has('accordion')) reasons.push('open every section');
-  if (pendingTypes.has('video')) reasons.push('watch the video');
+  if (pendingTypes.has('video')) {
+    const videoHasCheckpoints = interactiveRequired.some(
+      (b) =>
+        b.block_type === 'video' &&
+        !deckState[b.id] &&
+        videoCheckpoints(b.payload as VideoPayload).length > 0
+    );
+    reasons.push(
+      videoHasCheckpoints
+        ? 'watch the video and answer its checkpoint questions'
+        : 'watch the video'
+    );
+  }
+
   if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
   if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   const disabledReason = reasons.length
@@ -332,8 +347,12 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   return (
     <div className="space-y-4">
       <div className="space-y-6 rounded-lg border bg-card p-6">
-        {blocks.map((block) => (
-          <div key={block.id}>
+        {blocks.map((block, blockIndex) => (
+          <RevealOnScroll
+            key={block.id}
+            index={blockIndex}
+            opacityOnly={block.block_type === 'video' || block.block_type === 'drag_match'}
+          >
             {block.block_type === 'text' && <TextBlock payload={block.payload as TextPayload} />}
             {block.block_type === 'callout' && (
               <CalloutBlock payload={block.payload as CalloutPayload} />
@@ -355,10 +374,14 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
             {block.block_type === 'video' && (
               <BlockVideo
                 payload={block.payload as VideoPayload}
+                blockId={block.id}
+                lessonId={block.lesson_id}
+                lessonCompleted={completed}
                 preview={preview}
                 onWatched={(done) => setSignal(block.id, done)}
               />
             )}
+
             {block.block_type === 'flip_cards' && (
               <BlockFlipCards
                 payload={block.payload as FlipCardsPayload}
@@ -387,7 +410,7 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
             {block.block_type === 'checklist' && (
               <BlockChecklist payload={block.payload as ChecklistPayload} />
             )}
-          </div>
+          </RevealOnScroll>
         ))}
       </div>
 

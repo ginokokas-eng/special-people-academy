@@ -88,4 +88,11 @@ export interface MediaController {
   seekTo: (seconds: number) => void;
   getCurrentTime: () => number;
   isAvailable: () => boolean;
+  /** Pause playback (used by in-video checkpoints). */
+  pause?: () => void;
+  /** Resume playback (used by in-video checkpoints). */
+  play?: () => void;
+  /** Media duration in seconds, or 0 when not yet known. */
+  getDuration?: () => number;
 }
+

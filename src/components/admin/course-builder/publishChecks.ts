@@ -6,6 +6,12 @@
  * courses are never unpublished by these rules.
  */
 import { supabase } from '@/integrations/supabase/client';
+import {
+  checkpointIssues,
+  supportsCheckpoints,
+  videoCheckpoints,
+  type VideoPayload,
+} from '@/components/course-learn/blocks/types';
 
 export interface PublishCheck {
   id: string;
@@ -65,7 +71,7 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     blockLessons.length
       ? supabase
           .from('lesson_blocks')
-          .select('lesson_id')
+          .select('lesson_id, block_type, payload')
           .in('lesson_id', blockLessons.map((l) => l.id))
       : Promise.resolve({ data: [], error: null } as const),
     videoLessons.length
@@ -128,6 +134,35 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     label: 'Interactive lessons have content',
     passed: emptyBlocks.length === 0,
     detail: `No blocks added yet in: ${names(emptyBlocks)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
+
+  // Checkpoint questions must be answerable: they need an uploaded video (we
+  // cannot pause a YouTube/Vimeo embed) and a valid question setup.
+  const blockRows = (blocksRes.data || []) as {
+    lesson_id: string;
+    block_type?: string | null;
+    payload?: unknown;
+  }[];
+  const lessonTitle = (id: string) => lessons.find((l) => l.id === id)?.title || 'Untitled lesson';
+  const badCheckpointLessons = new Set<string>();
+  for (const row of blockRows) {
+    if (row.block_type !== 'video') continue;
+    const payload = (row.payload || {}) as VideoPayload;
+    const cps = videoCheckpoints(payload);
+    if (!cps.length) continue;
+    if (!supportsCheckpoints(payload)) {
+      badCheckpointLessons.add(row.lesson_id);
+      continue;
+    }
+    if (cps.some((cp) => checkpointIssues(cp).length > 0)) badCheckpointLessons.add(row.lesson_id);
+  }
+  const badCheckpoints = [...badCheckpointLessons].map(lessonTitle);
+  checks.push({
+    id: 'checkpoints',
+    label: 'Checkpoint questions are complete',
+    passed: badCheckpoints.length === 0,
+    detail: `Checkpoint questions need an uploaded video, a question, 2–4 options and a correct answer. Please check: ${names(badCheckpoints)}.`,
     tab: 'Modules & Lessons → Edit content',
   });
 

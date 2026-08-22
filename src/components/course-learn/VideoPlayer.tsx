@@ -64,7 +64,18 @@ interface Props {
   onContentInfo: () => void;
   onReport: (time: number) => void;
   controllerRef: React.MutableRefObject<MediaController | null>;
+  /**
+   * Rendered as the top-most layer INSIDE the player container, so it survives
+   * fullscreen. Used by in-video checkpoint questions.
+   */
+  overlay?: React.ReactNode;
+  /**
+   * Hard seek limit in seconds. Any attempt to move past it (slider, keyboard,
+   * mobile skip buttons, native seeking) snaps back to the ceiling.
+   */
+  seekCeiling?: number | null;
 }
+
 
 interface QualityOption {
   label: string;
@@ -90,11 +101,23 @@ export function VideoPlayer({
   onContentInfo,
   onReport,
   controllerRef,
+  overlay,
+  seekCeiling,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useIsMobile();
+  const ceilingRef = useRef<number | null>(seekCeiling ?? null);
+  ceilingRef.current = typeof seekCeiling === 'number' ? seekCeiling : null;
+
+  /** Clamp a requested time to the seek ceiling (if any). */
+  const clampTime = useCallback((t: number) => {
+    const ceil = ceilingRef.current;
+    const safe = Math.max(0, t);
+    return typeof ceil === 'number' ? Math.min(safe, ceil) : safe;
+  }, []);
+
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -128,22 +151,31 @@ export function VideoPlayer({
   const [qualityIdx, setQualityIdx] = useState(defaultIdx);
   const activeSrc = qualities[qualityIdx]?.url ?? fallbackUrl ?? '';
 
-  // Expose imperative controller for notes / transcript seeking.
+  // Expose imperative controller for notes / transcript seeking and checkpoints.
   useEffect(() => {
     controllerRef.current = {
       seekTo: (s: number) => {
         const v = videoRef.current;
         if (!v) return;
-        v.currentTime = Math.max(0, s);
+        v.currentTime = clampTime(s);
         v.play().catch(() => {});
       },
       getCurrentTime: () => videoRef.current?.currentTime ?? 0,
       isAvailable: () => true,
+      pause: () => videoRef.current?.pause(),
+      play: () => {
+        videoRef.current?.play().catch(() => {});
+      },
+      getDuration: () => {
+        const d = videoRef.current?.duration ?? 0;
+        return Number.isFinite(d) ? d : 0;
+      },
     };
     return () => {
       controllerRef.current = null;
     };
-  }, [controllerRef]);
+  }, [controllerRef, clampTime]);
+
 
   // Apply persisted speed / volume on mount + source change.
   useEffect(() => {
@@ -188,11 +220,28 @@ export function VideoPlayer({
     else v.pause();
   }, []);
 
-  const seekBy = useCallback((delta: number) => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.currentTime = Math.min(Math.max(0, v.currentTime + delta), v.duration || 0);
-  }, []);
+  const seekBy = useCallback(
+    (delta: number) => {
+      const v = videoRef.current;
+      if (!v) return;
+      const target = Math.min(Math.max(0, v.currentTime + delta), v.duration || 0);
+      v.currentTime = clampTime(target);
+    },
+    [clampTime]
+  );
+
+  /** Commit a scrub from the seek slider, respecting the ceiling. */
+  const seekTo = useCallback(
+    (t: number) => {
+      const v = videoRef.current;
+      if (!v) return;
+      const next = clampTime(t);
+      v.currentTime = next;
+      setCurrent(next);
+    },
+    [clampTime]
+  );
+
 
   const changeVolume = useCallback(
     (val: number) => {
@@ -413,6 +462,17 @@ export function VideoPlayer({
             setControlsVisible(true);
           }}
           onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+          onSeeking={(e) => {
+            // Native seek (keyboard, gestures, media keys): snap back when the
+            // learner tries to move past an unanswered checkpoint.
+            const v = e.currentTarget;
+            const ceil = ceilingRef.current;
+            if (typeof ceil === 'number' && v.currentTime > ceil + 0.25) {
+              v.currentTime = ceil;
+              setCurrent(ceil);
+            }
+          }}
+
           onDurationChange={(e) => setDuration(e.currentTarget.duration)}
           onLoadedMetadata={(e) => {
             setDuration(e.currentTarget.duration);
@@ -589,13 +649,7 @@ export function VideoPlayer({
                     min={0}
                     max={duration || 100}
                     step={0.1}
-                    onValueChange={(v) => {
-                      const vid = videoRef.current;
-                      if (vid) {
-                        vid.currentTime = v[0];
-                        setCurrent(v[0]);
-                      }
-                    }}
+                    onValueChange={(v) => seekTo(v[0])}
                     aria-label="Seek"
                     className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                   />
@@ -636,13 +690,7 @@ export function VideoPlayer({
               min={0}
               max={duration || 100}
               step={0.1}
-              onValueChange={(v) => {
-                const vid = videoRef.current;
-                if (vid) {
-                  vid.currentTime = v[0];
-                  setCurrent(v[0]);
-                }
-              }}
+              onValueChange={(v) => seekTo(v[0])}
               aria-label="Seek"
               className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
             />
@@ -763,6 +811,9 @@ export function VideoPlayer({
           </div>
         </div>
         )}
+
+        {/* Top-most layer INSIDE the container so it survives fullscreen. */}
+        {overlay}
       </div>
 
 
