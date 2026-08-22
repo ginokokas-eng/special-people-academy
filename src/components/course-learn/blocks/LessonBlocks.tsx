@@ -346,8 +346,12 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
   return (
     <div className="space-y-4">
       <div className="space-y-6 rounded-lg border bg-card p-6">
-        {blocks.map((block) => (
-          <div key={block.id}>
+        {blocks.map((block, blockIndex) => (
+          <RevealOnScroll
+            key={block.id}
+            index={blockIndex}
+            opacityOnly={block.block_type === 'video' || block.block_type === 'drag_match'}
+          >
             {block.block_type === 'text' && <TextBlock payload={block.payload as TextPayload} />}
             {block.block_type === 'callout' && (
               <CalloutBlock payload={block.payload as CalloutPayload} />
