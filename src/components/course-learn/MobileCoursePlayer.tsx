@@ -35,6 +35,7 @@ import { MobileTranscript } from './MobileTranscript';
 import { CertificateTab } from './CertificateTab';
 import { lessonTypeLabel } from './lessonMeta';
 import type {
+import { progressPercent, requiredLessons } from '@/lib/progress';
   LearnCourse,
   LearnLesson,
   LearnModule,
@@ -123,9 +124,11 @@ export function MobileCoursePlayer({
     };
   }, [user, course.id, course.has_certificate]);
 
-  const completedCount = visibleLessons.filter((l) => l.completed).length;
-  const total = visibleLessons.length;
-  const progressPct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+  // Required lessons only — same rule as the certificate gate.
+  const gatingLessons = requiredLessons(visibleLessons);
+  const completedCount = gatingLessons.filter((l) => l.completed).length;
+  const total = gatingLessons.length;
+  const progressPct = progressPercent(completedCount, total);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/courses/${course.id}`;

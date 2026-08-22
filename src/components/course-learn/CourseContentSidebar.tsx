@@ -5,6 +5,7 @@ import { CheckCircle2, Circle, ChevronDown, Paperclip, Download, Loader2 } from 
 import { lessonTypeIcon, lessonMetaLabel, totalDuration } from './lessonMeta';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnLesson, LearnModule, LearnResource } from './types';
+import { requiredLessons } from '@/lib/progress';
 
 interface Props {
   courseId: string;
@@ -23,14 +24,16 @@ export function CourseContentSidebar({
   activeLessonId,
   onSelect,
 }: Props) {
-  const completedCount = lessons.filter((l) => l.completed).length;
+  // Progress counts required lessons only, matching the certificate gate.
+  const gating = requiredLessons(lessons);
+  const completedCount = gating.filter((l) => l.completed).length;
 
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-3 border-b">
         <p className="text-sm font-semibold text-foreground">Course content</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {completedCount}/{lessons.length} complete · {totalDuration(lessons) || '—'}
+          {completedCount}/{gating.length} complete · {totalDuration(lessons) || '—'}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto">
