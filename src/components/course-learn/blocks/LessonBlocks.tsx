@@ -15,15 +15,22 @@ import { BlockMcq } from './BlockMcq';
 import { BlockDragMatch } from './BlockDragMatch';
 import { BlockFlipCards } from './BlockFlipCards';
 import { BlockChecklist } from './BlockChecklist';
+import { BlockCarousel } from './BlockCarousel';
+import { BlockHotGraphic } from './BlockHotGraphic';
+import { SignedImage } from './SignedImage';
 import {
+
+  blockLayout,
   isInteractive,
   parseBlockText,
   type AccordionPayload,
   type CalloutPayload,
   type CardDeckPayload,
+  type CarouselPayload,
   type ChecklistPayload,
   type DragMatchPayload,
   type FlipCardsPayload,
+  type HotGraphicPayload,
   type ImagePayload,
   type LessonBlock,
   type McqPayload,
@@ -40,7 +47,10 @@ interface LessonBlocksProps {
   onComplete?: () => void;
   /** Admin preview: render exactly as learners see it, but never write progress. */
   preview?: boolean;
+  /** Per-lesson trickle: veil content below the first unfinished gating block. */
+  trickleEnabled?: boolean;
 }
+
 
 /* ---------------------------------- text ---------------------------------- */
 
@@ -262,7 +272,9 @@ function AccordionBlock({
 /* ---------------------------------- image --------------------------------- */
 
 function ImageBlock({ payload }: { payload: ImagePayload }) {
-  if (!payload.url) {
+  // Uploaded images carry a MediaRef; legacy blocks still hold a pasted URL.
+  const media = payload.media ?? (payload.url ? { source: 'url' as const, url: payload.url } : null);
+  if (!media) {
     return (
       <div className="rounded-lg border bg-muted p-6 text-center text-sm text-muted-foreground">
         No image added yet.
@@ -272,12 +284,7 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
   return (
     <figure className="space-y-2">
       <div className="overflow-hidden rounded-lg border bg-card">
-        <img
-          src={payload.url}
-          alt={payload.alt || ''}
-          loading="lazy"
-          className="mx-auto max-h-[520px] w-full object-contain"
-        />
+        <SignedImage media={media} alt={payload.alt || ''} className="max-h-[520px]" />
       </div>
       {payload.caption?.trim() && (
         <figcaption className="text-xs text-muted-foreground">{payload.caption}</figcaption>
@@ -288,10 +295,30 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
 
 /* -------------------------------- renderer -------------------------------- */
 
+/** Human label for the activity a trickle veil is waiting on. */
+const GATE_LABELS: Partial<Record<LessonBlock['block_type'], string>> = {
+  card_deck: 'card deck',
+  flip_cards: 'flip cards',
+  accordion: 'sections',
+  video: 'video',
+  carousel: 'story carousel',
+  hot_graphic: 'labelled image',
+  mcq: 'knowledge check',
+  drag_match: 'matching activity',
+};
+
 /**
  * Renders an ordered list of lesson blocks. The SAME component is used by the
  * learner player and the admin editor preview (with `preview`), so what an
  * author sees is what a learner gets.
+ *
+ * Layout: a block payload may carry `layout: 'half'`. Two CONSECUTIVE half
+ * blocks share a two-column row; an orphan half renders full width. Mobile
+ * always stacks. Rows (not blocks) are what scroll-reveal wraps.
+ *
+ * Trickle (per lesson): presentation only. Content after the first unsatisfied
+ * gating block is veiled using the EXISTING completion signals — no new state,
+ * no change to what "complete" means.
  *
  * Completion: a block lesson is complete once every block with
  * `contributes_to_completion` has its signal satisfied. Non-interactive blocks
@@ -299,8 +326,15 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
  * cards revealed. The roll-up then writes the single existing lesson_progress
  * row via the caller's markComplete.
  */
-export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonBlocksProps) {
+export function LessonBlocks({
+  blocks,
+  completed,
+  onComplete,
+  preview,
+  trickleEnabled,
+}: LessonBlocksProps) {
   const [deckState, setDeckState] = useState<Record<string, boolean>>({});
+  const [revealAll, setRevealAll] = useState(false);
 
   const setSignal = (id: string, done: boolean) =>
     setDeckState((prev) => (prev[id] === done ? prev : { ...prev, [id]: done }));
@@ -330,11 +364,59 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
     );
   }
 
+  if (pendingTypes.has('carousel')) reasons.push('view every slide in the carousel');
+  if (pendingTypes.has('hot_graphic')) reasons.push('explore every point on the image');
   if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
   if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   const disabledReason = reasons.length
     ? `Please ${reasons.join(', ')} above to finish this lesson.`
     : '';
+
+  /** Group consecutive half-width blocks into two-column rows. */
+  const rows = useMemo(() => {
+    const grouped: LessonBlock[][] = [];
+    let i = 0;
+    while (i < blocks.length) {
+      const block = blocks[i];
+      const next = blocks[i + 1];
+      const isHalf = blockLayout(block.block_type, block.payload) === 'half';
+      const nextIsHalf = !!next && blockLayout(next.block_type, next.payload) === 'half';
+
+      if (isHalf && nextIsHalf) {
+        grouped.push([block, next]);
+        i += 2;
+      } else {
+        // An orphan half has no partner, so it renders full width.
+        grouped.push([block]);
+        i += 1;
+      }
+    }
+    return grouped;
+  }, [blocks]);
+
+  /**
+   * First row index that is veiled by trickle: the row AFTER the one holding the
+   * first unsatisfied gating block. Completed learners and reveal-all see all.
+   */
+  const veilFromRow = useMemo(() => {
+    if (!trickleEnabled || completed || revealAll) return -1;
+    for (let r = 0; r < rows.length; r += 1) {
+      const gate = rows[r].find(
+        (b) => b.contributes_to_completion && isInteractive(b.block_type) && !deckState[b.id]
+      );
+      if (gate) return r + 1;
+    }
+    return -1;
+  }, [trickleEnabled, completed, revealAll, rows, deckState]);
+
+  const blockingGate = useMemo(() => {
+    if (veilFromRow < 1) return null;
+    return (
+      rows[veilFromRow - 1].find(
+        (b) => b.contributes_to_completion && isInteractive(b.block_type) && !deckState[b.id]
+      ) ?? null
+    );
+  }, [veilFromRow, rows, deckState]);
 
   if (!blocks.length) {
     return (
@@ -344,74 +426,146 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
     );
   }
 
+  const renderBlock = (block: LessonBlock) => (
+    <>
+      {block.block_type === 'text' && <TextBlock payload={block.payload as TextPayload} />}
+      {block.block_type === 'callout' && (
+        <CalloutBlock payload={block.payload as CalloutPayload} />
+      )}
+      {block.block_type === 'image' && <ImageBlock payload={block.payload as ImagePayload} />}
+      {block.block_type === 'card_deck' && (
+        <CardDeckBlock
+          payload={block.payload as CardDeckPayload}
+          onAllRevealed={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'accordion' && (
+        <AccordionBlock
+          payload={block.payload as AccordionPayload}
+          showProgress={block.contributes_to_completion}
+          onAllOpened={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'video' && (
+        <BlockVideo
+          payload={block.payload as VideoPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          lessonCompleted={completed}
+          preview={preview}
+          onWatched={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'carousel' && (
+        <BlockCarousel
+          payload={block.payload as CarouselPayload}
+          showProgress={block.contributes_to_completion}
+          onAllViewed={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'hot_graphic' && (
+        <BlockHotGraphic
+          payload={block.payload as HotGraphicPayload}
+          showProgress={block.contributes_to_completion}
+          onAllExplored={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'flip_cards' && (
+        <BlockFlipCards
+          payload={block.payload as FlipCardsPayload}
+          showProgress={block.contributes_to_completion}
+          onAllFlipped={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'mcq' && (
+        <BlockMcq
+          payload={block.payload as McqPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          preview={preview}
+          onAnswered={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'drag_match' && (
+        <BlockDragMatch
+          payload={block.payload as DragMatchPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          preview={preview}
+          onSolved={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'checklist' && (
+        <BlockChecklist payload={block.payload as ChecklistPayload} />
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="space-y-6 rounded-lg border bg-card p-6">
-        {blocks.map((block, blockIndex) => (
-          <RevealOnScroll
-            key={block.id}
-            index={blockIndex}
-            opacityOnly={block.block_type === 'video' || block.block_type === 'drag_match'}
+      {preview && trickleEnabled && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <p className="text-sm text-foreground">
+            <span className="font-semibold">Trickle is on for this lesson.</span> Learners only see
+            the next section once they finish the activity above it.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setRevealAll((v) => !v)}
           >
-            {block.block_type === 'text' && <TextBlock payload={block.payload as TextPayload} />}
-            {block.block_type === 'callout' && (
-              <CalloutBlock payload={block.payload as CalloutPayload} />
-            )}
-            {block.block_type === 'image' && <ImageBlock payload={block.payload as ImagePayload} />}
-            {block.block_type === 'card_deck' && (
-              <CardDeckBlock
-                payload={block.payload as CardDeckPayload}
-                onAllRevealed={(done) => setSignal(block.id, done)}
-              />
-            )}
-            {block.block_type === 'accordion' && (
-              <AccordionBlock
-                payload={block.payload as AccordionPayload}
-                showProgress={block.contributes_to_completion}
-                onAllOpened={(done) => setSignal(block.id, done)}
-              />
-            )}
-            {block.block_type === 'video' && (
-              <BlockVideo
-                payload={block.payload as VideoPayload}
-                blockId={block.id}
-                lessonId={block.lesson_id}
-                lessonCompleted={completed}
-                preview={preview}
-                onWatched={(done) => setSignal(block.id, done)}
-              />
-            )}
+            {revealAll ? 'Show trickle veils' : 'Reveal all'}
+          </Button>
+        </div>
+      )}
 
-            {block.block_type === 'flip_cards' && (
-              <BlockFlipCards
-                payload={block.payload as FlipCardsPayload}
-                showProgress={block.contributes_to_completion}
-                onAllFlipped={(done) => setSignal(block.id, done)}
-              />
-            )}
-            {block.block_type === 'mcq' && (
-              <BlockMcq
-                payload={block.payload as McqPayload}
-                blockId={block.id}
-                lessonId={block.lesson_id}
-                preview={preview}
-                onAnswered={(done) => setSignal(block.id, done)}
-              />
-            )}
-            {block.block_type === 'drag_match' && (
-              <BlockDragMatch
-                payload={block.payload as DragMatchPayload}
-                blockId={block.id}
-                lessonId={block.lesson_id}
-                preview={preview}
-                onSolved={(done) => setSignal(block.id, done)}
-              />
-            )}
-            {block.block_type === 'checklist' && (
-              <BlockChecklist payload={block.payload as ChecklistPayload} />
-            )}
-          </RevealOnScroll>
-        ))}
+      <div className="space-y-6 rounded-lg border bg-card p-6">
+        {rows.map((row, rowIndex) => {
+          const veiled = veilFromRow >= 0 && rowIndex >= veilFromRow;
+          const isVeilEdge = veilFromRow >= 0 && rowIndex === veilFromRow;
+          const opacityOnly = row.some(
+            (b) => b.block_type === 'video' || b.block_type === 'drag_match'
+          );
+
+          return (
+            <div key={row.map((b) => b.id).join('-')}>
+              {isVeilEdge && (
+                <div className="mb-4 rounded-lg border border-dashed border-primary/40 bg-muted/50 p-4 text-center">
+                  <p className="text-sm font-medium text-foreground">
+                    Complete the {GATE_LABELS[blockingGate?.block_type ?? 'card_deck'] ?? 'activity'}{' '}
+                    above to continue
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    The rest of this lesson opens up as soon as you’re done.
+                  </p>
+                </div>
+              )}
+              <div
+                aria-hidden={veiled || undefined}
+                // Veiled content stays MOUNTED so signals and scroll positions
+                // survive; it is just non-interactive and dimmed.
+                className={cn(
+                  'transition-opacity duration-300',
+                  veiled && 'pointer-events-none select-none opacity-25 blur-[1px]'
+                )}
+              >
+                <RevealOnScroll index={rowIndex} opacityOnly={opacityOnly}>
+                  {row.length === 2 ? (
+                    <div className="grid gap-6 md:grid-cols-2">
+                      {row.map((block) => (
+                        <div key={block.id}>{renderBlock(block)}</div>
+                      ))}
+                    </div>
+                  ) : (
+                    renderBlock(row[0])
+                  )}
+                </RevealOnScroll>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {!preview && (
@@ -436,3 +590,4 @@ export function LessonBlocks({ blocks, completed, onComplete, preview }: LessonB
     </div>
   );
 }
+

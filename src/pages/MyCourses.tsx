@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { formatDeliveryType } from '@/lib/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { progressPercent } from '@/lib/progress';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -148,10 +149,6 @@ export default function MyCourses() {
     return `${hours}h ${mins}m`;
   };
 
-  const formatDeliveryType = (type: string | null) => {
-    if (!type) return 'Online';
-    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
 
   // Filter courses by tab
   const assignedCourses = courses.filter(c => c.isAssigned);

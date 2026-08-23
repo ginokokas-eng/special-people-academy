@@ -747,8 +747,10 @@ export default function CourseLearn() {
         <LessonBlocks
           blocks={lessonBlocks}
           completed={!!activeLesson.completed}
+          trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
           onComplete={() => markComplete(activeLesson.id)}
         />
+
       );
     }
 

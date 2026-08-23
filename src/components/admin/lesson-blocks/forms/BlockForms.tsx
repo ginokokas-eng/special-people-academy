@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CheckpointEditor } from './CheckpointEditor';
 import { TranscriptReviewPanel } from '@/components/admin/lesson-blocks/TranscriptReviewPanel';
+import { MediaUploadField } from './MediaUploadField';
+
 import {
   VIDEO_ACCEPT,
   VIDEO_ALLOWED_EXT,
@@ -192,18 +194,29 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
   );
 }
 
-export function ImageBlockForm({ payload, onChange, idPrefix }: FormProps<ImagePayload>) {
+export function ImageBlockForm({
+  payload,
+  onChange,
+  idPrefix,
+  courseId,
+  lessonId,
+}: FormProps<ImagePayload> & { courseId?: string; lessonId?: string }) {
+  const media = payload.media ?? {
+    source: payload.url ? ('url' as const) : ('storage' as const),
+    url: payload.url ?? '',
+  };
   return (
     <div className="space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor={`${idPrefix}-url`}>Image URL</Label>
-        <Input
-          id={`${idPrefix}-url`}
-          value={payload.url ?? ''}
-          placeholder="https://…"
-          onChange={(e) => onChange({ ...payload, url: e.target.value })}
-        />
-      </div>
+      <MediaUploadField
+        value={media}
+        onChange={(next) =>
+          // Keep `url` in step so older readers of the payload still work.
+          onChange({ ...payload, media: next, url: next.source === 'url' ? (next.url ?? '') : '' })
+        }
+        idPrefix={idPrefix}
+        courseId={courseId}
+        lessonId={lessonId}
+      />
       <div className="space-y-1.5">
         <Label htmlFor={`${idPrefix}-alt`}>Alt text (describes the image)</Label>
         <Input
@@ -224,6 +237,7 @@ export function ImageBlockForm({ payload, onChange, idPrefix }: FormProps<ImageP
     </div>
   );
 }
+
 
 /* -------------------------------- accordion ------------------------------- */
 

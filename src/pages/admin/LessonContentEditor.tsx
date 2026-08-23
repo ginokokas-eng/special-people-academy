@@ -11,6 +11,8 @@ import { BlockPalette } from '@/components/admin/lesson-blocks/BlockPalette';
 import { BlockList } from '@/components/admin/lesson-blocks/BlockList';
 import { TemplatePicker } from '@/components/admin/lesson-blocks/TemplatePicker';
 import type { LessonTemplate } from '@/components/admin/lesson-blocks/templates';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 
 import {
@@ -36,7 +38,7 @@ export default function LessonContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [lesson, setLesson] = useState<{ title: string; lesson_type: string } | null>(null);
+  const [lesson, setLesson] = useState<{ title: string; lesson_type: string; trickle_enabled: boolean } | null>(null);
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
@@ -54,7 +56,7 @@ export default function LessonContentEditor() {
     setLoading(true);
     try {
       const [lessonRes, blocksRes] = await Promise.all([
-        supabase.from('lessons').select('title, lesson_type').eq('id', lessonId).maybeSingle(),
+        supabase.from('lessons').select('title, lesson_type, trickle_enabled').eq('id', lessonId).maybeSingle(),
         supabase
           .from('lesson_blocks')
           .select('*')
@@ -281,7 +283,42 @@ export default function LessonContentEditor() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Reveal content gradually</CardTitle>
+              <CardDescription>
+                With this on, learners see the next section only once they’ve finished the activity
+                above it. It changes what learners see, not what counts as complete.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-3">
+              <Switch
+                id="lesson-trickle"
+                checked={lesson?.trickle_enabled ?? false}
+                onCheckedChange={async (checked) => {
+                  if (!lessonId) return;
+                  setLesson((prev) => (prev ? { ...prev, trickle_enabled: checked } : prev));
+                  const { error } = await supabase
+                    .from('lessons')
+                    .update({ trickle_enabled: checked })
+                    .eq('id', lessonId);
+                  if (error) {
+                    console.error('Could not update trickle setting:', error);
+                    toast.error('Could not save that setting');
+                    setLesson((prev) => (prev ? { ...prev, trickle_enabled: !checked } : prev));
+                    return;
+                  }
+                  toast.success(checked ? 'Gradual reveal is on' : 'Gradual reveal is off');
+                }}
+              />
+              <Label htmlFor="lesson-trickle" className="text-sm text-muted-foreground">
+                Reveal each section as learners finish the one before it
+              </Label>
+            </CardContent>
+          </Card>
+
           {!blocks.length && !templateDismissed && <TemplatePicker onPick={applyTemplate} />}
+
           <BlockList
 
             blocks={blocks}
@@ -308,7 +345,11 @@ export default function LessonContentEditor() {
             <Eye className="h-4 w-4" />
             Learner preview
           </div>
-          <LessonBlocks blocks={previewBlocks} preview />
+          <LessonBlocks
+            blocks={previewBlocks}
+            preview
+            trickleEnabled={lesson?.trickle_enabled ?? false}
+          />
         </div>
       </div>
     </div>

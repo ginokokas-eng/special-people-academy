@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { formatDeliveryType } from '@/lib/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -890,7 +891,7 @@ export default function AdminDashboard() {
                           <TableCell>{course.category}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
-                              {course.delivery_type || 'online'}
+                              {formatDeliveryType(course.delivery_type)}
                             </Badge>
                           </TableCell>
                           <TableCell>
