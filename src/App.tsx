@@ -1,4 +1,3 @@
-import P7Probe from "@/pages/P7Probe";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -80,7 +79,6 @@ const App = () => (
                 <Route path="/sign-in" element={<Auth />} />
                 <Route path="/sign-up" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/p7probe" element={<P7Probe />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:id" element={<CourseDetail />} />
                 <Route path="/courses/:id/learn" element={<CourseLearn />} />
