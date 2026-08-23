@@ -162,12 +162,13 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
             Back
           </Button>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2.5">
             {items.map((item, i) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => go(i)}
+                data-hit-expanded
                 aria-label={`Go to step ${i + 1} of ${items.length}`}
                 aria-current={i === index}
                 className={cn(
