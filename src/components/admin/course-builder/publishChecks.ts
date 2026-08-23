@@ -166,6 +166,45 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     tab: 'Modules & Lessons → Edit content',
   });
 
+  // Story carousels need slides, and a labelled image needs a picture, alt text
+  // and at least one point — otherwise learners meet an empty activity.
+  const badCarouselLessons = new Set<string>();
+  const badHotGraphicLessons = new Set<string>();
+  for (const row of blockRows) {
+    if (row.block_type === 'carousel') {
+      const payload = (row.payload || {}) as CarouselPayload;
+      const items = payload.items ?? [];
+      const usable = items.filter((it) => it.title?.trim() || it.text?.trim() || it.media);
+      if (!usable.length) badCarouselLessons.add(row.lesson_id);
+    }
+    if (row.block_type === 'hot_graphic') {
+      const payload = (row.payload || {}) as HotGraphicPayload;
+      const hasImage = !!(payload.image?.path || payload.image?.url?.trim());
+      const spots = payload.hotspots ?? [];
+      const spotsOk = spots.length > 0 && spots.every((s) => s.title?.trim() || s.text?.trim());
+      if (!hasImage || !payload.alt?.trim() || !spotsOk) badHotGraphicLessons.add(row.lesson_id);
+    }
+  }
+  const badCarousels = [...badCarouselLessons].map(lessonTitle);
+  checks.push({
+    id: 'carousel',
+    label: 'Story carousels have slides',
+    passed: badCarousels.length === 0,
+    detail: `Add at least one slide with a title or text in: ${names(badCarousels)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
+
+  const badHotGraphics = [...badHotGraphicLessons].map(lessonTitle);
+  checks.push({
+    id: 'hot_graphic',
+    label: 'Labelled images are ready',
+    passed: badHotGraphics.length === 0,
+    detail: `A labelled image needs a picture, alt text and at least one point with wording. Please check: ${names(badHotGraphics)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
+
+
+
   const noVideo = videoLessons
     .filter((l) => !l.video_url?.trim() && !sourceLessons.has(l.id))
     .map((l) => l.title);
