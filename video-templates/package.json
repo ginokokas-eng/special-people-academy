@@ -1,0 +1,23 @@
+{
+  "name": "academy-video-templates",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Special People Academy house video furniture — slates and lower-thirds rendered from course data (see Academy Video Standard).",
+  "scripts": {
+    "studio": "remotion studio",
+    "render:objective": "remotion render ObjectiveSlate out/objective-slate.mp4",
+    "render:coldopen": "remotion render ColdOpenTitle out/cold-open.mp4",
+    "render:outro": "remotion render OutroSlate out/outro-slate.mp4",
+    "still:all": "remotion still ObjectiveSlate out/objective.png && remotion still ColdOpenTitle out/cold-open.png && remotion still OutroSlate out/outro.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.515",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.515"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
