@@ -122,7 +122,14 @@ export function CourseHome({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* Menu-page card grid. Future addition (out of scope today): module
+          imagery would need a modules image column + upload flow. */}
+      <div
+        className={cn(
+          'grid gap-4 md:grid-cols-2',
+          grouped.length >= 3 && 'min-[1100px]:grid-cols-3'
+        )}
+      >
         {grouped.map((group) => {
           const prog = requiredProgress(group.lessons, completedIds);
           const done = prog.total > 0 && prog.completed === prog.total;
@@ -139,12 +146,13 @@ export function CourseHome({
                 }
               }}
               className={cn(
-                'cursor-pointer transition-shadow hover:shadow-md',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'group h-full cursor-pointer transition-all duration-200',
+                'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 done && 'border-success/40'
               )}
             >
-              <CardContent className="flex items-start gap-4 p-5">
+              <CardContent className="flex h-full items-start gap-4 p-5">
                 <ProgressRing percent={prog.percent} />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <h2 className="text-base font-semibold text-foreground">{group.title}</h2>
@@ -152,15 +160,27 @@ export function CourseHome({
                     {group.lessons.length} {group.lessons.length === 1 ? 'lesson' : 'lessons'}
                     {prog.total > 0 && ` · ${prog.completed}/${prog.total} required complete`}
                   </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  <p
+                    className={cn(
+                      'flex items-center gap-1 text-xs font-medium',
+                      done ? 'text-success' : 'text-muted-foreground'
+                    )}
+                  >
                     {done ? (
                       <>
-                        <CheckCircle2 className="h-4 w-4 text-success" /> Revisit module
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Complete
                       </>
+                    ) : (
+                      `${prog.percent}% complete`
+                    )}
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                    {done ? (
+                      'Revisit module'
                     ) : (
                       <>
                         {prog.completed > 0 ? 'Continue module' : 'Start module'}
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                       </>
                     )}
                   </span>
@@ -170,6 +190,7 @@ export function CourseHome({
           );
         })}
       </div>
+
 
       {!grouped.length && (
         <p className="text-sm text-muted-foreground">

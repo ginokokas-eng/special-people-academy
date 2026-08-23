@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
 import { RevealOnScroll } from './RevealOnScroll';
+import { LessonProgressStrip } from './LessonProgressStrip';
+import { BackToTop } from './BackToTop';
 import { BlockMcq } from './BlockMcq';
 import { BlockDragMatch } from './BlockDragMatch';
 import { BlockFlipCards } from './BlockFlipCards';
@@ -426,6 +428,25 @@ export function LessonBlocks({
     );
   }, [veilFromRow, rows, deckState]);
 
+  /**
+   * Orientation counts for the sticky strip. Trickle-aware: only gates the
+   * learner can actually reach right now are counted, so the label never
+   * promises activities that are still veiled. Read-only over deckState.
+   */
+  const gateCounts = useMemo(() => {
+    const lastRow = veilFromRow < 0 ? rows.length : veilFromRow;
+    const reachable = rows
+      .slice(0, lastRow)
+      .flat()
+      .filter((b) => b.contributes_to_completion && isInteractive(b.block_type));
+    return {
+      total: reachable.length,
+      done: reachable.filter((b) => deckState[b.id]).length,
+    };
+  }, [rows, veilFromRow, deckState]);
+
+
+
   if (!blocks.length) {
     return (
       <div className="rounded-lg border bg-card p-6">
@@ -513,7 +534,12 @@ export function LessonBlocks({
     // Reading measure: ~68-72ch of body copy, centred. Wide activities are
     // allowed to reach the card edges but never full-bleed (see WIDE_TYPES).
     <div className="lesson-content mx-auto w-full max-w-[47rem] space-y-4">
+      {/* Deep-scroll orientation: hidden on lessons with no gating activities
+          and in the editor preview so authoring visuals stay unchanged. */}
+      {!preview && <LessonProgressStrip done={gateCounts.done} total={gateCounts.total} />}
+      {!preview && blocks.length > 5 && <BackToTop />}
       {preview && trickleEnabled && (
+
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
           <p className="text-sm text-foreground">
             <span className="font-semibold">Trickle is on for this lesson.</span> Learners only see
