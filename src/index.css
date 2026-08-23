@@ -399,3 +399,81 @@
     mix-blend-mode: multiply;
   }
 }
+/* ---------------------------------------------------------------------------
+   Learner lesson-consumption typography (P7)
+   Scoped to .lesson-content so admin/editor/marketing surfaces are untouched.
+   --------------------------------------------------------------------------- */
+@layer components {
+  .lesson-content {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.65;
+  }
+
+  /* Body copy: element+class specificity beats utility text-sm/text-base. */
+  .lesson-content :is(p, li, dd, dt, blockquote) {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  /* Genuinely secondary copy (captions, helper lines) steps down one notch. */
+  .lesson-content :is(p, li).text-xs,
+  .lesson-content figcaption {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.55;
+  }
+
+  .lesson-content :is(ul, ol) > li + li {
+    margin-top: 0.4rem;
+  }
+
+  .lesson-content :is(h1, h2, h3, h4) {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .lesson-content h1 {
+    font-size: 1.5rem; /* 24px mobile */
+  }
+  .lesson-content h2 {
+    font-size: 1.25rem;
+  }
+  .lesson-content h3 {
+    font-size: 1.125rem;
+  }
+  .lesson-content h4 {
+    font-size: 1.0625rem;
+  }
+
+  @media (min-width: 768px) {
+    .lesson-content h1 {
+      font-size: 1.875rem; /* 30px desktop */
+    }
+    .lesson-content h2 {
+      font-size: 1.375rem;
+    }
+    .lesson-content h3 {
+      font-size: 1.1875rem;
+    }
+  }
+
+  /* Touch: everything tappable in the lesson body gets a >=44px hit area.
+     Pins and other visually-small controls opt out with data-hit-expanded
+     and grow their hit area with a transparent overlay instead. */
+  @media (pointer: coarse) {
+    .lesson-content
+      :is(button, [role='button'], [role='tab'], [role='option'], summary, label[for], a[href]):not(
+        [data-hit-expanded]
+      ) {
+      min-height: 44px;
+    }
+    .lesson-content [data-hit-expanded] {
+      position: relative;
+    }
+    .lesson-content [data-hit-expanded]::after {
+      content: '';
+      position: absolute;
+      inset: 50%;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
