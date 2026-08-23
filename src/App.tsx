@@ -40,6 +40,7 @@ import Partners from "./pages/Partners";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import P7Probe from "@/pages/P7Probe";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import StaffManagement from "./pages/StaffManagement";
@@ -139,6 +140,7 @@ const App = () => (
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
                 <Route path="/scorm/launch/:registrationId" element={<ScormPlayer />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/p7probe" element={<P7Probe />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
