@@ -138,6 +138,7 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
                 <PopoverTrigger asChild>
                   <button
                     type="button"
+                    data-hit-expanded
                     aria-label={`Point ${i + 1}: ${spot.title || 'Find out more'}${found ? ' (explored)' : ''}`}
                     style={{
                       left: `${Math.min(98, Math.max(2, spot.x))}%`,

@@ -565,7 +565,6 @@ export function LessonBlocks({
                 )}
               >
                 <RevealOnScroll index={rowIndex} opacityOnly={opacityOnly}>
-                  {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
                   {row.length === 2 ? (
                     <div className="grid gap-6 md:grid-cols-2">
                       {row.map((block) => (

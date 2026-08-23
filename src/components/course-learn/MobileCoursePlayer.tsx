@@ -261,7 +261,7 @@ export function MobileCoursePlayer({
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Compact header */}
-      <header className="flex items-center gap-2 border-b bg-card px-3 py-2">
+      <header className="flex items-center gap-2 border-b bg-card px-4 py-2">
         <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onBack} aria-label="Back to course">
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -270,7 +270,7 @@ export function MobileCoursePlayer({
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {/* Top video area — full width, 16:9 handled inside the lesson body */}
-        <div className="w-full bg-background px-3 pt-3">{lessonBody}</div>
+        <div className="w-full bg-background px-4 pt-4">{lessonBody}</div>
 
         {/* Course + lesson meta */}
         <div className="border-b px-4 pb-4 pt-3">

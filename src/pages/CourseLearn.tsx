@@ -760,9 +760,9 @@ export default function CourseLearn() {
 
     // text / scenario / pdf
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <div className="lesson-content mx-auto w-full max-w-[47rem] rounded-lg border bg-card p-4 sm:p-6">
         {activeLesson.description ? (
-          <div className="prose prose-sm max-w-none whitespace-pre-line leading-relaxed text-foreground">
+          <div className="prose max-w-none whitespace-pre-line text-foreground">
             {activeLesson.description}
           </div>
         ) : (
@@ -904,7 +904,7 @@ export default function CourseLearn() {
           {showHub ? (
             courseHome
           ) : (
-          <div className={cn('mx-auto px-4 py-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
+          <div className={cn('mx-auto px-5 py-6 sm:px-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
             <div className="mb-3">
               <Button
                 variant="ghost"
@@ -925,7 +925,9 @@ export default function CourseLearn() {
                     </Badge>
                   )}
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">{activeLesson.title}</h2>
+                <h2 className="text-[1.5rem] font-bold leading-tight text-foreground md:text-3xl">
+                  {activeLesson.title}
+                </h2>
               </div>
             )}
 
