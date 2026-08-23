@@ -295,6 +295,14 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
 
 /* -------------------------------- renderer -------------------------------- */
 
+/** Activities that may extend past the text measure to the card edges. */
+const WIDE_TYPES = new Set<LessonBlock['block_type']>([
+  'video',
+  'hot_graphic',
+  'drag_match',
+  'carousel',
+]);
+
 /** Human label for the activity a trickle veil is waiting on. */
 const GATE_LABELS: Partial<Record<LessonBlock['block_type'], string>> = {
   card_deck: 'card deck',
@@ -502,7 +510,9 @@ export function LessonBlocks({
   );
 
   return (
-    <div className="space-y-4">
+    // Reading measure: ~68-72ch of body copy, centred. Wide activities are
+    // allowed to reach the card edges but never full-bleed (see WIDE_TYPES).
+    <div className="lesson-content mx-auto w-full max-w-[47rem] space-y-4">
       {preview && trickleEnabled && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
           <p className="text-sm text-foreground">
@@ -521,16 +531,19 @@ export function LessonBlocks({
         </div>
       )}
 
-      <div className="space-y-6 rounded-lg border bg-card p-6">
+      <div className="space-y-6 rounded-lg border bg-card p-4 sm:p-6">
         {rows.map((row, rowIndex) => {
           const veiled = veilFromRow >= 0 && rowIndex >= veilFromRow;
           const isVeilEdge = veilFromRow >= 0 && rowIndex === veilFromRow;
           const opacityOnly = row.some(
             (b) => b.block_type === 'video' || b.block_type === 'drag_match'
           );
+          // Wide activities stretch to the card edges on larger screens so they
+          // are not squeezed into the narrower text measure.
+          const wide = row.length === 1 && WIDE_TYPES.has(row[0].block_type);
 
           return (
-            <div key={row.map((b) => b.id).join('-')}>
+            <div key={row.map((b) => b.id).join('-')} className={cn(wide && 'sm:-mx-6')}>
               {isVeilEdge && (
                 <div className="mb-4 rounded-lg border border-dashed border-primary/40 bg-muted/50 p-4 text-center">
                   <p className="text-sm font-medium text-foreground">
@@ -552,6 +565,7 @@ export function LessonBlocks({
                 )}
               >
                 <RevealOnScroll index={rowIndex} opacityOnly={opacityOnly}>
+                  {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
                   {row.length === 2 ? (
                     <div className="grid gap-6 md:grid-cols-2">
                       {row.map((block) => (
