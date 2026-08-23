@@ -36,7 +36,7 @@ export default function LessonContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [lesson, setLesson] = useState<{ title: string; lesson_type: string } | null>(null);
+  const [lesson, setLesson] = useState<{ title: string; lesson_type: string; trickle_enabled: boolean } | null>(null);
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
@@ -54,7 +54,7 @@ export default function LessonContentEditor() {
     setLoading(true);
     try {
       const [lessonRes, blocksRes] = await Promise.all([
-        supabase.from('lessons').select('title, lesson_type').eq('id', lessonId).maybeSingle(),
+        supabase.from('lessons').select('title, lesson_type, trickle_enabled').eq('id', lessonId).maybeSingle(),
         supabase
           .from('lesson_blocks')
           .select('*')
@@ -308,7 +308,11 @@ export default function LessonContentEditor() {
             <Eye className="h-4 w-4" />
             Learner preview
           </div>
-          <LessonBlocks blocks={previewBlocks} preview />
+          <LessonBlocks
+            blocks={previewBlocks}
+            preview
+            trickleEnabled={lesson?.trickle_enabled ?? false}
+          />
         </div>
       </div>
     </div>
