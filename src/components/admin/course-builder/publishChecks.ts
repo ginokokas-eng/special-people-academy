@@ -10,7 +10,10 @@ import {
   checkpointIssues,
   supportsCheckpoints,
   videoCheckpoints,
+  type CarouselPayload,
+  type HotGraphicPayload,
   type VideoPayload,
+
 } from '@/components/course-learn/blocks/types';
 
 export interface PublishCheck {
