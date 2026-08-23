@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/accordion';
 import { BlockVideo } from './BlockVideo';
 import { RevealOnScroll } from './RevealOnScroll';
+import { LessonProgressStrip } from './LessonProgressStrip';
+import { BackToTop } from './BackToTop';
 import { BlockMcq } from './BlockMcq';
 import { BlockDragMatch } from './BlockDragMatch';
 import { BlockFlipCards } from './BlockFlipCards';
