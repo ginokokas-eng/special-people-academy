@@ -14,13 +14,66 @@ export const BLOCK_TYPES = [
   'accordion',
   'image',
   'video',
+  'carousel',
+  'hot_graphic',
   'mcq',
   'drag_match',
   'checklist',
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
-export interface TextPayload {
+/* ------------------------------- shared media ------------------------------ */
+
+/**
+ * A reference to a piece of media. Storage refs point at an object in the
+ * PRIVATE `lesson-media` bucket and are played/shown through a short-lived
+ * signed URL; url refs hold an external link. Never inline media data.
+ */
+export interface MediaRef {
+  source: 'storage' | 'url';
+  /** Object path in `lesson-media`: {course_id}/{lesson_id}/{uuid}.{ext} */
+  path?: string;
+  /** External/direct link (secondary to uploading). */
+  url?: string;
+  /** Original file name, so authors recognise their upload. */
+  file_name?: string;
+}
+
+export const IMAGE_MAX_MB = 10;
+export const IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp';
+export const IMAGE_ALLOWED_EXT = ['png', 'jpg', 'jpeg', 'webp'] as const;
+
+/* ------------------------------- half width -------------------------------- */
+
+export type BlockLayout = 'full' | 'half';
+
+/** Payloads that may opt into a half-width column. */
+export interface LayoutAware {
+  layout?: BlockLayout;
+}
+
+/** Block types where the width toggle is offered. Everything else is full-only. */
+export const HALF_ELIGIBLE_TYPES: readonly BlockType[] = [
+  'text',
+  'callout',
+  'image',
+  'flip_cards',
+  'mcq',
+  'carousel',
+  'hot_graphic',
+];
+
+export function allowsHalfWidth(type: BlockType): boolean {
+  return HALF_ELIGIBLE_TYPES.includes(type);
+}
+
+/** Effective authored layout — anything not eligible is always full. */
+export function blockLayout(type: BlockType, payload?: BlockPayload): BlockLayout {
+  if (!allowsHalfWidth(type)) return 'full';
+  return (payload as LayoutAware | undefined)?.layout === 'half' ? 'half' : 'full';
+}
+
+export interface TextPayload extends LayoutAware {
   heading?: string;
   /** Plain text. Blank lines separate paragraphs; lines starting with -/•/* become bullets. */
   text: string;
@@ -28,7 +81,7 @@ export interface TextPayload {
 
 export type CalloutVariant = 'info' | 'safety' | 'warning' | 'success';
 
-export interface CalloutPayload {
+export interface CalloutPayload extends LayoutAware {
   variant: CalloutVariant;
   title?: string;
   text: string;
@@ -46,12 +99,16 @@ export interface CardDeckPayload {
   cards: DeckCard[];
 }
 
-export interface ImagePayload {
+export interface ImagePayload extends LayoutAware {
+  /** Legacy/pasted URL. Kept for every pre-Phase-6 image block. */
   url: string;
+  /** Uploaded or pasted media reference. Wins over `url` when present. */
+  media?: MediaRef;
   /** Required for accessibility — described to screen readers. */
   alt: string;
   caption?: string;
 }
+
 
 export interface AccordionItemPayload {
   id: string;
@@ -102,18 +159,59 @@ export interface VideoPayload {
 }
 
 
+/* -------------------------- narrative carousel ---------------------------- */
+
+export interface CarouselItem {
+  id: string;
+  title: string;
+  text: string;
+  /** Optional slide image. Fixed aspect box, so slides never jump height. */
+  media?: MediaRef;
+  /** Alt text for the slide image. */
+  alt?: string;
+}
+
+/** Narrative carousel — one item at a time, prev/next, dots, swipe. */
+export interface CarouselPayload extends LayoutAware {
+  heading?: string;
+  instruction?: string;
+  items: CarouselItem[];
+}
+
+/* ------------------------------ hot graphic -------------------------------- */
+
+export interface Hotspot {
+  id: string;
+  /** Position as a PERCENTAGE of the rendered image box (0–100). */
+  x: number;
+  y: number;
+  title: string;
+  text: string;
+}
+
+/** Labelled pins placed on an image; learners open each one. */
+export interface HotGraphicPayload extends LayoutAware {
+  heading?: string;
+  instruction?: string;
+  image?: MediaRef;
+  /** Required — describes the image itself for screen readers. */
+  alt?: string;
+  hotspots: Hotspot[];
+}
+
 /** Multiple-choice knowledge check. Formative only — never touches quizzes. */
 export interface McqOption {
   id: string;
   label: string;
 }
 
-export interface McqPayload {
+export interface McqPayload extends LayoutAware {
   question: string;
   options: McqOption[];
   correct_id: string;
   explanation?: string;
 }
+
 
 /** Drag-and-drop matching. Grading is a pure comparison of item.target_id. */
 export interface DragMatchTarget {
@@ -136,11 +234,12 @@ export interface DragMatchPayload {
 }
 
 /** Flip cards — same content shape as a card deck, flip-in-place presentation. */
-export interface FlipCardsPayload {
+export interface FlipCardsPayload extends LayoutAware {
   heading?: string;
   instruction?: string;
   cards: DeckCard[];
 }
+
 
 /** Read-only practical checklist. Learners cannot tick it; no sign-off link. */
 export interface ChecklistStep {
@@ -163,10 +262,13 @@ export type BlockPayload =
   | AccordionPayload
   | ImagePayload
   | VideoPayload
+  | CarouselPayload
+  | HotGraphicPayload
   | McqPayload
   | DragMatchPayload
   | FlipCardsPayload
   | ChecklistPayload;
+
 
 export interface LessonBlock {
   id: string;
@@ -195,6 +297,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   accordion: 'Accordion',
   image: 'Image',
   video: 'Video',
+  carousel: 'Story carousel',
+  hot_graphic: 'Labelled image',
   mcq: 'Knowledge check',
   drag_match: 'Matching activity',
   checklist: 'Practical checklist',
@@ -208,10 +312,13 @@ export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   accordion: 'Collapsible sections learners open one at a time.',
   image: 'A picture with alt text and an optional caption.',
   video: 'Upload a video file, or paste a YouTube, Vimeo or direct link.',
+  carousel: 'A step-by-step story learners click through, one slide at a time.',
+  hot_graphic: 'An image with labelled points learners tap to explore.',
   mcq: 'A single multiple-choice question with instant feedback.',
   drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
   checklist: 'Read-only practical steps learners can study before assessment.',
 };
+
 
 export function defaultPayload(type: BlockType): BlockPayload {
   switch (type) {
@@ -240,6 +347,21 @@ export function defaultPayload(type: BlockType): BlockPayload {
       return { url: '', alt: '', caption: '' } satisfies ImagePayload;
     case 'video':
       return { source: 'storage', path: '', url: '', title: '', caption: '' } satisfies VideoPayload;
+    case 'carousel':
+      return {
+        heading: '',
+        instruction: 'Use the arrows to move through each step.',
+        items: [{ id: crypto.randomUUID(), title: '', text: '' }],
+      } satisfies CarouselPayload;
+    case 'hot_graphic':
+      return {
+        heading: '',
+        instruction: 'Select each point on the image to find out more.',
+        image: { source: 'storage' },
+        alt: '',
+        hotspots: [],
+      } satisfies HotGraphicPayload;
+
     case 'mcq': {
       const first = crypto.randomUUID();
       return {
@@ -284,6 +406,8 @@ export function isInteractive(type: BlockType): boolean {
     type === 'flip_cards' ||
     type === 'accordion' ||
     type === 'video' ||
+    type === 'carousel' ||
+    type === 'hot_graphic' ||
     type === 'mcq' ||
     type === 'drag_match'
   );
@@ -291,12 +415,20 @@ export function isInteractive(type: BlockType): boolean {
 
 /**
  * Whether the completion switch starts ON for a newly added block.
- * Card decks, knowledge checks and matching activities default ON; video,
- * accordion, flip cards and the practical checklist default OFF.
+ * Card decks, knowledge checks, matching activities, story carousels and
+ * labelled images default ON; video, accordion, flip cards and the practical
+ * checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
-  return type === 'card_deck' || type === 'mcq' || type === 'drag_match';
+  return (
+    type === 'card_deck' ||
+    type === 'mcq' ||
+    type === 'drag_match' ||
+    type === 'carousel' ||
+    type === 'hot_graphic'
+  );
 }
+
 
 /**
  * Blocks whose learner answers are persisted to lesson_block_responses.

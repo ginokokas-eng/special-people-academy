@@ -1428,6 +1428,7 @@ export type Database = {
           resource_page_count: number | null
           scorm_package_id: string | null
           title: string
+          trickle_enabled: boolean
           updated_at: string
           video_url: string | null
         }
@@ -1448,6 +1449,7 @@ export type Database = {
           resource_page_count?: number | null
           scorm_package_id?: string | null
           title: string
+          trickle_enabled?: boolean
           updated_at?: string
           video_url?: string | null
         }
@@ -1468,6 +1470,7 @@ export type Database = {
           resource_page_count?: number | null
           scorm_package_id?: string | null
           title?: string
+          trickle_enabled?: boolean
           updated_at?: string
           video_url?: string | null
         }
