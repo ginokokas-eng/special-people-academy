@@ -11,6 +11,8 @@ import { BlockPalette } from '@/components/admin/lesson-blocks/BlockPalette';
 import { BlockList } from '@/components/admin/lesson-blocks/BlockList';
 import { TemplatePicker } from '@/components/admin/lesson-blocks/TemplatePicker';
 import type { LessonTemplate } from '@/components/admin/lesson-blocks/templates';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 
 import {
