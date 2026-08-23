@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { formatDeliveryType } from '@/lib/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -185,12 +186,6 @@ export function FeaturedCoursesManager() {
     }
   };
 
-  const deliveryLabels: Record<string, string> = {
-    online: 'Online',
-    practical: 'Practical',
-    blended: 'Blended',
-    classroom: 'Classroom',
-  };
 
   const featuredCourses = courses.filter(c => c.is_featured);
 
@@ -283,7 +278,7 @@ export function FeaturedCoursesManager() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">
-                        {deliveryLabels[course.delivery_type || 'online'] || course.delivery_type}
+                        {formatDeliveryType(course.delivery_type)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
