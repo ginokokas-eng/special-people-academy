@@ -532,7 +532,12 @@ export function LessonBlocks({
     // Reading measure: ~68-72ch of body copy, centred. Wide activities are
     // allowed to reach the card edges but never full-bleed (see WIDE_TYPES).
     <div className="lesson-content mx-auto w-full max-w-[47rem] space-y-4">
+      {/* Deep-scroll orientation: hidden on lessons with no gating activities
+          and in the editor preview so authoring visuals stay unchanged. */}
+      {!preview && <LessonProgressStrip done={gateCounts.done} total={gateCounts.total} />}
+      {!preview && blocks.length > 5 && <BackToTop />}
       {preview && trickleEnabled && (
+
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
           <p className="text-sm text-foreground">
             <span className="font-semibold">Trickle is on for this lesson.</span> Learners only see
