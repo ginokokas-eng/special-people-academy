@@ -281,7 +281,42 @@ export default function LessonContentEditor() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Reveal content gradually</CardTitle>
+              <CardDescription>
+                With this on, learners see the next section only once they’ve finished the activity
+                above it. It changes what learners see, not what counts as complete.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-3">
+              <Switch
+                id="lesson-trickle"
+                checked={lesson?.trickle_enabled ?? false}
+                onCheckedChange={async (checked) => {
+                  if (!lessonId) return;
+                  setLesson((prev) => (prev ? { ...prev, trickle_enabled: checked } : prev));
+                  const { error } = await supabase
+                    .from('lessons')
+                    .update({ trickle_enabled: checked })
+                    .eq('id', lessonId);
+                  if (error) {
+                    console.error('Could not update trickle setting:', error);
+                    toast.error('Could not save that setting');
+                    setLesson((prev) => (prev ? { ...prev, trickle_enabled: !checked } : prev));
+                    return;
+                  }
+                  toast.success(checked ? 'Gradual reveal is on' : 'Gradual reveal is off');
+                }}
+              />
+              <Label htmlFor="lesson-trickle" className="text-sm text-muted-foreground">
+                Reveal each section as learners finish the one before it
+              </Label>
+            </CardContent>
+          </Card>
+
           {!blocks.length && !templateDismissed && <TemplatePicker onPick={applyTemplate} />}
+
           <BlockList
 
             blocks={blocks}
