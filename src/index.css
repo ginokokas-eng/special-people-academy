@@ -464,9 +464,6 @@
       ) {
       min-height: 44px;
     }
-    .lesson-content [data-hit-expanded] {
-      position: relative;
-    }
     .lesson-content [data-hit-expanded]::after {
       content: '';
       position: absolute;
