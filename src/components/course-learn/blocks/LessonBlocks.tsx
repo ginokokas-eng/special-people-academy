@@ -426,6 +426,25 @@ export function LessonBlocks({
     );
   }, [veilFromRow, rows, deckState]);
 
+  /**
+   * Orientation counts for the sticky strip. Trickle-aware: only gates the
+   * learner can actually reach right now are counted, so the label never
+   * promises activities that are still veiled. Read-only over deckState.
+   */
+  const gateCounts = useMemo(() => {
+    const lastRow = veilFromRow < 0 ? rows.length : veilFromRow;
+    const reachable = rows
+      .slice(0, lastRow)
+      .flat()
+      .filter((b) => b.contributes_to_completion && isInteractive(b.block_type));
+    return {
+      total: reachable.length,
+      done: reachable.filter((b) => deckState[b.id]).length,
+    };
+  }, [rows, veilFromRow, deckState]);
+
+
+
   if (!blocks.length) {
     return (
       <div className="rounded-lg border bg-card p-6">
