@@ -420,6 +420,8 @@ export function CourseHome({
           This course doesn’t have any lessons yet. Please check back soon.
         </p>
       )}
+      </div>
     </div>
   );
 }
+
