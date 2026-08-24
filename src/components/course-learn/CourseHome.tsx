@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
 import { requiredProgress } from '@/lib/progress';
+import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
+import { useLockedQuizLessons } from '@/components/quiz/useLockedQuizLessons';
 import { cn } from '@/lib/utils';
 import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
 import { SignedImage } from './blocks/SignedImage';
@@ -151,6 +153,10 @@ export function CourseHome({
   onOpenCertificate,
 }: Props) {
   const completedIds = new Set(lessons.filter((l) => l.completed).map((l) => l.id));
+  // Locked-out graded quizzes must never be a silent dead end on the hub.
+  const lockedQuizLessonIds = useLockedQuizLessons(
+    lessons.filter((l) => l.lesson_type === 'quiz').map((l) => l.id)
+  );
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const grouped: HubModule[] = modules
@@ -402,6 +408,12 @@ export function CourseHome({
                           </Badge>
                         )}
                       </div>
+
+                      {lockedQuizLessonIds.has(lesson.id) && (
+                        <p className="rounded-md bg-warning/10 px-2.5 py-2 text-xs text-warning">
+                          No attempts remaining. {QUIZ_LOCKOUT_NEXT_STEP}
+                        </p>
+                      )}
 
                       {feature && lesson.description?.trim() && (
                         <p className="line-clamp-3 text-sm text-muted-foreground">
