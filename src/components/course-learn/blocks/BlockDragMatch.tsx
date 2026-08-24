@@ -359,6 +359,7 @@ export function BlockDragMatch({
             </TargetZone>
           ))}
         </div>
+        </div>
       </DndContext>
 
       <div className="flex flex-wrap items-center gap-3">
