@@ -97,6 +97,12 @@ export function BlockVideo({
   useEffect(() => () => {
     if (boundaryTimer.current) clearTimeout(boundaryTimer.current);
   }, []);
+  /**
+   * The checkpoint that has just been dismissed: it keeps rendering while the
+   * mirrored exit animation plays, then unmounts. A fresh checkpoint clears it
+   * immediately so the arrival interrupts rather than queues.
+   */
+  const [exitingCheckpoint, setExitingCheckpoint] = useState<VideoCheckpoint | null>(null);
   const dismissedRef = useRef<Set<string>>(new Set());
 
   // Restore saved answers so a returning learner is not asked again.
@@ -254,6 +260,8 @@ export function BlockVideo({
 
   const activeCheckpoint = activeId ? checkpoints.find((c) => c.id === activeId) : null;
   const answeredCount = checkpoints.filter((c) => isDone(c.id)).length;
+  // Enter and exit share one path, so the overlay stays mounted through its exit.
+  const shownCheckpoint = activeCheckpoint ?? exitingCheckpoint;
 
   return (
     <div className="space-y-2">
