@@ -185,38 +185,99 @@ export function CourseHome({
     return 'new';
   };
 
-  return (
-    <div className="learner-surface mx-auto w-full max-w-5xl space-y-8 p-4 sm:p-6">
-      <div className="space-y-3">
-        <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
-          <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+  const hero = !!courseThumbnailUrl?.trim();
+
+  const actions = (
+    <div className="flex flex-wrap items-center gap-3">
+      <Badge variant="secondary" className="tabular-nums">
+        {overall.completed}/{overall.total} required lessons complete
+      </Badge>
+      {firstIncomplete && (
+        <Button onClick={() => onSelectLesson(firstIncomplete.id)}>
+          <Play className="mr-1.5 h-4 w-4" />
+          {overall.completed > 0 ? 'Continue learning' : 'Start learning'}
         </Button>
-        <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
-        {courseSubtitle?.trim() && (
-          <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
+      )}
+      {courseDone && hasCertificate && onOpenCertificate && (
+        <Button variant="outline" onClick={onOpenCertificate}>
+          <Award className="mr-1.5 h-4 w-4" /> Your certificate
+        </Button>
+      )}
+    </div>
+  );
+
+  const pickLine = (
+    <p className="text-xs text-muted-foreground">
+      Pick any lesson below. When you finish one you’ll come back here to choose the next.
+    </p>
+  );
+
+  return (
+    <div className="learner-surface w-full">
+      {hero && (
+        <header className="relative isolate w-full overflow-hidden">
+          <img
+            src={courseThumbnailUrl!}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {/* Dim + gradient to the canvas colour so text always sits legibly. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/40"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[hsl(var(--learner-canvas))]"
+          />
+          <div className="relative mx-auto w-full max-w-5xl space-y-3 px-4 pb-14 pt-5 sm:px-6 sm:pb-20 sm:pt-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackToCourse}
+              className="-ml-2 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+            </Button>
+            <h1 className="font-display text-2xl text-primary-foreground sm:text-4xl">
+              {courseTitle}
+            </h1>
+            {courseSubtitle?.trim() && (
+              <p className="max-w-2xl text-sm text-primary-foreground/85">{courseSubtitle}</p>
+            )}
+            {courseDescription?.trim() && (
+              <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
+                {courseDescription}
+              </p>
+            )}
+            <p className="text-sm font-semibold text-primary-foreground">
+              Select a topic below to begin.
+            </p>
+            {actions}
+          </div>
+        </header>
+      )}
+
+      <div className="mx-auto w-full max-w-5xl space-y-8 p-4 sm:p-6">
+        {hero ? (
+          pickLine
+        ) : (
+          <div className="space-y-3">
+            <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+            </Button>
+            <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
+            {courseSubtitle?.trim() && (
+              <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
+            )}
+            {actions}
+            {pickLine}
+          </div>
         )}
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="secondary" className="tabular-nums">
-            {overall.completed}/{overall.total} required lessons complete
-          </Badge>
-          {firstIncomplete && (
-            <Button onClick={() => onSelectLesson(firstIncomplete.id)}>
-              <Play className="mr-1.5 h-4 w-4" />
-              {overall.completed > 0 ? 'Continue learning' : 'Start learning'}
-            </Button>
-          )}
-          {courseDone && hasCertificate && onOpenCertificate && (
-            <Button variant="outline" onClick={onOpenCertificate}>
-              <Award className="mr-1.5 h-4 w-4" /> Your certificate
-            </Button>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Pick any lesson below. When you finish one you’ll come back here to choose the next.
-        </p>
-      </div>
 
       {grouped.map((group) => {
+
         const prog = requiredProgress(group.lessons, completedIds);
         const done = prog.total > 0 && prog.completed === prog.total;
         return (
