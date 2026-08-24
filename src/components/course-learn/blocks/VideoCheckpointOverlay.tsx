@@ -58,8 +58,9 @@ export function VideoCheckpointOverlay({
                 aria-pressed={chosen}
                 disabled={answeredCorrectly && !chosen}
                 className={cn(
-                  'flex min-h-12 w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm transition-all duration-200',
+                  'pressable flex min-h-12 w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+
                   chosen && answeredCorrectly && 'border-success bg-success/[0.12]',
                   chosen && wrong && 'border-destructive bg-destructive/[0.10]',
                   !chosen &&
