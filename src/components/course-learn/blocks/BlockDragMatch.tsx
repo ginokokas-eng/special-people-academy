@@ -67,7 +67,7 @@ function ItemButton({
       disabled={locked}
       aria-pressed={selected}
       className={cn(
-        'min-h-[44px] rounded-xl px-3.5 py-2 text-left text-sm font-medium shadow-learner transition-all duration-200',
+        'pressable min-h-[44px] rounded-xl px-3.5 py-2 text-left text-sm font-medium shadow-learner',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'touch-none',
         !locked && 'cursor-grab active:cursor-grabbing',
@@ -76,6 +76,7 @@ function ItemButton({
         !locked && !selected && 'bg-violet-soft text-violet-soft-foreground hover:shadow-learner-lg',
         isDragging && 'opacity-60'
       )}
+
     >
       <span className="flex items-center gap-2">
         {locked && <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />}
@@ -106,14 +107,15 @@ function TargetZone({
     <div
       ref={setNodeRef}
       className={cn(
-        'rounded-xl border-2 border-dashed border-border p-3 transition-colors',
+        'pressable rounded-xl border-2 border-dashed border-border p-3',
         (isOver || active) && 'border-solid border-primary/50 bg-violet-soft'
       )}
+
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="font-display text-sm text-foreground">{label || 'Group'}</p>
         {active && (
-          <Button type="button" size="sm" variant="outline" onClick={onActivate}>
+          <Button type="button" size="sm" variant="outline" className="pressable" onClick={onActivate}>
             Place here
           </Button>
         )}
@@ -359,7 +361,7 @@ export function BlockDragMatch({
       </DndContext>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={check} disabled={!allPlaced || solved}>
+        <Button type="button" className="pressable" onClick={check} disabled={!allPlaced || solved}>
           Check answers
         </Button>
         {solved && (

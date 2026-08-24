@@ -645,3 +645,90 @@
     }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   P13 — fluid interface: press feedback, material arrival, carousel motion.
+   Compositor-only properties (transform / opacity / filter).
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* Feedback lands on pointer-down (:active fires on pointerdown in browsers),
+     never delayed or debounced. */
+  .pressable {
+    transition:
+      transform 0.1s ease-out,
+      background-color 0.1s ease-out,
+      box-shadow 0.1s ease-out,
+      opacity 0.2s ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pressable:active {
+    transform: scale(0.98);
+  }
+  /* Subtle surface darken on press, independent of the element's own bg. */
+  .pressable {
+    position: relative;
+  }
+  .pressable::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: hsl(var(--foreground));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease-out;
+  }
+  .pressable:active::after {
+    opacity: 0.05;
+  }
+
+  /* Material arrival: blur + scale + opacity animate together, ~250ms
+     critically-damped. Exit mirrors the entry path exactly. */
+  .material-in {
+    animation: material-in 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .material-out {
+    animation: material-out 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pressable:active {
+      transform: none;
+    }
+    .material-in,
+    .material-out {
+      animation: none !important;
+    }
+  }
+}
+
+@keyframes material-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes material-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+

@@ -74,6 +74,9 @@ interface Props {
    * mobile skip buttons, native seeking) snaps back to the ceiling.
    */
   seekCeiling?: number | null;
+  /** Fired when a scrub pushes against the seek ceiling (soft boundary). */
+  onSeekBoundary?: () => void;
+
 }
 
 
@@ -103,7 +106,9 @@ export function VideoPlayer({
   controllerRef,
   overlay,
   seekCeiling,
+  onSeekBoundary,
 }: Props) {
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -121,7 +126,10 @@ export function VideoPlayer({
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
+  /** Rubber-banded thumb position while scrubbing past the seek ceiling. */
+  const [scrubDisplay, setScrubDisplay] = useState<number | null>(null);
   const [duration, setDuration] = useState(0);
+
   const [buffered, setBuffered] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -230,17 +238,40 @@ export function VideoPlayer({
     [clampTime]
   );
 
-  /** Commit a scrub from the seek slider, respecting the ceiling. */
+  /**
+   * Commit a scrub from the seek slider. The ceiling is a SOFT boundary: the
+   * thumb may travel past it with progressive rubber-band resistance while the
+   * pointer is down, then eases back to the ceiling on release.
+   */
   const seekTo = useCallback(
     (t: number) => {
       const v = videoRef.current;
       if (!v) return;
+      const ceil = ceilingRef.current;
+      const dur = v.duration || duration || 0;
+      if (typeof ceil === 'number' && t > ceil && dur > 0) {
+        const over = t - ceil;
+        // resistance = (overshoot * width * 0.55) / (width + 0.55 * overshoot)
+        const damped = (over * dur * 0.55) / (dur + 0.55 * over);
+        v.currentTime = ceil;
+        setCurrent(ceil);
+        setScrubDisplay(Math.min(dur, ceil + damped));
+        onSeekBoundary?.();
+        return;
+      }
       const next = clampTime(t);
+      setScrubDisplay(null);
       v.currentTime = next;
       setCurrent(next);
     },
-    [clampTime]
+    [clampTime, duration, onSeekBoundary]
   );
+
+  /** Pointer released: ease the thumb back to the real position. */
+  const endScrub = useCallback(() => {
+    setScrubDisplay(null);
+  }, []);
+
 
 
   const changeVolume = useCallback(
@@ -645,13 +676,18 @@ export function VideoPlayer({
                   onPointerDown={(e) => e.stopPropagation()}
                 >
                   <Slider
-                    value={[current]}
+                    value={[scrubDisplay ?? current]}
                     min={0}
                     max={duration || 100}
                     step={0.1}
                     onValueChange={(v) => seekTo(v[0])}
+                    onValueCommit={endScrub}
                     aria-label="Seek"
-                    className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                    className={cn(
+                      '[&_[role=slider]]:h-4 [&_[role=slider]]:w-4',
+                      scrubDisplay == null &&
+                        'motion-safe:[&_[role=slider]]:transition-[left] motion-safe:[&_[role=slider]]:duration-200'
+                    )}
                   />
                 </div>
                 <span className="select-none text-[11px] tabular-nums text-white/90">
@@ -686,13 +722,18 @@ export function VideoPlayer({
           {/* Seek bar */}
           <div className="px-1">
             <Slider
-              value={[current]}
+              value={[scrubDisplay ?? current]}
               min={0}
               max={duration || 100}
               step={0.1}
               onValueChange={(v) => seekTo(v[0])}
+              onValueCommit={endScrub}
               aria-label="Seek"
-              className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+              className={cn(
+                '[&_[role=slider]]:h-3 [&_[role=slider]]:w-3',
+                scrubDisplay == null &&
+                  'motion-safe:[&_[role=slider]]:transition-[left] motion-safe:[&_[role=slider]]:duration-200'
+              )}
             />
           </div>
 

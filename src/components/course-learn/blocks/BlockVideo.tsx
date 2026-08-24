@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Loader2 } from '@/components/icons';
@@ -85,6 +86,17 @@ export function BlockVideo({
   const [answers, setAnswers] = useState<Record<string, CheckpointAnswer>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [ended, setEnded] = useState(false);
+  const [boundaryHit, setBoundaryHit] = useState(false);
+  const boundaryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Brief highlight of the checkpoint hint when a scrub hits the ceiling. */
+  const flashBoundary = useCallback(() => {
+    setBoundaryHit(true);
+    if (boundaryTimer.current) clearTimeout(boundaryTimer.current);
+    boundaryTimer.current = setTimeout(() => setBoundaryHit(false), 900);
+  }, []);
+  useEffect(() => () => {
+    if (boundaryTimer.current) clearTimeout(boundaryTimer.current);
+  }, []);
   const dismissedRef = useRef<Set<string>>(new Set());
 
   // Restore saved answers so a returning learner is not asked again.
@@ -251,7 +263,13 @@ export function BlockVideo({
 
       {hasCheckpoints && !embedUrl && (
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">
+          <Badge
+            variant="outline"
+            className={cn(
+              'transition-all duration-200',
+              boundaryHit && 'scale-105 border-primary bg-primary/10 text-primary'
+            )}
+          >
             {answeredCount}/{checkpoints.length} checkpoints answered
           </Badge>
           <p className="text-xs text-muted-foreground">
@@ -302,6 +320,7 @@ export function BlockVideo({
           onReport={() => {}}
           controllerRef={controllerRef}
           seekCeiling={seekCeiling}
+          onSeekBoundary={flashBoundary}
           overlay={
             activeCheckpoint ? (
               <VideoCheckpointOverlay

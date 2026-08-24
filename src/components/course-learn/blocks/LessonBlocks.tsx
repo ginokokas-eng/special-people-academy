@@ -182,11 +182,12 @@ function CardDeckBlock({
               onClick={() => toggle(card.id)}
               aria-expanded={open}
               className={cn(
-                'min-h-[104px] rounded-xl p-4 text-left shadow-learner transition-all duration-200',
+                'pressable min-h-[104px] rounded-xl p-4 text-left shadow-learner',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'motion-safe:hover:-translate-y-0.5 hover:shadow-learner-lg',
                 open ? 'bg-card' : 'bg-violet-soft'
               )}
+
             >
               <p className="font-display text-base text-foreground">{card.front || 'Card'}</p>
               {open ? (
@@ -272,7 +273,7 @@ function AccordionBlock({
       >
         {items.map((item, i) => (
           <AccordionItem key={item.id} value={item.id} className="border-border/60 last:border-b-0">
-            <AccordionTrigger className="text-left text-sm font-semibold data-[state=open]:text-primary">
+            <AccordionTrigger className="pressable text-left text-sm font-semibold data-[state=open]:text-primary">
               {item.title || `Section ${i + 1}`}
             </AccordionTrigger>
             <AccordionContent>
@@ -610,7 +611,8 @@ export function LessonBlocks({
           return (
             <div key={row.map((b) => b.id).join('-')}>
               {isVeilEdge && (
-                <div className="mb-4 rounded-xl border border-dashed border-primary/40 bg-primary/[0.05] p-4 text-center">
+                <div className="material-in mb-4 rounded-xl border border-dashed border-primary/40 bg-primary/[0.05] p-4 text-center">
+
                   <p className="text-sm font-medium text-foreground">
                     Complete the {GATE_LABELS[blockingGate?.block_type ?? 'card_deck'] ?? 'activity'}{' '}
                     above to continue
@@ -659,7 +661,7 @@ export function LessonBlocks({
             </span>
           ) : (
             <>
-              <Button onClick={() => onComplete?.()} disabled={!allSatisfied}>
+              <Button className="pressable" onClick={() => onComplete?.()} disabled={!allSatisfied}>
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Mark as complete
               </Button>

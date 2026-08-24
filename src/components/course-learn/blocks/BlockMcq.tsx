@@ -79,8 +79,9 @@ export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: Bl
               onClick={() => choose(opt.id)}
               aria-pressed={chosen}
               className={cn(
-                'flex w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm transition-all duration-200',
+                'pressable flex w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+
                 showState && isCorrect && 'border-success bg-success/[0.12]',
                 showState && !isCorrect && 'border-destructive bg-destructive/[0.10]',
                 !showState &&

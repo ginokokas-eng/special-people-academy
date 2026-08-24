@@ -331,8 +331,9 @@ export function CourseHome({
                       }
                     }}
                     className={cn(
-                      'learner-card learner-card-hover learner-wash group relative h-full cursor-pointer overflow-hidden',
+                      'learner-card learner-card-hover learner-wash pressable group relative h-full cursor-pointer overflow-hidden',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+
                       SPAN_CLASS[span],
                       feature && !media && 'sm:min-h-[12.5rem]',
                       status === 'completed' && 'ring-1 ring-success/40',
