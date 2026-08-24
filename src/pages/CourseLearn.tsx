@@ -795,7 +795,7 @@ export default function CourseLearn() {
           blocks={lessonBlocks}
           completed={!!activeLesson.completed}
           trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
-          onComplete={() => markComplete(activeLesson.id)}
+          onComplete={() => markComplete(activeLesson.id, { returnHome: true })}
         />
 
       );
@@ -907,7 +907,7 @@ export default function CourseLearn() {
           nextLesson={nextLesson}
           onSelectLesson={goToLesson}
           onBack={() => setSearchParams({}, { replace: false })}
-          onMarkComplete={markComplete}
+          onMarkComplete={(lessonId) => markComplete(lessonId, { returnHome: true })}
         />
         <ContentInfoDialog
           open={contentInfoOpen}
