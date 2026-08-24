@@ -303,6 +303,9 @@ export function CourseHome({
                 const status = statusOf(lesson);
                 const highlighted = highlightLessonId === lesson.id;
                 const wash = WASHES[index % WASHES.length];
+                // Image-led card when the lesson's own blocks give us a still;
+                // otherwise the wash + chip identity stays as the fallback.
+                const media = lessonMedia?.get(lesson.id) ?? null;
                 return (
                   <Card
                     key={lesson.id}
@@ -311,7 +314,7 @@ export function CourseHome({
                     }}
                     role="button"
                     tabIndex={0}
-                    data-wash={wash}
+                    data-wash={media ? undefined : wash}
                     data-complete={status === 'completed' ? 'true' : undefined}
                     aria-label={`${lesson.title} — ${
                       status === 'completed'
@@ -331,7 +334,7 @@ export function CourseHome({
                       'learner-card learner-card-hover learner-wash group relative h-full cursor-pointer overflow-hidden',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       SPAN_CLASS[span],
-                      feature && 'sm:min-h-[12.5rem]',
+                      feature && !media && 'sm:min-h-[12.5rem]',
                       status === 'completed' && 'ring-1 ring-success/40',
                       status === 'continue' && 'ring-1 ring-primary/40',
                       feature && status !== 'completed' && 'ring-1 ring-primary/50',
@@ -349,6 +352,20 @@ export function CourseHome({
                             : 'bg-transparent'
                       )}
                     />
+                    {media && (
+                      <div
+                        className={cn(
+                          'relative w-full overflow-hidden bg-muted',
+                          feature ? 'aspect-[16/9] sm:aspect-[16/7]' : 'aspect-[16/9]'
+                        )}
+                      >
+                        <SignedImage
+                          media={media}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardContent className="flex h-full flex-col gap-3 p-4 pl-5">
                       <div className="flex items-start gap-3">
                         <span
@@ -356,7 +373,9 @@ export function CourseHome({
                             'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
                             status === 'completed'
                               ? 'bg-success/10 text-success'
-                              : 'learner-wash-chip'
+                              : media
+                                ? 'bg-primary/10 text-primary'
+                                : 'learner-wash-chip'
                           )}
                         >
                           {lessonTypeIcon(lesson.lesson_type, 'h-4 w-4')}
