@@ -58,7 +58,13 @@ export default function QuizPage() {
   };
 
   const handleQuizComplete = (passed: boolean) => {
-    // Could trigger course progress recalculation here if needed
+    // Passing completes the lesson (handled in QuizContainer). Return the
+    // learner to the course menu with the finished lesson highlighted.
+    if (passed && courseId && lessonId) {
+      setTimeout(() => {
+        navigate(`/courses/${courseId}/learn?complete=${lessonId}`);
+      }, 2000);
+    }
   };
 
   if (authLoading || loading) {

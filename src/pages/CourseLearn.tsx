@@ -91,6 +91,11 @@ export default function CourseLearn() {
   const [scormReloadKey, setScormReloadKey] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  /** Lessons with an existing progress row that is not yet complete. */
+  const [startedLessonIds, setStartedLessonIds] = useState<Set<string>>(new Set());
+  /** Lesson to scroll into view + highlight once on the course home. */
+  const [highlightLessonId, setHighlightLessonId] = useState<string | null>(null);
+
 
   // Per-lesson media support
   const [transcript, setTranscript] = useState<LessonTranscript | null>(null);
@@ -256,11 +261,15 @@ export default function CourseLearn() {
       }
 
       const progressMap = new Map(progressData?.map((p) => [p.lesson_id, p.completed]) || []);
+      setStartedLessonIds(
+        new Set((progressData || []).filter((p) => !p.completed).map((p) => p.lesson_id))
+      );
       const withProgress: LearnLesson[] = (lessonsData || []).map((l: any) => ({
         ...l,
         completed: progressMap.get(l.id) || false,
         question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
       }));
+
 
       const assessors = (assessorRows || [])
         .map((t: any) => (t.full_name as string)?.split(' ')[0])
@@ -358,7 +367,12 @@ export default function CourseLearn() {
   }, [activeTab, canSeek, activeLesson?.id]);
 
   const markComplete = useCallback(
-    async (lessonId: string) => {
+    /**
+     * Persist lesson completion. `returnHome` is only passed by the explicit
+     * "Mark complete" actions — gates, autoplay and video-ended keep the
+     * learner where they are.
+     */
+    async (lessonId: string, opts?: { returnHome?: boolean }) => {
       if (!user) return;
       const { error } = await supabase.from('lesson_progress').upsert(
         {
@@ -375,14 +389,37 @@ export default function CourseLearn() {
         return;
       }
       setLessons((prev) => prev.map((l) => (l.id === lessonId ? { ...l, completed: true } : l)));
+      setStartedLessonIds((prev) => {
+        if (!prev.has(lessonId)) return prev;
+        const next = new Set(prev);
+        next.delete(lessonId);
+        return next;
+      });
       if (courseId) {
         supabase.functions
           .invoke('check-course-completion', { body: { course_id: courseId } })
           .catch((e) => console.error('completion check error', e));
       }
+      if (opts?.returnHome) {
+        toast.success('Lesson complete');
+        setHighlightLessonId(lessonId);
+        setSearchParams({}, { replace: false });
+      }
     },
-    [user, courseId]
+    [user, courseId, setSearchParams]
   );
+
+  // Returning from the quiz page after a passing submission: land on the course
+  // home with the completed lesson highlighted.
+  useEffect(() => {
+    const completed = searchParams.get('complete');
+    if (!completed) return;
+    setLessons((prev) => prev.map((l) => (l.id === completed ? { ...l, completed: true } : l)));
+    setHighlightLessonId(completed);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
 
   // Load SCORM content when active lesson is a SCORM lesson (preserved logic)
   useEffect(() => {
@@ -555,10 +592,12 @@ export default function CourseLearn() {
 
 
   const goToLesson = (lessonId: string) => {
+    setHighlightLessonId(null);
     setSearchParams({ lesson: lessonId });
     setMobileNavOpen(false);
     setActiveTab('overview');
   };
+
 
   const currentIndex = visibleLessons.findIndex((l) => l.id === activeLesson?.id);
   const prevLesson = currentIndex > 0 ? visibleLessons[currentIndex - 1] : null;
@@ -756,14 +795,20 @@ export default function CourseLearn() {
           blocks={lessonBlocks}
           completed={!!activeLesson.completed}
           trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
-          onComplete={() => markComplete(activeLesson.id)}
+          onComplete={() => markComplete(activeLesson.id, { returnHome: true })}
         />
 
       );
     }
 
     if (activeLesson.lesson_type === 'resource') {
-      return <ResourceLessonBody lesson={activeLesson} onMarkRead={markComplete} />;
+      return (
+        <ResourceLessonBody
+          lesson={activeLesson}
+          onMarkRead={(lessonId) => markComplete(lessonId, { returnHome: true })}
+        />
+      );
+
     }
 
     // text / scenario / pdf
@@ -829,7 +874,10 @@ export default function CourseLearn() {
       modules={modules}
       lessons={visibleLessons}
       hasCertificate={course.has_certificate}
+      startedLessonIds={startedLessonIds}
+      highlightLessonId={highlightLessonId}
       onSelectLesson={goToLesson}
+
       onBackToCourse={() => navigate(`/courses/${courseId || id}`)}
       onOpenCertificate={() => {
         if (visibleLessons.length) goToLesson(visibleLessons[0].id);
@@ -859,7 +907,7 @@ export default function CourseLearn() {
           nextLesson={nextLesson}
           onSelectLesson={goToLesson}
           onBack={() => setSearchParams({}, { replace: false })}
-          onMarkComplete={markComplete}
+          onMarkComplete={(lessonId) => markComplete(lessonId, { returnHome: true })}
         />
         <ContentInfoDialog
           open={contentInfoOpen}
@@ -981,7 +1029,11 @@ export default function CourseLearn() {
                     activeLesson.lesson_type !== 'scorm' &&
                     activeLesson.lesson_type !== 'resource' &&
                     !activeLesson.completed && (
-                      <Button variant="secondary" onClick={() => markComplete(activeLesson.id)}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => markComplete(activeLesson.id, { returnHome: true })}
+                      >
+
                         <CheckCircle2 className="mr-1 h-4 w-4" /> Mark complete
                       </Button>
                     )}

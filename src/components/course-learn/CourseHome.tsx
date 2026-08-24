@@ -1,9 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
 import { requiredProgress } from '@/lib/progress';
 import { cn } from '@/lib/utils';
+import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
 import type { LearnLesson, LearnModule } from './types';
 
 interface Props {
@@ -13,6 +15,10 @@ interface Props {
   /** Learner-facing lessons only, already filtered and ordered. */
   lessons: LearnLesson[];
   hasCertificate?: boolean;
+  /** Lessons with a progress row that is not yet complete (resume targets). */
+  startedLessonIds?: Set<string>;
+  /** Lesson just completed — scrolled into view with a one-time highlight. */
+  highlightLessonId?: string | null;
   onSelectLesson: (lessonId: string) => void;
   onBackToCourse: () => void;
   onOpenCertificate?: () => void;
@@ -26,17 +32,17 @@ interface HubModule {
 
 /** Small SVG ring showing required-lesson progress for a module. */
 function ProgressRing({ percent, done }: { percent: number; done?: boolean }) {
-  const r = 18;
+  const r = 15;
   const c = 2 * Math.PI * r;
   return (
-    <svg viewBox="0 0 44 44" className="h-11 w-11 shrink-0" aria-hidden="true">
-      <circle cx="22" cy="22" r={r} fill="none" strokeWidth="4" className="stroke-muted" />
+    <svg viewBox="0 0 36 36" className="h-9 w-9 shrink-0" aria-hidden="true">
+      <circle cx="18" cy="18" r={r} fill="none" strokeWidth="3.5" className="stroke-muted" />
       <circle
-        cx="22"
-        cy="22"
+        cx="18"
+        cy="18"
         r={r}
         fill="none"
-        strokeWidth="4"
+        strokeWidth="3.5"
         strokeLinecap="round"
         className={cn(
           'transition-[stroke-dashoffset] duration-500',
@@ -44,13 +50,13 @@ function ProgressRing({ percent, done }: { percent: number; done?: boolean }) {
         )}
         strokeDasharray={c}
         strokeDashoffset={c - (c * Math.min(100, Math.max(0, percent))) / 100}
-        transform="rotate(-90 22 22)"
+        transform="rotate(-90 18 18)"
       />
       <text
-        x="22"
-        y="26"
+        x="18"
+        y="21.5"
         textAnchor="middle"
-        className="fill-foreground text-[0.6rem] font-semibold tabular-nums"
+        className="fill-foreground text-[0.55rem] font-semibold tabular-nums"
       >
         {percent}%
       </text>
@@ -58,10 +64,12 @@ function ProgressRing({ percent, done }: { percent: number; done?: boolean }) {
   );
 }
 
+type LessonStatus = 'completed' | 'continue' | 'new';
 
 /**
- * Course home ("module hub"): shown when no `?lesson=` is present. Learners
- * choose where to start — no sequencing is enforced.
+ * Course home ("menu page"): shown when no `?lesson=` is present. Modules are
+ * section headings; every lesson is a card so learners can start one, finish
+ * it, and come straight back here to pick the next.
  */
 export function CourseHome({
   courseTitle,
@@ -69,11 +77,14 @@ export function CourseHome({
   modules,
   lessons,
   hasCertificate,
+  startedLessonIds,
+  highlightLessonId,
   onSelectLesson,
   onBackToCourse,
   onOpenCertificate,
 }: Props) {
   const completedIds = new Set(lessons.filter((l) => l.completed).map((l) => l.id));
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const grouped: HubModule[] = modules
     .map((m) => ({
@@ -88,15 +99,27 @@ export function CourseHome({
 
   const overall = requiredProgress(lessons, completedIds);
   const firstIncomplete = lessons.find((l) => !completedIds.has(l.id)) ?? lessons[0];
+  const upNextId = lessons.find((l) => !completedIds.has(l.id))?.id ?? null;
   const courseDone = overall.total > 0 && overall.completed === overall.total;
 
-  const enterModule = (group: HubModule) => {
-    const target = group.lessons.find((l) => !completedIds.has(l.id)) ?? group.lessons[0];
-    if (target) onSelectLesson(target.id);
+  // Bring the just-completed card into view once (no animation when the
+  // learner has asked for reduced motion — the highlight state is enough).
+  useEffect(() => {
+    if (!highlightLessonId) return;
+    const el = cardRefs.current[highlightLessonId];
+    if (!el) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+  }, [highlightLessonId]);
+
+  const statusOf = (lesson: LearnLesson): LessonStatus => {
+    if (completedIds.has(lesson.id)) return 'completed';
+    if (startedLessonIds?.has(lesson.id)) return 'continue';
+    return 'new';
   };
 
   return (
-    <div className="learner-surface mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-6">
+    <div className="learner-surface mx-auto w-full max-w-5xl space-y-8 p-4 sm:p-6">
       <div className="space-y-3">
         <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
           <ArrowLeft className="mr-1 h-4 w-4" /> Course page
@@ -122,78 +145,126 @@ export function CourseHome({
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          Choose any module below — you can work through them in whatever order suits you.
+          Pick any lesson below. When you finish one you’ll come back here to choose the next.
         </p>
       </div>
 
-      {/* Menu-page card grid. Future addition (out of scope today): module
-          imagery would need a modules image column + upload flow. */}
-      <div
-        className={cn(
-          'grid gap-4 md:grid-cols-2',
-          grouped.length >= 3 && 'min-[1100px]:grid-cols-3'
-        )}
-      >
-        {grouped.map((group) => {
-          const prog = requiredProgress(group.lessons, completedIds);
-          const done = prog.total > 0 && prog.completed === prog.total;
-          return (
-            <Card
-              key={group.id ?? 'essentials'}
-              role="button"
-              tabIndex={0}
-              onClick={() => enterModule(group)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  enterModule(group);
-                }
-              }}
-              className={cn(
-                'learner-card learner-card-hover group h-full cursor-pointer',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-              )}
-            >
-              <CardContent className="flex h-full items-start gap-4 p-5">
-                <ProgressRing percent={prog.percent} done={done} />
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <h2 className="font-display text-base text-foreground">{group.title}</h2>
-                  <p className="text-xs tabular-nums text-muted-foreground">
-                    {group.lessons.length} {group.lessons.length === 1 ? 'lesson' : 'lessons'}
-                    {prog.total > 0 && ` · ${prog.completed}/${prog.total} required complete`}
-                  </p>
-                  <p
+      {grouped.map((group) => {
+        const prog = requiredProgress(group.lessons, completedIds);
+        const done = prog.total > 0 && prog.completed === prog.total;
+        return (
+          <section key={group.id ?? 'essentials'} className="space-y-3">
+            <div className="flex items-center gap-3">
+              <ProgressRing percent={prog.percent} done={done} />
+              <div className="min-w-0">
+                <h2 className="font-display text-lg text-foreground">{group.title}</h2>
+                <p className="text-xs tabular-nums text-muted-foreground">
+                  {prog.total > 0
+                    ? `${prog.completed} of ${prog.total} complete`
+                    : `${group.lessons.length} ${group.lessons.length === 1 ? 'lesson' : 'lessons'}`}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 min-[1100px]:grid-cols-3">
+              {group.lessons.map((lesson) => {
+                const status = statusOf(lesson);
+                const highlighted = highlightLessonId === lesson.id;
+                return (
+                  <Card
+                    key={lesson.id}
+                    ref={(el) => {
+                      cardRefs.current[lesson.id] = el;
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${lesson.title} — ${
+                      status === 'completed'
+                        ? 'completed'
+                        : status === 'continue'
+                          ? 'continue'
+                          : 'not started'
+                    }`}
+                    onClick={() => onSelectLesson(lesson.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelectLesson(lesson.id);
+                      }
+                    }}
                     className={cn(
-                      'flex items-center gap-1 text-xs font-semibold tabular-nums',
-                      done ? 'text-success' : 'text-muted-foreground'
+                      'learner-card learner-card-hover group relative h-full cursor-pointer overflow-hidden',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                      status === 'completed' && 'ring-1 ring-success/40',
+                      status === 'continue' && 'ring-1 ring-primary/40',
+                      highlighted && 'ring-2 ring-primary ring-offset-2'
                     )}
                   >
-                    {done ? (
-                      <>
-                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Complete
-                      </>
-                    ) : (
-                      `${prog.percent}% complete`
-                    )}
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                    {done ? (
-                      'Revisit module'
-                    ) : (
-                      <>
-                        {prog.completed > 0 ? 'Continue module' : 'Start module'}
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                      </>
-                    )}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'absolute inset-y-0 left-0 w-[3px]',
+                        status === 'completed'
+                          ? 'bg-success'
+                          : status === 'continue'
+                            ? 'bg-primary'
+                            : 'bg-transparent'
+                      )}
+                    />
+                    <CardContent className="flex h-full flex-col gap-3 p-4 pl-5">
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={cn(
+                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                            status === 'completed'
+                              ? 'bg-success/10 text-success'
+                              : 'bg-primary/10 text-primary'
+                          )}
+                        >
+                          {lessonTypeIcon(lesson.lesson_type, 'h-4 w-4')}
+                        </span>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <h3 className="font-display text-sm leading-snug text-foreground">
+                            {lesson.title}
+                          </h3>
+                          <p className="text-xs tabular-nums text-muted-foreground">
+                            {lessonMetaLabel(lesson)}
+                          </p>
+                        </div>
+                        {upNextId === lesson.id && (
+                          <Badge variant="secondary" className="shrink-0 text-[0.65rem]">
+                            Up next
+                          </Badge>
+                        )}
+                      </div>
 
-
+                      <div className="mt-auto flex items-center justify-between gap-2">
+                        {status === 'completed' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
+                            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Completed
+                          </span>
+                        ) : status === 'continue' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                            Continue
+                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Not started
+                          </span>
+                        )}
+                        {status === 'completed' && (
+                          <span className="text-xs text-muted-foreground">Review</span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
 
       {!grouped.length && (
         <p className="text-sm text-muted-foreground">
