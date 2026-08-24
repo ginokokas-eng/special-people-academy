@@ -73,16 +73,26 @@ Deno.serve(async (req) => {
     return json({ revoked: false });
   }
 
-  const { error } = await admin.auth.admin.signOut(
-    // Global sign-out for the mapped Academy user.
-    '',
-    'global',
-  ).catch(() => ({ error: { message: 'signOut unsupported' } as { message: string } })) as { error?: { message: string } };
+  // Global revocation of every Academy session for the mapped learner via the
+  // GoTrue admin sessions endpoint (service-role only, never exposed to clients).
+  let revokeError: { message: string } | null = null;
+  try {
+    const res = await fetch(
+      `${Deno.env.get('SUPABASE_URL')}/auth/v1/admin/users/${resolution.userId}/sessions`,
+      {
+        method: 'DELETE',
+        headers: {
+          apikey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!}`,
+        },
+      },
+    );
+    if (!res.ok) revokeError = { message: `sessions_delete_${res.status}` };
+    await res.text();
+  } catch (e) {
+    revokeError = { message: (e as Error).message };
+  }
 
-  // supabase-js exposes per-user revocation through the admin API:
-  const { error: revokeError } = error
-    ? await admin.auth.admin.updateUserById(resolution.userId, { password: undefined as unknown as string })
-    : { error: null };
 
   await audit({
     ariadne_sub: isUuid(sub) ? sub : null,
