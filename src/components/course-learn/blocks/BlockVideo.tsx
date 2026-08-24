@@ -251,7 +251,13 @@ export function BlockVideo({
 
       {hasCheckpoints && !embedUrl && (
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">
+          <Badge
+            variant="outline"
+            className={cn(
+              'transition-all duration-200',
+              boundaryHit && 'scale-105 border-primary bg-primary/10 text-primary'
+            )}
+          >
             {answeredCount}/{checkpoints.length} checkpoints answered
           </Badge>
           <p className="text-xs text-muted-foreground">
@@ -302,6 +308,7 @@ export function BlockVideo({
           onReport={() => {}}
           controllerRef={controllerRef}
           seekCeiling={seekCeiling}
+          onSeekBoundary={flashBoundary}
           overlay={
             activeCheckpoint ? (
               <VideoCheckpointOverlay
