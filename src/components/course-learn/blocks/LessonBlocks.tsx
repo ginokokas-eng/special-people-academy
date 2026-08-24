@@ -435,6 +435,29 @@ export function LessonBlocks({
     return -1;
   }, [trickleEnabled, completed, revealAll, rows, deckState]);
 
+  /**
+   * Rows that were veiled a moment ago and have just opened up — they get a
+   * short settle-in (opacity + slight rise), staggered from the old veil edge.
+   * Presentational only: nothing here reads or writes completion.
+   */
+  const [justUnveiled, setJustUnveiled] = useState<Set<number>>(new Set());
+  const wasVeiledRef = useRef<Set<number>>(new Set());
+  const veilStartRef = useRef(0);
+  useEffect(() => {
+    const nowVeiled = new Set<number>();
+    if (veilFromRow >= 0) {
+      for (let r = veilFromRow; r < rows.length; r += 1) nowVeiled.add(r);
+    }
+    const freed = [...wasVeiledRef.current].filter((r) => !nowVeiled.has(r));
+    wasVeiledRef.current = nowVeiled;
+    if (!freed.length) return;
+    veilStartRef.current = Math.min(...freed);
+    setJustUnveiled(new Set(freed));
+    const t = window.setTimeout(() => setJustUnveiled(new Set()), 700);
+    return () => window.clearTimeout(t);
+  }, [veilFromRow, rows.length]);
+
+
   const blockingGate = useMemo(() => {
     if (veilFromRow < 1) return null;
     return (
