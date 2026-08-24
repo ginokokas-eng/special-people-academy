@@ -802,7 +802,13 @@ export default function CourseLearn() {
     }
 
     if (activeLesson.lesson_type === 'resource') {
-      return <ResourceLessonBody lesson={activeLesson} onMarkRead={markComplete} />;
+      return (
+        <ResourceLessonBody
+          lesson={activeLesson}
+          onMarkRead={(lessonId) => markComplete(lessonId, { returnHome: true })}
+        />
+      );
+
     }
 
     // text / scenario / pdf
