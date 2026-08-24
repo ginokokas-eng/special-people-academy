@@ -268,9 +268,9 @@ export function MobileCoursePlayer({
         <h1 className="truncate text-sm font-semibold text-foreground">{course.title}</h1>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="learner-surface flex min-h-0 flex-1 flex-col overflow-y-auto">
         {/* Top video area — full width, 16:9 handled inside the lesson body */}
-        <div className="w-full bg-background px-4 pt-4">{lessonBody}</div>
+        <div className="w-full px-4 pt-4">{lessonBody}</div>
 
         {/* Course + lesson meta */}
         <div className="border-b px-4 pb-4 pt-3">
@@ -284,7 +284,7 @@ export function MobileCoursePlayer({
               )}
             </div>
           )}
-          <h2 className="text-lg font-bold leading-snug text-foreground">
+          <h2 className="font-display text-lg leading-snug text-foreground">
             {activeLesson?.title ?? course.title}
           </h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{providerName}</p>
