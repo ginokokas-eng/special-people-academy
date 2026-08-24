@@ -12,6 +12,8 @@ import {
   type MediaRef,
 } from '@/components/course-learn/blocks/types';
 import { describeUploadError, resolveContentType } from './uploadHelpers';
+import { FileDropZone } from './FileDropZone';
+
 
 
 interface Props {
@@ -93,7 +95,10 @@ export function MediaUploadField({
             type="button"
             size="sm"
             variant={source === 'storage' ? 'default' : 'outline'}
-            onClick={() => onChange({ ...(value ?? {}), source: 'storage' })}
+            onClick={() => {
+              if (source !== 'storage') onChange({ ...(value ?? {}), source: 'storage' });
+              inputRef.current?.click();
+            }}
           >
             Upload
           </Button>
@@ -109,34 +114,19 @@ export function MediaUploadField({
       </div>
 
       {source === 'storage' ? (
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-image-file`} className="sr-only">
-            {label} file
-          </Label>
-          <Input
-            id={`${idPrefix}-image-file`}
-            ref={inputRef}
-            type="file"
-            accept={IMAGE_ACCEPT}
-            disabled={uploading}
-            onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-          />
-          <p className="text-xs text-muted-foreground">
-            PNG, JPG or WebP — up to {IMAGE_MAX_MB} MB. Images are stored privately and only
-            enrolled learners can see them.
-          </p>
-          {uploading && (
-            <div className="space-y-1">
-              <Progress value={progress} />
-              <p className="text-xs text-muted-foreground">Uploading… {progress}%</p>
-            </div>
-          )}
-          {value?.path && !uploading && (
-            <p className="text-xs text-success">
-              Uploaded: {value.file_name || value.path.split('/').pop()}
-            </p>
-          )}
-        </div>
+        <FileDropZone
+          inputId={`${idPrefix}-image-file`}
+          inputRef={inputRef}
+          accept={IMAGE_ACCEPT}
+          label={`${label} file`}
+          primaryText="Choose an image"
+          secondaryText={`PNG, JPG or WebP — up to ${IMAGE_MAX_MB} MB. Images are stored privately and only enrolled learners can see them.`}
+          uploading={uploading}
+          progress={progress}
+          storedName={value?.path ? value.file_name || value.path.split('/').pop() : null}
+          onFile={handleFile}
+        />
+
       ) : (
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-image-url`} className="sr-only">
