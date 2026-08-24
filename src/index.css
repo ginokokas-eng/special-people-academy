@@ -261,7 +261,15 @@
     --learner-kicker: 30 15% 72%;
     --shadow-learner: 0 1px 2px hsl(0 0% 0% / 0.35), 0 8px 24px hsl(0 0% 0% / 0.3);
     --shadow-learner-lg: 0 2px 4px hsl(0 0% 0% / 0.4), 0 18px 40px hsl(0 0% 0% / 0.42);
+
+    /* Same hues, deeper/less saturated so ink text keeps AA on dark cards. */
+    --wash-violet: 268 45% 62%;
+    --wash-teal: 187 55% 55%;
+    --wash-amber: 36 70% 60%;
+    --wash-coral: 340 55% 62%;
+    --wash-tint: 0.14;
   }
+
 
 }
 
