@@ -51,11 +51,12 @@ export function BackToTop({ threshold = 900 }: { threshold?: number }) {
         onClick={toTop}
         aria-label="Back to top of lesson"
         className={cn(
-          'fixed bottom-5 right-5 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full',
-          'border bg-card text-foreground shadow-md transition-opacity duration-200',
+          'pressable fixed bottom-5 right-5 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full',
+          'border bg-card text-foreground shadow-md',
           'hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           visible ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
+
       >
         <ArrowUp className="h-5 w-5" aria-hidden="true" />
       </button>
