@@ -637,6 +637,13 @@
       'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-weight: 700;
     letter-spacing: -0.015em;
+    /* Bricolage Grotesque ships an opsz 12..96 axis — make sure it engages. */
+    font-optical-sizing: auto;
+  }
+
+  /* Largest display step only (hero / course title). */
+  .font-display-hero {
+    letter-spacing: -0.02em;
   }
 
   @media (prefers-reduced-motion: reduce) {
