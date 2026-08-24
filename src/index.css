@@ -865,3 +865,37 @@
     opacity: 0;
   }
 }
+
+/* ------------------------------------------------------------------------
+   P16 — accent-bar clearance + media-only breakout.
+
+   1. Any card wearing the read-vs-do accent bar reserves its own left padding
+      (normal card padding + the 3px bar), so NO descendant layout choice can
+      push text under the bar again.
+   2. Breakout is opt-in per MEDIA element (.media-breakout) and only takes
+      effect inside a single-block wide row (.media-wide). Headings,
+      instructions, chips, captions and footers never break out.
+   ---------------------------------------------------------------------- */
+@layer utilities {
+  .learner-card.learner-accent {
+    padding-left: calc(1rem + 3px);
+  }
+
+  .media-breakout {
+    margin-inline: 0;
+  }
+
+  @media (min-width: 640px) {
+    .learner-card.learner-accent {
+      padding-left: calc(1.5rem + 3px);
+    }
+    .media-wide > .media-breakout,
+    .media-wide .media-breakout {
+      margin-inline: -1.5rem;
+    }
+    /* Inside an accent card the bar stays visible beside the media. */
+    .learner-accent .media-wide .media-breakout {
+      margin-left: -1.5rem;
+    }
+  }
+}
