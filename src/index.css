@@ -543,6 +543,16 @@
     color: hsl(var(--success));
   }
 
+  /* Designed lesson header: faint brand wash + clipped logo watermark. */
+  .learner-header-band {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-learner);
+    background-color: hsl(var(--learner-wash) / 0.05);
+    box-shadow: var(--shadow-learner);
+  }
+
+
   /* Primary actions inside learner surfaces: solid brand, radius 10, 600. */
   .learner-surface :is(button, a).bg-primary {
     border-radius: 10px;
