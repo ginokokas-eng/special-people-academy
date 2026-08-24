@@ -36,8 +36,9 @@ export function VideoCheckpointOverlay({
       role="dialog"
       aria-modal="true"
       aria-label="Checkpoint question"
-      className="absolute inset-0 z-30 flex items-center justify-center overflow-y-auto bg-background/95 p-4 backdrop-blur-sm animate-fade-in"
+      className="material-in absolute inset-0 z-30 flex items-center justify-center overflow-y-auto bg-background/95 p-4 will-change-[transform,opacity,filter] motion-reduce:animate-fade-in"
     >
+
       <div className="w-full max-w-xl space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
           Checkpoint {index} of {total}
