@@ -63,7 +63,7 @@ export default function QuizPage() {
     if (passed && courseId && lessonId) {
       setTimeout(() => {
         navigate(`/courses/${courseId}/learn?complete=${lessonId}`);
-      }, 1200);
+      }, 2000);
     }
   };
 
