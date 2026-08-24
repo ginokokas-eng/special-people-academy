@@ -230,17 +230,40 @@ export function VideoPlayer({
     [clampTime]
   );
 
-  /** Commit a scrub from the seek slider, respecting the ceiling. */
+  /**
+   * Commit a scrub from the seek slider. The ceiling is a SOFT boundary: the
+   * thumb may travel past it with progressive rubber-band resistance while the
+   * pointer is down, then eases back to the ceiling on release.
+   */
   const seekTo = useCallback(
     (t: number) => {
       const v = videoRef.current;
       if (!v) return;
+      const ceil = ceilingRef.current;
+      const dur = v.duration || duration || 0;
+      if (typeof ceil === 'number' && t > ceil && dur > 0) {
+        const over = t - ceil;
+        // resistance = (overshoot * width * 0.55) / (width + 0.55 * overshoot)
+        const damped = (over * dur * 0.55) / (dur + 0.55 * over);
+        v.currentTime = ceil;
+        setCurrent(ceil);
+        setScrubDisplay(Math.min(dur, ceil + damped));
+        onSeekBoundary?.();
+        return;
+      }
       const next = clampTime(t);
+      setScrubDisplay(null);
       v.currentTime = next;
       setCurrent(next);
     },
-    [clampTime]
+    [clampTime, duration, onSeekBoundary]
   );
+
+  /** Pointer released: ease the thumb back to the real position. */
+  const endScrub = useCallback(() => {
+    setScrubDisplay(null);
+  }, []);
+
 
 
   const changeVolume = useCallback(
