@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertTriangle } from '@/components/icons';
 import { useBlockResponse } from './useBlockResponse';
