@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import logoMark from '@/assets/logo.svg';
+
 import {
   Loader2,
   CheckCircle2,
@@ -171,6 +173,12 @@ export default function CourseLearn() {
     () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
     [modules, activeLesson]
   );
+  /** 1-based position of the active lesson's module, 0 when unknown. */
+  const activeModuleIndex = useMemo(
+    () => modules.findIndex((m) => m.id === activeLesson?.module_id) + 1,
+    [modules, activeLesson]
+  );
+
   const hasTranscript = !!transcript && (!!transcript.transcript_text || (transcript.segments?.length ?? 0) > 0);
   const lessonHasResources = useMemo(
     () =>
