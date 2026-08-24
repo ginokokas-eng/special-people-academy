@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,6 +30,8 @@ interface Props {
 export function CheckpointEditor({ payload, onChange, idPrefix }: Props) {
   const supported = supportsCheckpoints(payload);
   const checkpoints = videoCheckpoints(payload);
+  /** Raw mm:ss text per checkpoint while typing; parsed on every change. */
+  const [raw, setRaw] = useState<Record<string, string>>({});
 
   const update = (list: VideoCheckpoint[]) => onChange({ ...payload, checkpoints: list });
 
@@ -104,12 +107,24 @@ export function CheckpointEditor({ payload, onChange, idPrefix }: Props) {
                 <Label htmlFor={`${idPrefix}-cp-${cp.id}-at`}>Time (mm:ss)</Label>
                 <Input
                   id={`${idPrefix}-cp-${cp.id}-at`}
-                  defaultValue={secondsToMmSs(cp.at_s)}
+                  value={raw[cp.id] ?? secondsToMmSs(cp.at_s)}
                   placeholder="1:30"
-                  onBlur={(e) => {
-                    const secs = mmSsToSeconds(e.target.value);
-                    if (secs != null) patch(cp.id, { at_s: secs });
-                    e.target.value = secondsToMmSs(secs ?? cp.at_s);
+                  aria-invalid={!cp.at_s || cp.at_s <= 0 || undefined}
+                  className={
+                    !cp.at_s || cp.at_s <= 0 ? 'border-destructive focus-visible:ring-destructive' : undefined
+                  }
+                  // Parse on every keystroke so a fast or programmatic entry can
+                  // never reach save as at_s = 0.
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    setRaw((prev) => ({ ...prev, [cp.id]: text }));
+                    const secs = mmSsToSeconds(text);
+                    patch(cp.id, { at_s: secs ?? 0 });
+                  }}
+                  onBlur={() => {
+                    const secs = mmSsToSeconds(raw[cp.id] ?? '') ?? cp.at_s;
+                    setRaw((prev) => ({ ...prev, [cp.id]: secondsToMmSs(secs) }));
+                    patch(cp.id, { at_s: secs });
                   }}
                 />
               </div>

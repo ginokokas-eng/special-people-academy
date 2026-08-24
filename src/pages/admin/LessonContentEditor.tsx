@@ -18,10 +18,12 @@ import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import {
   defaultContributesToCompletion,
   defaultPayload,
+  hasInvalidCheckpoints,
   type BlockDraft,
   type BlockPayload,
   type BlockType,
   type LessonBlock,
+  type VideoPayload,
 } from '@/components/course-learn/blocks/types';
 
 /**
@@ -208,6 +210,12 @@ export default function LessonContentEditor() {
     }
   };
 
+  // P9: an unusable checkpoint (no/zero time, missing question, bad options)
+  // blocks saving so at_s = 0 can never reach the database.
+  const checkpointsInvalid = blocks.some(
+    (b) => b.block_type === 'video' && hasInvalidCheckpoints(b.payload as VideoPayload)
+  );
+
   const previewBlocks: LessonBlock[] = blocks.map((b, index) => ({
     id: b.id ?? `preview-${index}`,
     lesson_id: lessonId ?? '',
@@ -261,7 +269,12 @@ export default function LessonContentEditor() {
           >
             Close
           </Button>
-          <Button onClick={handleSave} disabled={saving || !dirty}>
+          {checkpointsInvalid && (
+            <span className="text-xs font-medium text-destructive">
+              Fix the checkpoint problems below to save
+            </span>
+          )}
+          <Button onClick={handleSave} disabled={saving || !dirty || checkpointsInvalid}>
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

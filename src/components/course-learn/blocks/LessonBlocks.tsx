@@ -596,6 +596,16 @@ export function LessonBlocks({
           // Wide activities stretch to the card edges on larger screens so they
           // are not squeezed into the narrower text measure.
           const wide = row.length === 1 && WIDE_TYPES.has(row[0].block_type);
+          // Accent only for blocks that RECORD something. Story carousels are
+          // read-along and stay quiet, as do non-gated blocks.
+          const accentBlocks = row.filter(
+            (b) =>
+              b.contributes_to_completion &&
+              isInteractive(b.block_type) &&
+              b.block_type !== 'carousel'
+          );
+          const accentDone = accentBlocks.every((b) => !!deckState[b.id]);
+
 
           return (
             <div key={row.map((b) => b.id).join('-')}>
@@ -612,10 +622,14 @@ export function LessonBlocks({
               )}
               <div
                 aria-hidden={veiled || undefined}
+                // P9 read-vs-do: cards holding a recording activity carry the
+                // 3px accent, green once every gate in the card is satisfied.
+                data-done={accentBlocks.length > 0 && accentDone ? 'true' : undefined}
                 // Veiled content stays MOUNTED so signals and scroll positions
                 // survive; it is just non-interactive and dimmed.
                 className={cn(
                   'learner-card p-4 transition-opacity duration-300 sm:p-6',
+                  accentBlocks.length > 0 && 'learner-accent',
                   veiled && 'pointer-events-none select-none opacity-25 blur-[1px]'
                 )}
               >

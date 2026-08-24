@@ -526,6 +526,29 @@
     transform: translateY(-2px);
   }
 
+  /* P9 — "read vs do" accent: 3px brand bar on the card's inside left edge,
+     rounded with the card. Turns green when the card's gates are complete. */
+  .learner-accent {
+    position: relative;
+    overflow: hidden;
+  }
+  .learner-accent::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: hsl(var(--learner-wash));
+    border-top-left-radius: var(--radius-learner);
+    border-bottom-left-radius: var(--radius-learner);
+    pointer-events: none;
+  }
+  .learner-accent[data-done='true']::before {
+    background-color: hsl(var(--success));
+  }
+
+
   /* Icon chip that marks a "this counts" activity. */
   .learner-chip {
     display: inline-flex;

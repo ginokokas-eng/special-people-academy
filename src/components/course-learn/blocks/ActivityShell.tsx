@@ -50,14 +50,7 @@ export function ActivityShell({
   const { label, Icon } = meta;
 
   return (
-    <section className="relative pl-4">
-      <span
-        aria-hidden="true"
-        className={cn(
-          'absolute inset-y-0 left-0 w-[3px] rounded-full',
-          done ? 'bg-success' : 'bg-primary'
-        )}
-      />
+    <section>
       <div className="mb-3 flex items-center gap-2">
         <span className="learner-chip" data-done={done} aria-hidden="true">
           {done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}

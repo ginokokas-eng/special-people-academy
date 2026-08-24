@@ -561,3 +561,13 @@ export function parseBlockText(text: string): TextChunk[] {
 
   return chunks;
 }
+
+/**
+ * P9 — authoring guard: does this video payload carry an invalid checkpoint?
+ * Used to block "Save content" while a checkpoint time/question/options are
+ * unusable. Learner behaviour is untouched.
+ */
+export function hasInvalidCheckpoints(payload?: VideoPayload | null): boolean {
+  if (!supportsCheckpoints(payload)) return false;
+  return videoCheckpoints(payload).some((cp) => checkpointIssues(cp).length > 0);
+}
