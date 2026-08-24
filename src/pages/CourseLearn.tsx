@@ -768,7 +768,7 @@ export default function CourseLearn() {
 
     // text / scenario / pdf
     return (
-      <div className="lesson-content mx-auto w-full max-w-[47rem] rounded-lg border bg-card p-4 sm:p-6">
+      <div className="learner-card lesson-content mx-auto w-full max-w-[47rem] p-4 sm:p-6">
         {activeLesson.description ? (
           <div className="prose max-w-none whitespace-pre-line text-foreground">
             {activeLesson.description}
