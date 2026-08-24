@@ -300,6 +300,7 @@ export function BlockDragMatch({
         onDragEnd={handleDragEnd}
         accessibility={{ announcements }}
       >
+        <div className="media-breakout">
         <div className="rounded-xl bg-muted/40 p-3">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Items

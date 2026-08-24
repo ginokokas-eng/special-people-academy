@@ -320,6 +320,7 @@ export function BlockVideo({
           </Button>
         </div>
       ) : (
+        <div className="media-breakout">
         <VideoPlayer
           key={signedUrl ?? externalUrl}
           title={payload.title?.trim() || 'Lesson video'}
@@ -355,6 +356,7 @@ export function BlockVideo({
             ) : null
           }
         />
+        </div>
       )}
 
       {payload.caption?.trim() && (
