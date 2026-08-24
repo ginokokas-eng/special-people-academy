@@ -11,6 +11,7 @@ import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import SsoCallback from "./pages/SsoCallback";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -76,6 +77,8 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/sso" element={<SsoCallback />} />
+
                 <Route path="/sign-in" element={<Auth />} />
                 <Route path="/sign-up" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
