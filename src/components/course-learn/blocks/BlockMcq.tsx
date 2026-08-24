@@ -54,24 +54,21 @@ export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: Bl
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline">Knowledge check</Badge>
-        {answered && (
-          <span
-            className={cn(
-              'text-xs font-medium',
-              isCorrect ? 'text-success' : 'text-destructive'
-            )}
-          >
-            {isCorrect ? 'Correct' : 'Try again'}
-          </span>
-        )}
-      </div>
-      <p className="text-sm font-semibold text-foreground">
+      {answered && (
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.12em]',
+            isCorrect ? 'text-success' : 'text-destructive'
+          )}
+        >
+          {isCorrect ? 'Correct' : 'Try again'}
+        </span>
+      )}
+      <p className="font-display text-lg leading-snug text-foreground">
         {payload.question || 'Add your question in the editor.'}
       </p>
 
-      <div className="space-y-2" role="group" aria-label="Answer options">
+      <div className="space-y-2.5" role="group" aria-label="Answer options">
         {options.map((opt) => {
           const chosen = selected === opt.id;
           const showState = answered && chosen;
@@ -82,11 +79,16 @@ export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: Bl
               onClick={() => choose(opt.id)}
               aria-pressed={chosen}
               className={cn(
-                'flex w-full items-start gap-2 rounded-lg border p-3 text-left text-sm transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                showState && isCorrect && 'border-success bg-success/10',
-                showState && !isCorrect && 'border-destructive bg-destructive/10',
-                !showState && 'bg-card hover:bg-muted'
+                'flex w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                showState && isCorrect && 'border-success bg-success/[0.12]',
+                showState && !isCorrect && 'border-destructive bg-destructive/[0.10]',
+                !showState &&
+                  chosen &&
+                  'border-primary bg-primary/[0.08]',
+                !showState &&
+                  !chosen &&
+                  'border-border/70 bg-card motion-safe:hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-learner'
               )}
             >
               {showState ? (
@@ -99,11 +101,12 @@ export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: Bl
                   />
                 )
               ) : null}
-              <span className="text-foreground">{opt.label || 'Option'}</span>
+              <span className="font-medium text-foreground">{opt.label || 'Option'}</span>
             </button>
           );
         })}
       </div>
+
 
       <div aria-live="polite" className="min-h-[1.25rem]">
         {answered && (

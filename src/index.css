@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap');
 
 @layer base {
   :root {
@@ -103,7 +103,20 @@
     --shadow-2xl: 0 25px 50px -12px hsl(270 25% 15% / 0.2);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
+
+    /* ---- Learner experience design language (P8) ----------------------
+       Scoped to learner surfaces only (.learner-surface / lesson blocks).
+       Depth comes from tint + layered shadow, never hairline borders. */
+    --learner-canvas: 268 25% 97%;
+    --learner-wash: 268 55% 50%;
+    --violet-soft: 268 60% 95%;
+    --violet-soft-foreground: 268 45% 28%;
+    --learner-kicker: 268 30% 45%;
+    --shadow-learner: 0 1px 2px hsl(258 38% 15% / 0.06), 0 8px 24px hsl(258 38% 15% / 0.07);
+    --shadow-learner-lg: 0 2px 4px hsl(258 38% 15% / 0.07), 0 18px 40px hsl(258 38% 15% / 0.11);
+    --radius-learner: 15px;
   }
+
   .dark {
     --background: 270 20% 10%;
     --foreground: 270 10% 95%;
@@ -229,7 +242,17 @@
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.2), 0 4px 6px -2px hsl(0 0% 0% / 0.15);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.2), 0 10px 10px -5px hsl(0 0% 0% / 0.15);
     --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.4);
+
+    /* Learner surfaces in dark mode: elevation by lightness steps, softer shadows. */
+    --learner-canvas: 184 40% 7%;
+    --learner-wash: 184 45% 40%;
+    --violet-soft: 184 28% 22%;
+    --violet-soft-foreground: 30 25% 90%;
+    --learner-kicker: 30 15% 72%;
+    --shadow-learner: 0 1px 2px hsl(0 0% 0% / 0.35), 0 8px 24px hsl(0 0% 0% / 0.3);
+    --shadow-learner-lg: 0 2px 4px hsl(0 0% 0% / 0.4), 0 18px 40px hsl(0 0% 0% / 0.42);
   }
+
 }
 
 @layer base {
@@ -471,6 +494,71 @@
       width: 44px;
       height: 44px;
       transform: translate(-50%, -50%);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   P8 — Learner visual design language.
+   Scoped to `.learner-surface` (the learner player/course-home shells) so the
+   admin portal, editor and marketing pages keep their existing styling.
+   --------------------------------------------------------------------------- */
+@layer components {
+  .learner-surface {
+    background-color: hsl(var(--learner-canvas));
+  }
+
+  /* White (card-token) content surface: no border, layered soft shadow. */
+  .learner-card {
+    background-color: hsl(var(--card));
+    border: 0;
+    border-radius: var(--radius-learner);
+    box-shadow: var(--shadow-learner);
+  }
+
+  .learner-card-hover {
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+  }
+  .learner-card-hover:hover {
+    box-shadow: var(--shadow-learner-lg);
+    transform: translateY(-2px);
+  }
+
+  /* Icon chip that marks a "this counts" activity. */
+  .learner-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.75rem;
+    width: 1.75rem;
+    flex-shrink: 0;
+    border-radius: 0.625rem;
+    background-color: hsl(var(--violet-soft));
+    color: hsl(var(--primary));
+  }
+  .learner-chip[data-done='true'] {
+    background-color: hsl(var(--success) / 0.16);
+    color: hsl(var(--success));
+  }
+
+  /* Primary actions inside learner surfaces: solid brand, radius 10, 600. */
+  .learner-surface :is(button, a).bg-primary {
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  /* Display type: learner-facing headings only. */
+  .font-display {
+    font-family: 'Bricolage Grotesque', 'Baloo 2', 'Poppins', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .learner-card-hover:hover {
+      transform: none;
     }
   }
 }

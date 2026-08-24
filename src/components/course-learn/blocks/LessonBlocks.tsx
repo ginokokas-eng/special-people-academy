@@ -20,6 +20,8 @@ import { BlockChecklist } from './BlockChecklist';
 import { BlockCarousel } from './BlockCarousel';
 import { BlockHotGraphic } from './BlockHotGraphic';
 import { SignedImage } from './SignedImage';
+import { ActivityShell } from './ActivityShell';
+
 import {
 
   blockLayout,
@@ -61,7 +63,7 @@ function TextBlock({ payload }: { payload: TextPayload }) {
   return (
     <div className="space-y-3">
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
       {chunks.map((chunk, i) =>
         chunk.kind === 'list' ? (
@@ -87,25 +89,29 @@ function TextBlock({ payload }: { payload: TextPayload }) {
 
 const CALLOUT_STYLES: Record<
   CalloutPayload['variant'],
-  { wrap: string; icon: JSX.Element; label: string }
+  { wrap: string; bar: string; icon: JSX.Element; label: string }
 > = {
   info: {
-    wrap: 'border-primary/30 bg-primary/5 text-foreground',
+    wrap: 'bg-primary/[0.07] text-foreground',
+    bar: 'bg-primary',
     icon: <Info className="h-4 w-4 text-primary" />,
     label: 'Good to know',
   },
   safety: {
-    wrap: 'border-destructive/30 bg-destructive/5 text-foreground',
+    wrap: 'bg-destructive/[0.07] text-foreground',
+    bar: 'bg-destructive',
     icon: <ShieldCheck className="h-4 w-4 text-destructive" />,
     label: 'Safety',
   },
   warning: {
-    wrap: 'border-warning/40 bg-warning/10 text-foreground',
+    wrap: 'bg-warning/[0.12] text-foreground',
+    bar: 'bg-warning',
     icon: <AlertTriangle className="h-4 w-4 text-warning" />,
     label: 'Important',
   },
   success: {
-    wrap: 'border-success/40 bg-success/10 text-foreground',
+    wrap: 'bg-success/[0.10] text-foreground',
+    bar: 'bg-success',
     icon: <Sparkles className="h-4 w-4 text-success" />,
     label: 'Good practice',
   },
@@ -114,15 +120,19 @@ const CALLOUT_STYLES: Record<
 function CalloutBlock({ payload }: { payload: CalloutPayload }) {
   const style = CALLOUT_STYLES[payload.variant] ?? CALLOUT_STYLES.info;
   return (
-    <div className={cn('rounded-lg border p-4', style.wrap)}>
-      <div className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
+    <div className={cn('relative overflow-hidden rounded-xl p-4 pl-5', style.wrap)}>
+      <span aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', style.bar)} />
+      <div className="mb-1.5 flex items-center gap-2">
         {style.icon}
-        <span>{payload.title?.trim() || style.label}</span>
+        <span className="font-display text-base text-foreground">
+          {payload.title?.trim() || style.label}
+        </span>
       </div>
       <p className="whitespace-pre-line text-sm leading-relaxed">{payload.text}</p>
     </div>
   );
 }
+
 
 /* ------------------------------- card deck -------------------------------- */
 
@@ -152,13 +162,13 @@ function CardDeckBlock({
   return (
     <div className="space-y-3">
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-sm text-muted-foreground">
           {payload.instruction?.trim() || 'Tap each card to reveal the answer.'}
         </p>
-        <Badge variant="outline">
+        <Badge variant="secondary" className="tabular-nums">
           {revealed.size}/{cards.length} revealed
         </Badge>
       </div>
@@ -172,23 +182,27 @@ function CardDeckBlock({
               onClick={() => toggle(card.id)}
               aria-expanded={open}
               className={cn(
-                'min-h-[104px] rounded-lg border p-4 text-left transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                open ? 'border-primary bg-primary/5' : 'bg-card hover:bg-muted'
+                'min-h-[104px] rounded-xl p-4 text-left shadow-learner transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'motion-safe:hover:-translate-y-0.5 hover:shadow-learner-lg',
+                open ? 'bg-card' : 'bg-violet-soft'
               )}
             >
-              <p className="text-sm font-medium text-foreground">{card.front || 'Card'}</p>
+              <p className="font-display text-base text-foreground">{card.front || 'Card'}</p>
               {open ? (
-                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground">
                   {card.back}
                 </p>
               ) : (
-                <p className="mt-2 text-xs font-medium text-primary">Tap to reveal</p>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+                  Tap to reveal
+                </p>
               )}
             </button>
           );
         })}
       </div>
+
     </div>
   );
 }
@@ -235,19 +249,19 @@ function AccordionBlock({
   return (
     <div className="space-y-3">
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
       {showProgress && (
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm text-muted-foreground">Open each section to continue.</p>
-          <Badge variant="outline">
+          <Badge variant="secondary" className="tabular-nums">
             {opened.size}/{items.length} opened
           </Badge>
         </div>
       )}
       <Accordion
         type="multiple"
-        className="rounded-lg border bg-card px-2"
+        className="rounded-xl bg-card px-4 shadow-learner"
         onValueChange={(values) =>
           setOpened((prev) => {
             const next = new Set(prev);
@@ -257,8 +271,8 @@ function AccordionBlock({
         }
       >
         {items.map((item, i) => (
-          <AccordionItem key={item.id} value={item.id}>
-            <AccordionTrigger className="text-left text-sm font-medium">
+          <AccordionItem key={item.id} value={item.id} className="border-border/60 last:border-b-0">
+            <AccordionTrigger className="text-left text-sm font-semibold data-[state=open]:text-primary">
               {item.title || `Section ${i + 1}`}
             </AccordionTrigger>
             <AccordionContent>
@@ -278,14 +292,14 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
   const media = payload.media ?? (payload.url ? { source: 'url' as const, url: payload.url } : null);
   if (!media) {
     return (
-      <div className="rounded-lg border bg-muted p-6 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl bg-muted/60 p-6 text-center text-sm text-muted-foreground">
         No image added yet.
       </div>
     );
   }
   return (
     <figure className="space-y-2">
-      <div className="overflow-hidden rounded-lg border bg-card">
+      <div className="overflow-hidden rounded-xl bg-card shadow-learner">
         <SignedImage media={media} alt={payload.alt || ''} className="max-h-[520px]" />
       </div>
       {payload.caption?.trim() && (
@@ -294,6 +308,7 @@ function ImageBlock({ payload }: { payload: ImagePayload }) {
     </figure>
   );
 }
+
 
 /* -------------------------------- renderer -------------------------------- */
 
@@ -449,13 +464,14 @@ export function LessonBlocks({
 
   if (!blocks.length) {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <div className="learner-card p-6">
         <p className="text-sm text-muted-foreground">No content for this lesson yet.</p>
       </div>
     );
   }
 
-  const renderBlock = (block: LessonBlock) => (
+  const renderBlockBody = (block: LessonBlock) => (
+
     <>
       {block.block_type === 'text' && <TextBlock payload={block.payload as TextPayload} />}
       {block.block_type === 'callout' && (
@@ -530,6 +546,20 @@ export function LessonBlocks({
     </>
   );
 
+  /**
+   * P8 signature: blocks whose signal gates the lesson are wrapped in the
+   * accent + chip shell. Read-only blocks stay quiet.
+   */
+  const renderBlock = (block: LessonBlock) => {
+    const gating = block.contributes_to_completion && isInteractive(block.block_type);
+    if (!gating) return renderBlockBody(block);
+    return (
+      <ActivityShell blockType={block.block_type} done={!!deckState[block.id]}>
+        {renderBlockBody(block)}
+      </ActivityShell>
+    );
+  };
+
   return (
     // Reading measure: ~68-72ch of body copy, centred. Wide activities are
     // allowed to reach the card edges but never full-bleed (see WIDE_TYPES).
@@ -539,8 +569,7 @@ export function LessonBlocks({
       {!preview && <LessonProgressStrip done={gateCounts.done} total={gateCounts.total} />}
       {!preview && blocks.length > 5 && <BackToTop />}
       {preview && trickleEnabled && (
-
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-primary/[0.07] p-3">
           <p className="text-sm text-foreground">
             <span className="font-semibold">Trickle is on for this lesson.</span> Learners only see
             the next section once they finish the activity above it.
@@ -557,7 +586,7 @@ export function LessonBlocks({
         </div>
       )}
 
-      <div className="space-y-6 rounded-lg border bg-card p-4 sm:p-6">
+      <div className="space-y-4">
         {rows.map((row, rowIndex) => {
           const veiled = veilFromRow >= 0 && rowIndex >= veilFromRow;
           const isVeilEdge = veilFromRow >= 0 && rowIndex === veilFromRow;
@@ -569,9 +598,9 @@ export function LessonBlocks({
           const wide = row.length === 1 && WIDE_TYPES.has(row[0].block_type);
 
           return (
-            <div key={row.map((b) => b.id).join('-')} className={cn(wide && 'sm:-mx-6')}>
+            <div key={row.map((b) => b.id).join('-')}>
               {isVeilEdge && (
-                <div className="mb-4 rounded-lg border border-dashed border-primary/40 bg-muted/50 p-4 text-center">
+                <div className="mb-4 rounded-xl border border-dashed border-primary/40 bg-primary/[0.05] p-4 text-center">
                   <p className="text-sm font-medium text-foreground">
                     Complete the {GATE_LABELS[blockingGate?.block_type ?? 'card_deck'] ?? 'activity'}{' '}
                     above to continue
@@ -586,7 +615,7 @@ export function LessonBlocks({
                 // Veiled content stays MOUNTED so signals and scroll positions
                 // survive; it is just non-interactive and dimmed.
                 className={cn(
-                  'transition-opacity duration-300',
+                  'learner-card p-4 transition-opacity duration-300 sm:p-6',
                   veiled && 'pointer-events-none select-none opacity-25 blur-[1px]'
                 )}
               >
@@ -598,7 +627,7 @@ export function LessonBlocks({
                       ))}
                     </div>
                   ) : (
-                    renderBlock(row[0])
+                    <div className={cn(wide && 'sm:-mx-6')}>{renderBlock(row[0])}</div>
                   )}
                 </RevealOnScroll>
               </div>
@@ -606,6 +635,7 @@ export function LessonBlocks({
           );
         })}
       </div>
+
 
       {!preview && (
         <div className="flex flex-wrap items-center gap-3">
