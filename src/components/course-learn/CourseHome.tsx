@@ -6,11 +6,19 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Award, Play } from '@/components/i
 import { requiredProgress } from '@/lib/progress';
 import { cn } from '@/lib/utils';
 import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
+import { SignedImage } from './blocks/SignedImage';
+import type { MediaRef } from './blocks/types';
 import type { LearnLesson, LearnModule } from './types';
 
 interface Props {
   courseTitle: string;
   courseSubtitle?: string | null;
+  /** Intro blurb shown under the title in the hero. */
+  courseDescription?: string | null;
+  /** When present the header becomes a cinematic hero band. */
+  courseThumbnailUrl?: string | null;
+  /** Per-lesson card image, derived from the lesson's own blocks. */
+  lessonMedia?: Map<string, MediaRef>;
   modules: LearnModule[];
   /** Learner-facing lessons only, already filtered and ordered. */
   lessons: LearnLesson[];
@@ -130,6 +138,9 @@ function bentoOrder(
 export function CourseHome({
   courseTitle,
   courseSubtitle,
+  courseDescription,
+  courseThumbnailUrl,
+  lessonMedia,
   modules,
   lessons,
   hasCertificate,
