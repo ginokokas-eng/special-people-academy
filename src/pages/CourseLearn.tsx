@@ -592,10 +592,12 @@ export default function CourseLearn() {
 
 
   const goToLesson = (lessonId: string) => {
+    setHighlightLessonId(null);
     setSearchParams({ lesson: lessonId });
     setMobileNavOpen(false);
     setActiveTab('overview');
   };
+
 
   const currentIndex = visibleLessons.findIndex((l) => l.id === activeLesson?.id);
   const prevLesson = currentIndex > 0 ? visibleLessons[currentIndex - 1] : null;
