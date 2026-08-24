@@ -208,7 +208,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
         aria-roledescription="carousel"
         aria-label={payload.heading?.trim() || 'Story carousel'}
         tabIndex={0}
-        className="overflow-hidden rounded-xl bg-card shadow-learner focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="media-breakout overflow-hidden rounded-xl bg-card shadow-learner focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         onKeyDown={(e) => {
           if (e.key === 'ArrowLeft') {
             e.preventDefault();

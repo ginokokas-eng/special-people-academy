@@ -98,7 +98,7 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
 
       {showList ? (
         <div className="space-y-3">
-          <div className="overflow-hidden rounded-xl bg-card shadow-learner">
+          <div className="media-breakout overflow-hidden rounded-xl bg-card shadow-learner">
             <SignedImage media={payload.image} alt={payload.alt || ''} className="max-h-[420px]" />
           </div>
           <Accordion
@@ -129,7 +129,7 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
           </Accordion>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-xl bg-card shadow-learner">
+        <div className="media-breakout relative overflow-hidden rounded-xl bg-card shadow-learner">
           <SignedImage media={payload.image} alt={payload.alt || ''} className="max-h-[560px]" />
           {hotspots.map((spot, i) => {
             const found = explored.has(spot.id);
