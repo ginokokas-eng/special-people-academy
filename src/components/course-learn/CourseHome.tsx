@@ -25,7 +25,7 @@ interface HubModule {
 }
 
 /** Small SVG ring showing required-lesson progress for a module. */
-function ProgressRing({ percent }: { percent: number }) {
+function ProgressRing({ percent, done }: { percent: number; done?: boolean }) {
   const r = 18;
   const c = 2 * Math.PI * r;
   return (
@@ -38,7 +38,10 @@ function ProgressRing({ percent }: { percent: number }) {
         fill="none"
         strokeWidth="4"
         strokeLinecap="round"
-        className="stroke-primary transition-[stroke-dashoffset] duration-500"
+        className={cn(
+          'transition-[stroke-dashoffset] duration-500',
+          done ? 'stroke-success' : 'stroke-primary'
+        )}
         strokeDasharray={c}
         strokeDashoffset={c - (c * Math.min(100, Math.max(0, percent))) / 100}
         transform="rotate(-90 22 22)"
@@ -47,13 +50,14 @@ function ProgressRing({ percent }: { percent: number }) {
         x="22"
         y="26"
         textAnchor="middle"
-        className="fill-foreground text-[0.6rem] font-semibold"
+        className="fill-foreground text-[0.6rem] font-semibold tabular-nums"
       >
         {percent}%
       </text>
     </svg>
   );
 }
+
 
 /**
  * Course home ("module hub"): shown when no `?lesson=` is present. Learners

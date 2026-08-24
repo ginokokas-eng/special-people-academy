@@ -70,7 +70,7 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
   return (
     <div className="space-y-3" ref={wrapRef}>
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
@@ -98,12 +98,12 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
 
       {showList ? (
         <div className="space-y-3">
-          <div className="overflow-hidden rounded-lg border bg-card">
+          <div className="overflow-hidden rounded-xl bg-card shadow-learner">
             <SignedImage media={payload.image} alt={payload.alt || ''} className="max-h-[420px]" />
           </div>
           <Accordion
             type="multiple"
-            className="rounded-lg border bg-card px-2"
+            className="rounded-xl bg-muted/40 px-2"
             onValueChange={(values) => (values as string[]).forEach(open)}
           >
             {hotspots.map((spot, i) => (
@@ -129,7 +129,7 @@ export function BlockHotGraphic({ payload, onAllExplored, showProgress }: Props)
           </Accordion>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-lg border bg-card">
+        <div className="relative overflow-hidden rounded-xl bg-card shadow-learner">
           <SignedImage media={payload.image} alt={payload.alt || ''} className="max-h-[560px]" />
           {hotspots.map((spot, i) => {
             const found = explored.has(spot.id);
