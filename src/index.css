@@ -584,6 +584,37 @@
     color: hsl(var(--success));
   }
 
+  /* P10.1 — brand-mark colour washes on course-home lesson cards.
+     `data-wash` cycles deterministically by card index in the section. */
+  .learner-wash[data-wash] {
+    background-image: linear-gradient(
+      0deg,
+      hsl(var(--wash) / var(--wash-tint)),
+      hsl(var(--wash) / var(--wash-tint))
+    );
+  }
+  .learner-wash[data-wash='violet'] {
+    --wash: var(--wash-violet);
+  }
+  .learner-wash[data-wash='teal'] {
+    --wash: var(--wash-teal);
+  }
+  .learner-wash[data-wash='amber'] {
+    --wash: var(--wash-amber);
+  }
+  .learner-wash[data-wash='coral'] {
+    --wash: var(--wash-coral);
+  }
+  /* Completed cards mute their wash so the green state reads first. */
+  .learner-wash[data-complete='true'] {
+    --wash-tint: 0.05;
+  }
+  /* Chip takes the full-strength hue of its card's wash. */
+  .learner-wash .learner-wash-chip {
+    background-color: hsl(var(--wash) / 0.16);
+    color: hsl(var(--wash));
+  }
+
   /* Designed lesson header: faint brand wash + clipped logo watermark. */
   .learner-header-band {
     position: relative;
