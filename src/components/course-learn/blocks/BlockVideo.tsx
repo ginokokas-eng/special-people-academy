@@ -190,9 +190,18 @@ export function BlockVideo({
   );
 
   const continueWatching = useCallback(() => {
-    if (activeId) dismissedRef.current.add(activeId);
+    if (activeId) {
+      dismissedRef.current.add(activeId);
+      // Hand the overlay to the exit path so it leaves the way it arrived.
+      setExitingCheckpoint(checkpoints.find((c) => c.id === activeId) ?? null);
+    }
     setActiveId(null);
     controllerRef.current?.play?.();
+  }, [activeId, checkpoints]);
+
+  // A new checkpoint interrupts any exit in flight — never queue behind it.
+  useEffect(() => {
+    if (activeId) setExitingCheckpoint(null);
   }, [activeId]);
 
   // Done-signal: played to the end AND every checkpoint answered.
