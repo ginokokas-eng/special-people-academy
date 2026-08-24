@@ -297,7 +297,7 @@ export function BlockVideo({
       )}
 
       {embedUrl ? (
-        <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="media-breakout overflow-hidden rounded-lg border bg-card">
           <div className="aspect-video">
             <iframe
               src={embedUrl}
@@ -309,7 +309,7 @@ export function BlockVideo({
           </div>
         </div>
       ) : loading && !signedUrl ? (
-        <div className="flex aspect-video items-center justify-center rounded-lg border bg-card">
+        <div className="media-breakout flex aspect-video items-center justify-center rounded-lg border bg-card">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : error && !signedUrl ? (
@@ -320,6 +320,7 @@ export function BlockVideo({
           </Button>
         </div>
       ) : (
+        <div className="media-breakout">
         <VideoPlayer
           key={signedUrl ?? externalUrl}
           title={payload.title?.trim() || 'Lesson video'}
@@ -355,6 +356,7 @@ export function BlockVideo({
             ) : null
           }
         />
+        </div>
       )}
 
       {payload.caption?.trim() && (
