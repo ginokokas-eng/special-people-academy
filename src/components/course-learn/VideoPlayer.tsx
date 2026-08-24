@@ -106,7 +106,9 @@ export function VideoPlayer({
   controllerRef,
   overlay,
   seekCeiling,
+  onSeekBoundary,
 }: Props) {
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
