@@ -868,7 +868,10 @@ export default function CourseLearn() {
       modules={modules}
       lessons={visibleLessons}
       hasCertificate={course.has_certificate}
+      startedLessonIds={startedLessonIds}
+      highlightLessonId={highlightLessonId}
       onSelectLesson={goToLesson}
+
       onBackToCourse={() => navigate(`/courses/${courseId || id}`)}
       onOpenCertificate={() => {
         if (visibleLessons.length) goToLesson(visibleLessons[0].id);
