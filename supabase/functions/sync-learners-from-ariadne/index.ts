@@ -84,10 +84,12 @@ Deno.serve(async (req) => {
       return {
         email,
         fountain_applicant_id,
+        ariadne_user_id: w.ariadne_user_id ?? w.auth_user_id ?? w.user_id ?? null,
         full_name: full_name || null,
         external_id: w.external_id ?? fountain_applicant_id,
         source_system: w.source_system ?? 'fountain',
       } as AriadneWorker;
+
     });
 
     console.log('[ariadne] worker count:', workers.length, 'first normalized:', JSON.stringify(workers[0] ?? null));
