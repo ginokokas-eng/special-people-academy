@@ -1029,7 +1029,11 @@ export default function CourseLearn() {
                     activeLesson.lesson_type !== 'scorm' &&
                     activeLesson.lesson_type !== 'resource' &&
                     !activeLesson.completed && (
-                      <Button variant="secondary" onClick={() => markComplete(activeLesson.id)}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => markComplete(activeLesson.id, { returnHome: true })}
+                      >
+
                         <CheckCircle2 className="mr-1 h-4 w-4" /> Mark complete
                       </Button>
                     )}
