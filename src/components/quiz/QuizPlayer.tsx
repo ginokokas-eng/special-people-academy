@@ -4,6 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -15,6 +25,7 @@ import {
   Clock
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
+
 
 interface QuizQuestion {
   id: string;
