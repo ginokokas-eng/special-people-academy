@@ -673,7 +673,10 @@ export function LessonBlocks({
                       ))}
                     </div>
                   ) : (
-                    <div className={cn(wide && 'sm:-mx-6')}>{renderBlock(row[0])}</div>
+                    // Breakout is scoped to media elements (.media-breakout)
+                    // inside a wide row — never to headings or instructions.
+                    <div className={cn(wide && 'media-wide')}>{renderBlock(row[0])}</div>
+
                   )}
                 </RevealOnScroll>
               </div>
