@@ -1,13 +1,16 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors';
+import { resolveOrProvisionLearner } from '../_shared/ariadne.ts';
 
 interface AriadneWorker {
   fountain_applicant_id: string;
   external_id?: string;
+  ariadne_user_id?: string | null;
   email: string;
   full_name?: string | null;
   source_system?: string; // expected 'fountain'
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
