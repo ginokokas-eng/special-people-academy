@@ -345,7 +345,7 @@ export function MobileCoursePlayer({
           }}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <TabsList className="material-chrome relative z-20 grid h-12 w-full shrink-0 grid-cols-2 rounded-none bg-transparent p-0">
+          <TabsList className="material-chrome relative z-20 grid h-12 w-full shrink-0 grid-cols-2 rounded-none p-0">
             <TabsTrigger
               value="lectures"
               className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
