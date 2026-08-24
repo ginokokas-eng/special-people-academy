@@ -107,9 +107,10 @@ function TargetZone({
     <div
       ref={setNodeRef}
       className={cn(
-        'rounded-xl border-2 border-dashed border-border p-3 transition-colors',
+        'pressable rounded-xl border-2 border-dashed border-border p-3',
         (isOver || active) && 'border-solid border-primary/50 bg-violet-soft'
       )}
+
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="font-display text-sm text-foreground">{label || 'Group'}</p>
