@@ -115,15 +115,15 @@ Deno.serve(async (req) => {
         const outcome = await resolveOrProvisionLearner(
           admin,
           {
-            ariadneUserId: (w as { ariadne_user_id?: string }).ariadne_user_id ?? null,
-            fountain_applicant_id: undefined,
+            ariadneUserId: w.ariadne_user_id ?? null,
             fountainApplicantId: w.fountain_applicant_id,
             email: w.email,
             fullName: w.full_name ?? null,
             externalId: w.external_id ?? w.fountain_applicant_id,
-          } as never,
+          },
           { allowProvision: true },
         );
+
 
         if (outcome.status === 'matched') {
           updated++;
