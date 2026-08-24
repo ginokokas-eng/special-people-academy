@@ -31,6 +31,8 @@ import {
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
 import { describeUploadError, resolveContentType } from './uploadHelpers';
+import { FileDropZone } from './FileDropZone';
+
 
 
 interface FormProps<T extends BlockPayload> {
@@ -427,7 +429,10 @@ export function VideoBlockForm({
           type="button"
           size="sm"
           variant={source === 'storage' ? 'default' : 'outline'}
-          onClick={() => onChange({ ...payload, source: 'storage' })}
+          onClick={() => {
+            if (source !== 'storage') onChange({ ...payload, source: 'storage' });
+            inputRef.current?.click();
+          }}
         >
           Upload a file
         </Button>
@@ -443,30 +448,20 @@ export function VideoBlockForm({
 
       {source === 'storage' ? (
         <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-file`}>Video file</Label>
-          <Input
-            id={`${idPrefix}-file`}
-            ref={inputRef}
-            type="file"
+          <FileDropZone
+            inputId={`${idPrefix}-file`}
+            inputRef={inputRef}
             accept={VIDEO_ACCEPT}
-            disabled={uploading}
-            onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+            label="Video file"
+            primaryText="Choose a video file"
+            secondaryText={`MP4, WebM or MOV — up to ${VIDEO_MAX_MB} MB. Videos are stored privately and only enrolled learners can play them.`}
+            uploading={uploading}
+            progress={progress}
+            storedName={
+              payload.path ? payload.file_name || payload.path.split('/').pop() : null
+            }
+            onFile={handleFile}
           />
-          <p className="text-xs text-muted-foreground">
-            MP4, WebM or MOV — up to {VIDEO_MAX_MB} MB. Videos are stored privately and only
-            enrolled learners can play them.
-          </p>
-          {uploading && (
-            <div className="space-y-1">
-              <Progress value={progress} />
-              <p className="text-xs text-muted-foreground">Uploading… {progress}%</p>
-            </div>
-          )}
-          {payload.path && !uploading && (
-            <p className="text-xs text-success">
-              Uploaded: {payload.file_name || payload.path.split('/').pop()}
-            </p>
-          )}
           {payload.path && (
             <TranscriptReviewPanel
               lessonId={lessonId}
@@ -476,6 +471,7 @@ export function VideoBlockForm({
             />
           )}
         </div>
+
       ) : (
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-video-url`}>Video link</Label>
