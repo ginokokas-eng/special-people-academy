@@ -166,10 +166,15 @@ export function CourseHome({
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2 min-[1100px]:grid-cols-3">
-              {group.lessons.map((lesson) => {
+            <div
+              className="grid grid-cols-1 gap-3 sm:grid-cols-12"
+              style={{ gridAutoFlow: 'dense' }}
+            >
+              {bentoOrder(group.lessons, upNextId, startedLessonIds).map((entry, index) => {
+                const { lesson, span, feature } = entry;
                 const status = statusOf(lesson);
                 const highlighted = highlightLessonId === lesson.id;
+                const wash = WASHES[index % WASHES.length];
                 return (
                   <Card
                     key={lesson.id}
@@ -178,6 +183,8 @@ export function CourseHome({
                     }}
                     role="button"
                     tabIndex={0}
+                    data-wash={wash}
+                    data-complete={status === 'completed' ? 'true' : undefined}
                     aria-label={`${lesson.title} — ${
                       status === 'completed'
                         ? 'completed'
@@ -193,10 +200,13 @@ export function CourseHome({
                       }
                     }}
                     className={cn(
-                      'learner-card learner-card-hover group relative h-full cursor-pointer overflow-hidden',
+                      'learner-card learner-card-hover learner-wash group relative h-full cursor-pointer overflow-hidden',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                      SPAN_CLASS[span],
+                      feature && 'sm:min-h-[12.5rem]',
                       status === 'completed' && 'ring-1 ring-success/40',
                       status === 'continue' && 'ring-1 ring-primary/40',
+                      feature && status !== 'completed' && 'ring-1 ring-primary/50',
                       highlighted && 'ring-2 ring-primary ring-offset-2'
                     )}
                   >
@@ -218,13 +228,18 @@ export function CourseHome({
                             'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
                             status === 'completed'
                               ? 'bg-success/10 text-success'
-                              : 'bg-primary/10 text-primary'
+                              : 'learner-wash-chip'
                           )}
                         >
                           {lessonTypeIcon(lesson.lesson_type, 'h-4 w-4')}
                         </span>
                         <div className="min-w-0 flex-1 space-y-1">
-                          <h3 className="font-display text-sm leading-snug text-foreground">
+                          <h3
+                            className={cn(
+                              'font-display leading-snug text-foreground',
+                              feature ? 'text-base' : 'text-sm'
+                            )}
+                          >
                             {lesson.title}
                           </h3>
                           <p className="text-xs tabular-nums text-muted-foreground">
@@ -237,6 +252,12 @@ export function CourseHome({
                           </Badge>
                         )}
                       </div>
+
+                      {feature && lesson.description?.trim() && (
+                        <p className="line-clamp-3 text-sm text-muted-foreground">
+                          {lesson.description}
+                        </p>
+                      )}
 
                       <div className="mt-auto flex items-center justify-between gap-2">
                         {status === 'completed' ? (
