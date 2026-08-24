@@ -100,8 +100,9 @@ export function VideoCheckpointOverlay({
         </div>
 
         {answeredCorrectly && (
-          <Button onClick={onContinue}>Continue watching</Button>
+          <Button className="pressable" onClick={onContinue}>Continue watching</Button>
         )}
+
       </div>
     </div>
   );
