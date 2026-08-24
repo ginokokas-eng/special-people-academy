@@ -91,6 +91,11 @@ export default function CourseLearn() {
   const [scormReloadKey, setScormReloadKey] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  /** Lessons with an existing progress row that is not yet complete. */
+  const [startedLessonIds, setStartedLessonIds] = useState<Set<string>>(new Set());
+  /** Lesson to scroll into view + highlight once on the course home. */
+  const [highlightLessonId, setHighlightLessonId] = useState<string | null>(null);
+
 
   // Per-lesson media support
   const [transcript, setTranscript] = useState<LessonTranscript | null>(null);
