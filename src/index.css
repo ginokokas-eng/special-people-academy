@@ -115,7 +115,17 @@
     --shadow-learner: 0 1px 2px hsl(258 38% 15% / 0.06), 0 8px 24px hsl(258 38% 15% / 0.07);
     --shadow-learner-lg: 0 2px 4px hsl(258 38% 15% / 0.07), 0 18px 40px hsl(258 38% 15% / 0.11);
     --radius-learner: 15px;
+
+    /* ---- Brand-mark colour washes (P10.1) -----------------------------
+       Hues taken from the logo figures. Cards tint at ~10%; icon chips use
+       the full-strength hue so chip + wash read as one family. */
+    --wash-violet: 268 55% 50%;
+    --wash-teal: 187 72% 40%;
+    --wash-amber: 33 88% 45%;
+    --wash-coral: 340 70% 50%;
+    --wash-tint: 0.10;
   }
+
 
   .dark {
     --background: 270 20% 10%;
@@ -251,7 +261,15 @@
     --learner-kicker: 30 15% 72%;
     --shadow-learner: 0 1px 2px hsl(0 0% 0% / 0.35), 0 8px 24px hsl(0 0% 0% / 0.3);
     --shadow-learner-lg: 0 2px 4px hsl(0 0% 0% / 0.4), 0 18px 40px hsl(0 0% 0% / 0.42);
+
+    /* Same hues, deeper/less saturated so ink text keeps AA on dark cards. */
+    --wash-violet: 268 45% 62%;
+    --wash-teal: 187 55% 55%;
+    --wash-amber: 36 70% 60%;
+    --wash-coral: 340 55% 62%;
+    --wash-tint: 0.14;
   }
+
 
 }
 
@@ -564,6 +582,37 @@
   .learner-chip[data-done='true'] {
     background-color: hsl(var(--success) / 0.16);
     color: hsl(var(--success));
+  }
+
+  /* P10.1 — brand-mark colour washes on course-home lesson cards.
+     `data-wash` cycles deterministically by card index in the section. */
+  .learner-wash[data-wash] {
+    background-image: linear-gradient(
+      0deg,
+      hsl(var(--wash) / var(--wash-tint)),
+      hsl(var(--wash) / var(--wash-tint))
+    );
+  }
+  .learner-wash[data-wash='violet'] {
+    --wash: var(--wash-violet);
+  }
+  .learner-wash[data-wash='teal'] {
+    --wash: var(--wash-teal);
+  }
+  .learner-wash[data-wash='amber'] {
+    --wash: var(--wash-amber);
+  }
+  .learner-wash[data-wash='coral'] {
+    --wash: var(--wash-coral);
+  }
+  /* Completed cards mute their wash so the green state reads first. */
+  .learner-wash[data-complete='true'] {
+    --wash-tint: 0.05;
+  }
+  /* Chip takes the full-strength hue of its card's wash. */
+  .learner-wash .learner-wash-chip {
+    background-color: hsl(var(--wash) / 0.16);
+    color: hsl(var(--wash));
   }
 
   /* Designed lesson header: faint brand wash + clipped logo watermark. */
