@@ -611,7 +611,8 @@ export function LessonBlocks({
           return (
             <div key={row.map((b) => b.id).join('-')}>
               {isVeilEdge && (
-                <div className="mb-4 rounded-xl border border-dashed border-primary/40 bg-primary/[0.05] p-4 text-center">
+                <div className="material-in mb-4 rounded-xl border border-dashed border-primary/40 bg-primary/[0.05] p-4 text-center">
+
                   <p className="text-sm font-medium text-foreground">
                     Complete the {GATE_LABELS[blockingGate?.block_type ?? 'card_deck'] ?? 'activity'}{' '}
                     above to continue
