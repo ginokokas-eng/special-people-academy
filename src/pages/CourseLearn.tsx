@@ -261,11 +261,15 @@ export default function CourseLearn() {
       }
 
       const progressMap = new Map(progressData?.map((p) => [p.lesson_id, p.completed]) || []);
+      setStartedLessonIds(
+        new Set((progressData || []).filter((p) => !p.completed).map((p) => p.lesson_id))
+      );
       const withProgress: LearnLesson[] = (lessonsData || []).map((l: any) => ({
         ...l,
         completed: progressMap.get(l.id) || false,
         question_count: l.lesson_type === 'quiz' ? questionCountByLesson.get(l.id) || 0 : undefined,
       }));
+
 
       const assessors = (assessorRows || [])
         .map((t: any) => (t.full_name as string)?.split(' ')[0])
