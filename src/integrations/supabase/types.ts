@@ -1901,6 +1901,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ariadne_user_id: string | null
           avatar_url: string | null
           created_at: string
           department: string | null
@@ -1914,6 +1915,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ariadne_user_id?: string | null
           avatar_url?: string | null
           created_at?: string
           department?: string | null
@@ -1927,6 +1929,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ariadne_user_id?: string | null
           avatar_url?: string | null
           created_at?: string
           department?: string | null
@@ -2340,6 +2343,72 @@ export type Database = {
           new_value?: Json | null
           previous_value?: Json | null
           section?: string
+        }
+        Relationships: []
+      }
+      sso_exchange_log: {
+        Row: {
+          ariadne_sub: string | null
+          created_at: string
+          detail: string | null
+          email: string | null
+          id: string
+          ip_address: string | null
+          outcome: string
+          provisioned: boolean
+          source_system: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ariadne_sub?: string | null
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          outcome: string
+          provisioned?: boolean
+          source_system?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ariadne_sub?: string | null
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          outcome?: string
+          provisioned?: boolean
+          source_system?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      sso_replay_guard: {
+        Row: {
+          ariadne_sub: string
+          created_at: string
+          expires_at: string
+          id: string
+          token_iat: number
+        }
+        Insert: {
+          ariadne_sub: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_iat: number
+        }
+        Update: {
+          ariadne_sub?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_iat?: number
         }
         Relationships: []
       }
