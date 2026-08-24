@@ -398,11 +398,56 @@ export function QuizPlayer({
           </Button>
         ) : (
           <Button onClick={handleNextQuestion}>
-            {isLastQuestion ? 'See Results' : 'Next Question'}
+            {isLastQuestion ? (isFinalAttempt ? 'Submit final attempt' : 'See Results') : 'Next Question'}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         )}
       </CardFooter>
+
+      {/* Unanswered-questions guard */}
+      <AlertDialog open={unansweredOpen} onOpenChange={setUnansweredOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              You haven’t answered {unansweredIndexes.length}{' '}
+              {unansweredIndexes.length === 1 ? 'question' : 'questions'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Unanswered questions are marked incorrect. You can go back and complete them before
+              submitting.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={goToFirstUnanswered}>Review answers</AlertDialogCancel>
+            <AlertDialogAction onClick={submitAnyway}>Submit anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Final-attempt confirmation — only when it truly is the last one */}
+      <AlertDialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This is your final attempt</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your score will be locked in once you submit. Pass mark: {passingScore}%.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go back</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setFinalConfirmOpen(false);
+                submitAttempt();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Submit final attempt
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
+
