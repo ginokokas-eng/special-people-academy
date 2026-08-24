@@ -632,8 +632,15 @@ export function LessonBlocks({
                 className={cn(
                   'learner-card p-4 transition-opacity duration-300 sm:p-6',
                   accentBlocks.length > 0 && 'learner-accent',
-                  veiled && 'pointer-events-none select-none opacity-25 blur-[1px]'
+                  veiled && 'pointer-events-none select-none opacity-25 blur-[1px]',
+                  // Freshly unlocked sections settle in rather than popping.
+                  justUnveiled.has(rowIndex) && 'settle-in'
                 )}
+                style={
+                  justUnveiled.has(rowIndex)
+                    ? { animationDelay: `${Math.min((rowIndex - veilStartRef.current) * 60, 240)}ms` }
+                    : undefined
+                }
               >
                 <RevealOnScroll index={rowIndex} opacityOnly={opacityOnly}>
                   {row.length === 2 ? (
