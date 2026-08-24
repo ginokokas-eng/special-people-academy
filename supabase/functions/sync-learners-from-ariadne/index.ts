@@ -110,83 +110,51 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // 1) Match by fountain_applicant_id
-        const { data: byFountain } = await admin
-          .from('profiles')
-          .select('user_id')
-          .eq('fountain_applicant_id', w.fountain_applicant_id)
-          .maybeSingle();
+        // Shared provisioning path — identical to the SSO exchange so the two
+        // can never drift.
+        const outcome = await resolveOrProvisionLearner(
+          admin,
+          {
+            ariadneUserId: (w as { ariadne_user_id?: string }).ariadne_user_id ?? null,
+            fountain_applicant_id: undefined,
+            fountainApplicantId: w.fountain_applicant_id,
+            email: w.email,
+            fullName: w.full_name ?? null,
+            externalId: w.external_id ?? w.fountain_applicant_id,
+          } as never,
+          { allowProvision: true },
+        );
 
-        let userId = byFountain?.user_id ?? null;
-
-        // 2) Match by email via auth admin
-        if (!userId) {
-          const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-          const found = list?.users?.find(
-            (u) => u.email?.toLowerCase() === w.email.toLowerCase(),
-          );
-          if (found) userId = found.id;
-        }
-
-        if (userId) {
-          // Update profile with Fountain identifiers (option B: link existing)
-          await admin
-            .from('profiles')
-            .update({
-              source_system: 'fountain',
-              external_id: w.external_id ?? w.fountain_applicant_id,
-              fountain_applicant_id: w.fountain_applicant_id,
-              full_name: w.full_name ?? undefined,
-            })
-            .eq('user_id', userId);
+        if (outcome.status === 'matched') {
           updated++;
           await admin.from('user_sync_log').insert({
             source_system: 'fountain',
             external_id: w.fountain_applicant_id,
             email: w.email,
-            user_id: userId,
+            user_id: outcome.userId,
             status: 'updated',
             triggered_by: callerId,
           });
-        } else {
-          // Create new auth user
-          const tempPassword = crypto.randomUUID() + crypto.randomUUID();
-          const { data: createRes, error: createErr } = await admin.auth.admin.createUser({
-            email: w.email,
-            password: tempPassword,
-            email_confirm: true,
-            user_metadata: { full_name: w.full_name ?? '' },
-          });
-          if (createErr || !createRes.user) {
-            failed++;
-            errors.push({ email: w.email, reason: createErr?.message ?? 'create failed' });
-            await admin.from('user_sync_log').insert({
-              source_system: 'fountain',
-              external_id: w.fountain_applicant_id,
-              email: w.email,
-              status: 'failed',
-              message: createErr?.message ?? 'create failed',
-              triggered_by: callerId,
-            });
-            continue;
-          }
-          // handle_new_user trigger created profile + learner role; update Fountain fields
-          await admin
-            .from('profiles')
-            .update({
-              source_system: 'fountain',
-              external_id: w.external_id ?? w.fountain_applicant_id,
-              fountain_applicant_id: w.fountain_applicant_id,
-              full_name: w.full_name ?? null,
-            })
-            .eq('user_id', createRes.user.id);
+        } else if (outcome.status === 'provisioned') {
           created++;
           await admin.from('user_sync_log').insert({
             source_system: 'fountain',
             external_id: w.fountain_applicant_id,
             email: w.email,
-            user_id: createRes.user.id,
+            user_id: outcome.userId,
             status: 'created',
+            triggered_by: callerId,
+          });
+        } else {
+          failed++;
+          const reason = 'reason' in outcome ? outcome.reason : 'unknown';
+          errors.push({ email: w.email, reason });
+          await admin.from('user_sync_log').insert({
+            source_system: 'fountain',
+            external_id: w.fountain_applicant_id,
+            email: w.email,
+            status: 'failed',
+            message: reason,
             triggered_by: callerId,
           });
         }
@@ -195,6 +163,7 @@ Deno.serve(async (req) => {
         errors.push({ email: w.email, reason: (e as Error).message });
       }
     }
+
 
     return json({ ok: true, total: workers.length, created, updated, skipped, failed, errors });
   } catch (e) {
