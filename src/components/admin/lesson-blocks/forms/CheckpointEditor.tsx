@@ -29,6 +29,8 @@ interface Props {
 export function CheckpointEditor({ payload, onChange, idPrefix }: Props) {
   const supported = supportsCheckpoints(payload);
   const checkpoints = videoCheckpoints(payload);
+  /** Raw mm:ss text per checkpoint while typing; parsed on every change. */
+  const [raw, setRaw] = useState<Record<string, string>>({});
 
   const update = (list: VideoCheckpoint[]) => onChange({ ...payload, checkpoints: list });
 
