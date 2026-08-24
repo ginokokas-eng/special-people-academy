@@ -121,7 +121,10 @@ export function VideoPlayer({
 
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
+  /** Rubber-banded thumb position while scrubbing past the seek ceiling. */
+  const [scrubDisplay, setScrubDisplay] = useState<number | null>(null);
   const [duration, setDuration] = useState(0);
+
   const [buffered, setBuffered] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
