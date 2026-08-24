@@ -732,3 +732,127 @@
   }
 }
 
+
+/* ---------------------------------------------------------------------------
+   P14 — accessibility-aware materials, chrome surfaces and settle motion.
+   Shared tokens/utilities: any future translucent surface inherits by adding
+   `.adaptive-surface` (or `.adaptive-scrim` for gradient scrims).
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* Chrome material: semi-transparent + blur, no hard divider, soft scroll edge.
+     Heights/layout are untouched — the seam is a 12px ::after gradient that sits
+     OUTSIDE the box and only reads once content passes under it. */
+  .material-chrome {
+    position: relative;
+    background-color: hsl(var(--background) / 0.9);
+  }
+  @supports ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+    .material-chrome {
+      background-color: hsl(var(--background) / 0.72);
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
+    }
+  }
+  .material-chrome::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 12px;
+    pointer-events: none;
+    background-image: linear-gradient(
+      to bottom,
+      hsl(var(--foreground) / 0.08),
+      hsl(var(--foreground) / 0)
+    );
+  }
+
+  /* Newly unveiled trickle sections settle in rather than popping. */
+  .settle-in {
+    animation: settle-in 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .settle-in {
+      animation: none !important;
+    }
+  }
+}
+
+@keyframes settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Translucent surfaces become near-solid and lose their blur. */
+@media (prefers-reduced-transparency: reduce) {
+  .adaptive-surface,
+  .material-chrome {
+    background-color: hsl(var(--adaptive-surface, var(--background)) / 0.98) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .material-in,
+  .material-out {
+    animation-name: adaptive-fade-in;
+  }
+  .material-out {
+    animation-name: adaptive-fade-out;
+  }
+  .adaptive-scrim {
+    background-image: linear-gradient(
+      to right,
+      hsl(0 0% 0% / 0.94),
+      hsl(0 0% 0% / 0.86)
+    ) !important;
+  }
+}
+
+/* High contrast: solid grounds plus a defined hairline, drawn as an inset ring
+   so no surface changes size. Accent/status colours keep their meaning. */
+@media (prefers-contrast: more) {
+  .adaptive-surface,
+  .material-chrome {
+    background-color: hsl(var(--adaptive-surface, var(--background))) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: inset 0 -1px 0 0 hsl(var(--foreground) / 0.45);
+  }
+  .material-chrome::after {
+    background-image: none;
+  }
+  .material-in,
+  .material-out {
+    animation-name: adaptive-fade-in;
+  }
+  .material-out {
+    animation-name: adaptive-fade-out;
+  }
+  .adaptive-scrim {
+    background-image: linear-gradient(to right, hsl(0 0% 0% / 0.96), hsl(0 0% 0% / 0.9)) !important;
+  }
+}
+
+@keyframes adaptive-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes adaptive-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
