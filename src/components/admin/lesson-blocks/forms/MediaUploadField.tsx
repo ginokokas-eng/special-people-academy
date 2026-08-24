@@ -11,6 +11,8 @@ import {
   IMAGE_MAX_MB,
   type MediaRef,
 } from '@/components/course-learn/blocks/types';
+import { describeUploadError, resolveContentType } from './uploadHelpers';
+
 
 interface Props {
   value?: MediaRef | null;
@@ -66,15 +68,16 @@ export function MediaUploadField({
     try {
       const { error: uploadError } = await supabase.storage
         .from('lesson-media')
-        .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        .upload(path, file, { contentType: resolveContentType(file, ext), upsert: false });
       if (uploadError) throw uploadError;
       setProgress(100);
       onChange({ source: 'storage', path, file_name: file.name, url: '' });
       toast.success('Image uploaded');
     } catch (err) {
       console.error('Image upload failed:', err);
-      setError('Upload failed. Please check your connection and try again.');
+      setError(describeUploadError(err));
     } finally {
+
       clearInterval(ramp);
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
