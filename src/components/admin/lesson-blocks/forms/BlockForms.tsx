@@ -30,6 +30,8 @@ import {
   type TextPayload,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
+import { describeUploadError, resolveContentType } from './uploadHelpers';
+
 
 interface FormProps<T extends BlockPayload> {
   payload: T;
@@ -400,7 +402,7 @@ export function VideoBlockForm({
     try {
       const { error: uploadError } = await supabase.storage
         .from('lesson-media')
-        .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        .upload(path, file, { contentType: resolveContentType(file, ext), upsert: false });
       if (uploadError) throw uploadError;
       setProgress(100);
       onChange({ ...payload, source: 'storage', path, file_name: file.name, url: '' });
@@ -409,7 +411,8 @@ export function VideoBlockForm({
       setTranscribeFile(file);
     } catch (err) {
       console.error('Video upload failed:', err);
-      setError('Upload failed. Please check your connection and try again.');
+      setError(describeUploadError(err));
+
     } finally {
       clearInterval(ramp);
       setUploading(false);
