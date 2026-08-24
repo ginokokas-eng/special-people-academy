@@ -340,15 +340,17 @@ export function BlockVideo({
           seekCeiling={seekCeiling}
           onSeekBoundary={flashBoundary}
           overlay={
-            activeCheckpoint ? (
+            shownCheckpoint ? (
               <VideoCheckpointOverlay
-                checkpoint={activeCheckpoint}
-                index={checkpoints.findIndex((c) => c.id === activeCheckpoint.id) + 1}
+                checkpoint={shownCheckpoint}
+                index={checkpoints.findIndex((c) => c.id === shownCheckpoint.id) + 1}
                 total={checkpoints.length}
-                selectedId={answers[activeCheckpoint.id]?.selected_id ?? null}
-                answeredCorrectly={!!answers[activeCheckpoint.id]?.is_correct}
-                onSelect={(optionId) => answerCheckpoint(activeCheckpoint.id, optionId)}
+                selectedId={answers[shownCheckpoint.id]?.selected_id ?? null}
+                answeredCorrectly={!!answers[shownCheckpoint.id]?.is_correct}
+                onSelect={(optionId) => answerCheckpoint(shownCheckpoint.id, optionId)}
                 onContinue={continueWatching}
+                exiting={!activeCheckpoint}
+                onExited={() => setExitingCheckpoint(null)}
               />
             ) : null
           }
