@@ -367,7 +367,12 @@ export default function CourseLearn() {
   }, [activeTab, canSeek, activeLesson?.id]);
 
   const markComplete = useCallback(
-    async (lessonId: string) => {
+    /**
+     * Persist lesson completion. `returnHome` is only passed by the explicit
+     * "Mark complete" actions — gates, autoplay and video-ended keep the
+     * learner where they are.
+     */
+    async (lessonId: string, opts?: { returnHome?: boolean }) => {
       if (!user) return;
       const { error } = await supabase.from('lesson_progress').upsert(
         {
@@ -384,14 +389,37 @@ export default function CourseLearn() {
         return;
       }
       setLessons((prev) => prev.map((l) => (l.id === lessonId ? { ...l, completed: true } : l)));
+      setStartedLessonIds((prev) => {
+        if (!prev.has(lessonId)) return prev;
+        const next = new Set(prev);
+        next.delete(lessonId);
+        return next;
+      });
       if (courseId) {
         supabase.functions
           .invoke('check-course-completion', { body: { course_id: courseId } })
           .catch((e) => console.error('completion check error', e));
       }
+      if (opts?.returnHome) {
+        toast.success('Lesson complete');
+        setHighlightLessonId(lessonId);
+        setSearchParams({}, { replace: false });
+      }
     },
-    [user, courseId]
+    [user, courseId, setSearchParams]
   );
+
+  // Returning from the quiz page after a passing submission: land on the course
+  // home with the completed lesson highlighted.
+  useEffect(() => {
+    const completed = searchParams.get('complete');
+    if (!completed) return;
+    setLessons((prev) => prev.map((l) => (l.id === completed ? { ...l, completed: true } : l)));
+    setHighlightLessonId(completed);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
 
   // Load SCORM content when active lesson is a SCORM lesson (preserved logic)
   useEffect(() => {
