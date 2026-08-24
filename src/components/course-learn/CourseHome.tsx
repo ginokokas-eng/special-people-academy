@@ -225,7 +225,7 @@ export function CourseHome({
           {/* Dim + gradient to the canvas colour so text always sits legibly. */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/40"
+            className="adaptive-scrim absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/40"
           />
           <div
             aria-hidden="true"
@@ -240,7 +240,7 @@ export function CourseHome({
             >
               <ArrowLeft className="mr-1 h-4 w-4" /> Course page
             </Button>
-            <h1 className="font-display text-2xl text-primary-foreground sm:text-4xl">
+            <h1 className="font-display font-display-hero text-2xl text-primary-foreground sm:text-4xl">
               {courseTitle}
             </h1>
             {courseSubtitle?.trim() && (
@@ -267,7 +267,9 @@ export function CourseHome({
             <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
               <ArrowLeft className="mr-1 h-4 w-4" /> Course page
             </Button>
-            <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
+            <h1 className="font-display font-display-hero text-2xl text-foreground sm:text-3xl">
+              {courseTitle}
+            </h1>
             {courseSubtitle?.trim() && (
               <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
             )}

@@ -955,7 +955,7 @@ export default function CourseLearn() {
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
-      <header className="flex items-center justify-between gap-3 border-b bg-card px-4 py-2.5">
+      <header className="material-chrome relative z-30 flex items-center justify-between gap-3 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(`/courses/${courseId || id}`)}>
             <ArrowLeft className="mr-1 h-4 w-4" />

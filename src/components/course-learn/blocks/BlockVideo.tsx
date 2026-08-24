@@ -14,6 +14,7 @@ import {
   supportsCheckpoints,
   videoCheckpoints,
   videoEmbedUrl,
+  type VideoCheckpoint,
   type VideoPayload,
 } from './types';
 
@@ -97,6 +98,12 @@ export function BlockVideo({
   useEffect(() => () => {
     if (boundaryTimer.current) clearTimeout(boundaryTimer.current);
   }, []);
+  /**
+   * The checkpoint that has just been dismissed: it keeps rendering while the
+   * mirrored exit animation plays, then unmounts. A fresh checkpoint clears it
+   * immediately so the arrival interrupts rather than queues.
+   */
+  const [exitingCheckpoint, setExitingCheckpoint] = useState<VideoCheckpoint | null>(null);
   const dismissedRef = useRef<Set<string>>(new Set());
 
   // Restore saved answers so a returning learner is not asked again.
@@ -183,9 +190,18 @@ export function BlockVideo({
   );
 
   const continueWatching = useCallback(() => {
-    if (activeId) dismissedRef.current.add(activeId);
+    if (activeId) {
+      dismissedRef.current.add(activeId);
+      // Hand the overlay to the exit path so it leaves the way it arrived.
+      setExitingCheckpoint(checkpoints.find((c) => c.id === activeId) ?? null);
+    }
     setActiveId(null);
     controllerRef.current?.play?.();
+  }, [activeId, checkpoints]);
+
+  // A new checkpoint interrupts any exit in flight — never queue behind it.
+  useEffect(() => {
+    if (activeId) setExitingCheckpoint(null);
   }, [activeId]);
 
   // Done-signal: played to the end AND every checkpoint answered.
@@ -254,6 +270,8 @@ export function BlockVideo({
 
   const activeCheckpoint = activeId ? checkpoints.find((c) => c.id === activeId) : null;
   const answeredCount = checkpoints.filter((c) => isDone(c.id)).length;
+  // Enter and exit share one path, so the overlay stays mounted through its exit.
+  const shownCheckpoint = activeCheckpoint ?? exitingCheckpoint;
 
   return (
     <div className="space-y-2">
@@ -322,15 +340,17 @@ export function BlockVideo({
           seekCeiling={seekCeiling}
           onSeekBoundary={flashBoundary}
           overlay={
-            activeCheckpoint ? (
+            shownCheckpoint ? (
               <VideoCheckpointOverlay
-                checkpoint={activeCheckpoint}
-                index={checkpoints.findIndex((c) => c.id === activeCheckpoint.id) + 1}
+                checkpoint={shownCheckpoint}
+                index={checkpoints.findIndex((c) => c.id === shownCheckpoint.id) + 1}
                 total={checkpoints.length}
-                selectedId={answers[activeCheckpoint.id]?.selected_id ?? null}
-                answeredCorrectly={!!answers[activeCheckpoint.id]?.is_correct}
-                onSelect={(optionId) => answerCheckpoint(activeCheckpoint.id, optionId)}
+                selectedId={answers[shownCheckpoint.id]?.selected_id ?? null}
+                answeredCorrectly={!!answers[shownCheckpoint.id]?.is_correct}
+                onSelect={(optionId) => answerCheckpoint(shownCheckpoint.id, optionId)}
                 onContinue={continueWatching}
+                exiting={!activeCheckpoint}
+                onExited={() => setExitingCheckpoint(null)}
               />
             ) : null
           }

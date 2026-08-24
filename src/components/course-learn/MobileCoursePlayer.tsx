@@ -261,7 +261,7 @@ export function MobileCoursePlayer({
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Compact header */}
-      <header className="flex items-center gap-2 border-b bg-card px-4 py-2">
+      <header className="material-chrome relative z-30 flex items-center gap-2 px-4 py-2">
         <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onBack} aria-label="Back to course">
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -345,7 +345,7 @@ export function MobileCoursePlayer({
           }}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <TabsList className="grid h-12 w-full shrink-0 grid-cols-2 rounded-none border-b bg-card p-0">
+          <TabsList className="material-chrome relative z-20 grid h-12 w-full shrink-0 grid-cols-2 rounded-none p-0">
             <TabsTrigger
               value="lectures"
               className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
