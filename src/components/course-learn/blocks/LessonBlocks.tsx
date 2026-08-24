@@ -273,7 +273,7 @@ function AccordionBlock({
       >
         {items.map((item, i) => (
           <AccordionItem key={item.id} value={item.id} className="border-border/60 last:border-b-0">
-            <AccordionTrigger className="text-left text-sm font-semibold data-[state=open]:text-primary">
+            <AccordionTrigger className="pressable text-left text-sm font-semibold data-[state=open]:text-primary">
               {item.title || `Section ${i + 1}`}
             </AccordionTrigger>
             <AccordionContent>
