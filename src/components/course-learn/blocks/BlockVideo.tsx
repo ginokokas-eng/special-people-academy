@@ -14,6 +14,7 @@ import {
   supportsCheckpoints,
   videoCheckpoints,
   videoEmbedUrl,
+  type VideoCheckpoint,
   type VideoPayload,
 } from './types';
 
