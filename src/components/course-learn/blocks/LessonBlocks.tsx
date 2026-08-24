@@ -596,6 +596,16 @@ export function LessonBlocks({
           // Wide activities stretch to the card edges on larger screens so they
           // are not squeezed into the narrower text measure.
           const wide = row.length === 1 && WIDE_TYPES.has(row[0].block_type);
+          // Accent only for blocks that RECORD something. Story carousels are
+          // read-along and stay quiet, as do non-gated blocks.
+          const accentBlocks = row.filter(
+            (b) =>
+              b.contributes_to_completion &&
+              isInteractive(b.block_type) &&
+              b.block_type !== 'carousel'
+          );
+          const accentDone = accentBlocks.every((b) => !!deckState[b.id]);
+
 
           return (
             <div key={row.map((b) => b.id).join('-')}>
