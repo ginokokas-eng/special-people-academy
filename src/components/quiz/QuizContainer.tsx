@@ -404,8 +404,8 @@ export function QuizContainer({
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>No attempts remaining</AlertTitle>
               <AlertDescription>
-                You have used all {attemptsAllowed} allowed attempts without reaching the {quiz.passing_score}% pass mark.
-                Please contact your trainer or clinical sign-off lead for support before this assessment can be reopened.
+                You have used all {attemptsAllowed} allowed attempts without reaching the {quiz.passing_score}% pass mark.{' '}
+                {QUIZ_LOCKOUT_NEXT_STEP}
               </AlertDescription>
             </Alert>
           )}
@@ -427,7 +427,13 @@ export function QuizContainer({
             </p>
           </div>
         </CardContent>
-        <div className="p-6 pt-0 flex justify-center">
+        <div className="p-6 pt-0 flex flex-col items-center gap-3">
+          {/* Final attempt is unmissable before starting — emphasis, not a dialog */}
+          {!isLockedOut && !hasPassed && attemptsRemaining === 1 && (
+            <p className="text-sm font-semibold text-warning-foreground bg-warning/15 border border-warning/40 rounded-md px-3 py-2 text-center">
+              This is your last attempt
+            </p>
+          )}
           {isLockedOut ? (
             <Button size="lg" variant="outline" disabled>
               <Lock className="h-4 w-4 mr-2" />
@@ -453,6 +459,8 @@ export function QuizContainer({
       onComplete={handleQuizComplete}
       onRetry={() => setStarted(true)}
       previousAttempts={attempts.length}
+      attemptsRemaining={attemptsRemaining}
     />
   );
 }
+
