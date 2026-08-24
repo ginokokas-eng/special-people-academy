@@ -163,6 +163,9 @@ export default function CourseLearn() {
       });
   }, [lessons, modules, RELOCATED_LESSON_IDS]);
 
+  /** Course-home card images, derived once from the course's block rows. */
+  const lessonCardMedia = useMemo(() => deriveLessonCardMedia(courseBlockRows), [courseBlockRows]);
+
 
   const activeLesson = useMemo(
     () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
