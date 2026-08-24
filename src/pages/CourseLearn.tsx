@@ -908,7 +908,7 @@ export default function CourseLearn() {
 
       <div className="flex min-h-0 flex-1">
         {/* Main */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="learner-surface min-w-0 flex-1 overflow-y-auto">
           {showHub ? (
             courseHome
           ) : (
