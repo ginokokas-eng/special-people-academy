@@ -12,7 +12,7 @@ export function BlockChecklist({ payload }: { payload: ChecklistPayload }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <ClipboardList className="h-4 w-4 text-primary" aria-hidden="true" />
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className="font-display text-lg text-foreground">
           {payload.heading?.trim() || 'Practical checklist'}
         </h3>
       </div>
@@ -23,10 +23,11 @@ export function BlockChecklist({ payload }: { payload: ChecklistPayload }) {
       {steps.length ? (
         <ol className="space-y-3">
           {steps.map((step, i) => (
-            <li key={step.id} className="rounded-lg border bg-card p-4">
-              <p className="text-sm font-medium text-foreground">
+            <li key={step.id} className="rounded-xl bg-muted/40 p-4">
+              <p className="text-sm font-semibold tabular-nums text-foreground">
                 {i + 1}. {step.step_title || 'Step'}
               </p>
+
               {step.instruction?.trim() && (
                 <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                   {step.instruction}

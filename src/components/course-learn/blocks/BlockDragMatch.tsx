@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle2 } from '@/components/icons';
+import { CheckCircle2, GripVertical } from '@/components/icons';
 import { useBlockResponse } from './useBlockResponse';
 import type { DragMatchItem, DragMatchPayload } from './types';
 
@@ -282,10 +282,10 @@ export function BlockDragMatch({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-sm font-semibold text-foreground">
+        <p className="font-display text-lg leading-snug text-foreground">
           {payload.prompt || 'Match each item to the right group.'}
         </p>
-        <Badge variant="outline">
+        <Badge variant="secondary" className="tabular-nums">
           {Object.keys(placements).length}/{items.length} placed
         </Badge>
       </div>
@@ -298,10 +298,11 @@ export function BlockDragMatch({
         onDragEnd={handleDragEnd}
         accessibility={{ announcements }}
       >
-        <div className="rounded-lg border bg-card p-3">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="rounded-xl bg-muted/40 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Items
           </p>
+
           <div className="flex flex-wrap gap-2">
             {poolIds.length ? (
               poolIds.map((id) => {

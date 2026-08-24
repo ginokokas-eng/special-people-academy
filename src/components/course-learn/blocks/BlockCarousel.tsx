@@ -65,7 +65,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
   return (
     <div className="space-y-3">
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
@@ -73,7 +73,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
           {payload.instruction?.trim() || 'Use the arrows to move through each step.'}
         </p>
         {showProgress && (
-          <Badge variant="outline">
+          <Badge variant="secondary" className="tabular-nums">
             {viewed.size}/{items.length} viewed
           </Badge>
         )}
@@ -84,7 +84,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
         aria-roledescription="carousel"
         aria-label={payload.heading?.trim() || 'Story carousel'}
         tabIndex={0}
-        className="rounded-lg border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="overflow-hidden rounded-xl bg-card shadow-learner focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         onKeyDown={(e) => {
           if (e.key === 'ArrowLeft') {
             e.preventDefault();
@@ -111,7 +111,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
         }}
       >
         {active.media && (
-          <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
+          <div className="aspect-video overflow-hidden bg-muted">
             <SignedImage
               media={active.media}
               alt={active.alt || ''}
@@ -125,12 +125,13 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
           key={active.id}
           className={cn('space-y-2 p-4', !reduced && 'animate-fade-in')}
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary tabular-nums">
             Step {index + 1} of {items.length}
           </p>
           {active.title?.trim() && (
-            <h4 className="text-base font-semibold text-foreground">{active.title}</h4>
+            <h4 className="font-display text-base text-foreground">{active.title}</h4>
           )}
+
           {chunks.map((chunk, i) =>
             chunk.kind === 'list' ? (
               <ul
