@@ -24,7 +24,7 @@ export function LessonProgressStrip({ done, total }: Props) {
 
   return (
     <div
-      className="sticky top-0 z-20 rounded-t-[15px] bg-background/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+      className="adaptive-surface sticky top-0 z-20 rounded-t-[15px] bg-background/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80"
       role="status"
       aria-live="polite"
     >
