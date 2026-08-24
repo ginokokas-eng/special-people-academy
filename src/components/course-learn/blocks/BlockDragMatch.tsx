@@ -114,7 +114,7 @@ function TargetZone({
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="font-display text-sm text-foreground">{label || 'Group'}</p>
         {active && (
-          <Button type="button" size="sm" variant="outline" onClick={onActivate}>
+          <Button type="button" size="sm" variant="outline" className="pressable" onClick={onActivate}>
             Place here
           </Button>
         )}
