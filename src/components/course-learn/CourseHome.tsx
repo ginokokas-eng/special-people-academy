@@ -66,6 +66,62 @@ function ProgressRing({ percent, done }: { percent: number; done?: boolean }) {
 
 type LessonStatus = 'completed' | 'continue' | 'new';
 
+/** Brand-mark wash hues, cycled deterministically by card index. */
+const WASHES = ['violet', 'teal', 'amber', 'coral'] as const;
+
+/** 12-column spans; rows always sum to 12 so the bento never leaves holes. */
+const SPAN_CLASS: Record<number, string> = {
+  4: 'sm:col-span-4',
+  5: 'sm:col-span-5',
+  6: 'sm:col-span-6',
+  7: 'sm:col-span-7',
+  12: 'sm:col-span-12',
+};
+
+interface BentoEntry {
+  lesson: LearnLesson;
+  span: number;
+  feature: boolean;
+}
+
+/**
+ * Deterministic bento layout: the feature card (the "Up next" lesson, or an
+ * in-progress lesson when one exists) leads the section at ~7/12; the rest pack
+ * into full rows (7+5, then 6+6, odd tail full-width).
+ */
+function bentoOrder(
+  lessons: LearnLesson[],
+  upNextId: string | null,
+  startedLessonIds?: Set<string>
+): BentoEntry[] {
+  if (lessons.length === 0) return [];
+  if (lessons.length === 1) return [{ lesson: lessons[0], span: 12, feature: true }];
+
+  const featureIndex = (() => {
+    const started = lessons.findIndex((l) => !l.completed && startedLessonIds?.has(l.id));
+    if (started >= 0) return started;
+    const upNext = lessons.findIndex((l) => l.id === upNextId);
+    return upNext >= 0 ? upNext : 0;
+  })();
+
+  const feature = lessons[featureIndex];
+  const rest = lessons.filter((_, i) => i !== featureIndex);
+
+  const entries: BentoEntry[] = [{ lesson: feature, span: 7, feature: true }];
+  rest.forEach((lesson, i) => {
+    if (i === 0) {
+      entries.push({ lesson, span: 5, feature: false });
+      return;
+    }
+    const tail = i - 1;
+    const isLast = i === rest.length - 1;
+    const span = isLast && tail % 2 === 0 ? 12 : 6;
+    entries.push({ lesson, span, feature: false });
+  });
+  return entries;
+}
+
+
 /**
  * Course home ("menu page"): shown when no `?lesson=` is present. Modules are
  * section headings; every lesson is a card so learners can start one, finish
