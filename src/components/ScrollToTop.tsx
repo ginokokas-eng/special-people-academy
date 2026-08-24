@@ -10,16 +10,26 @@ export const ScrollToTop = () => {
 
   useEffect(() => {
     if (hash) {
-      // If URL has a hash, scroll to that element
-      const element = document.querySelector(hash);
+      // If the URL has a hash, try to scroll to that element. The fragment is
+      // not always a selector (e.g. the /sso callback carries key=value pairs
+      // in the fragment), so guard against querySelector throwing.
+      let element: Element | null = null;
+      try {
+        element = document.querySelector(hash);
+      } catch {
+        element = null;
+      }
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.scrollTo(0, 0);
       }
     } else {
       // Otherwise scroll to top
       window.scrollTo(0, 0);
     }
   }, [pathname, hash]);
+
 
   return null;
 };
