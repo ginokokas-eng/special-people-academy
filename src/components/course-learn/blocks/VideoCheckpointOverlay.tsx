@@ -39,14 +39,14 @@ export function VideoCheckpointOverlay({
       className="absolute inset-0 z-30 flex items-center justify-center overflow-y-auto bg-background/95 p-4 backdrop-blur-sm animate-fade-in"
     >
       <div className="w-full max-w-xl space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
           Checkpoint {index} of {total}
         </p>
-        <p className="text-base font-semibold text-foreground">
+        <p className="font-display text-lg leading-snug text-foreground">
           {checkpoint.question || 'Checkpoint question'}
         </p>
 
-        <div className="space-y-2" role="group" aria-label="Answer options">
+        <div className="space-y-2.5" role="group" aria-label="Answer options">
           {options.map((opt) => {
             const chosen = selectedId === opt.id;
             return (
@@ -57,11 +57,12 @@ export function VideoCheckpointOverlay({
                 aria-pressed={chosen}
                 disabled={answeredCorrectly && !chosen}
                 className={cn(
-                  'flex min-h-12 w-full items-start gap-2 rounded-lg border p-3 text-left text-sm transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  chosen && answeredCorrectly && 'border-success bg-success/10',
-                  chosen && wrong && 'border-destructive bg-destructive/10',
-                  !chosen && 'bg-card hover:bg-muted'
+                  'flex min-h-12 w-full items-start gap-2.5 rounded-xl border-2 p-3.5 text-left text-sm transition-all duration-200',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  chosen && answeredCorrectly && 'border-success bg-success/[0.12]',
+                  chosen && wrong && 'border-destructive bg-destructive/[0.10]',
+                  !chosen &&
+                    'border-border/70 bg-card motion-safe:hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-learner'
                 )}
               >
                 {chosen ? (
@@ -77,11 +78,12 @@ export function VideoCheckpointOverlay({
                     />
                   )
                 ) : null}
-                <span className="text-foreground">{opt.label || 'Option'}</span>
+                <span className="font-medium text-foreground">{opt.label || 'Option'}</span>
               </button>
             );
           })}
         </div>
+
 
         <div aria-live="polite" className="min-h-[1.25rem]">
           {selectedId && (

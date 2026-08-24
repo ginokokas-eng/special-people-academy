@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import logoMark from '@/assets/logo.svg';
+
 import {
   Loader2,
   CheckCircle2,
@@ -171,6 +173,12 @@ export default function CourseLearn() {
     () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
     [modules, activeLesson]
   );
+  /** 1-based position of the active lesson's module, 0 when unknown. */
+  const activeModuleIndex = useMemo(
+    () => modules.findIndex((m) => m.id === activeLesson?.module_id) + 1,
+    [modules, activeLesson]
+  );
+
   const hasTranscript = !!transcript && (!!transcript.transcript_text || (transcript.segments?.length ?? 0) > 0);
   const lessonHasResources = useMemo(
     () =>
@@ -760,7 +768,7 @@ export default function CourseLearn() {
 
     // text / scenario / pdf
     return (
-      <div className="lesson-content mx-auto w-full max-w-[47rem] rounded-lg border bg-card p-4 sm:p-6">
+      <div className="learner-card lesson-content mx-auto w-full max-w-[47rem] p-4 sm:p-6">
         {activeLesson.description ? (
           <div className="prose max-w-none whitespace-pre-line text-foreground">
             {activeLesson.description}
@@ -900,7 +908,7 @@ export default function CourseLearn() {
 
       <div className="flex min-h-0 flex-1">
         {/* Main */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="learner-surface min-w-0 flex-1 overflow-y-auto">
           {showHub ? (
             courseHome
           ) : (
@@ -916,20 +924,45 @@ export default function CourseLearn() {
               </Button>
             </div>
             {activeLesson && (
-              <div className="mb-4">
-                <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">{lessonTypeLabel(activeLesson.lesson_type)}</Badge>
-                  {activeLesson.completed && (
-                    <Badge className="bg-status-success-bg text-status-success-foreground">
-                      <CheckCircle2 className="mr-1 h-3 w-3" /> Completed
-                    </Badge>
+              <header className="learner-header-band mb-5">
+                <img
+                  src={logoMark}
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 opacity-[0.06] sm:h-48 sm:w-48"
+                />
+                <div className="relative space-y-1.5 p-4 sm:p-6">
+                  {activeModuleName && (
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-primary">
+                      {activeModuleName}
+                    </p>
                   )}
+                  <h2 className="font-display text-[1.5rem] font-bold leading-tight text-foreground md:text-3xl">
+                    {activeLesson.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-muted-foreground">
+                    <span>{lessonTypeLabel(activeLesson.lesson_type)}</span>
+                    {activeModuleIndex > 0 && (
+                      <>
+                        <span aria-hidden="true">•</span>
+                        <span className="tabular-nums">
+                          Module {activeModuleIndex} of {modules.length}
+                        </span>
+                      </>
+                    )}
+                    {activeLesson.completed && (
+                      <>
+                        <span aria-hidden="true">•</span>
+                        <span className="inline-flex items-center gap-1 font-semibold text-success">
+                          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Completed
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <h2 className="text-[1.5rem] font-bold leading-tight text-foreground md:text-3xl">
-                  {activeLesson.title}
-                </h2>
-              </div>
+              </header>
             )}
+
 
             {renderLessonBody()}
 

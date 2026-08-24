@@ -24,13 +24,13 @@ export function LessonProgressStrip({ done, total }: Props) {
 
   return (
     <div
-      className="sticky top-0 z-20 -mx-1 rounded-b-lg border-b bg-background/95 px-1 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+      className="sticky top-0 z-20 rounded-t-[15px] bg-background/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80"
       role="status"
       aria-live="polite"
     >
       <div className="flex items-center gap-3">
         <div
-          className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
+          className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={total}
@@ -47,7 +47,7 @@ export function LessonProgressStrip({ done, total }: Props) {
         </div>
         <p
           className={cn(
-            'flex shrink-0 items-center gap-1 text-xs font-medium tabular-nums',
+            'flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums',
             complete ? 'text-success' : 'text-muted-foreground'
           )}
         >
@@ -66,3 +66,4 @@ export function LessonProgressStrip({ done, total }: Props) {
     </div>
   );
 }
+

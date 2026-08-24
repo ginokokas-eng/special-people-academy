@@ -119,8 +119,14 @@ export default {
   				DEFAULT: 'hsl(var(--status-info))',
   				foreground: 'hsl(var(--status-info-foreground))',
   				bg: 'hsl(var(--status-info-bg))'
-  			}
+  			},
+  			'violet-soft': {
+  				DEFAULT: 'hsl(var(--violet-soft))',
+  				foreground: 'hsl(var(--violet-soft-foreground))'
+  			},
+  			'learner-canvas': 'hsl(var(--learner-canvas))'
   		},
+
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -160,8 +166,11 @@ export default {
   			md: 'var(--shadow-md)',
   			lg: 'var(--shadow-lg)',
   			xl: 'var(--shadow-xl)',
-  			'2xl': 'var(--shadow-2xl)'
+  			'2xl': 'var(--shadow-2xl)',
+  			learner: 'var(--shadow-learner)',
+  			'learner-lg': 'var(--shadow-learner-lg)'
   		}
+
   	}
   },
   plugins: [require("tailwindcss-animate")],

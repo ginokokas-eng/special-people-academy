@@ -32,14 +32,14 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
   return (
     <div className="space-y-3">
       {payload.heading?.trim() && (
-        <h3 className="text-base font-semibold text-foreground">{payload.heading}</h3>
+        <h3 className="font-display text-lg text-foreground">{payload.heading}</h3>
       )}
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-sm text-muted-foreground">
           {payload.instruction?.trim() || 'Tap a card to flip it over.'}
         </p>
         {showProgress && (
-          <Badge variant="outline">
+          <Badge variant="secondary" className="tabular-nums">
             {seen.size}/{cards.length} flipped
           </Badge>
         )}
@@ -55,9 +55,10 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
               onClick={() => toggle(card.id)}
               aria-pressed={isFlipped}
               className={cn(
-                'group min-h-[120px] rounded-lg border bg-card p-0 text-left transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                isFlipped ? 'border-primary' : 'hover:bg-muted'
+                'group min-h-[120px] rounded-xl p-0 text-left shadow-learner transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'motion-safe:hover:-translate-y-0.5 hover:shadow-learner-lg',
+                isFlipped ? 'bg-card' : 'bg-violet-soft'
               )}
               style={{ perspective: '1000px' }}
             >
@@ -73,11 +74,15 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
                   style={{ backfaceVisibility: 'hidden' }}
                   aria-hidden={isFlipped}
                 >
-                  <span className="text-sm font-medium text-foreground">{card.front || 'Card'}</span>
-                  <span className="text-xs font-medium text-primary">Tap to flip</span>
+                  <span className="font-display text-base text-foreground">
+                    {card.front || 'Card'}
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+                    Tap to flip
+                  </span>
                 </span>
                 <span
-                  className="absolute inset-0 flex flex-col justify-center gap-2 rounded-lg bg-primary/5 p-4"
+                  className="absolute inset-0 flex flex-col justify-center gap-2 rounded-xl bg-card p-4"
                   style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                   aria-hidden={!isFlipped}
                 >
@@ -91,6 +96,7 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
           );
         })}
       </div>
+
     </div>
   );
 }

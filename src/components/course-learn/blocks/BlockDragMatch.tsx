@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle2 } from '@/components/icons';
+import { CheckCircle2, GripVertical } from '@/components/icons';
 import { useBlockResponse } from './useBlockResponse';
 import type { DragMatchItem, DragMatchPayload } from './types';
 
@@ -67,17 +67,21 @@ function ItemButton({
       disabled={locked}
       aria-pressed={selected}
       className={cn(
-        'min-h-[44px] rounded-lg border px-3 py-2 text-left text-sm transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'min-h-[44px] rounded-xl px-3.5 py-2 text-left text-sm font-medium shadow-learner transition-all duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'touch-none',
-        locked && 'border-success bg-success/10 text-foreground',
-        !locked && selected && 'border-primary bg-primary/10',
-        !locked && !selected && (placed ? 'border-primary/40 bg-card' : 'bg-card hover:bg-muted'),
+        !locked && 'cursor-grab active:cursor-grabbing',
+        locked && 'bg-success/[0.14] text-foreground shadow-none',
+        !locked && selected && 'bg-primary text-primary-foreground',
+        !locked && !selected && 'bg-violet-soft text-violet-soft-foreground hover:shadow-learner-lg',
         isDragging && 'opacity-60'
       )}
     >
       <span className="flex items-center gap-2">
         {locked && <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />}
+        {!locked && (
+          <GripVertical className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
+        )}
         {item.label || 'Item'}
       </span>
     </button>
@@ -102,12 +106,12 @@ function TargetZone({
     <div
       ref={setNodeRef}
       className={cn(
-        'rounded-lg border bg-muted/30 p-3 transition-colors',
-        (isOver || active) && 'border-primary bg-primary/5'
+        'rounded-xl border-2 border-dashed border-border p-3 transition-colors',
+        (isOver || active) && 'border-solid border-primary/50 bg-violet-soft'
       )}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">{label || 'Group'}</p>
+        <p className="font-display text-sm text-foreground">{label || 'Group'}</p>
         {active && (
           <Button type="button" size="sm" variant="outline" onClick={onActivate}>
             Place here
@@ -118,6 +122,7 @@ function TargetZone({
     </div>
   );
 }
+
 
 /* --------------------------------- block ---------------------------------- */
 
@@ -277,10 +282,10 @@ export function BlockDragMatch({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-sm font-semibold text-foreground">
+        <p className="font-display text-lg leading-snug text-foreground">
           {payload.prompt || 'Match each item to the right group.'}
         </p>
-        <Badge variant="outline">
+        <Badge variant="secondary" className="tabular-nums">
           {Object.keys(placements).length}/{items.length} placed
         </Badge>
       </div>
@@ -293,10 +298,11 @@ export function BlockDragMatch({
         onDragEnd={handleDragEnd}
         accessibility={{ announcements }}
       >
-        <div className="rounded-lg border bg-card p-3">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="rounded-xl bg-muted/40 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Items
           </p>
+
           <div className="flex flex-wrap gap-2">
             {poolIds.length ? (
               poolIds.map((id) => {
