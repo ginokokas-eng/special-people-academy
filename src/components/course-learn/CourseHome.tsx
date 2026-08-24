@@ -92,17 +92,17 @@ export function CourseHome({
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-6">
+    <div className="learner-surface mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-6">
       <div className="space-y-3">
         <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
           <ArrowLeft className="mr-1 h-4 w-4" /> Course page
         </Button>
-        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{courseTitle}</h1>
+        <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
         {courseSubtitle?.trim() && (
           <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="tabular-nums">
             {overall.completed}/{overall.total} required lessons complete
           </Badge>
           {firstIncomplete && (
@@ -146,23 +146,21 @@ export function CourseHome({
                 }
               }}
               className={cn(
-                'group h-full cursor-pointer transition-all duration-200',
-                'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                done && 'border-success/40'
+                'learner-card learner-card-hover group h-full cursor-pointer',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
               )}
             >
               <CardContent className="flex h-full items-start gap-4 p-5">
-                <ProgressRing percent={prog.percent} />
+                <ProgressRing percent={prog.percent} done={done} />
                 <div className="min-w-0 flex-1 space-y-1.5">
-                  <h2 className="text-base font-semibold text-foreground">{group.title}</h2>
-                  <p className="text-xs text-muted-foreground">
+                  <h2 className="font-display text-base text-foreground">{group.title}</h2>
+                  <p className="text-xs tabular-nums text-muted-foreground">
                     {group.lessons.length} {group.lessons.length === 1 ? 'lesson' : 'lessons'}
                     {prog.total > 0 && ` · ${prog.completed}/${prog.total} required complete`}
                   </p>
                   <p
                     className={cn(
-                      'flex items-center gap-1 text-xs font-medium',
+                      'flex items-center gap-1 text-xs font-semibold tabular-nums',
                       done ? 'text-success' : 'text-muted-foreground'
                     )}
                   >
@@ -174,7 +172,7 @@ export function CourseHome({
                       `${prog.percent}% complete`
                     )}
                   </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
                     {done ? (
                       'Revisit module'
                     ) : (
@@ -190,6 +188,7 @@ export function CourseHome({
           );
         })}
       </div>
+
 
 
       {!grouped.length && (
