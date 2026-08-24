@@ -360,7 +360,7 @@ export function BlockDragMatch({
       </DndContext>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={check} disabled={!allPlaced || solved}>
+        <Button type="button" className="pressable" onClick={check} disabled={!allPlaced || solved}>
           Check answers
         </Button>
         {solved && (
