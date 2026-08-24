@@ -55,7 +55,7 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
               onClick={() => toggle(card.id)}
               aria-pressed={isFlipped}
               className={cn(
-                'group min-h-[120px] rounded-xl p-0 text-left shadow-learner transition-all duration-200',
+                'pressable group min-h-[120px] rounded-xl p-0 text-left shadow-learner',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'motion-safe:hover:-translate-y-0.5 hover:shadow-learner-lg',
                 isFlipped ? 'bg-card' : 'bg-violet-soft'
@@ -63,12 +63,21 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
               style={{ perspective: '1000px' }}
             >
               <span
-                className="relative block h-full min-h-[120px] w-full transition-transform duration-500"
+                className={cn(
+                  'relative block h-full min-h-[120px] w-full',
+                  // Interruptible: the transition always runs from the CURRENT
+                  // visual state, so a second tap mid-flip reverses immediately.
+                  'motion-safe:transition-transform motion-safe:duration-[380ms] motion-safe:ease-[cubic-bezier(0.32,0.72,0,1)]',
+                  // Reduced motion: instant face swap with a short cross-fade.
+                  'motion-reduce:transition-opacity motion-reduce:duration-150'
+                )}
                 style={{
                   transformStyle: 'preserve-3d',
                   transform: isFlipped ? 'rotateY(180deg)' : 'none',
+                  willChange: 'transform',
                 }}
               >
+
                 <span
                   className="absolute inset-0 flex flex-col justify-center gap-2 p-4"
                   style={{ backfaceVisibility: 'hidden' }}
