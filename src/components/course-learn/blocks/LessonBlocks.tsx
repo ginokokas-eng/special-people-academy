@@ -612,10 +612,14 @@ export function LessonBlocks({
               )}
               <div
                 aria-hidden={veiled || undefined}
+                // P9 read-vs-do: cards holding a recording activity carry the
+                // 3px accent, green once every gate in the card is satisfied.
+                data-done={accentBlocks.length > 0 && accentDone ? 'true' : undefined}
                 // Veiled content stays MOUNTED so signals and scroll positions
                 // survive; it is just non-interactive and dimmed.
                 className={cn(
                   'learner-card p-4 transition-opacity duration-300 sm:p-6',
+                  accentBlocks.length > 0 && 'learner-accent',
                   veiled && 'pointer-events-none select-none opacity-25 blur-[1px]'
                 )}
               >
