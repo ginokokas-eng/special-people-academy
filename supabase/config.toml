@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.ariadne-api]
 verify_jwt = false
+
+[functions.sso-from-ariadne]
+verify_jwt = false
+
+[functions.sso-logout]
+verify_jwt = false
