@@ -18,10 +18,12 @@ import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import {
   defaultContributesToCompletion,
   defaultPayload,
+  hasInvalidCheckpoints,
   type BlockDraft,
   type BlockPayload,
   type BlockType,
   type LessonBlock,
+  type VideoPayload,
 } from '@/components/course-learn/blocks/types';
 
 /**
