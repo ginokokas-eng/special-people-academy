@@ -74,6 +74,9 @@ interface Props {
    * mobile skip buttons, native seeking) snaps back to the ceiling.
    */
   seekCeiling?: number | null;
+  /** Fired when a scrub pushes against the seek ceiling (soft boundary). */
+  onSeekBoundary?: () => void;
+
 }
 
 
