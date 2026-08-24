@@ -30,6 +30,8 @@ import {
   type TextPayload,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
+import { describeUploadError, resolveContentType } from './uploadHelpers';
+
 
 interface FormProps<T extends BlockPayload> {
   payload: T;
