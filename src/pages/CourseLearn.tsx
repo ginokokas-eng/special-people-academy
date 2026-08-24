@@ -45,6 +45,7 @@ import { AIAssistantTab } from '@/components/course-learn/AIAssistantTab';
 import { TranscriptTab } from '@/components/course-learn/TranscriptTab';
 import { VideoPlayer } from '@/components/course-learn/VideoPlayer';
 import { CourseHome } from '@/components/course-learn/CourseHome';
+import { deriveLessonCardMedia, type CardMediaBlockRow } from '@/components/course-learn/lessonCardMedia';
 import { MobileCoursePlayer } from '@/components/course-learn/MobileCoursePlayer';
 import { ResourceLessonBody } from '@/components/course-learn/ResourceLessonBody';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
@@ -95,6 +96,8 @@ export default function CourseLearn() {
   const [startedLessonIds, setStartedLessonIds] = useState<Set<string>>(new Set());
   /** Lesson to scroll into view + highlight once on the course home. */
   const [highlightLessonId, setHighlightLessonId] = useState<string | null>(null);
+  /** All block rows for the course, used only to derive course-home card images. */
+  const [courseBlockRows, setCourseBlockRows] = useState<CardMediaBlockRow[]>([]);
 
 
   // Per-lesson media support
@@ -160,6 +163,9 @@ export default function CourseLearn() {
       });
   }, [lessons, modules, RELOCATED_LESSON_IDS]);
 
+  /** Course-home card images, derived once from the course's block rows. */
+  const lessonCardMedia = useMemo(() => deriveLessonCardMedia(courseBlockRows), [courseBlockRows]);
+
 
   const activeLesson = useMemo(
     () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
@@ -207,7 +213,7 @@ export default function CourseLearn() {
       const { data: courseData, error: courseError } = await sb
         .from('courses')
         .select(
-          'id, title, subtitle, description, overview, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes, learning_outcomes'
+          'id, title, subtitle, description, overview, thumbnail_url, has_certificate, requires_practical_signoff, practical_details, certificate_details, scope_notes, learning_outcomes'
         )
         .eq(lookupField, id)
         .single();
@@ -277,6 +283,21 @@ export default function CourseLearn() {
 
       setModules(modulesData || []);
       setLessons(withProgress);
+
+      // One extra query for the whole course's blocks — used to derive the
+      // course-home card images (memoised below; never per-card).
+      const blockLessonIds = (lessonsData || [])
+        .filter((l: any) => l.lesson_type === 'blocks')
+        .map((l: any) => l.id);
+      if (blockLessonIds.length) {
+        const { data: blockRows } = await sb
+          .from('lesson_blocks')
+          .select('id, lesson_id, block_type, payload, order_index')
+          .in('lesson_id', blockLessonIds);
+        setCourseBlockRows((blockRows || []) as CardMediaBlockRow[]);
+      } else {
+        setCourseBlockRows([]);
+      }
       setResources(resourcesData || []);
       setCompetencyAssessors(assessors);
 
@@ -871,6 +892,9 @@ export default function CourseLearn() {
     <CourseHome
       courseTitle={course.title}
       courseSubtitle={course.subtitle}
+      courseDescription={course.description}
+      courseThumbnailUrl={course.thumbnail_url}
+      lessonMedia={lessonCardMedia}
       modules={modules}
       lessons={visibleLessons}
       hasCertificate={course.has_certificate}

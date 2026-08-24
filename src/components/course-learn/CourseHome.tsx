@@ -6,11 +6,19 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Award, Play } from '@/components/i
 import { requiredProgress } from '@/lib/progress';
 import { cn } from '@/lib/utils';
 import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
+import { SignedImage } from './blocks/SignedImage';
+import type { MediaRef } from './blocks/types';
 import type { LearnLesson, LearnModule } from './types';
 
 interface Props {
   courseTitle: string;
   courseSubtitle?: string | null;
+  /** Intro blurb shown under the title in the hero. */
+  courseDescription?: string | null;
+  /** When present the header becomes a cinematic hero band. */
+  courseThumbnailUrl?: string | null;
+  /** Per-lesson card image, derived from the lesson's own blocks. */
+  lessonMedia?: Map<string, MediaRef>;
   modules: LearnModule[];
   /** Learner-facing lessons only, already filtered and ordered. */
   lessons: LearnLesson[];
@@ -130,6 +138,9 @@ function bentoOrder(
 export function CourseHome({
   courseTitle,
   courseSubtitle,
+  courseDescription,
+  courseThumbnailUrl,
+  lessonMedia,
   modules,
   lessons,
   hasCertificate,
@@ -174,38 +185,99 @@ export function CourseHome({
     return 'new';
   };
 
-  return (
-    <div className="learner-surface mx-auto w-full max-w-5xl space-y-8 p-4 sm:p-6">
-      <div className="space-y-3">
-        <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
-          <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+  const hero = !!courseThumbnailUrl?.trim();
+
+  const actions = (
+    <div className="flex flex-wrap items-center gap-3">
+      <Badge variant="secondary" className="tabular-nums">
+        {overall.completed}/{overall.total} required lessons complete
+      </Badge>
+      {firstIncomplete && (
+        <Button onClick={() => onSelectLesson(firstIncomplete.id)}>
+          <Play className="mr-1.5 h-4 w-4" />
+          {overall.completed > 0 ? 'Continue learning' : 'Start learning'}
         </Button>
-        <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
-        {courseSubtitle?.trim() && (
-          <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
+      )}
+      {courseDone && hasCertificate && onOpenCertificate && (
+        <Button variant="outline" onClick={onOpenCertificate}>
+          <Award className="mr-1.5 h-4 w-4" /> Your certificate
+        </Button>
+      )}
+    </div>
+  );
+
+  const pickLine = (
+    <p className="text-xs text-muted-foreground">
+      Pick any lesson below. When you finish one you’ll come back here to choose the next.
+    </p>
+  );
+
+  return (
+    <div className="learner-surface w-full">
+      {hero && (
+        <header className="relative isolate w-full overflow-hidden">
+          <img
+            src={courseThumbnailUrl!}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {/* Dim + gradient to the canvas colour so text always sits legibly. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-foreground/40"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[hsl(var(--learner-canvas))]"
+          />
+          <div className="relative mx-auto w-full max-w-5xl space-y-3 px-4 pb-14 pt-5 sm:px-6 sm:pb-20 sm:pt-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackToCourse}
+              className="-ml-2 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+            </Button>
+            <h1 className="font-display text-2xl text-primary-foreground sm:text-4xl">
+              {courseTitle}
+            </h1>
+            {courseSubtitle?.trim() && (
+              <p className="max-w-2xl text-sm text-primary-foreground/85">{courseSubtitle}</p>
+            )}
+            {courseDescription?.trim() && (
+              <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
+                {courseDescription}
+              </p>
+            )}
+            <p className="text-sm font-semibold text-primary-foreground">
+              Select a topic below to begin.
+            </p>
+            {actions}
+          </div>
+        </header>
+      )}
+
+      <div className="mx-auto w-full max-w-5xl space-y-8 p-4 sm:p-6">
+        {hero ? (
+          pickLine
+        ) : (
+          <div className="space-y-3">
+            <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
+            </Button>
+            <h1 className="font-display text-2xl text-foreground sm:text-3xl">{courseTitle}</h1>
+            {courseSubtitle?.trim() && (
+              <p className="text-sm text-muted-foreground">{courseSubtitle}</p>
+            )}
+            {actions}
+            {pickLine}
+          </div>
         )}
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="secondary" className="tabular-nums">
-            {overall.completed}/{overall.total} required lessons complete
-          </Badge>
-          {firstIncomplete && (
-            <Button onClick={() => onSelectLesson(firstIncomplete.id)}>
-              <Play className="mr-1.5 h-4 w-4" />
-              {overall.completed > 0 ? 'Continue learning' : 'Start learning'}
-            </Button>
-          )}
-          {courseDone && hasCertificate && onOpenCertificate && (
-            <Button variant="outline" onClick={onOpenCertificate}>
-              <Award className="mr-1.5 h-4 w-4" /> Your certificate
-            </Button>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Pick any lesson below. When you finish one you’ll come back here to choose the next.
-        </p>
-      </div>
 
       {grouped.map((group) => {
+
         const prog = requiredProgress(group.lessons, completedIds);
         const done = prog.total > 0 && prog.completed === prog.total;
         return (
@@ -231,6 +303,9 @@ export function CourseHome({
                 const status = statusOf(lesson);
                 const highlighted = highlightLessonId === lesson.id;
                 const wash = WASHES[index % WASHES.length];
+                // Image-led card when the lesson's own blocks give us a still;
+                // otherwise the wash + chip identity stays as the fallback.
+                const media = lessonMedia?.get(lesson.id) ?? null;
                 return (
                   <Card
                     key={lesson.id}
@@ -239,7 +314,7 @@ export function CourseHome({
                     }}
                     role="button"
                     tabIndex={0}
-                    data-wash={wash}
+                    data-wash={media ? undefined : wash}
                     data-complete={status === 'completed' ? 'true' : undefined}
                     aria-label={`${lesson.title} — ${
                       status === 'completed'
@@ -259,7 +334,7 @@ export function CourseHome({
                       'learner-card learner-card-hover learner-wash group relative h-full cursor-pointer overflow-hidden',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       SPAN_CLASS[span],
-                      feature && 'sm:min-h-[12.5rem]',
+                      feature && !media && 'sm:min-h-[12.5rem]',
                       status === 'completed' && 'ring-1 ring-success/40',
                       status === 'continue' && 'ring-1 ring-primary/40',
                       feature && status !== 'completed' && 'ring-1 ring-primary/50',
@@ -277,6 +352,20 @@ export function CourseHome({
                             : 'bg-transparent'
                       )}
                     />
+                    {media && (
+                      <div
+                        className={cn(
+                          'relative w-full overflow-hidden bg-muted',
+                          feature ? 'aspect-[16/9] sm:aspect-[16/7]' : 'aspect-[16/9]'
+                        )}
+                      >
+                        <SignedImage
+                          media={media}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardContent className="flex h-full flex-col gap-3 p-4 pl-5">
                       <div className="flex items-start gap-3">
                         <span
@@ -284,7 +373,9 @@ export function CourseHome({
                             'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
                             status === 'completed'
                               ? 'bg-success/10 text-success'
-                              : 'learner-wash-chip'
+                              : media
+                                ? 'bg-primary/10 text-primary'
+                                : 'learner-wash-chip'
                           )}
                         >
                           {lessonTypeIcon(lesson.lesson_type, 'h-4 w-4')}
@@ -348,6 +439,8 @@ export function CourseHome({
           This course doesn’t have any lessons yet. Please check back soon.
         </p>
       )}
+      </div>
     </div>
   );
 }
+

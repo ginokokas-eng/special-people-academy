@@ -46,7 +46,10 @@ export interface LearnCourse {
   title: string;
   subtitle: string | null;
   description: string | null;
+  /** Course cover image, used as the course-home hero backdrop. */
+  thumbnail_url?: string | null;
   overview: string | null;
+
   has_certificate: boolean | null;
   requires_practical_signoff: boolean | null;
   practical_details: string | null;
