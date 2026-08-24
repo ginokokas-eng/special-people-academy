@@ -676,13 +676,18 @@ export function VideoPlayer({
                   onPointerDown={(e) => e.stopPropagation()}
                 >
                   <Slider
-                    value={[current]}
+                    value={[scrubDisplay ?? current]}
                     min={0}
                     max={duration || 100}
                     step={0.1}
                     onValueChange={(v) => seekTo(v[0])}
+                    onValueCommit={endScrub}
                     aria-label="Seek"
-                    className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                    className={cn(
+                      '[&_[role=slider]]:h-4 [&_[role=slider]]:w-4',
+                      scrubDisplay == null &&
+                        'motion-safe:[&_[role=slider]]:transition-[left] motion-safe:[&_[role=slider]]:duration-200'
+                    )}
                   />
                 </div>
                 <span className="select-none text-[11px] tabular-nums text-white/90">
@@ -717,13 +722,18 @@ export function VideoPlayer({
           {/* Seek bar */}
           <div className="px-1">
             <Slider
-              value={[current]}
+              value={[scrubDisplay ?? current]}
               min={0}
               max={duration || 100}
               step={0.1}
               onValueChange={(v) => seekTo(v[0])}
+              onValueCommit={endScrub}
               aria-label="Seek"
-              className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+              className={cn(
+                '[&_[role=slider]]:h-3 [&_[role=slider]]:w-3',
+                scrubDisplay == null &&
+                  'motion-safe:[&_[role=slider]]:transition-[left] motion-safe:[&_[role=slider]]:duration-200'
+              )}
             />
           </div>
 
