@@ -269,7 +269,12 @@ export default function LessonContentEditor() {
           >
             Close
           </Button>
-          <Button onClick={handleSave} disabled={saving || !dirty}>
+          {checkpointsInvalid && (
+            <span className="text-xs font-medium text-destructive">
+              Fix the checkpoint problems below to save
+            </span>
+          )}
+          <Button onClick={handleSave} disabled={saving || !dirty || checkpointsInvalid}>
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
