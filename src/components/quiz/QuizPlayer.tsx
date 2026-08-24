@@ -4,6 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -15,6 +25,7 @@ import {
   Clock
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
+
 
 interface QuizQuestion {
   id: string;
@@ -33,6 +44,8 @@ interface QuizPlayerProps {
   onComplete: (passed: boolean, score: number, answers: Record<string, number>) => void;
   onRetry: () => void;
   previousAttempts?: number;
+  /** Attempts left including this one; 1 means this is the final attempt. */
+  attemptsRemaining?: number | null;
 }
 
 type FeedbackState = 'none' | 'correct' | 'incorrect';
@@ -45,6 +58,7 @@ export function QuizPlayer({
   onComplete,
   onRetry,
   previousAttempts = 0,
+  attemptsRemaining = null,
 }: QuizPlayerProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -52,11 +66,14 @@ export function QuizPlayer({
   const [feedback, setFeedback] = useState<FeedbackState>('none');
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unansweredOpen, setUnansweredOpen] = useState(false);
+  const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
 
   const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const answeredCount = Object.keys(answers).length;
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const isFinalAttempt = attemptsRemaining === 1;
 
   // Calculate score
   const calculateScore = () => {
@@ -91,19 +108,56 @@ export function QuizPlayer({
     }
   };
 
+  /** Questions with no recorded answer, in authored order. */
+  const unansweredIndexes = questions
+    .map((q, i) => (answers[q.id] === undefined ? i : -1))
+    .filter((i) => i >= 0);
+
+  const submitAttempt = () => {
+    const finalScore = calculateScore();
+    const passed = finalScore >= passingScore;
+    setShowResults(true);
+    onComplete(passed, finalScore, answers);
+  };
+
   const handleNextQuestion = () => {
     if (isLastQuestion) {
-      // Calculate final score and complete
-      const finalScore = calculateScore();
-      const passed = finalScore >= passingScore;
-      setShowResults(true);
-      onComplete(passed, finalScore, answers);
+      // Guard the irreversible step: unanswered questions first, then the
+      // final-attempt confirmation when this really is the last attempt.
+      if (unansweredIndexes.length > 0) {
+        setUnansweredOpen(true);
+        return;
+      }
+      if (isFinalAttempt) {
+        setFinalConfirmOpen(true);
+        return;
+      }
+      submitAttempt();
     } else {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setFeedback('none');
     }
   };
+
+  const goToFirstUnanswered = () => {
+    const target = unansweredIndexes[0];
+    setUnansweredOpen(false);
+    if (target === undefined) return;
+    setCurrentQuestionIndex(target);
+    setSelectedAnswer(null);
+    setFeedback('none');
+  };
+
+  const submitAnyway = () => {
+    setUnansweredOpen(false);
+    if (isFinalAttempt) {
+      setFinalConfirmOpen(true);
+      return;
+    }
+    submitAttempt();
+  };
+
 
   const handleRetry = () => {
     setCurrentQuestionIndex(0);
@@ -344,11 +398,56 @@ export function QuizPlayer({
           </Button>
         ) : (
           <Button onClick={handleNextQuestion}>
-            {isLastQuestion ? 'See Results' : 'Next Question'}
+            {isLastQuestion ? (isFinalAttempt ? 'Submit final attempt' : 'See Results') : 'Next Question'}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         )}
       </CardFooter>
+
+      {/* Unanswered-questions guard */}
+      <AlertDialog open={unansweredOpen} onOpenChange={setUnansweredOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              You haven’t answered {unansweredIndexes.length}{' '}
+              {unansweredIndexes.length === 1 ? 'question' : 'questions'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Unanswered questions are marked incorrect. You can go back and complete them before
+              submitting.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={goToFirstUnanswered}>Review answers</AlertDialogCancel>
+            <AlertDialogAction onClick={submitAnyway}>Submit anyway</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Final-attempt confirmation — only when it truly is the last one */}
+      <AlertDialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This is your final attempt</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your score will be locked in once you submit. Pass mark: {passingScore}%.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go back</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setFinalConfirmOpen(false);
+                submitAttempt();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Submit final attempt
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
+

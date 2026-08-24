@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Award, GraduationCap, Download, Clock, ShieldCheck } from '@/components/icons';
 import { toast } from 'sonner';
+import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
 import type { LearnCourse } from './types';
 
 const sb = supabase as any;
@@ -22,6 +23,7 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
   const [loading, setLoading] = useState(true);
   const [certs, setCerts] = useState<CertRow[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [quizLockedOut, setQuizLockedOut] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -38,6 +40,39 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Read-only check: is a graded quiz in this course out of attempts? If so the
+  // certificate is blocked, and the learner needs the next step spelled out.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) return;
+    (async () => {
+      const { data: lessons } = await sb.from('lessons').select('id').eq('course_id', course.id);
+      const lessonIds = (lessons || []).map((l: { id: string }) => l.id);
+      if (lessonIds.length === 0) return;
+      const { data: quizzes } = await sb
+        .from('quizzes')
+        .select('id, attempts_allowed')
+        .in('lesson_id', lessonIds);
+      const limited = (quizzes || []).filter(
+        (q: { attempts_allowed: number | null }) => (q.attempts_allowed ?? 0) > 0
+      );
+      if (limited.length === 0) return;
+      const { data: attempts } = await sb
+        .from('quiz_attempts')
+        .select('quiz_id, passed')
+        .eq('user_id', user.id)
+        .in('quiz_id', limited.map((q: { id: string }) => q.id));
+      const locked = limited.some((q: { id: string; attempts_allowed: number | null }) => {
+        const rows = (attempts || []).filter((a: { quiz_id: string }) => a.quiz_id === q.id);
+        return !rows.some((a: { passed: boolean }) => a.passed) && rows.length >= (q.attempts_allowed ?? 0);
+      });
+      if (!cancelled) setQuizLockedOut(locked);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, course.id]);
 
   const download = async (id: string) => {
     setDownloading(id);
@@ -131,6 +166,12 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
 
   return (
     <div className="space-y-4">
+      {quizLockedOut && !certs.length && (
+        <p className="rounded-md bg-warning/10 px-3 py-2 text-sm text-warning">
+          Your assessment has no attempts remaining, so your certificate can’t be issued yet.{' '}
+          {QUIZ_LOCKOUT_NEXT_STEP}
+        </p>
+      )}
       {course.certificate_details && (
         <p className="text-sm text-muted-foreground">{course.certificate_details}</p>
       )}
