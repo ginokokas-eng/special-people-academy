@@ -182,11 +182,12 @@ function CardDeckBlock({
               onClick={() => toggle(card.id)}
               aria-expanded={open}
               className={cn(
-                'min-h-[104px] rounded-xl p-4 text-left shadow-learner transition-all duration-200',
+                'pressable min-h-[104px] rounded-xl p-4 text-left shadow-learner',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'motion-safe:hover:-translate-y-0.5 hover:shadow-learner-lg',
                 open ? 'bg-card' : 'bg-violet-soft'
               )}
+
             >
               <p className="font-display text-base text-foreground">{card.front || 'Card'}</p>
               {open ? (
