@@ -91,13 +91,15 @@ Contract details:
 | Status | `error` | Meaning | App behaviour |
 | --- | --- | --- | --- |
 | 401 | `ariadne_token_invalid` | Missing/expired/untrusted Ariadne token | Refresh the Ariadne session, retry once |
-| 403 | `sso_denied` | Not eligible (no email, inactive/suspended learner, replayed token, mint failure) | Show "Training isn't available for your account yet — contact your manager" |
+| 400 | `invalid_request` | Missing/malformed `nonce` | Fix the caller — generate a fresh valid nonce; do NOT retry the same request |
+| 403 | `sso_denied` | Not eligible (no email, inactive/suspended learner, replayed nonce, mint failure) | Show "Training isn't available for your account yet — contact your manager". Do NOT force a token refresh and retry |
 | 429 | `rate_limited` | 10/min or 60/hr exceeded per user or IP | Back off, retry later |
 | 503 | `sso_disabled` | Kill-switch off (`platform_settings.ariadne_sso.enabled`) | Show "Training is temporarily unavailable" |
 | 5xx / network | — | Academy down | Show retry affordance |
 
 `403` is deliberately a single generic code — the specific reason is only ever
 written to the `sso_exchange_log` audit table.
+
 
 ## sso-logout (optional hard revocation)
 
