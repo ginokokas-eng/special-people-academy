@@ -6,11 +6,14 @@
 // Invariants enforced here:
 //  - kill-switch (platform_settings.ariadne_sso.enabled) checked first
 //  - JWKS verification with kid match, pinned iss/aud, asymmetric algs only
-//  - replay defence on (sub, iat) for the lifetime of the token
+//  - a fresh per-request nonce is REQUIRED, and replay defence is keyed on
+//    (sub, nonce) — NOT on the token iat, since one Ariadne access token is
+//    legitimately reused for many taps within its hour-long lifetime
 //  - rate limits: 10/min and 60/hr per Ariadne sub AND per IP
 //  - identity resolution ariadne_user_id -> fountain_applicant_id -> email
 //  - inline provisioning is learner-only, and never mints for an inactive learner
 //  - every attempt writes an audit row; the client only ever sees a generic 403
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors';
 import {
@@ -24,6 +27,11 @@ import { verifyAriadneToken } from '../_shared/ariadne-jwt.ts';
 const DEFAULT_BASE_URL = 'https://grow-shine-campus.lovable.app';
 /** Magic links are treated as short-lived regardless of the project setting. */
 const LINK_TTL_SECONDS = 120;
+/** Replay window for a given nonce — the exchange only needs minutes, not the token's hour. */
+const GUARD_TTL_MS = 10 * 60 * 1000;
+/** URL-safe nonce, 16–128 chars (callers send 43-char base64url of 32 random bytes). */
+const NONCE_PATTERN = /^[A-Za-z0-9._~-]{16,128}$/;
+
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -176,11 +184,39 @@ Deno.serve(async (req) => {
     return json({ error: 'rate_limited', message: 'Too many sign-in attempts. Try again shortly.' }, 429);
   }
 
-  // 5. Replay defence on (sub, iat) for the token's lifetime.
+  let body: Record<string, unknown> = {};
+  try {
+    body = (await req.json()) ?? {};
+  } catch {
+    body = {};
+  }
+
+  // 5. Per-request nonce: this is the replay key, so it is mandatory.
+  const rawNonce = typeof body.nonce === 'string' ? body.nonce.trim() : '';
+  if (!NONCE_PATTERN.test(rawNonce)) {
+    await audit({
+      sub,
+      email,
+      outcome: 'invalid_nonce',
+      detail: rawNonce ? `nonce failed validation (len=${rawNonce.length})` : 'nonce missing',
+      ip,
+      ua,
+    });
+    return json(
+      { error: 'invalid_request', message: 'A fresh nonce is required for each sign-in request.' },
+      400,
+    );
+  }
+  const nonce = rawNonce;
+
+  // 6. Replay defence on (sub, nonce) — a replayed REQUEST is refused, while a
+  // fresh tap on the same still-valid Ariadne token is allowed through.
+  const guardExpiry = Math.min(claims.exp * 1000, Date.now() + GUARD_TTL_MS);
   const { error: replayErr } = await admin.from('sso_replay_guard').insert({
     ariadne_sub: sub,
-    token_iat: claims.iat,
-    expires_at: new Date(claims.exp * 1000).toISOString(),
+    token_iat: claims.iat, // retained for audit/debug only — no longer a uniqueness key
+    nonce,
+    expires_at: new Date(guardExpiry).toISOString(),
   });
   if (replayErr) {
     const replayed = (replayErr as { code?: string }).code === '23505';
@@ -200,12 +236,6 @@ Deno.serve(async (req) => {
     () => {},
   );
 
-  let body: Record<string, unknown> = {};
-  try {
-    body = (await req.json()) ?? {};
-  } catch {
-    body = {};
-  }
 
   const meta = (claims.user_metadata ?? {}) as Record<string, unknown>;
   const fullName =
@@ -270,7 +300,6 @@ Deno.serve(async (req) => {
   }
 
   const next = safeNext(body.next) ?? '/my-learning';
-  const nonce = typeof body.nonce === 'string' && body.nonce.length <= 128 ? body.nonce : null;
   const expiresAt = new Date(Date.now() + LINK_TTL_SECONDS * 1000).toISOString();
 
   const fragment = new URLSearchParams({
@@ -278,8 +307,9 @@ Deno.serve(async (req) => {
     type: 'email',
     next,
     expires_at: expiresAt,
+    nonce,
   });
-  if (nonce) fragment.set('nonce', nonce);
+
 
   await audit({
     sub,

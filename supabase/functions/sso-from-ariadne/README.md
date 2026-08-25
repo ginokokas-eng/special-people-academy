@@ -12,14 +12,23 @@ Content-Type: application/json
 
 {
   "next": "/my-learning",            // optional, internal path only
-  "nonce": "<random 16+ chars>"      // optional but recommended
+  "nonce": "<fresh random 16-128 chars>"   // REQUIRED, new value per tap
 }
 ```
+
+`nonce` is **required** and must be **freshly generated for every exchange
+request** (recommended: 32 random bytes, base64url — 43 chars). Allowed charset
+`A-Z a-z 0-9 . _ ~ -`, length 16–128. It is the replay key: the pair
+(Ariadne `sub`, `nonce`) may be exchanged **once**, so reusing a nonce returns a
+generic `403 sso_denied`. A missing or malformed nonce returns
+`400 invalid_request`. Note the same Ariadne access token may legitimately be
+used for many taps within its lifetime — only the nonce must change.
 
 The Ariadne token is verified offline against Ariadne's public JWKS
 (`https://hbklqmoywlxbjvpxsxyc.supabase.co/auth/v1/.well-known/jwks.json`),
 issuer pinned to `https://hbklqmoywlxbjvpxsxyc.supabase.co/auth/v1`, audience
 `authenticated`, ES256/RS256 only. Verification fails closed.
+
 
 ## Response `200`
 
@@ -82,13 +91,15 @@ Contract details:
 | Status | `error` | Meaning | App behaviour |
 | --- | --- | --- | --- |
 | 401 | `ariadne_token_invalid` | Missing/expired/untrusted Ariadne token | Refresh the Ariadne session, retry once |
-| 403 | `sso_denied` | Not eligible (no email, inactive/suspended learner, replayed token, mint failure) | Show "Training isn't available for your account yet — contact your manager" |
+| 400 | `invalid_request` | Missing/malformed `nonce` | Fix the caller — generate a fresh valid nonce; do NOT retry the same request |
+| 403 | `sso_denied` | Not eligible (no email, inactive/suspended learner, replayed nonce, mint failure) | Show "Training isn't available for your account yet — contact your manager". Do NOT force a token refresh and retry |
 | 429 | `rate_limited` | 10/min or 60/hr exceeded per user or IP | Back off, retry later |
 | 503 | `sso_disabled` | Kill-switch off (`platform_settings.ariadne_sso.enabled`) | Show "Training is temporarily unavailable" |
 | 5xx / network | — | Academy down | Show retry affordance |
 
 `403` is deliberately a single generic code — the specific reason is only ever
 written to the `sso_exchange_log` audit table.
+
 
 ## sso-logout (optional hard revocation)
 
