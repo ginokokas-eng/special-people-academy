@@ -210,35 +210,16 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   }
 }
 
+// Subscription lifecycle events are logged only. There is no local
+// subscription mirror any more; organisation licences carry entitlement.
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log(`[WEBHOOK] Subscription updated: ${subscription.id}, status: ${subscription.status}`);
-  
-  const { error } = await supabase
-    .from("user_subscriptions")
-    .update({
-      status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-    })
-    .eq("stripe_subscription_id", subscription.id);
-
-  if (error) {
-    console.error("[WEBHOOK] Failed to update subscription:", error);
-  }
+  console.log(`[WEBHOOK] Subscription updated (no-op): ${subscription.id}, status: ${subscription.status}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log(`[WEBHOOK] Subscription deleted: ${subscription.id}`);
-  
-  const { error } = await supabase
-    .from("user_subscriptions")
-    .update({ status: "canceled" })
-    .eq("stripe_subscription_id", subscription.id);
-
-  if (error) {
-    console.error("[WEBHOOK] Failed to cancel subscription:", error);
-  }
+  console.log(`[WEBHOOK] Subscription deleted (no-op): ${subscription.id}`);
 }
+
 
 Deno.serve(async (req) => {
   const signature = req.headers.get("stripe-signature");
