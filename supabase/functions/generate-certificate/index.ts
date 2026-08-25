@@ -21,8 +21,9 @@ function generateCertificatePDF(data: {
   cpdHours?: number;
   certificateType: 'completion' | 'competency';
   competencySignedBy?: string;
+  verificationCode?: string;
 }): string {
-  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName, cpdHours, certificateType, competencySignedBy } = data;
+  const { learnerName, courseTitle, completionDate, certificateNumber, instructorName, cpdHours, certificateType, competencySignedBy, verificationCode } = data;
   
   const isCompetency = certificateType === 'competency';
   const certTitle = isCompetency ? 'CERTIFICATE OF COMPETENCY' : 'CERTIFICATE OF COMPLETION';
@@ -127,6 +128,10 @@ function generateCertificatePDF(data: {
   <text x="642" y="485" font-family="'Courier New', monospace" font-size="11" fill="#7c3aed" text-anchor="middle" font-weight="bold">${escapeXml(certificateNumber)}</text>
   <line x1="532" y1="495" x2="752" y2="495" stroke="#6b7280" stroke-width="1"/>
   <text x="642" y="515" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">Certificate ID</text>
+  ${verificationCode ? `
+  <!-- Public verification code -->
+  <text x="642" y="531" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6b7280" text-anchor="middle">Verify at www.specialpeopleacademy.com/verify/${escapeXml(verificationCode)}</text>
+  ` : ''}
   
   <!-- Footer bar -->
   <rect x="25" y="545" width="792" height="25" fill="url(#purpleGradient)" rx="0"/>
@@ -231,6 +236,7 @@ Deno.serve(async (req) => {
         pdf_path,
         certificate_type,
         competency_signed_by,
+        verification_code,
         course:courses(
           id,
           title,
@@ -329,6 +335,7 @@ Deno.serve(async (req) => {
       cpdHours,
       certificateType: certificateType as 'completion' | 'competency',
       competencySignedBy,
+      verificationCode: (certificate as any).verification_code || undefined,
     });
 
     // Store SVG as a file (can be viewed/printed as PDF)
