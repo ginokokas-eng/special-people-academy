@@ -16,6 +16,8 @@ interface CertRow {
   issued_at: string;
   certificate_type: string | null;
   competency_signed_at: string | null;
+  expires_at: string | null;
+  verification_code: string | null;
 }
 
 export function CertificateTab({ course }: { course: LearnCourse }) {
@@ -29,7 +31,7 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
     if (!user) return;
     const { data } = await sb
       .from('certificates')
-      .select('id, certificate_number, issued_at, certificate_type, competency_signed_at')
+      .select('id, certificate_number, issued_at, certificate_type, competency_signed_at, expires_at, verification_code')
       .eq('user_id', user.id)
       .eq('course_id', course.id)
       .order('issued_at', { ascending: false });
@@ -77,8 +79,8 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
   const download = async (id: string) => {
     setDownloading(id);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-certificate', {
-        body: { certificate_id: id },
+      const { data, error } = await supabase.functions.invoke('issue-certificate', {
+        body: { action: 'download', certificate_id: id },
       });
       if (error) throw error;
       if (data?.url) {
@@ -143,6 +145,23 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
             <span className="text-muted-foreground">Issued</span>
             <span>{new Date(cert.issued_at).toLocaleDateString()}</span>
           </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Expires</span>
+            <span>{cert.expires_at ? new Date(cert.expires_at).toLocaleDateString() : 'No expiry'}</span>
+          </div>
+          {cert.verification_code && (
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="text-muted-foreground">Verification code</span>
+              <a
+                href={`/verify/${cert.verification_code}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-primary underline-offset-2 hover:underline"
+              >
+                {cert.verification_code}
+              </a>
+            </div>
+          )}
           <Button
             variant="outline"
             size="sm"
