@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.sso-logout]
 verify_jwt = false
+
+[functions.org-invite]
+verify_jwt = false
+
+[functions.accept-org-invitation]
+verify_jwt = false
