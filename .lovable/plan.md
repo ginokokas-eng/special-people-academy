@@ -1,137 +1,166 @@
-# Cross-app SSO: Ariadne mobile app → Academy
+# Selling to Care Organisations — Recommended Architecture
 
-Architecture recommendation only. No code changes in this plan.
+## Sanity-check of the current state (verified today)
 
-## 1. Recommended pattern
+Confirmed against the live database and code:
 
-Build the token-exchange edge function in this project, essentially as you described. It is the right call.
+- `orders`, `payments`, `user_subscriptions`, `stripe_webhook_logs`: 0 rows. `cart_items` holds stale test rows.
+- `course_offerings`: 32 real rows — online £19–55, blended £29–150, individual F2F £60–200, group F2F £380–1350.
+- 109 courses, 36 profiles, 16 enrollments, `certificates` empty.
+- No organisation concept anywhere. `enrollments` has no entitlement link.
+- Access rules on `enrollments`, `certificates`, `profiles` are "own row OR platform admin" only — there is no third party who can see someone else's progress. This is the key gap for B2B.
+- A certificate generator already exists (`generate-certificate` edge function, SVG → PDF, completion + competency variants, CPD hours). It has simply never been invoked in anger; `courses.certificate_expiry_months` and `cpd_hours` already exist.
+- Ariadne SSO provisioning (`_shared/ariadne.ts`) creates flat learner accounts with no org field.
+
+So: commerce scaffolding is dead weight, pricing data is real, and certificates are 80% built.
+
+## Recommendation in one line
+
+Add a real tenancy layer (`organisations` + `organisation_members` + org-scoped roles), model purchases as **licences with seats** rather than subscriptions, ship invoice-led sales first, and treat Special People itself as a first-class "home organisation" that Ariadne carers are provisioned into.
+
+---
+
+## 1. Tenancy model
+
+**Recommendation: `organisations` + `organisation_members` with an org-scoped role, and Special People becomes the home org.**
+
+Making Special People an organisation row (with a fixed, seeded id) is the decision that keeps everything else simple. If internal learners stay org-less, every query and policy needs an "or NULL org" branch forever, and internal compliance reporting can never reuse the org-admin surface. Instead:
+
+- Seed one organisation, `Special People` (`kind = 'internal'`).
+- Ariadne SSO provisioning stamps new carers as members of that org. This is a one-line addition to the shared provisioning module, so both the bulk sync and the token exchange stay identical.
+- Backfill the existing 36 profiles into the home org in the same migration.
+- External buyers get `kind = 'customer'` organisations.
+
+**Roles: keep the existing flat `app_role` untouched, add a separate org-scoped role.** Do not extend the `app_role` enum with `org_admin` — platform roles and tenant roles are different axes, and mixing them means a future `org_admin` could be mistaken for a platform admin by existing `has_role()` checks. `organisation_members.org_role` (`org_admin` | `member`) is checked through a new security-definer function, exactly mirroring the existing `has_role` / `is_enrolled` pattern.
+
+**RLS scoping** — additive only; every existing policy stays. New policies added alongside:
+
+- `enrollments`, `certificates`, `profiles`: add a SELECT policy `is_org_admin_of_member(auth.uid(), user_id)` — a security-definer function that returns true when the caller is an `org_admin` of an organisation the target user belongs to. Existing "own row" and platform-admin policies are unaffected, and because policies are OR'd, nothing that works today breaks.
+- Org admins get **read-only** access to their members' progress and certificates. They never write enrollments directly; enrolment happens through licence assignment (Phase 2 section below).
+- Never expose `auth.users`; org admin views read `profiles` + `organisation_members`.
+
+Trade-off accepted: a learner could in principle belong to two organisations (agency staff). The join table allows it, and the RLS function tolerates it, but Phase 1 UI assumes one org per learner.
+
+## 2. Entitlement / licence model
+
+**Recommendation: `licences` (org × course × seats × validity window) + `licence_seats` (one row per assigned learner), with `enrollments` staying exactly as it is.**
+
+Do not put entitlement columns on `enrollments`. `enrollments` means "this learner has access to this course" and is already wired into progress, quizzes, certificates and the player. Adding a nullable `licence_seat_id` pointer to it is the only change needed there — internal Ariadne learners keep a NULL pointer and are unaffected.
+
+Seat semantics:
+
+- A seat is **reserved on invite/assignment**, not on first lesson. Training managers buy predictability; a manager who assigns 40 staff must immediately see 40/40 used. Consuming only on enrolment lets a manager over-assign and hit a wall later.
+- Revoking a seat before the learner has completed anything frees it (`status = 'revoked'`, seat count recalculated). Revoking after completion does **not** free it — the certificate has been earned and the seat is spent. This rule prevents seat-recycling abuse and is the norm in the sector.
+- Expiry lives on the licence (`starts_at`, `expires_at`, typically 12 months). Expiry blocks *new* assignments and blocks *access to unfinished* courses; it never invalidates an already issued certificate.
+- Renewal = a new licence row referencing the previous one (`renews_licence_id`). Never mutate dates in place — audit trail matters when a manager disputes what they bought.
+- Course access check becomes: internal enrolment (as today) **or** an active seat on a non-expired licence. Implemented in one security-definer function so both RLS and the client hook share one rule.
+
+## 3. Sales motion sequencing
+
+**Agree with invoice-led first.** Care organisations of 40 staff buy on invoice and purchase order far more often than by card, and an invoice-led flow needs zero payment infrastructure: our admin creates the organisation, the licence, and hands the training manager an invite link. That is a sellable product in Phase 1.
+
+**Delete the dead scaffolding rather than reuse it.** `user_subscriptions` and `cart_items` model the wrong thing (per-user recurring plans, single-item carts) and would fight the licence model. `orders` and `payments` are reasonable shapes but were written for a per-user course purchase and carry a `plan` column we do not want. With zero rows there is no migration cost. Keep `stripe_webhook_logs` (generic, useful) and keep the existing Stripe edge functions dormant rather than deleting them, so the F2F booking path is untouched.
+
+The B2B commercial record for Phase 1 is a single new `org_orders` table (invoice number, PO reference, amount, status: `draft` → `invoiced` → `paid`), which licences reference. Phase 3 Stripe checkout writes into the same table instead of inventing a parallel one.
+
+**Lovable's native path for Phase 2/3** is the Stripe integration with Checkout Sessions created in an edge function and fulfilment driven by a webhook — the same shape as the existing (unused) `create-checkout` / `stripe-webhook` functions. Design towards: one Stripe Price per `course_offerings` row, quantity = seats, and a webhook that creates the licence. That means Phase 1 should already treat licence creation as a single server-side function, called by an admin form now and by the webhook later.
+
+## 4. Org admin experience — minimal surface
+
+Four screens under `/org` behind an `org_admin` guard:
+
+1. **People** — member list with status, bulk invite by pasted emails (one per line or comma-separated), seat counter.
+2. **Compliance matrix** — staff × licenced course grid, cells showing Not started / In progress / Complete / Expiring / Expired. This is the screen that sells renewals, so it ships in Phase 1 even in a plain form.
+3. **Certificates** — per-learner download, plus a bulk "download all for this course" for inspection packs.
+4. **Licences** — what was bought, seats used, expiry.
+
+**Invitations: our own `organisation_invitations` table, with the actual account creation done through Supabase auth invite/magic link.** A pure Supabase auth invite carries no org or licence context and cannot express "invited, not yet accepted, seat reserved". Our table owns the state machine (`pending` → `accepted` / `expired` / `revoked`), a hashed token, and the seat reservation; the email itself is a magic link that lands on an `/invite` accept route which reuses the same verify-and-land pattern already proven in the `/sso` callback. Invitation emails go through the existing transactional email setup.
+
+## 5. Blended / F2F for external organisations
+
+`course_offerings` already distinguishes the four delivery types, so the answer is presentation and permission, not new schema — with one small addition.
+
+- Add `available_to` (`internal` | `customer_org` | `public`) to `course_offerings`. A course can then be sold online-only to external orgs while remaining bookable F2F internally, without duplicating the course.
+- Licences are only ever issued against offerings whose type is `individual_online` (or blended's online portion). Practical attendance stays on the existing `bookings` / `practical_sessions` path.
+- For blended sold to an external org: the licence covers the online modules and the certificate issued is the **completion** certificate only. The competency certificate stays gated on a practical sign-off at our venue, booked separately. This is honest to the dual-certificate model already in place and avoids promising a sign-off we cannot deliver remotely.
+- Group F2F (£380–1350) remains a quote/booking product, not a licence product — surfaced as "Contact us" in the org portal.
+
+## 6. Certificates
+
+The generator already exists; the work is triggering, storing and verifying it.
+
+- **Trigger on completion**, server-side: when the last required item completes, the existing completion check calls `generate-certificate`, which writes the row and the PDF. Never generate on page view.
+- **Storage**: keep the private `certificates` bucket; serve via short-lived signed URLs from an edge function that re-checks entitlement (learner themselves, their org admin, or platform admin). Org admins must not be able to guess paths.
+- **Add to `certificates`**: `expires_at` (derived from `courses.certificate_expiry_months`), `organisation_id` (snapshot of the issuing context), and a public `verification_code`.
+- **Co-branding**: add optional org logo to the template in a later phase — the SVG template already has the layout space. Phase 1 issues our own branding only; inspectors care about the awarding body, not the employer's logo.
+
+## 7. What else matters for UK care-sector B2B
+
+- **Verification links.** A public `/verify/<code>` page showing name, course, issue and expiry only. Inspectors and commissioners ask for this, and it is a strong trust signal at zero cost.
+- **Refresher cycles are the recurring-revenue engine.** `certificate_expiry_months` already exists; add scheduled "expiring in 90/30 days" notifications to both the learner and their org admin, reusing the existing notification settings infrastructure. This drives renewals better than any sales email.
+- **Data isolation expectations.** Buyers will ask, in writing, whether another customer can see their staff. Getting the org-admin RLS right — and being able to say policies enforce it at the database layer — is a procurement requirement, not a nicety.
+- **CPD hours** already exist on `courses` and print on the certificate; make sure the compliance matrix totals them per learner, as managers report on them.
+- **Named-user licences, not shared logins.** State it explicitly in the portal; shared logins destroy audit value and are the most common misuse.
+- **Data processing / retention.** An org admin leaving must lose access immediately (membership revoke), and staff leaving an organisation keep their own certificates. Model membership end (`ended_at`) rather than deleting rows.
+- **Accessibility and evidence exports.** A CSV export of the compliance matrix is the single most requested B2B feature after certificates.
+
+---
+
+## Phased plan
+
+### Phase 1 — smallest sellable B2B slice (invoice-led)
+
+Goal: we can sell Falls Prevention to Sunrise Care for 40 staff today, their manager invites staff, sees progress, downloads certificates.
+
+New tables: `organisations`, `organisation_members`, `organisation_invitations`, `licences`, `licence_seats`, `org_orders`.
+New functions: `is_org_admin`, `is_org_admin_of_member`, `has_active_licence_seat`.
+Touches: `enrollments` (+ nullable `licence_seat_id`), `profiles` (read policy for org admins), `certificates` (read policy, `expires_at`, `organisation_id`, `verification_code`), `_shared/ariadne.ts` (stamp home-org membership), `course_offerings` (+ `available_to`).
+New surfaces: `/org` portal (People, Compliance, Certificates, Licences), `/invite` accept route, admin screens to create organisations and issue licences.
+Also in Phase 1: wire certificate generation on completion, and the public `/verify/<code>` page.
+Cleanup: drop `user_subscriptions`, `cart_items`; retire `orders` / `payments` in favour of `org_orders`.
+
+### Phase 2 — retention and scale
+
+Expiry/refresher notifications, CSV compliance export, bulk certificate download, org co-branding on certificates, multi-course licence bundles, membership offboarding, seat reassignment UI.
+
+### Phase 3 — self-serve commerce
+
+Stripe Checkout for org purchases (quantity = seats) and individual card purchases, writing into the same `org_orders` + `licences` path as the admin form. Individual purchases create a single-seat licence in a personal organisation, so there is exactly one entitlement code path.
+
+### Phase 4 — enterprise asks
+
+SSO for customer organisations (the Ariadne exchange generalised per-org), API/reporting access, custom learning paths per organisation, F2F scheduling self-service.
+
+---
+
+## Technical notes
+
+Schema sketch (Phase 1, abbreviated — full SQL at build time):
 
 ```text
-Ariadne app (Capacitor)
-  |  POST /functions/v1/sso-from-ariadne
-  |  Authorization: Bearer <Ariadne access token>
-  v
-sso-from-ariadne (this project, service role)
-  1. verify Ariadne JWT via Ariadne JWKS (iss/aud/exp/alg pinned)
-  2. map Ariadne sub -> Academy user (provision if needed, learner role only)
-  3. auth.admin.generateLink({ type: 'magiclink' }) -> token_hash
-  4. return { url: https://academy/sso#token_hash=...&type=magiclink, expires_at }
-  v
-Academy /sso route -> supabase.auth.verifyOtp({ token_hash, type:'email' })
-  -> session established -> redirect to /my-learning (or validated deep path)
+organisations(id, name, slug unique, kind: internal|customer|personal,
+              logo_url, contact_email, is_active, created_at, updated_at)
+
+organisation_members(id, organisation_id, user_id, org_role: org_admin|member,
+                     started_at, ended_at null, unique(organisation_id, user_id))
+
+organisation_invitations(id, organisation_id, email, org_role, licence_id null,
+                         token_hash, status: pending|accepted|expired|revoked,
+                         expires_at, invited_by, accepted_user_id, created_at)
+
+licences(id, organisation_id, course_id, offering_id null, org_order_id null,
+         seats_total, starts_at, expires_at, renews_licence_id null,
+         status: active|expired|cancelled, created_at, updated_at)
+
+licence_seats(id, licence_id, user_id null, invitation_id null,
+              status: reserved|active|completed|revoked,
+              assigned_at, revoked_at, unique(licence_id, user_id))
+
+org_orders(id, organisation_id, reference, po_reference, amount_gbp,
+           status: draft|invoiced|paid|void, source: manual|stripe,
+           stripe_session_id null, created_at, updated_at)
 ```
 
-Why this over the alternatives:
+Every new public table gets explicit GRANTs plus RLS in the same migration, per project convention. All org-admin reads go through security-definer functions to avoid recursive policy evaluation — the same pattern as the existing `has_role` and `is_enrolled`.
 
-- **Supabase third-party / custom JWT acceptance** (Academy trusts Ariadne-issued JWTs directly): tempting, but it makes Ariadne's signing key a permanent authority over Academy identities, and Academy RLS is written against `auth.uid()` of *Academy* users. You would need identity aliasing everywhere, and role escalation risk moves into another team's token claims. Reject.
-- **Shared auth project** (both products on one Supabase auth): cleanest in theory, but it is a migration of two live products with separate RLS, separate user tables, separate compliance posture. Violates the no-rebuild constraint. Reject.
-- **Full OIDC broker** (Auth0/Keycloak/WorkOS in front of both): correct for 5+ relying parties, overkill for two apps you both own, and it means re-platforming Academy auth. Revisit only if a third-party customer ever needs to federate their own IdP.
-- **Token exchange + magiclink verifyOtp**: no new infrastructure, no new vendor, Academy remains the sole issuer of Academy sessions, Ariadne is only ever an *assertion* source. Same endpoint later serves a standalone Academy wrapper by swapping the verifier (see §5 note on `provider`). Build this.
-
-One refinement to your sketch: verify the Ariadne token by **JWKS, not** a server-side `getUser` call against Ariadne. JWKS is offline, cached, no round-trip on the hot path, and does not require holding Ariadne API credentials here. Keep a `getUser` fallback only if Ariadne uses opaque/legacy tokens.
-
-## 2. Identity mapping
-
-Yes — move off email as the join key.
-
-- Extend the sync path to persist the Ariadne auth user id on the Academy profile. `profiles` already has `external_id`, `fountain_applicant_id`, `source_system`; add a dedicated `ariadne_user_id uuid` (unique, nullable) rather than overloading `external_id`, which currently carries the Fountain applicant id.
-- Exchange resolution order: `ariadne_user_id` → `fountain_applicant_id` → normalised email (lowercased/trimmed). On an email-only match, backfill `ariadne_user_id` so the next exchange takes the fast, stable path.
-- Email differs (carer changed it in Ariadne): stable id wins, no new account created; optionally record the divergence in `user_sync_log` for admin review. Never treat a *new* email as a new learner if the Ariadne sub already maps.
-- Learner does not exist yet: auto-provision inline, reusing the existing sync logic (extract it into a shared module so `sync-learners-from-ariadne` and the exchange cannot drift). Provisioning creates the auth user with `email_confirm: true`, lets `handle_new_user` seed the profile + `learner` role, then stamps the Ariadne identifiers. **Never** read a role from external claims; staff roles remain owned by `staff_profiles` / `sync_staff_role`.
-- If the Ariadne token carries no email at all, fail closed (`403 unprovisioned`) rather than inventing a synthetic address.
-
-## 3. Security invariants the exchange must enforce
-
-Token verification
-- Signature via Ariadne JWKS, key id matched, algorithm allow-list (no `none`, no HS/RS confusion).
-- `iss` pinned to Ariadne's exact issuer URL, `aud` pinned, `exp`/`nbf` checked with ≤60s clock skew.
-- Reject tokens whose `sub` is missing, or whose `role` claim is not `authenticated`.
-- Cache JWKS with a short TTL and refresh on unknown `kid`, but never fall back to "unverified" on fetch failure.
-
-URL-borne material
-- Return the magiclink hash in the **fragment** (`#token_hash=...`), never the query string — fragments are not sent to servers, not written to access logs, and not captured by referrers.
-- Short TTL (Supabase link default is long; treat it as ≤120s by also returning `expires_at` and having `/sso` refuse anything older) and single use — `verifyOtp` consumes it; the callback must clear `location.hash` immediately after.
-- `/sso` must render nothing from the fragment and must not log it.
-
-Abuse control
-- Rate limit per Ariadne `sub` and per IP (e.g. 10/min, 60/hour) with a `user_sync_log`-style audit row per exchange: outcome, mapped user id, ip, user agent.
-- Replay defence: record `jti`/`sub`+`iat` of accepted Ariadne tokens for the token's remaining lifetime and refuse repeats; combined with single-use magiclinks this closes both legs.
-- Never mint a session for a disabled/soft-deleted Academy learner; check `is_active`-style state before generating the link.
-
-Redirect safety
-- The exchange builds the Academy URL server-side from a configured origin. Any `next` path the app supplies must be validated against an allow-list of internal paths (must start `/`, no `//`, no scheme, no host) — otherwise ignore it and use the default landing route.
-
-Secret hygiene
-- Only Ariadne's issuer URL and expected audience need to live here (public values). If a fallback `getUser` is kept, its key is a read-only Ariadne credential stored in Project Settings → Secrets, used server-side only, never returned in a response or logged.
-- Service-role key stays inside the function; the response body contains only the callback URL and expiry.
-- `verify_jwt = false` for this function (the caller presents an Ariadne token, not an Academy one) — which makes the invariants above load-bearing, not optional.
-
-Additions you did not list
-- **CSRF/initiator binding**: have the app generate a nonce, send it with the exchange, and require it back on `/sso` (sessionStorage) so a leaked URL cannot be completed in a different browser context.
-- **Kill switch**: a platform setting to disable Ariadne SSO instantly without a deploy.
-- **Error responses must not enumerate** — "unprovisioned" vs "not found" should be one generic 403 to the client, with the detail only in the audit log.
-
-## 4. Session lifecycle on mobile
-
-- **Surface**: system browser tab — Android Custom Tabs / iOS `ASWebAuthenticationSession`/`SFSafariViewController` — not an embedded WebView. Reasons: real cookie/storage isolation, no in-app-browser storage quirks that break Supabase session persistence, App Store/Play policy comfort for auth flows, and it keeps the Academy web app single-codebase. An embedded WebView is only worth it if you need deep chrome integration; you don't.
-- **Re-run the exchange on every entry**: yes, agreed. It is idempotent, cheap, always reflects current Ariadne auth state and current provisioning, and it means no Academy refresh token has to be trusted to survive inside another product's app. Treat the Academy session as ephemeral per visit.
-- Because of that, the Academy session in the SSO tab should be **short-lived and non-persistent where possible**: land, do the training, close the tab. Do not attempt to share the session back into the Ariadne app.
-- **Logout**: be honest about the limits. When the carer signs out of Ariadne, the app should (a) stop offering the Training entry point, and (b) best-effort close/discard the Custom Tab. Realistically you cannot reach into a system browser tab and revoke an Academy session from Ariadne. Mitigations that actually work: short Academy session lifetime in this flow, `verifyOtp` sessions treated as one-visit, and — if you need hard revocation — an authenticated `sso-logout` endpoint Ariadne calls on sign-out that runs `auth.admin.signOut(user_id, scope: 'global')` for the mapped learner. That is the only reliable invalidation, and it is a small addition to the same contract.
-- Biometric unlock stays entirely on the Ariadne side; the Academy never sees it.
-
-## 5. Contract for the Ariadne side
-
-**Request**
-
-```http
-POST https://<academy-functions-host>/functions/v1/sso-from-ariadne
-Authorization: Bearer <Ariadne Supabase access_token>
-Content-Type: application/json
-
-{ "nonce": "<random 32+ chars>", "next": "/my-learning" }   // next optional
-```
-
-- No Academy API key required; the Ariadne bearer token is the credential.
-- `next` must be an internal Academy path; anything else is ignored.
-
-**Success — 200**
-
-```json
-{
-  "url": "https://<academy>/sso#token_hash=...&type=magiclink&nonce=...",
-  "expires_at": "2026-08-24T21:48:00Z",
-  "academy_user_id": "uuid",
-  "provisioned": false
-}
-```
-
-The app opens `url` in a Custom Tab / ASWebAuthenticationSession. It must not parse, store, or log the fragment.
-
-**Errors the app must handle**
-
-| Status | `code` | Meaning | App behaviour |
-| --- | --- | --- | --- |
-| 401 | `ariadne_token_invalid` | expired/bad Ariadne token | refresh Ariadne session, retry once; else send user to Ariadne login |
-| 403 | `not_eligible` | no matching learner and auto-provision refused (no email, inactive) | show "Training isn't set up for your account yet — contact your training team" |
-| 403 | `sso_disabled` | kill switch on | show maintenance copy |
-| 429 | `rate_limited` | too many exchanges | back off, respect `Retry-After` |
-| 5xx / timeout | `unavailable` | Academy or exchange down | "Training is temporarily unavailable, try again shortly"; never fall back to a manual login form |
-
-**Optional logout call (recommended)**
-
-```http
-POST /functions/v1/sso-from-ariadne?action=logout
-Authorization: Bearer <Ariadne access_token>
-```
-→ `204`, global sign-out of the mapped Academy learner. Fire-and-forget on Ariadne sign-out.
-
-**Standalone Academy wrapper later**: the same endpoint gains a `provider` dimension (`ariadne` today) whose verifier config is looked up server-side; a first-party Academy wrapper simply authenticates against Academy Supabase directly and needs no exchange at all.
-
-## Build order when approved
-
-1. Migration: `profiles.ariadne_user_id` (unique) + backfill from existing email matches; extract shared provisioning module.
-2. `sso-from-ariadne` edge function (verify → map/provision → generateLink → fragment URL), `verify_jwt = false`, audit rows in `user_sync_log`.
-3. `/sso` public route: read fragment, check nonce + expiry, `verifyOtp`, clear hash, redirect to validated path; hard-fail states with plain copy.
-4. Rate limiting + replay table + kill-switch platform setting.
-5. Optional `?action=logout`.
-6. Hand the §5 contract to the Ariadne team; test with a real carer account end to end on both platforms.
+Migrations are additive: no existing column is dropped or retyped, no existing policy is removed, and internal Ariadne learners keep working with NULL licence pointers throughout.
