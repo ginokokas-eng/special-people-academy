@@ -29,6 +29,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { learnerNavItems, learnerDropdownItems } from '@/config/navigation';
+import { useOrgAdmin } from '@/hooks/useOrgAdmin';
+import { Building2 } from '@/components/icons';
 
 interface DashboardLayoutProps {
   children: ReactNode;
