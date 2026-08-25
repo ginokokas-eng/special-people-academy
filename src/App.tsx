@@ -62,6 +62,10 @@ import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ScormPlayer from "./pages/ScormPlayer";
+import Organisations from "./pages/admin/Organisations";
+import Licences from "./pages/admin/Licences";
+import OrgPortal from "./pages/org/OrgPortal";
+import InviteAccept from "./pages/InviteAccept";
 
 const queryClient = new QueryClient();
 
