@@ -183,21 +183,45 @@ Deno.serve(async (req) => {
 
   try {
     let userId = invitation.accepted_user_id ?? (await findAuthUserByEmail(admin, email));
+    let createdNow = false;
 
     if (!userId) {
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
         password: crypto.randomUUID() + crypto.randomUUID(),
         email_confirm: true,
+        user_metadata: displayName ? { full_name: displayName } : undefined,
       });
       if (createErr || !created?.user) {
         console.error('[org-invite-accept] createUser failed:', createErr?.message);
         return json({ error: 'failed', message: 'We could not set up your account.' }, 500);
       }
       userId = created.user.id;
+      createdNow = true;
+    }
+
+    // Name capture: write it for a freshly created account; on the idempotent
+    // path only fill a blank profile name, never overwrite an existing one, and
+    // never touch a profile for an invitation already bound to another user.
+    if (displayName && (createdNow || invitation.status !== 'accepted')) {
+      const { data: profile } = await admin
+        .from('profiles')
+        .select('id, full_name')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profile) {
+        const current = (profile.full_name ?? '').trim();
+        if (!current) {
+          await admin.from('profiles').update({ full_name: displayName }).eq('id', userId);
+        }
+      } else {
+        await admin.from('profiles').insert({ id: userId, email, full_name: displayName });
+      }
     }
 
     const courseId = await applyBindings(invitation, userId);
+
 
     await admin
       .from('organisation_invitations')
