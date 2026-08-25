@@ -160,6 +160,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         {item.label}
                       </DropdownMenuItem>
                     ))}
+                    {showOrgLink && (
+                      <DropdownMenuItem onClick={() => navigate('/org')}>
+                        <Building2 className="mr-2 h-4 w-4" />
+                        Organisation Portal
+                      </DropdownMenuItem>
+                    )}
                     {showAdminLink && (
                       <DropdownMenuItem onClick={() => navigate('/admin-portal/dashboard')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
