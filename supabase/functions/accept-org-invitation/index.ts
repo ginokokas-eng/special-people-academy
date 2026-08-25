@@ -21,7 +21,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors';
 import { findAuthUserByEmail } from '../_shared/ariadne.ts';
-import { hashToken, looksLikeToken, normaliseEmail } from '../_shared/org-invites.ts';
+import {
+  hashToken,
+  looksLikeToken,
+  normaliseDisplayName,
+  normaliseEmail,
+} from '../_shared/org-invites.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -111,7 +116,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
-  let body: { token?: string };
+  let body: { token?: string; display_name?: string };
   try {
     body = await req.json();
   } catch {
@@ -119,6 +124,15 @@ Deno.serve(async (req) => {
   }
 
   if (!looksLikeToken(body.token)) return json(INVALID, 400);
+
+  const displayName = normaliseDisplayName(body.display_name);
+  if (body.display_name !== undefined && !displayName) {
+    return json(
+      { error: 'invalid_name', message: 'Please enter your full name (2–100 characters).' },
+      400,
+    );
+  }
+
 
   const tokenHash = await hashToken(body.token);
 
@@ -169,21 +183,46 @@ Deno.serve(async (req) => {
 
   try {
     let userId = invitation.accepted_user_id ?? (await findAuthUserByEmail(admin, email));
+    let createdNow = false;
 
     if (!userId) {
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
         password: crypto.randomUUID() + crypto.randomUUID(),
         email_confirm: true,
+        user_metadata: displayName ? { full_name: displayName } : undefined,
       });
       if (createErr || !created?.user) {
         console.error('[org-invite-accept] createUser failed:', createErr?.message);
         return json({ error: 'failed', message: 'We could not set up your account.' }, 500);
       }
       userId = created.user.id;
+      createdNow = true;
     }
 
+    // Name capture: write it for a freshly created account; on the idempotent
+    // path only fill a blank profile name, never overwrite an existing one, and
+    // never touch a profile for an invitation already bound to another user.
+    if (displayName && (createdNow || invitation.status !== 'accepted')) {
+      const { data: profile } = await admin
+        .from('profiles')
+        .select('id, full_name')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profile) {
+        const current = (profile.full_name ?? '').trim();
+        if (!current) {
+          await admin.from('profiles').update({ full_name: displayName }).eq('id', profile.id);
+        }
+      } else {
+        await admin.from('profiles').insert({ user_id: userId, full_name: displayName });
+      }
+    }
+
+
     const courseId = await applyBindings(invitation, userId);
+
 
     await admin
       .from('organisation_invitations')
