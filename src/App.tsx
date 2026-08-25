@@ -151,6 +151,8 @@ const App = () => (
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
                 <Route path="/scorm/launch/:registrationId" element={<ScormPlayer />} />
+                <Route path="/invite" element={<InviteAccept />} />
+                <Route path="/org" element={<OrgPortal />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
