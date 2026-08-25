@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { NativeSsoHandoff } from "@/hooks/useNativeSsoHandoff";
+
 import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -74,6 +76,8 @@ const App = () => (
             <ConfirmDialogHost />
             <BrowserRouter>
               <ScrollToTop />
+              <NativeSsoHandoff />
+
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
