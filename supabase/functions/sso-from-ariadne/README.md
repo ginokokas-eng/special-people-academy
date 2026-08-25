@@ -39,6 +39,44 @@ context; the callback checks it when present. Links are single-use and treated a
 valid for **≤120 seconds** — run the exchange fresh on every entry rather than
 caching `url`.
 
+## Preferred path: native hand-off into the Academy Android app
+
+When the Academy app (`uk.org.specialpeople.academy`) is installed, do **not**
+open a browser tab. Launch the app directly with an **explicit** intent so no
+other app can intercept it:
+
+```
+uk.org.specialpeople.academy://sso?token_hash=<hashed_token>&type=email&next=/my-learning
+```
+
+```kotlin
+val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
+    setPackage("uk.org.specialpeople.academy")
+}
+try {
+    startActivity(intent)
+} catch (e: ActivityNotFoundException) {
+    // Academy app not installed — fall back to the browser-tab flow above.
+    openCustomTab(response.url)
+}
+```
+
+Contract details:
+
+- Take `token_hash` from the `url` fragment returned by this function (or use the
+  fragment form `…://sso#token_hash=…` — the app accepts query **or** fragment).
+- `type` must be **`email`** — that is what `generateLink({ type: 'magiclink' })`
+  produces and what the callback verifies. Do not send `type=magiclink`.
+- `next` must be an internal path (single leading `/`, no scheme or host);
+  anything else falls back to `/my-learning`.
+- The link is still single-use and ≤120s — mint one per tap, never cache it.
+- **Not-installed fallback is the caller's responsibility.** An explicit intent
+  throws `ActivityNotFoundException` when the app is absent; catch it and open
+  the Custom Tab URL, otherwise "Open training" silently does nothing.
+- If a different learner is already signed in inside the Academy app, the
+  incoming hand-off replaces that session.
+
+
 ## Errors the app must handle
 
 | Status | `error` | Meaning | App behaviour |
