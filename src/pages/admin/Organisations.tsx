@@ -162,7 +162,7 @@ export default function Organisations() {
     setMembersLoading(true);
     const { data, error } = await supabase.rpc('get_org_people', { _org: org.id });
     if (error) toast.error('Could not load members', { description: error.message });
-    setMembers(((data ?? []) as OrgPerson[]) ?? []);
+    setMembers((data ?? []) as OrgPerson[]);
     setMembersLoading(false);
   };
 

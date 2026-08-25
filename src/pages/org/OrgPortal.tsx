@@ -102,9 +102,9 @@ export default function OrgPortal() {
       supabase.rpc('get_org_compliance_matrix', { _org: organisation.id }),
     ]);
 
-    setPeople(((peopleRes.data ?? []) as OrgPerson[]) ?? []);
-    setInvitations(((inviteRes.data ?? []) as PendingInvitation[]) ?? []);
-    setMatrix(((matrixRes.data ?? []) as unknown as MatrixRow[]) ?? []);
+    setPeople((peopleRes.data ?? []) as OrgPerson[]);
+    setInvitations((inviteRes.data ?? []) as PendingInvitation[]);
+    setMatrix((matrixRes.data ?? []) as unknown as MatrixRow[]);
     setLoading(false);
   }, [organisation]);
 
