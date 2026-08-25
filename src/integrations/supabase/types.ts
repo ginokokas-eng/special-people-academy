@@ -2394,21 +2394,24 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          token_iat: number
+          nonce: string | null
+          token_iat: number | null
         }
         Insert: {
           ariadne_sub: string
           created_at?: string
           expires_at: string
           id?: string
-          token_iat: number
+          nonce?: string | null
+          token_iat?: number | null
         }
         Update: {
           ariadne_sub?: string
           created_at?: string
           expires_at?: string
           id?: string
-          token_iat?: number
+          nonce?: string | null
+          token_iat?: number | null
         }
         Relationships: []
       }
