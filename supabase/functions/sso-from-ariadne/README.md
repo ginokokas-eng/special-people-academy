@@ -12,14 +12,23 @@ Content-Type: application/json
 
 {
   "next": "/my-learning",            // optional, internal path only
-  "nonce": "<random 16+ chars>"      // optional but recommended
+  "nonce": "<fresh random 16-128 chars>"   // REQUIRED, new value per tap
 }
 ```
+
+`nonce` is **required** and must be **freshly generated for every exchange
+request** (recommended: 32 random bytes, base64url — 43 chars). Allowed charset
+`A-Z a-z 0-9 . _ ~ -`, length 16–128. It is the replay key: the pair
+(Ariadne `sub`, `nonce`) may be exchanged **once**, so reusing a nonce returns a
+generic `403 sso_denied`. A missing or malformed nonce returns
+`400 invalid_request`. Note the same Ariadne access token may legitimately be
+used for many taps within its lifetime — only the nonce must change.
 
 The Ariadne token is verified offline against Ariadne's public JWKS
 (`https://hbklqmoywlxbjvpxsxyc.supabase.co/auth/v1/.well-known/jwks.json`),
 issuer pinned to `https://hbklqmoywlxbjvpxsxyc.supabase.co/auth/v1`, audience
 `authenticated`, ES256/RS256 only. Verification fails closed.
+
 
 ## Response `200`
 

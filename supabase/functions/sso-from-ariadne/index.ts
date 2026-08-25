@@ -300,7 +300,6 @@ Deno.serve(async (req) => {
   }
 
   const next = safeNext(body.next) ?? '/my-learning';
-  const nonce = typeof body.nonce === 'string' && body.nonce.length <= 128 ? body.nonce : null;
   const expiresAt = new Date(Date.now() + LINK_TTL_SECONDS * 1000).toISOString();
 
   const fragment = new URLSearchParams({
@@ -308,8 +307,9 @@ Deno.serve(async (req) => {
     type: 'email',
     next,
     expires_at: expiresAt,
+    nonce,
   });
-  if (nonce) fragment.set('nonce', nonce);
+
 
   await audit({
     sub,
