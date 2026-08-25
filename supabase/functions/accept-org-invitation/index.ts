@@ -21,7 +21,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors';
 import { findAuthUserByEmail } from '../_shared/ariadne.ts';
-import { hashToken, looksLikeToken, normaliseEmail } from '../_shared/org-invites.ts';
+import {
+  hashToken,
+  looksLikeToken,
+  normaliseDisplayName,
+  normaliseEmail,
+} from '../_shared/org-invites.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
