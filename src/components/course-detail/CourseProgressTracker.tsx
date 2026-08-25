@@ -90,7 +90,7 @@ export function CourseProgressTracker({
         return;
       }
 
-      const response = await supabase.functions.invoke('check-course-completion', {
+      const response = await supabase.functions.invoke('issue-certificate', {
         body: { course_id: courseId },
         headers: {
           Authorization: `Bearer ${session.access_token}`,

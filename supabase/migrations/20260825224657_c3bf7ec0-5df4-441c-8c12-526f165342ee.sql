@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Service role can upload certificates" ON storage.objects;

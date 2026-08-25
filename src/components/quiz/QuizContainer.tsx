@@ -70,7 +70,7 @@ export function QuizContainer({
 
   const checkCourseCompletion = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('check-course-completion', {
+      const { data, error } = await supabase.functions.invoke('issue-certificate', {
         body: { course_id: courseId },
       });
       if (!error && data?.completed && data?.certificate_id) {

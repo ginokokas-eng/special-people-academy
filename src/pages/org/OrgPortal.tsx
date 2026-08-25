@@ -33,6 +33,20 @@ interface PendingInvitation {
   licence_id: string | null;
 }
 
+interface OrgCertificate {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  course_title: string;
+  certificate_number: string;
+  certificate_type: string;
+  verification_code: string | null;
+  issued_at: string;
+  expires_at: string | null;
+  status: string;
+}
+
 interface MatrixRow {
   user_id: string;
   full_name: string | null;
@@ -86,12 +100,14 @@ export default function OrgPortal() {
   const [matrix, setMatrix] = useState<MatrixRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [certificates, setCertificates] = useState<OrgCertificate[]>([]);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!organisation) return;
     setLoading(true);
 
-    const [peopleRes, inviteRes, matrixRes] = await Promise.all([
+    const [peopleRes, inviteRes, matrixRes, certRes] = await Promise.all([
       supabase.rpc('get_org_people', { _org: organisation.id }),
       supabase
         .from('organisation_invitations')
@@ -100,11 +116,13 @@ export default function OrgPortal() {
         .eq('status', 'pending')
         .order('created_at', { ascending: false }),
       supabase.rpc('get_org_compliance_matrix', { _org: organisation.id }),
+      supabase.rpc('get_org_certificates', { _org: organisation.id }),
     ]);
 
     setPeople((peopleRes.data ?? []) as OrgPerson[]);
     setInvitations((inviteRes.data ?? []) as PendingInvitation[]);
     setMatrix((matrixRes.data ?? []) as unknown as MatrixRow[]);
+    setCertificates((certRes.data ?? []) as unknown as OrgCertificate[]);
     setLoading(false);
   }, [organisation]);
 
@@ -198,6 +216,27 @@ export default function OrgPortal() {
       </div>
     );
   }
+
+  const downloadCertificate = async (certificateId: string) => {
+    setDownloading(certificateId);
+    try {
+      // Entitlement-checked: the storage path comes from the row server-side.
+      const { data, error } = await supabase.functions.invoke('issue-certificate', {
+        body: { action: 'download', certificate_id: certificateId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast.error(data?.error ?? 'Certificate is not available yet');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not open that certificate');
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -475,11 +514,67 @@ export default function OrgPortal() {
                   <Award className="h-5 w-5 text-primary" />
                   Certificates
                 </CardTitle>
+                <CardDescription>
+                  Issued certificates for your team. Anyone can check one at /verify with its code.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Certificates appear here once issued.
-                </p>
+                {certificates.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Certificates appear here once issued.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Learner</TableHead>
+                        <TableHead>Course</TableHead>
+                        <TableHead>Issued</TableHead>
+                        <TableHead>Expires</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Certificate</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {certificates.map((cert) => (
+                        <TableRow key={cert.id}>
+                          <TableCell>
+                            <p className="font-medium">{cert.full_name || cert.email || 'Learner'}</p>
+                            <p className="text-xs text-muted-foreground">{cert.email}</p>
+                          </TableCell>
+                          <TableCell>
+                            <p>{cert.course_title}</p>
+                            {cert.verification_code && (
+                              <p className="font-mono text-xs text-muted-foreground">{cert.verification_code}</p>
+                            )}
+                          </TableCell>
+                          <TableCell>{fmtDate(cert.issued_at)}</TableCell>
+                          <TableCell>{cert.expires_at ? fmtDate(cert.expires_at) : 'No expiry'}</TableCell>
+                          <TableCell>
+                            <Badge variant={cert.status === 'expired' ? 'outline' : 'secondary'}>
+                              {cert.status === 'expired'
+                                ? 'Expired'
+                                : cert.status === 'expiring_soon'
+                                  ? 'Expiring soon'
+                                  : 'Valid'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void downloadCertificate(cert.id)}
+                              disabled={downloading === cert.id}
+                            >
+                              {downloading === cert.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : null}
+                              Download
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

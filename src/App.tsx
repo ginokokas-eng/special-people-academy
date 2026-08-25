@@ -22,6 +22,7 @@ import QuizPage from "./pages/QuizPage";
 import MyLearning from "./pages/MyLearning";
 import MyCourses from "./pages/MyCourses";
 import Certificates from "./pages/Certificates";
+import VerifyCertificate from "./pages/VerifyCertificate";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -97,6 +98,7 @@ const App = () => (
                 <Route path="/my-learning" element={<MyLearning />} />
                 <Route path="/my-courses" element={<MyCourses />} />
                 <Route path="/certificates" element={<Certificates />} />
+                <Route path="/verify/:code" element={<VerifyCertificate />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
 

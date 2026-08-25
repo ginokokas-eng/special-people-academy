@@ -341,10 +341,13 @@ export type Database = {
           competency_signed_at: string | null
           competency_signed_by: string | null
           course_id: string
+          expires_at: string | null
           id: string
           issued_at: string
+          organisation_id: string | null
           pdf_path: string | null
           user_id: string
+          verification_code: string | null
         }
         Insert: {
           certificate_number: string
@@ -352,10 +355,13 @@ export type Database = {
           competency_signed_at?: string | null
           competency_signed_by?: string | null
           course_id: string
+          expires_at?: string | null
           id?: string
           issued_at?: string
+          organisation_id?: string | null
           pdf_path?: string | null
           user_id: string
+          verification_code?: string | null
         }
         Update: {
           certificate_number?: string
@@ -363,10 +369,13 @@ export type Database = {
           competency_signed_at?: string | null
           competency_signed_by?: string | null
           course_id?: string
+          expires_at?: string | null
           id?: string
           issued_at?: string
+          organisation_id?: string | null
           pdf_path?: string | null
           user_id?: string
+          verification_code?: string | null
         }
         Relationships: [
           {
@@ -381,6 +390,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]
@@ -2914,6 +2930,23 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_org_certificates: {
+        Args: { _org: string }
+        Returns: {
+          certificate_number: string
+          certificate_type: string
+          course_id: string
+          course_title: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          issued_at: string
+          status: string
+          user_id: string
+          verification_code: string
+        }[]
+      }
       get_org_compliance_matrix: {
         Args: { _org: string }
         Returns: {
@@ -2975,6 +3008,18 @@ export type Database = {
       sync_staff_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          certificate_number: string
+          certificate_type: string
+          course_title: string
+          expires_at: string
+          issued_at: string
+          learner_name: string
+          status: string
+        }[]
       }
     }
     Enums: {

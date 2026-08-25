@@ -81,8 +81,8 @@ export default function Certificates() {
     setDownloading(cert.id);
     try {
       // Call the edge function to generate/get the certificate
-      const { data, error } = await supabase.functions.invoke('generate-certificate', {
-        body: { certificate_id: cert.id },
+      const { data, error } = await supabase.functions.invoke('issue-certificate', {
+        body: { action: 'download', certificate_id: cert.id },
       });
 
       if (error) {
