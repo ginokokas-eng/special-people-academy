@@ -124,11 +124,33 @@ export async function resolveOrProvisionLearner(
     }
 
     await stampProfile(admin, created.user.id, identity, ariadneUserId);
+    await ensureHomeOrgMembership(admin, created.user.id);
     return { status: 'provisioned', userId: created.user.id, provisioned: true, via: 'created' };
   } catch (e) {
     return { status: 'failed', reason: (e as Error).message };
   }
 }
+
+/**
+ * Places a newly provisioned learner in the Special People home organisation as
+ * a plain `member`. Idempotent — never promotes, never overwrites an existing row.
+ * Failures are non-fatal: sign-in must not break because of org bookkeeping.
+ */
+export async function ensureHomeOrgMembership(
+  admin: SupabaseClient,
+  userId: string,
+): Promise<void> {
+  const { error } = await admin
+    .from('organisation_members')
+    .upsert(
+      { organisation_id: HOME_ORGANISATION_ID, user_id: userId, org_role: 'member' },
+      { onConflict: 'organisation_id,user_id', ignoreDuplicates: true },
+    );
+  if (error) {
+    console.error('[ariadne] home-org membership stamp failed', error.message);
+  }
+}
+
 
 /** Writes the Ariadne identifiers onto the Academy profile (additive only). */
 export async function stampProfile(
