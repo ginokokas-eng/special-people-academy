@@ -2914,6 +2914,37 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_org_compliance_matrix: {
+        Args: { _org: string }
+        Returns: {
+          completed_at: string
+          course_id: string
+          course_title: string
+          cpd_hours: number
+          cpd_hours_total: number
+          email: string
+          full_name: string
+          licence_id: string
+          percent: number
+          required_completed: number
+          required_total: number
+          seat_status: string
+          status: string
+          user_id: string
+        }[]
+      }
+      get_org_people: {
+        Args: { _org: string }
+        Returns: {
+          email: string
+          ended_at: string
+          full_name: string
+          job_title: string
+          org_role: string
+          started_at: string
+          user_id: string
+        }[]
+      }
       has_active_licence_seat: {
         Args: { _course: string; _user: string }
         Returns: boolean
@@ -2937,7 +2968,9 @@ export type Database = {
       }
       is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      release_expired_invitation_seats: { Args: never; Returns: number }
+      release_expired_invitation_seats:
+        | { Args: never; Returns: number }
+        | { Args: { _org: string }; Returns: number }
       revoke_seat: { Args: { _seat_id: string }; Returns: boolean }
       sync_staff_role: {
         Args: never

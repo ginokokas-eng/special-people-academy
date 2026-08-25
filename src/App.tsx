@@ -62,6 +62,10 @@ import PaymentCanceled from "./pages/PaymentCanceled";
 import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ScormPlayer from "./pages/ScormPlayer";
+import Organisations from "./pages/admin/Organisations";
+import Licences from "./pages/admin/Licences";
+import OrgPortal from "./pages/org/OrgPortal";
+import InviteAccept from "./pages/InviteAccept";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +108,8 @@ const App = () => (
                 <Route path="/admin-portal/courses/:id/lessons/:lessonId/content" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><LessonContentEditor /></ProtectedRoute>} />
                 <Route path="/admin-portal/courses/:id/preview" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><CoursePreview /></ProtectedRoute>} />
                 <Route path="/admin-portal/learners" element={<ProtectedRoute requiredRoles={['admin']}><Learners /></ProtectedRoute>} />
+                <Route path="/admin-portal/organisations" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Organisations /></ProtectedRoute>} />
+                <Route path="/admin-portal/licences" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Licences /></ProtectedRoute>} />
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />
@@ -145,6 +151,8 @@ const App = () => (
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
                 <Route path="/scorm/launch/:registrationId" element={<ScormPlayer />} />
+                <Route path="/invite" element={<InviteAccept />} />
+                <Route path="/org" element={<OrgPortal />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

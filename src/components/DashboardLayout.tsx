@@ -29,6 +29,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { learnerNavItems, learnerDropdownItems } from '@/config/navigation';
+import { useOrgAdmin } from '@/hooks/useOrgAdmin';
+import { Building2 } from '@/components/icons';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -76,6 +78,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
   const showAdminLink = isAdmin || isSuperAdmin || isOpsTrainingAdmin || isTrainer;
+  // Organisation admins get a /org link. Platform staff use the admin portal
+  // instead, so the link is hidden for them even if they hold a membership.
+  const { isOrgAdmin } = useOrgAdmin();
+  const showOrgLink = isOrgAdmin && !showAdminLink;
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,6 +160,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         {item.label}
                       </DropdownMenuItem>
                     ))}
+                    {showOrgLink && (
+                      <DropdownMenuItem onClick={() => navigate('/org')}>
+                        <Building2 className="mr-2 h-4 w-4" />
+                        Organisation Portal
+                      </DropdownMenuItem>
+                    )}
                     {showAdminLink && (
                       <DropdownMenuItem onClick={() => navigate('/admin-portal/dashboard')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -209,6 +221,19 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </Button>
                 );
               })}
+              {showOrgLink && (
+                <Button
+                  variant={location.pathname === '/org' ? 'secondary' : 'ghost'}
+                  className={`w-full justify-start ${location.pathname === '/org' ? 'bg-primary/10 text-primary' : ''}`}
+                  onClick={() => {
+                    navigate('/org');
+                    setSidebarOpen(false);
+                  }}
+                >
+                  <Building2 className="mr-3 h-5 w-5" />
+                  Organisation
+                </Button>
+              )}
             </nav>
           </aside>
         )}
