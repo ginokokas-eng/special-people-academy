@@ -1,0 +1,44 @@
+# Maestro flow — Special People Academy Android shell integration.
+# Proves the Capacitor WebView boots the bundled build and reaches the live,
+# real-database surfaces (course catalogue + the published demo course).
+#
+#   maestro test tests/mobile/academy-android.yaml
+#
+# Requires: emulator running + debug APK installed (uk.org.specialpeople.academy).
+# Selectors are matched against the WebView accessibility tree, so they use the
+# on-screen labels verbatim (e.g. "All courses 12", "Mandatory 0").
+appId: uk.org.specialpeople.academy
+---
+- launchApp:
+    clearState: false
+    stopApp: true
+
+# 1. WebView boots; the marketing brand renders.
+- extendedWaitUntil:
+    visible:
+      text: ".*Special People.*"
+    timeout: 30000
+
+# 2. Open the nav (accessible "Open menu" button) and go to courses.
+- tapOn: "Open menu"
+- extendedWaitUntil:
+    visible: "All Courses"
+    timeout: 10000
+- tapOn: "All Courses"
+
+# 3. Catalogue rendered from the real database — count line + real category
+#    facets with their live counts (labels include the count, e.g. "Mandatory 0").
+- extendedWaitUntil:
+    visible:
+      text: ".*Showing .* of .* courses.*"
+    timeout: 20000
+- assertVisible:
+    text: "All courses .*"
+- assertVisible:
+    text: "Mandatory .*"
+
+# 4. The published demo course (with its generated cover art) is present.
+- scrollUntilVisible:
+    element:
+      text: ".*Falls Prevention Essentials.*"
+    direction: DOWN
