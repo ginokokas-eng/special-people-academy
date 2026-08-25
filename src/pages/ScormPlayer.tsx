@@ -140,7 +140,7 @@ export default function ScormPlayer() {
       // Check course completion
       if (reg.course_id) {
         try {
-          await supabase.functions.invoke('check-course-completion', {
+          await supabase.functions.invoke('issue-certificate', {
             body: { course_id: reg.course_id },
           });
         } catch (e) {

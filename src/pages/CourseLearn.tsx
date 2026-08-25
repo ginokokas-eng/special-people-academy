@@ -417,9 +417,16 @@ export default function CourseLearn() {
         return next;
       });
       if (courseId) {
+        // Fire-and-confirm: certificate issuance is re-verified server-side and
+        // must never block the completion UX.
         supabase.functions
-          .invoke('check-course-completion', { body: { course_id: courseId } })
-          .catch((e) => console.error('completion check error', e));
+          .invoke('issue-certificate', { body: { course_id: courseId } })
+          .then(({ data }) => {
+            if (data?.completed && data?.certificate_id && !data?.already_issued) {
+              toast.success('🎉 Course complete — your certificate is ready', { duration: 6000 });
+            }
+          })
+          .catch((e) => console.error('certificate issuance error', e));
       }
       if (opts?.returnHome) {
         toast.success('Lesson complete');
