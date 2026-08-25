@@ -1,10 +1,12 @@
 import {
   LayoutDashboard,
   BookOpen,
+  Building2,
   GraduationCap,
   Trophy,
   PenTool,
   ClipboardList,
+  Ticket,
   Users,
   Settings,
   Settings2,
