@@ -7,9 +7,15 @@ import { Loader2 } from '@/components/icons';
 /**
  * /sso — Ariadne single sign-on callback.
  *
- * The Ariadne app opens this route with the exchange result in the URL
- * FRAGMENT (never the query string, so it can't leak into logs or history):
+ * The exchange result arrives either in the URL FRAGMENT (the web hand-off, so
+ * the token can't leak into logs or history):
  *   /sso#token_hash=...&type=email&next=/my-learning&expires_at=...&nonce=...
+ * or in the QUERY STRING, which is how the native Android hand-off delivers it
+ * (an intent URI carries its payload in the query):
+ *   /sso?token_hash=...&type=email&next=/my-learning
+ *
+ * The fragment wins when both are present. Either way the URL is stripped
+ * immediately after reading.
  *
  * This screen only establishes the session. No auth UI, no role logic.
  */
@@ -34,18 +40,23 @@ export default function SsoCallback() {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const tokenHash = params.get('token_hash');
-    const expiresAt = params.get('expires_at');
-    const nonce = params.get('nonce');
-    const next = safeNext(params.get('next'));
+    const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const queryParams = new URLSearchParams(window.location.search.replace(/^\?/, ''));
+    // Fragment first (web hand-off), query second (native intent hand-off).
+    const source = fragmentParams.get('token_hash') ? fragmentParams : queryParams;
 
-    // Clear the fragment immediately — the token_hash must not survive in
-    // history, the address bar or any later share.
+    const tokenHash = source.get('token_hash');
+    const expiresAt = source.get('expires_at');
+    const nonce = source.get('nonce');
+    const next = safeNext(source.get('next'));
+
+    // Clear BOTH the fragment and the query immediately — the token_hash must
+    // not survive in history, the address bar or any later share.
     window.history.replaceState(null, '', window.location.pathname);
 
     const expectedNonce = sessionStorage.getItem(NONCE_KEY);
     sessionStorage.removeItem(NONCE_KEY);
+
 
     const run = async () => {
       if (!tokenHash) {
