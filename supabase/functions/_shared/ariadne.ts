@@ -15,8 +15,12 @@ export const ARIADNE_AUDIENCE = 'authenticated';
 /** Asymmetric only. HS* / none are never accepted. */
 export const ARIADNE_ALLOWED_ALGS = ['ES256', 'RS256'] as const;
 
+/** The Special People "home" organisation every internally provisioned learner belongs to. */
+export const HOME_ORGANISATION_ID = '00000000-0000-0000-0000-00000000513c';
+
 export const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 
 export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_RE.test(value);
