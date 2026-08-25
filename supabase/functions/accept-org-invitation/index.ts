@@ -207,18 +207,19 @@ Deno.serve(async (req) => {
       const { data: profile } = await admin
         .from('profiles')
         .select('id, full_name')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (profile) {
         const current = (profile.full_name ?? '').trim();
         if (!current) {
-          await admin.from('profiles').update({ full_name: displayName }).eq('id', userId);
+          await admin.from('profiles').update({ full_name: displayName }).eq('id', profile.id);
         }
       } else {
-        await admin.from('profiles').insert({ id: userId, email, full_name: displayName });
+        await admin.from('profiles').insert({ user_id: userId, full_name: displayName });
       }
     }
+
 
     const courseId = await applyBindings(invitation, userId);
 
