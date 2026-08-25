@@ -118,12 +118,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // roles-loading state: guards unmount their children while loading,
           // which would destroy in-progress editor state.
           if (nextUserId !== previousUserId) {
+            // A different learner has taken over this client (e.g. a native SSO
+            // hand-off replacing an existing session): the previous user's
+            // cached queries must not survive the swap.
+            if (previousUserId) queryClient.clear();
             setTimeout(() => {
               if (isMounted) {
                 checkUserRoles(session.user.id);
               }
             }, 0);
           }
+
         } else {
           clearRoles();
         }

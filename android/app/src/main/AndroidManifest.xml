@@ -22,6 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Ariadne "Open training" hand-off:
+                 uk.org.specialpeople.academy://sso?token_hash=...&type=email&next=/my-learning
+                 Launched with an EXPLICIT intent (setPackage) from the carer app. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="uk.org.specialpeople.academy"
+                    android:host="sso" />
+            </intent-filter>
+
+
         </activity>
 
         <provider
