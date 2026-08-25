@@ -98,3 +98,9 @@ export function useNativeSsoHandoff() {
     };
   }, [navigate]);
 }
+
+/** Mount-once component wrapper, used inside BrowserRouter. */
+export function NativeSsoHandoff() {
+  useNativeSsoHandoff();
+  return null;
+}

@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { useNativeSsoHandoff } from "@/hooks/useNativeSsoHandoff";
+import { NativeSsoHandoff } from "@/hooks/useNativeSsoHandoff";
 
 import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
