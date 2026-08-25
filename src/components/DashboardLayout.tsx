@@ -78,6 +78,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
   const showAdminLink = isAdmin || isSuperAdmin || isOpsTrainingAdmin || isTrainer;
+  // Organisation admins get a /org link. Platform staff use the admin portal
+  // instead, so the link is hidden for them even if they hold a membership.
+  const { isOrgAdmin } = useOrgAdmin();
+  const showOrgLink = isOrgAdmin && !showAdminLink;
 
   return (
     <div className="min-h-screen bg-background">
