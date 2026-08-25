@@ -460,6 +460,7 @@ export type Database = {
       course_offerings: {
         Row: {
           active: boolean | null
+          available_to: string
           base_price_gbp: number
           course_id: string
           created_at: string | null
@@ -470,6 +471,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          available_to?: string
           base_price_gbp: number
           course_id: string
           created_at?: string | null
@@ -480,6 +482,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          available_to?: string
           base_price_gbp?: number
           course_id?: string
           created_at?: string | null
@@ -907,6 +910,7 @@ export type Database = {
           course_id: string
           enrolled_at: string
           id: string
+          licence_seat_id: string | null
           user_id: string
         }
         Insert: {
@@ -914,6 +918,7 @@ export type Database = {
           course_id: string
           enrolled_at?: string
           id?: string
+          licence_seat_id?: string | null
           user_id: string
         }
         Update: {
@@ -921,6 +926,7 @@ export type Database = {
           course_id?: string
           enrolled_at?: string
           id?: string
+          licence_seat_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -929,6 +935,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_licence_seat_id_fkey"
+            columns: ["licence_seat_id"]
+            isOneToOne: false
+            referencedRelation: "licence_seats"
             referencedColumns: ["id"]
           },
         ]
@@ -1498,6 +1511,138 @@ export type Database = {
           },
         ]
       }
+      licence_seats: {
+        Row: {
+          assigned_at: string
+          created_at: string
+          id: string
+          invitation_id: string | null
+          licence_id: string
+          revoked_at: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          licence_id: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          licence_id?: string
+          revoked_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "licence_seats_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "organisation_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licence_seats_licence_id_fkey"
+            columns: ["licence_id"]
+            isOneToOne: false
+            referencedRelation: "licences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      licences: {
+        Row: {
+          course_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          offering_id: string | null
+          org_order_id: string | null
+          organisation_id: string
+          renews_licence_id: string | null
+          seats_total: number
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          offering_id?: string | null
+          org_order_id?: string | null
+          organisation_id: string
+          renews_licence_id?: string | null
+          seats_total: number
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          offering_id?: string | null
+          org_order_id?: string | null
+          organisation_id?: string
+          renews_licence_id?: string | null
+          seats_total?: number
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "licences_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licences_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licences_org_order_id_fkey"
+            columns: ["org_order_id"]
+            isOneToOne: false
+            referencedRelation: "org_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licences_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licences_renews_licence_id_fkey"
+            columns: ["renews_licence_id"]
+            isOneToOne: false
+            referencedRelation: "licences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_competency_signoffs: {
         Row: {
           action_plan: string | null
@@ -1719,6 +1864,190 @@ export type Database = {
           stripe_session_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      org_orders: {
+        Row: {
+          amount_gbp: number
+          created_at: string
+          id: string
+          organisation_id: string
+          po_reference: string | null
+          reference: string
+          source: string
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_gbp?: number
+          created_at?: string
+          id?: string
+          organisation_id: string
+          po_reference?: string | null
+          reference: string
+          source?: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_gbp?: number
+          created_at?: string
+          id?: string
+          organisation_id?: string
+          po_reference?: string | null
+          reference?: string
+          source?: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_orders_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organisation_invitations: {
+        Row: {
+          accepted_user_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          licence_id: string | null
+          org_role: string
+          organisation_id: string
+          status: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_user_id?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by?: string | null
+          licence_id?: string | null
+          org_role?: string
+          organisation_id: string
+          status?: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_user_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          licence_id?: string | null
+          org_role?: string
+          organisation_id?: string
+          status?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organisation_invitations_licence_id_fkey"
+            columns: ["licence_id"]
+            isOneToOne: false
+            referencedRelation: "licences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organisation_invitations_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organisation_members: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          org_role: string
+          organisation_id: string
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          org_role?: string
+          organisation_id: string
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          org_role?: string
+          organisation_id?: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organisation_members_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organisations: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          logo_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2514,45 +2843,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          id: string
-          plan: string
-          status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          plan?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          plan?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_sync_log: {
         Row: {
           created_at: string
@@ -2594,11 +2884,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_seat: {
+        Args: {
+          _email?: string
+          _invitation_id?: string
+          _licence_id: string
+          _user_id?: string
+        }
+        Returns: string
+      }
+      create_licence: {
+        Args: {
+          _amount_gbp?: number
+          _course_id: string
+          _expires_at: string
+          _offering_id: string
+          _order_reference: string
+          _order_status?: string
+          _organisation_id: string
+          _po_reference?: string
+          _seats_total: number
+          _starts_at: string
+        }
+        Returns: string
+      }
       get_course_competency_assessors: {
         Args: { _course_id: string }
         Returns: {
           full_name: string
         }[]
+      }
+      has_active_licence_seat: {
+        Args: { _course: string; _user: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -2612,7 +2930,15 @@ export type Database = {
         Returns: boolean
       }
       is_ops_training_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
+      is_org_admin_of_member: {
+        Args: { _admin: string; _member: string }
+        Returns: boolean
+      }
+      is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      release_expired_invitation_seats: { Args: never; Returns: number }
+      revoke_seat: { Args: { _seat_id: string }; Returns: boolean }
       sync_staff_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

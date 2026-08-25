@@ -32,24 +32,9 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    // First check our database for subscription
-    const { data: dbSubscription } = await supabaseClient
-      .from("user_subscriptions")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
+    // Subscription state is read from Stripe directly — the local
+    // user_subscriptions mirror was removed (B2B licences replace it).
 
-    if (dbSubscription && dbSubscription.status === "active") {
-      return new Response(JSON.stringify({
-        subscribed: true,
-        plan: dbSubscription.plan,
-        subscription_end: dbSubscription.current_period_end,
-        source: "database"
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
 
     // Fallback to checking Stripe directly
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
@@ -83,20 +68,8 @@ serve(async (req) => {
       else if (priceId === "price_1Sxp0wRx4aeCjAMWHnRxZcLb") plan = "team";
       else if (priceId === "price_1Sxp21Rx4aeCjAMWcILR5zbd") plan = "organization";
       else plan = "basic";
-
-      // Sync to database
-      await supabaseClient
-        .from("user_subscriptions")
-        .upsert({
-          user_id: user.id,
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subscription.id,
-          plan,
-          status: "active",
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: subscriptionEnd,
-        }, { onConflict: "user_id" });
     }
+
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,

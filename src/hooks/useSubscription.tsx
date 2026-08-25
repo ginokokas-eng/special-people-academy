@@ -30,40 +30,20 @@ export function useSubscription(): UseSubscriptionReturn {
     }
 
     try {
-      // First try local database
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      
-      if (data && data.status === 'active') {
+      // Entitlement is read from Stripe via the edge function. The local
+      // user_subscriptions mirror was removed in favour of organisation licences.
+      const { data: checkData, error: checkError } = await supabase.functions.invoke(
+        'check-subscription',
+      );
+      if (!checkError && checkData?.subscribed) {
         setSubscription({
-          id: data.id,
-          plan: data.plan,
-          status: data.status,
-          current_period_end: data.current_period_end,
+          id: 'stripe-synced',
+          plan: checkData.plan || 'basic',
+          status: 'active',
+          current_period_end: checkData.subscription_end ?? null,
         });
       } else {
-        // Fallback: check via edge function (syncs with Stripe)
-        try {
-          const { data: checkData, error: checkError } = await supabase.functions.invoke('check-subscription');
-          if (!checkError && checkData?.subscribed) {
-            setSubscription({
-              id: 'stripe-synced',
-              plan: checkData.plan || 'basic',
-              status: 'active',
-              current_period_end: checkData.subscription_end,
-            });
-          } else {
-            setSubscription(null);
-          }
-        } catch {
-          // Edge function not available, use database result
-          setSubscription(data);
-        }
+        setSubscription(null);
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
@@ -72,6 +52,7 @@ export function useSubscription(): UseSubscriptionReturn {
       setLoading(false);
     }
   }, [user]);
+
 
   useEffect(() => {
     fetchSubscription();
