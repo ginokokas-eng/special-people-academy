@@ -147,25 +147,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     throw orderError;
   }
 
-  // Only update subscription if this is a subscription checkout
-  if (session.mode === "subscription" && session.subscription) {
-    const { error: subError } = await supabase
-      .from("user_subscriptions")
-      .upsert({
-        user_id: userId,
-        stripe_customer_id: session.customer as string,
-        stripe_subscription_id: session.subscription as string,
-        plan: session.metadata?.plan_id || "basic",
-        status: "active",
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      }, { onConflict: "user_id" });
+  // Subscription checkouts are recorded in `orders` only. The local
+  // user_subscriptions mirror was removed — organisation licences replace it.
 
-    if (subError) {
-      console.error("[WEBHOOK] Failed to update subscription:", subError);
-      throw subError;
-    }
-  }
 
   console.log(`[WEBHOOK] Successfully processed checkout for user ${userId}`);
 }
