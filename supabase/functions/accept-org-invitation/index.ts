@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
-  let body: { token?: string };
+  let body: { token?: string; display_name?: string };
   try {
     body = await req.json();
   } catch {
@@ -124,6 +124,15 @@ Deno.serve(async (req) => {
   }
 
   if (!looksLikeToken(body.token)) return json(INVALID, 400);
+
+  const displayName = normaliseDisplayName(body.display_name);
+  if (body.display_name !== undefined && !displayName) {
+    return json(
+      { error: 'invalid_name', message: 'Please enter your full name (2–100 characters).' },
+      400,
+    );
+  }
+
 
   const tokenHash = await hashToken(body.token);
 
