@@ -221,6 +221,19 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </Button>
                 );
               })}
+              {showOrgLink && (
+                <Button
+                  variant={location.pathname === '/org' ? 'secondary' : 'ghost'}
+                  className={`w-full justify-start ${location.pathname === '/org' ? 'bg-primary/10 text-primary' : ''}`}
+                  onClick={() => {
+                    navigate('/org');
+                    setSidebarOpen(false);
+                  }}
+                >
+                  <Building2 className="mr-3 h-5 w-5" />
+                  Organisation
+                </Button>
+              )}
             </nav>
           </aside>
         )}
