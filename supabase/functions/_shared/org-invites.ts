@@ -17,6 +17,21 @@ export function normaliseEmail(value: unknown): string | null {
   return /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/.test(email) ? email : null;
 }
 
+/**
+ * Display names: trimmed, control characters stripped, whitespace collapsed.
+ * Returns null when the result is not 2–100 characters.
+ */
+export function normaliseDisplayName(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const cleaned = value
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (cleaned.length < 2 || cleaned.length > 100) return null;
+  return cleaned;
+}
+
 /** Splits a bulk paste (newlines, commas, semicolons) into unique emails + rejects. */
 export function parseEmailList(raw: string): { emails: string[]; invalid: string[] } {
   const parts = raw
