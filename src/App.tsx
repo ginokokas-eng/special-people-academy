@@ -94,6 +94,8 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+
                 <Route path="/sso" element={<SsoCallback />} />
                 <Route path="/native-welcome" element={<NativeWelcome />} />
 
