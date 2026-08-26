@@ -215,7 +215,7 @@ export default function OrgPortal() {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Could not open that certificate');
+      toast.error('Could not open that certificate', { description: 'Try again in a moment.' });
     } finally {
       setDownloading(null);
     }
@@ -411,7 +411,9 @@ export default function OrgPortal() {
             sub={
               invitations.length > 0
                 ? `${invitations.length} ${invitations.length === 1 ? 'invitation' : 'invitations'} pending`
-                : 'Everyone is on board'
+                : activeMembers.length > 0
+                  ? 'Everyone is on board'
+                  : 'Invite your first people'
             }
           />
           <StatTile
@@ -443,7 +445,7 @@ export default function OrgPortal() {
             label="Training complete"
             sub={
               licensedCourses.length > 0
-                ? `${matrixStats.completed} of ${matrixStats.total} course places finished`
+                ? `${matrixStats.completed} of ${matrixStats.total} course places complete`
                 : 'No licensed courses yet'
             }
           />
