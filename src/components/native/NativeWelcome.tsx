@@ -10,9 +10,12 @@ import logo from '@/assets/logo.svg';
  * This screen CANNOT start Ariadne SSO. That exchange is one-directional and
  * begins in the Ariadne carer app, which posts its own access token to
  * sso-from-ariadne and launches us by intent at /sso (see useNativeSsoHandoff).
- * Opened cold we hold no Ariadne token, so there is nothing to exchange — the
- * copy below points at the route that works instead of promising one we
- * cannot honour here.
+ * Opened cold we hold no Ariadne token, so there is nothing to exchange.
+ *
+ * Ariadne is also only ONE audience. Courses are sold to other care
+ * organisations whose staff have no Ariadne at all — they arrive through an
+ * organisation invitation. Copy here must serve both, and must not present an
+ * internal system name as the way in.
  */
 export const NativeWelcome = () => {
   const navigate = useNavigate();
@@ -42,8 +45,8 @@ export const NativeWelcome = () => {
           Browse courses
         </Button>
         <p className="px-1 pt-1 text-[12px] leading-relaxed text-muted-foreground">
-          Using the Ariadne carer app? Open <strong className="font-semibold">Training</strong>{' '}
-          there and you are signed in automatically &mdash; no password needed.
+          Invited by your employer? Use the link in your invitation email. If your organisation
+          uses the Ariadne carer app, open Training there and you arrive already signed in.
         </p>
       </div>
     </div>
