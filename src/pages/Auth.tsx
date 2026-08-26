@@ -31,10 +31,14 @@ const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signIn, signUp, loading } = useAuth();
+  const { user, signIn, signUp, requestPasswordReset, loading } = useAuth();
   const { loginRedirectUrl } = useRedirectSettings();
   const branding = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Invited organisation staff have no password, so passwordless is a
+  // first-class alternative rather than a recovery afterthought.
+  const [loginMode, setLoginMode] = useState<'password' | 'code'>('password');
+
   
   // Determine initial tab based on route
   const initialTab = location.pathname === '/sign-up' ? 'signup' : 'login';
