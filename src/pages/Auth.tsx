@@ -105,18 +105,8 @@ export default function Auth() {
       }
     } else {
       toast.success('Welcome back!');
-      // Ensure any active staff profile is reflected in the user's roles
-      // (server-side, tamper-resistant), then redirect based on roles.
-      let effectiveRoles = roles || [];
-      const { data: synced } = await supabase.rpc('sync_staff_role');
-      if (synced) {
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
-        effectiveRoles = rolesData?.map(r => r.role) || effectiveRoles;
-      }
-      navigate(landingForRoles(effectiveRoles));
+      await finishSignIn(roles || []);
+
     }
   };
 
