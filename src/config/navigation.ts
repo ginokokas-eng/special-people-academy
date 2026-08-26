@@ -30,13 +30,13 @@ export const learnerNavItems: NavItem[] = [
 
 /** Admin portal top-bar items (visible based on role) */
 export const adminNavItems: NavItem[] = [
-  { label: 'Admin Dashboard', href: '/admin-portal/dashboard', icon: LayoutDashboard },
-  { label: 'Course Builder', href: '/admin-portal/courses', icon: PenTool },
-  { label: 'Training Portal', href: '/admin-portal/trainer', icon: ClipboardList },
+  { label: 'Dashboard', href: '/admin-portal/dashboard', icon: LayoutDashboard },
+  { label: 'Courses', href: '/admin-portal/courses', icon: PenTool },
+  { label: 'Training', href: '/admin-portal/trainer', icon: ClipboardList },
   { label: 'Learners', href: '/admin-portal/learners', icon: GraduationCap },
   { label: 'Organisations', href: '/admin-portal/organisations', icon: Building2 },
   { label: 'Licences', href: '/admin-portal/licences', icon: Ticket },
-  { label: 'Staff Management', href: '/admin-portal/staff-management', icon: Users },
+  { label: 'Staff', href: '/admin-portal/staff-management', icon: Users },
   { label: 'Integrations', href: '/admin-portal/integrations', icon: Settings2 },
   { label: 'Settings', href: '/admin-portal/settings', icon: Settings },
 ];

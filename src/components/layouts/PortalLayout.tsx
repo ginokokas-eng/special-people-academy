@@ -96,7 +96,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Portal Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      <header className="material-chrome sticky top-0 z-50">
         <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-4">
@@ -115,14 +115,14 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
                 {backLabel || 'Back'}
               </Button>
             ) : (
-              <a href="/" className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+              <a href="/" className="flex shrink-0 items-center gap-2.5 whitespace-nowrap text-lg font-bold">
                 <img src={logo} alt={branding.platformName} className="h-8 w-8 object-contain flex-shrink-0" />
                 <span className="hidden sm:inline text-foreground tracking-tight">Admin Portal</span>
               </a>
             )}
 
-            {title && (
-              <div className="hidden md:flex items-center gap-2 text-muted-foreground">
+            {backHref && title && (
+              <div className="hidden items-center gap-2 whitespace-nowrap text-muted-foreground md:flex">
                 <span className="text-border">/</span>
                 <span className="font-medium text-foreground">{title}</span>
               </div>
@@ -130,18 +130,20 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
           </div>
 
           {/* Center navigation (desktop) */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden min-w-0 items-center gap-0.5 overflow-x-auto lg:flex" aria-label="Admin sections">
             {visibleNavItems.map((item) => {
               const isActive = location.pathname.startsWith(item.href);
               return (
                 <Button
                   key={item.href}
-                  variant={isActive ? 'secondary' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => navigate(item.href)}
-                  className={isActive ? 'bg-primary/10 text-primary' : ''}
+                  className={`shrink-0 whitespace-nowrap font-medium ${
+                    isActive ? 'bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
-                  <item.icon className="mr-2 h-4 w-4" />
                   {item.label}
                 </Button>
               );
@@ -149,7 +151,7 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="hidden sm:flex gap-2">
               <Home className="h-4 w-4" />
               Learner View
