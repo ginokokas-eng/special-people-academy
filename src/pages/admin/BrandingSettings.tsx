@@ -97,7 +97,7 @@ export default function BrandingSettingsPage() {
             <CardDescription>Set the name and tagline shown across the platform.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="platformName">Platform Name</Label>
                 <Input id="platformName" value={form.platformName} onChange={e => setForm(p => ({ ...p, platformName: e.target.value }))} />
@@ -150,7 +150,7 @@ export default function BrandingSettingsPage() {
             <CardDescription>Customise footer text and social media links.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="footerLeft">Footer Text (Left)</Label>
                 <Input id="footerLeft" value={form.footerTextLeft} onChange={e => setForm(p => ({ ...p, footerTextLeft: e.target.value }))} />
@@ -166,7 +166,7 @@ export default function BrandingSettingsPage() {
 
             <div className="space-y-4">
               <Label className="text-base font-medium">Social Links</Label>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {(['linkedin', 'facebook', 'instagram', 'youtube', 'email'] as const).map(key => (
                   <div key={key} className="space-y-2">
                     <Label htmlFor={`social-${key}`} className="capitalize">{key}</Label>

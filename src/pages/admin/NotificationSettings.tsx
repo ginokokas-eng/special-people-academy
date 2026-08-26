@@ -134,7 +134,7 @@ export default function NotificationSettingsPage() {
                 Email provider not configured — emails won't send until connected. These settings will apply once an email provider is set up.
               </AlertDescription>
             </Alert>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="fromName">From Name</Label>
                 <Input id="fromName" value={form.fromName} onChange={e => setForm(p => ({ ...p, fromName: e.target.value }))} />

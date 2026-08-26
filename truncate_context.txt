@@ -1,0 +1,73 @@
+src/components/course-detail/CourseContent.tsx-        {/* Lesson info */}
+src/components/course-detail/CourseContent.tsx-          <div className="min-w-0 flex-1">
+src/components/course-detail/CourseContent.tsx:          <p className={`font-medium text-sm truncate ${isLocked ? 'text-muted-foreground' : ''}`}>
+src/components/course-detail/CourseContent.tsx-            {index + 1}. {lesson.title}
+src/components/course-detail/CourseContent.tsx-          </p>
+--
+src/components/course-learn/CourseContentSidebar.tsx-      <CollapsibleTrigger className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors">
+src/components/course-learn/CourseContentSidebar.tsx-        <div className="min-w-0 flex-1">
+src/components/course-learn/CourseContentSidebar.tsx:          <p className="text-sm font-semibold text-foreground truncate">{title}</p>
+src/components/course-learn/CourseContentSidebar.tsx-          <p className="text-xs text-muted-foreground mt-0.5">
+src/components/course-learn/CourseContentSidebar.tsx-            {completed}/{lessons.length} · {duration || '—'}
+--
+src/components/course-learn/CourseContentSidebar.tsx-                  <Download className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+src/components/course-learn/CourseContentSidebar.tsx-                )}
+src/components/course-learn/CourseContentSidebar.tsx:                <span className="min-w-0 flex-1 truncate">{r.title}</span>
+src/components/course-learn/CourseContentSidebar.tsx-              </button>
+src/components/course-learn/CourseContentSidebar.tsx-            ))}
+--
+src/components/course-learn/MobileCoursePlayer.tsx-          <ArrowLeft className="h-5 w-5" />
+src/components/course-learn/MobileCoursePlayer.tsx-        </Button>
+src/components/course-learn/MobileCoursePlayer.tsx:        <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{course.title}</h1>
+src/components/course-learn/MobileCoursePlayer.tsx-      </header>
+src/components/course-learn/MobileCoursePlayer.tsx-
+--
+src/components/course-learn/MobileLectureList.tsx-      <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 bg-muted/30 px-4 py-3.5 text-left transition-colors hover:bg-muted/50">
+src/components/course-learn/MobileLectureList.tsx-        <div className="min-w-0 flex-1">
+src/components/course-learn/MobileLectureList.tsx:          <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+src/components/course-learn/MobileLectureList.tsx-          <p className="mt-0.5 text-xs text-muted-foreground">{progressLabel}</p>
+src/components/course-learn/MobileLectureList.tsx-        </div>
+--
+src/components/course-learn/MobileLectureList.tsx-                  <Download className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+src/components/course-learn/MobileLectureList.tsx-                )}
+src/components/course-learn/MobileLectureList.tsx:                <span className="min-w-0 flex-1 truncate">{r.title}</span>
+src/components/course-learn/MobileLectureList.tsx-              </button>
+src/components/course-learn/MobileLectureList.tsx-            ))}
+--
+src/components/course-learn/MobileMyCourses.tsx-              onClick={() => setActiveChip(chip.key)}
+src/components/course-learn/MobileMyCourses.tsx-              className={cn(
+src/components/course-learn/MobileMyCourses.tsx:                'whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium border transition-colors',
+src/components/course-learn/MobileMyCourses.tsx-                activeChip === chip.key
+src/components/course-learn/MobileMyCourses.tsx-                  ? 'bg-primary text-primary-foreground border-primary'
+--
+src/components/course-learn/MobileResources.tsx-      <CollapsibleTrigger className="flex min-h-[60px] w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50">
+src/components/course-learn/MobileResources.tsx-        <div className="min-w-0 flex-1">
+src/components/course-learn/MobileResources.tsx:          <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+src/components/course-learn/MobileResources.tsx-          <p className="mt-0.5 text-xs text-muted-foreground">
+src/components/course-learn/MobileResources.tsx-            {items.length} resource{items.length === 1 ? '' : 's'}
+--
+src/components/native/NativeHeader.tsx-        <span
+src/components/native/NativeHeader.tsx-          className={cn(
+src/components/native/NativeHeader.tsx:            'native-chrome-el font-heading font-semibold text-[17px] truncate transition-opacity duration-200',
+src/components/native/NativeHeader.tsx-            collapsed ? 'opacity-100' : 'opacity-0',
+src/components/native/NativeHeader.tsx-          )}
+--
+src/pages/CourseLearn.tsx-            <span className="hidden sm:inline">Course</span>
+src/pages/CourseLearn.tsx-          </Button>
+src/pages/CourseLearn.tsx:          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{course.title}</h1>
+src/pages/CourseLearn.tsx-        </div>
+src/pages/CourseLearn.tsx-        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+--
+src/components/Navbar.tsx-            />
+src/components/Navbar.tsx-            <span
+src/components/Navbar.tsx:              className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
+src/components/Navbar.tsx-              title={platformName}
+src/components/Navbar.tsx-            >
+--
+src/components/DashboardLayout.tsx-            </Button>
+src/components/DashboardLayout.tsx-            
+src/components/DashboardLayout.tsx:            <a href="/" className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+src/components/DashboardLayout.tsx-              <img src={logo} alt={platformName} className="h-8 w-8 object-contain flex-shrink-0" />
+src/components/DashboardLayout.tsx:              <span className="hidden sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
+src/components/DashboardLayout.tsx-            </a>
+src/components/DashboardLayout.tsx-          </div>

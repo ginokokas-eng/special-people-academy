@@ -119,7 +119,7 @@ export const OrganisationsSection = () => {
         </div>
 
         {/* Active panel */}
-        <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           <div className="lg:col-span-7 rounded-2xl border border-[#EEEAF8] bg-white p-7 lg:p-9 shadow-[0_8px_30px_-15px_rgba(76,29,149,0.15)]">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-11 w-11 rounded-xl bg-[hsl(262_83%_58%/0.10)] text-[hsl(262_83%_45%)] flex items-center justify-center">
@@ -157,7 +157,7 @@ export const OrganisationsSection = () => {
           </div>
 
           {/* Side cards summary */}
-          <div className="lg:col-span-5 grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
+          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             {sectors
               .filter((s) => s.id !== active)
               .slice(0, 3)

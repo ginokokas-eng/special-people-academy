@@ -31,7 +31,7 @@ export const HomeShowcaseSection = () => {
         </div>
 
         {/* Three-card editorial row */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 mb-16">
           {/* Currently Playing module card */}
           <article className="relative rounded-[28px] bg-white border border-[#EEEAF8] shadow-[0_20px_50px_-25px_rgba(76,29,149,0.25)] p-6 flex flex-col min-h-[460px]">
             {/* Top label */}

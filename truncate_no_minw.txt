@@ -1,0 +1,12 @@
+src/pages/TrainerPortal.tsx:                            <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+src/pages/ScormPlayer.tsx:          <h1 className="text-sm font-semibold truncate max-w-md">
+src/pages/Blog.tsx:                        <span className="truncate max-w-[120px]">{post.author}</span>
+src/components/Navbar.tsx:              className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
+src/components/FuturisticMobileMenu.tsx:                              "font-heading font-semibold leading-none transition-all duration-300 truncate",
+src/components/ui/sidebar.tsx:  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+src/components/DashboardLayout.tsx:              <span className="hidden sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
+src/components/course-learn/MobileResources.tsx:          <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+src/components/course-learn/MobileLectureList.tsx:          <p className="truncate text-sm font-semibold text-foreground">{title}</p>
+src/components/course-learn/CourseContentSidebar.tsx:          <p className="text-sm font-semibold text-foreground truncate">{title}</p>
+src/components/native/NativeHeader.tsx:            'native-chrome-el font-heading font-semibold text-[17px] truncate transition-opacity duration-200',
+src/components/course-detail/CourseContent.tsx:          <p className={`font-medium text-sm truncate ${isLocked ? 'text-muted-foreground' : ''}`}>

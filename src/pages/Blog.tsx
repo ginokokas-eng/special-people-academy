@@ -53,7 +53,7 @@ export default function Blog() {
               <p className="text-muted-foreground">No posts found in this category.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => (
                 <Card key={post.id} className="hover:shadow-lg transition-shadow group flex flex-col">
                   <CardHeader className="flex-grow">

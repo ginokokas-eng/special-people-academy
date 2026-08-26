@@ -163,7 +163,7 @@ export default function Integrations() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {integrationCategories.map((category, index) => {
               const Icon = category.icon;
               return (
@@ -206,7 +206,7 @@ export default function Integrations() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apiFeatures.map((feature, index) => {
               const Icon = feature.icon;
               return (
@@ -258,7 +258,7 @@ export default function Integrations() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {implementationSteps.map((step, index) => {
               const Icon = step.icon;
               return (

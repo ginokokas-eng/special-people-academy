@@ -158,7 +158,7 @@ export const FeaturesSection = () => {
 
       <div className="section-container relative">
         {/* Editorial header */}
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-12 lg:mb-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-12 lg:mb-14">
           <div className="lg:col-span-7">
             <div className="flex items-center gap-3 mb-6">
               <span className="h-px w-8 bg-[hsl(189_94%_30%)]" />
@@ -198,7 +198,7 @@ export const FeaturesSection = () => {
               intelligence, and the weight they carry.
             </h3>
 
-            <div className="grid sm:grid-cols-2 gap-8 mt-10 pt-8 border-t border-white/15">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-10 pt-8 border-t border-white/15">
               <div>
                 <div className="font-heading text-[44px] lg:text-[56px] font-bold leading-none text-white tabular-nums">
                   12<span className="text-[hsl(38_92%_60%)]">m</span>

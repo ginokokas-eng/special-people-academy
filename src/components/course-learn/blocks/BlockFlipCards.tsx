@@ -45,7 +45,7 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {cards.map((card) => {
           const isFlipped = flipped.has(card.id);
           return (

@@ -267,7 +267,7 @@ export default function Booking() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {/* Left: Selection Form */}
             <Card className="md:col-span-3">
               <CardHeader>

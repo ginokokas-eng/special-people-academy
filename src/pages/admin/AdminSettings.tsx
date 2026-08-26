@@ -152,7 +152,7 @@ export default function AdminSettings() {
             <h1 className="text-2xl font-heading font-bold text-foreground">Admin Settings</h1>
             <p className="text-muted-foreground mt-1">Manage platform configuration and preferences.</p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <SettingsCardSkeleton icon={Shield} title="Security" />
             <SettingsCardSkeleton icon={Bell} title="Notifications" />
             <SettingsCardSkeleton icon={Palette} title="Branding" />
@@ -182,7 +182,7 @@ export default function AdminSettings() {
           <p className="text-muted-foreground mt-1">Manage platform configuration and preferences.</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Security */}
           <Link to="/admin-portal/settings/security" className="block group">
             <Card className="h-full transition-shadow group-hover:shadow-md">

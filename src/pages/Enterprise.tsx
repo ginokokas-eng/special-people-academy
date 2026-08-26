@@ -173,7 +173,7 @@ export default function Enterprise() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {enterpriseNeeds.map((need, index) => {
               const Icon = need.icon;
               return (
@@ -206,7 +206,7 @@ export default function Enterprise() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {securityFeatures.map((feature, index) => {
               const Icon = feature.icon;
               return (
@@ -241,7 +241,7 @@ export default function Enterprise() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {implementationSupport.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -270,7 +270,7 @@ export default function Enterprise() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {useCases.map((useCase, index) => {
               const Icon = useCase.icon;
               return (

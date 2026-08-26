@@ -89,7 +89,7 @@ export default function BlogPost() {
             <h2 className="text-2xl font-bold text-foreground mb-8 text-center">
               Related Articles
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {relatedPosts.map((related) => (
                 <Card key={related.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>

@@ -14,7 +14,7 @@ interface BlockPaletteProps {
 /** "Add block" picker — plain language, one card per block type. */
 export function BlockPalette({ onAdd }: BlockPaletteProps) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {BLOCK_TYPES.map((type) => (
         <button
           key={type}

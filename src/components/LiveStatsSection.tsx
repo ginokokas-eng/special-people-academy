@@ -98,7 +98,7 @@ export const LiveStatsSection = ({
             }}
           />
 
-          <div className="relative z-10 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left: label + number + subtitle */}
             <div className="lg:col-span-8">
               <div className="flex items-center gap-2.5 mb-6">
