@@ -265,7 +265,7 @@ export function MobileCoursePlayer({
         <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onBack} aria-label="Back to course">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="truncate text-sm font-semibold text-foreground">{course.title}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{course.title}</h1>
       </header>
 
       <div className="learner-surface flex min-h-0 flex-1 flex-col overflow-y-auto">

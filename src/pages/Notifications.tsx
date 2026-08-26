@@ -242,8 +242,8 @@ export default function Notifications() {
                     
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className={`font-semibold ${!notification.is_read ? 'text-primary' : ''}`}>
+                      <div className="flex min-w-0 items-start justify-between gap-2">
+                        <h3 className={`min-w-0 font-semibold ${!notification.is_read ? 'text-primary' : ''}`}>
                           {notification.title}
                         </h3>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
