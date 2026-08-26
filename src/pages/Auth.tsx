@@ -270,9 +270,19 @@ export default function Auth() {
             <TabsContent value="login">
               <CardHeader className="pt-0">
                 <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>Enter your credentials to access your account</CardDescription>
+                <CardDescription>
+                  {loginMode === 'password'
+                    ? 'Enter your credentials to access your account'
+                    : 'Sign in with a code we email you'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
+                {loginMode === 'code' ? (
+                  <EmailCodeSignIn
+                    onSignedIn={(roles) => void finishSignIn(roles)}
+                    onCancel={() => setLoginMode('password')}
+                  />
+                ) : (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
@@ -286,7 +296,16 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <div className="flex items-center justify-between gap-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <Input
                       id="login-password"
                       type="password"
@@ -306,7 +325,17 @@ export default function Auth() {
                       'Sign In'
                     )}
                   </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setLoginMode('code')}
+                  >
+                    Email me a sign-in code instead
+                  </Button>
                 </form>
+                )}
+
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
