@@ -23,33 +23,33 @@ export function AdminOverviewCards({
   loading = false,
 }: AdminOverviewCardsProps) {
   const cards = [
-    { 
-      title: 'Total Learners', 
-      value: totalLearners, 
-      icon: Users, 
+    {
+      title: 'Total Learners',
+      value: totalLearners,
+      icon: Users,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
-    { 
-      title: 'Active Enrollments', 
-      value: activeEnrollments, 
-      icon: GraduationCap, 
+    {
+      title: 'Active Enrollments',
+      value: activeEnrollments,
+      icon: GraduationCap,
       color: 'text-accent',
       bgColor: 'bg-accent/10',
     },
-    { 
-      title: 'Upcoming Sessions', 
-      value: upcomingSessions, 
-      icon: Calendar, 
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100 dark:bg-amber-900/20',
+    {
+      title: 'Upcoming Sessions',
+      value: upcomingSessions,
+      icon: Calendar,
+      color: 'text-[hsl(var(--warning-ink))]',
+      bgColor: 'bg-[hsl(var(--warning)/0.12)]',
     },
-    { 
-      title: 'Certificates Issued', 
-      value: certificatesIssued, 
-      icon: Award, 
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-100 dark:bg-emerald-900/20',
+    {
+      title: 'Certificates Issued',
+      value: certificatesIssued,
+      icon: Award,
+      color: 'text-[hsl(var(--success-ink))]',
+      bgColor: 'bg-[hsl(var(--success)/0.12)]',
     },
   ];
 
@@ -75,16 +75,22 @@ export function AdminOverviewCards({
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card) => (
-        <Card key={card.title} className="hover:shadow-md transition-shadow">
-          <CardContent className="pt-4 pb-4">
+      {cards.map((card, index) => (
+        <Card
+          key={card.title}
+          className="settle-in transition-shadow hover:shadow-md"
+          style={index ? { animationDelay: `${index * 40}ms` } : undefined}
+        >
+          <CardContent className="pb-4 pt-4">
             <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-lg ${card.bgColor}`}>
+              <div className={`rounded-lg p-2.5 ${card.bgColor}`} aria-hidden="true">
                 <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">{card.title}</p>
-                <p className="text-2xl font-bold tracking-tight">{card.value.toLocaleString()}</p>
+                <p className="text-2xl font-bold leading-none tracking-tight tabular-nums">
+                  {card.value.toLocaleString()}
+                </p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">{card.title}</p>
               </div>
             </div>
           </CardContent>

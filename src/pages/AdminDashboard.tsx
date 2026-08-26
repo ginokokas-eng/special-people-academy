@@ -669,16 +669,16 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="courses" className="w-full mt-2">
-          <TabsList className="flex-wrap h-auto mb-4">
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="offerings">Offerings & Pricing</TabsTrigger>
-            <TabsTrigger value="featured">Featured</TabsTrigger>
-            <TabsTrigger value="sessions">Practical Sessions</TabsTrigger>
-            <TabsTrigger value="certificates">Certificates</TabsTrigger>
-            <TabsTrigger value="progress">Progress</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
+          <TabsList className="mb-4 h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border/60 bg-transparent p-0">
+            <TabsTrigger value="courses" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Courses</TabsTrigger>
+            <TabsTrigger value="offerings" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Offerings & Pricing</TabsTrigger>
+            <TabsTrigger value="featured" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Featured</TabsTrigger>
+            <TabsTrigger value="sessions" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Practical Sessions</TabsTrigger>
+            <TabsTrigger value="certificates" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Certificates</TabsTrigger>
+            <TabsTrigger value="progress" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Progress</TabsTrigger>
+            <TabsTrigger value="payments" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Payments</TabsTrigger>
+            <TabsTrigger value="users" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">Users</TabsTrigger>
+            <TabsTrigger value="system" className="relative h-10 shrink-0 scroll-mt-24 rounded-none border-b-2 border-transparent bg-transparent px-3.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none">System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses" className="mt-6">
