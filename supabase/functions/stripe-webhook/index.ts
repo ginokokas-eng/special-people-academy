@@ -82,32 +82,54 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
       console.log(`[WEBHOOK] Processing ${cartItems.length} course purchases`);
 
-      // Create enrollments for each course
+      // Fulfilment goes through fulfil_purchase, never a bare enrollments
+      // insert. Access is gated on can_access_course, which asks for a licence
+      // seat — an enrolment with no seat behind it would be a row the learner
+      // cannot actually use, and would quietly bypass the paywall for anyone
+      // who reached this code path.
+      //
+      // fulfil_purchase is idempotent on the payment reference, so a Stripe
+      // retry re-uses the same licence rather than minting a second one.
       for (const item of cartItems) {
-        // Check if enrollment already exists
-        const { data: existingEnrollment } = await supabase
-          .from("enrollments")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("course_id", item.course_id)
-          .maybeSingle();
+        // One reference per course in the session keeps each purchase's
+        // idempotency independent within a multi-course checkout.
+        const paymentRef = `${session.id}:${item.course_id}`;
 
-        if (!existingEnrollment) {
-          const { error: enrollError } = await supabase
-            .from("enrollments")
-            .insert({
-              user_id: userId,
-              course_id: item.course_id,
-            });
-
-          if (enrollError) {
-            console.error(`[WEBHOOK] Failed to create enrollment for course ${item.course_id}:`, enrollError);
-          } else {
-            console.log(`[WEBHOOK] Created enrollment for course ${item.course_id}`);
-          }
-        } else {
-          console.log(`[WEBHOOK] Enrollment already exists for course ${item.course_id}`);
+        // Price is read from the offering server-side. Session metadata is
+        // client-supplied and must never decide what the ledger records.
+        let amountGbp = 0;
+        if (item.offering_id) {
+          const { data: offering } = await supabase
+            .from("course_offerings")
+            .select("base_price_gbp")
+            .eq("id", item.offering_id)
+            .maybeSingle();
+          amountGbp = Number(offering?.base_price_gbp ?? 0);
         }
+
+        // A group offering is bought for a room of people; its participant count
+        // becomes the seat count the buyer then allocates.
+        const seats =
+          typeof item.participants_count === "number" && item.participants_count > 1
+            ? item.participants_count
+            : 1;
+
+        const { data: licenceId, error: fulfilError } = await supabase.rpc("fulfil_purchase", {
+          _user: userId,
+          _course: item.course_id,
+          _offering: item.offering_id ?? null,
+          _amount_gbp: amountGbp,
+          _payment_ref: paymentRef,
+          _seats: seats,
+        });
+
+        if (fulfilError) {
+          // Logged, not swallowed: Stripe will retry the event, and the
+          // idempotency check means a retry is safe.
+          console.error(`[WEBHOOK] fulfil_purchase failed for course ${item.course_id}:`, fulfilError);
+          throw fulfilError;
+        }
+        console.log(`[WEBHOOK] Fulfilled course ${item.course_id} -> licence ${licenceId}`);
       }
 
       // Clear user's cart
