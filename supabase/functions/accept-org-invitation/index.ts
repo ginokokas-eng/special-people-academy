@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
-  let body: { token?: string; display_name?: string };
+  let body: { token?: string; display_name?: string; password?: string };
   try {
     body = await req.json();
   } catch {
@@ -132,6 +132,17 @@ Deno.serve(async (req) => {
       400,
     );
   }
+
+  // Optional chosen password. Only ever applied to an account we create here —
+  // an invitation link must never be able to change an existing user's password.
+  const chosenPassword = typeof body.password === 'string' ? body.password : undefined;
+  if (chosenPassword !== undefined && (chosenPassword.length < 8 || chosenPassword.length > 72)) {
+    return json(
+      { error: 'invalid_password', message: 'Please choose a password of at least 8 characters.' },
+      400,
+    );
+  }
+
 
 
   const tokenHash = await hashToken(body.token);
