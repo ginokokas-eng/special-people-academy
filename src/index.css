@@ -1049,3 +1049,17 @@ html.native .native-shell .page-heading + * {
     animation: none !important;
   }
 }
+
+/* Quiz answer rows. Depth only — the state ring is a child element rendered by
+   the component, because this button's shadow/outline slots are already
+   composed by Tailwind utilities and proved unreliable once the row is
+   disabled after the answer is checked. */
+.quiz-option {
+  box-shadow: var(--shadow-learner);
+  transition: box-shadow 0.15s ease-out;
+}
+.quiz-option[data-state='selected'],
+.quiz-option[data-state='correct'],
+.quiz-option[data-state='incorrect'] {
+  box-shadow: var(--shadow-learner-lg);
+}

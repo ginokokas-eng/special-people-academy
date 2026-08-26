@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { QuizOption } from '@/components/native/QuizOption';
+import { haptics } from '@/hooks/useHaptics';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -88,6 +90,7 @@ export function QuizPlayer({
 
   const handleAnswerSelect = (optionIndex: number) => {
     if (feedback !== 'none') return; // Already answered
+    haptics.selection();
     setSelectedAnswer(optionIndex);
   };
 
@@ -100,10 +103,13 @@ export function QuizPlayer({
       [currentQuestion.id]: selectedAnswer,
     }));
 
-    // Show feedback
+    // Show feedback. Haptics stay sparse: a win always confirms; a miss only
+    // buzzes when there is no attempt left to fix it.
     if (selectedAnswer === currentQuestion.correct_answer) {
+      haptics.success();
       setFeedback('correct');
     } else {
+      if (isFinalAttempt) haptics.warning();
       setFeedback('incorrect');
     }
   };
@@ -279,7 +285,37 @@ export function QuizPlayer({
             Pass: {passingScore}%
           </Badge>
         </div>
-        <Progress value={progress} className="h-2" />
+        {/* One segment per question: answered-correct green, current violet,
+            still ahead grey — position and score in a single glance. */}
+        <div
+          className="flex gap-1"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={questions.length}
+          aria-valuenow={currentQuestionIndex + 1}
+          aria-label={`Question ${currentQuestionIndex + 1} of ${questions.length}`}
+        >
+          {questions.map((q, i) => {
+            const recorded = answers[q.id];
+            const isAnswered = recorded !== undefined;
+            const isRight = isAnswered && recorded === q.correct_answer;
+            return (
+              <span
+                key={q.id}
+                className={cn(
+                  'h-1 flex-1 rounded-full transition-colors',
+                  i === currentQuestionIndex
+                    ? 'bg-primary'
+                    : isRight
+                      ? 'bg-[hsl(var(--success))]'
+                      : isAnswered
+                        ? 'bg-[hsl(var(--destructive))]'
+                        : 'bg-muted',
+                )}
+              />
+            );
+          })}
+        </div>
         <CardTitle className="text-lg mt-4">{quizTitle}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -306,54 +342,30 @@ export function QuizPlayer({
           </p>
         </div>
 
-        {/* Options */}
-        <div className="space-y-3">
+        {/* Options — 68dp targets, whole row tappable. */}
+        <div className="space-y-2.5">
           {currentQuestion.options.map((option, index) => {
             const isSelected = selectedAnswer === index;
             const isCorrect = index === currentQuestion.correct_answer;
-            const showCorrect = feedback !== 'none' && isCorrect;
-            const showIncorrect = feedback === 'incorrect' && isSelected;
-
+            const state =
+              feedback === 'none'
+                ? isSelected
+                  ? 'selected'
+                  : 'idle'
+                : isCorrect
+                  ? 'correct'
+                  : isSelected
+                    ? 'incorrect'
+                    : 'idle';
             return (
-              <button
+              <QuizOption
                 key={index}
-                onClick={() => handleAnswerSelect(index)}
+                letter={String.fromCharCode(65 + index)}
+                text={option}
+                state={state}
                 disabled={feedback !== 'none'}
-                className={cn(
-                  "w-full p-4 rounded-lg border-2 text-left transition-all duration-200",
-                  "hover:border-primary/50 hover:bg-primary/5",
-                  "disabled:cursor-not-allowed",
-                  isSelected && feedback === 'none' && "border-primary bg-primary/10",
-                  showCorrect && "border-success bg-success/10",
-                  showIncorrect && "border-destructive bg-destructive/10",
-                  !isSelected && feedback === 'none' && "border-border"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2",
-                    isSelected && feedback === 'none' && "border-primary bg-primary text-primary-foreground",
-                    showCorrect && "border-success bg-success text-success-foreground",
-                    showIncorrect && "border-destructive bg-destructive text-destructive-foreground",
-                    !isSelected && feedback === 'none' && "border-muted-foreground/30"
-                  )}>
-                    {showCorrect ? (
-                      <CheckCircle2 className="h-5 w-5" />
-                    ) : showIncorrect ? (
-                      <XCircle className="h-5 w-5" />
-                    ) : (
-                      String.fromCharCode(65 + index)
-                    )}
-                  </div>
-                  <span className={cn(
-                    "flex-1",
-                    showCorrect && "font-medium text-success",
-                    showIncorrect && "text-destructive"
-                  )}>
-                    {option}
-                  </span>
-                </div>
-              </button>
+                onSelect={() => handleAnswerSelect(index)}
+              />
             );
           })}
         </div>
@@ -385,19 +397,28 @@ export function QuizPlayer({
           </Alert>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="text-sm text-muted-foreground">
-          {answeredCount} answered
-        </div>
+      <CardFooter className="flex-col items-stretch gap-3">
+        <p className="text-center text-xs text-muted-foreground">
+          {attemptsRemaining !== null && (
+            <>
+              {attemptsRemaining} {attemptsRemaining === 1 ? 'attempt' : 'attempts'} left ·{' '}
+            </>
+          )}
+          pass mark {passingScore}% · {answeredCount} answered
+        </p>
         {feedback === 'none' ? (
-          <Button 
-            onClick={handleSubmitAnswer} 
+          <Button
+            className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
+            onClick={handleSubmitAnswer}
             disabled={selectedAnswer === null}
           >
-            Check Answer
+            Check answer
           </Button>
         ) : (
-          <Button onClick={handleNextQuestion}>
+          <Button
+            className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
+            onClick={handleNextQuestion}
+          >
             {isLastQuestion ? (isFinalAttempt ? 'Submit final attempt' : 'See Results') : 'Next Question'}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>

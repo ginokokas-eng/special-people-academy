@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Save, LogOut, Building2 } from '@/components/icons';
+import { User, Loader2, Save, LogOut, Building2, Accessibility } from '@/components/icons';
+import { Switch } from '@/components/ui/switch';
+import { haptics } from '@/hooks/useHaptics';
 import { useIsNative } from '@/lib/native';
 import { toast } from 'sonner';
 
@@ -23,6 +25,9 @@ export default function Profile() {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const native = useIsNative();
+  // Read once — useHaptics reads the same key at call time, so this state only
+  // drives the control, never the gate itself.
+  const [hapticsOn, setHapticsOn] = useState(() => localStorage.getItem('spa.haptics') !== 'off');
   const [orgName, setOrgName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
@@ -244,6 +249,36 @@ export default function Profile() {
                   : 'Unknown'}
               </p>
             </div>
+
+            {native && (
+              <div className="rounded-2xl bg-[hsl(var(--learner-wash)/0.05)] p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Accessibility className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-foreground">Accessibility</h3>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <Label htmlFor="haptics-toggle" className="text-sm font-normal leading-relaxed">
+                    Haptic feedback
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      A short buzz when you answer a question or finish a lesson.
+                    </span>
+                  </Label>
+                  <Switch
+                    id="haptics-toggle"
+                    checked={hapticsOn}
+                    onCheckedChange={(on) => {
+                      localStorage.setItem('spa.haptics', on ? 'on' : 'off');
+                      setHapticsOn(on);
+                      // Confirm with the thing being switched on.
+                      if (on) haptics.selection();
+                    }}
+                  />
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Text size follows your device settings.
+                </p>
+              </div>
+            )}
 
             {native && (
               <Button

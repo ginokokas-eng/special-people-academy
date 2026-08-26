@@ -22,18 +22,22 @@ export const NativeWelcome = () => {
 
       <div className="w-full max-w-xs space-y-3">
         <Button
-          className="pressable w-full h-12 rounded-full text-[15px]"
+          className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
           onClick={() => navigate('/auth')}
         >
-          Sign in
+          Continue with your employer
         </Button>
         <Button
           variant="outline"
-          className="pressable w-full h-12 rounded-full text-[15px]"
+          className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
           onClick={() => navigate('/courses')}
         >
           Browse courses
         </Button>
+        <p className="px-1 pt-1 text-[12px] leading-relaxed text-muted-foreground">
+          You&rsquo;ll be signed in through Ariadne. No password to remember, no employer code to
+          type on a ward.
+        </p>
       </div>
     </div>
   );
