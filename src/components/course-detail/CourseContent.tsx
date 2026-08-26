@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LessonDownloadButton } from '@/components/native/LessonDownloadButton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -103,6 +104,10 @@ interface CourseContentProps {
   // Access control props
   canAccessCourse: boolean;
   requiresSubscription: boolean;
+  /** Native only: enables the per-lesson download affordance. */
+  courseId?: string;
+  /** lessonId -> storage path of its media, for lessons that have any. */
+  mediaPaths?: Record<string, string>;
 }
 
 const lessonTypeIcons: Record<string, React.ReactNode> = {
@@ -137,6 +142,8 @@ export function CourseContent({
   onQuizClick,
   canAccessCourse,
   requiresSubscription,
+  courseId,
+  mediaPaths,
 }: CourseContentProps) {
   const formatDuration = (minutes: number) => {
     if (minutes < 60) return `${minutes} min`;
@@ -212,6 +219,17 @@ export function CourseContent({
             })()}
           </div>
         </div>
+
+        {/* Download — native only, and only when the lesson has media. */}
+        {isEnrolled && !isLocked && courseId && mediaPaths?.[lesson.id] && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <LessonDownloadButton
+              lessonId={lesson.id}
+              courseId={courseId}
+              path={mediaPaths[lesson.id]}
+            />
+          </div>
+        )}
 
         {/* Lock/Preview indicator */}
         {isLocked ? (

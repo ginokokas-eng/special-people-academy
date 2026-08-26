@@ -6,6 +6,14 @@ import { ResumeCard } from '@/components/native/ResumeCard';
 import { ApertureIcon } from '@/components/ds/ApertureIcon';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from '@/components/icons';
+import { FigureMark, hueFor } from '@/components/ds/FigureMark';
+import {
+  entries as offlineEntries,
+  formatBytes,
+  offlineSupported,
+  storageUsed,
+  subscribeOffline,
+} from '@/lib/offline';
 
 /**
  * Learn — the native tab. Opens on the exact next required lesson so a carer
@@ -48,6 +56,8 @@ export function NativeLearn() {
   const [next, setNext] = useState<NextLesson | null>(null);
   const [due, setDue] = useState<DueItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cached, setCached] = useState(() => offlineEntries());
+  const [courseNames, setCourseNames] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -166,6 +176,18 @@ export function NativeLearn() {
     void load();
   }, [load]);
 
+  useEffect(() => subscribeOffline(() => setCached(offlineEntries())), []);
+
+  // Names for whatever is cached, so the tiles read as courses not ids.
+  useEffect(() => {
+    const ids = [...new Set(cached.map((c) => c.courseId))];
+    if (!ids.length) return;
+    void (async () => {
+      const { data } = await supabase.from('courses').select('id, title').in('id', ids);
+      setCourseNames(Object.fromEntries((data ?? []).map((c) => [c.id as string, c.title as string])));
+    })();
+  }, [cached]);
+
   const kicker = useMemo(() => kickerFor(new Date()), []);
 
   if (loading) {
@@ -229,6 +251,33 @@ export function NativeLearn() {
                 >
                   {item.booked ? 'Booked' : `${item.daysLeft}d`}
                 </span>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {offlineSupported() && cached.length > 0 && (
+        <section>
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-[17px] tracking-tight text-foreground">Ready offline</h2>
+            <span className="text-xs text-muted-foreground tabular-nums">{formatBytes(storageUsed())}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            {Object.entries(
+              cached.reduce<Record<string, number>>((acc, e) => {
+                acc[e.courseId] = (acc[e.courseId] ?? 0) + 1;
+                return acc;
+              }, {}),
+            ).map(([courseId, count], i) => (
+              <article key={courseId} className="learner-card flex flex-col gap-2 p-3.5">
+                <FigureMark hue={hueFor(i)} size={26} />
+                <p className="line-clamp-2 text-[14px] font-semibold leading-snug text-foreground">
+                  {courseNames[courseId] ?? 'Course'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {count} {count === 1 ? 'lesson' : 'lessons'} ready
+                </p>
               </article>
             ))}
           </div>

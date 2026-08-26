@@ -1,6 +1,7 @@
 import { haptics } from '@/hooks/useHaptics';
+import type { DownloadState } from '@/lib/offline';
 
-export type DownloadState = 'idle' | 'queued' | 'downloading' | 'ready' | 'error';
+export type { DownloadState };
 
 /**
  * The one download affordance, used at two scales: a whole course

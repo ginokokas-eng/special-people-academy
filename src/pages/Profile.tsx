@@ -8,9 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Save, LogOut, Building2, Accessibility, Bell } from '@/components/icons';
+import { User, Loader2, Save, LogOut, Building2, Accessibility, Bell, Download } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { haptics } from '@/hooks/useHaptics';
+import {
+  entries as offlineEntries,
+  formatBytes,
+  isWifiOnly,
+  offlineSupported,
+  removeAll,
+  setWifiOnly,
+  storageUsed,
+  subscribeOffline,
+} from '@/lib/offline';
 import { useIsNative } from '@/lib/native';
 import { toast } from 'sonner';
 
@@ -34,6 +44,10 @@ export default function Profile() {
   const [quietHours, setQuietHours] = useState(
     () => localStorage.getItem('spa.reminders.quiet') !== 'off',
   );
+  const [wifiOnly, setWifiOnlyState] = useState(isWifiOnly);
+  const [cached, setCached] = useState(() => offlineEntries());
+
+  useEffect(() => subscribeOffline(() => setCached(offlineEntries())), []);
   const [orgName, setOrgName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
@@ -255,6 +269,53 @@ export default function Profile() {
                   : 'Unknown'}
               </p>
             </div>
+
+            {native && offlineSupported() && (
+              <div className="rounded-2xl bg-[hsl(var(--learner-wash)/0.05)] p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Download className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-foreground">Downloads</h3>
+                </div>
+                <div className="mb-4 flex items-baseline justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {cached.length === 0
+                      ? 'Nothing downloaded yet.'
+                      : `${cached.length} ${cached.length === 1 ? 'lesson' : 'lessons'} on this device`}
+                  </p>
+                  <span className="text-sm font-semibold tabular-nums text-foreground">
+                    {formatBytes(storageUsed())}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <Label htmlFor="wifi-only" className="text-sm font-normal leading-relaxed">
+                    Download over wifi only
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      On mobile data we ask first instead of downloading.
+                    </span>
+                  </Label>
+                  <Switch
+                    id="wifi-only"
+                    checked={wifiOnly}
+                    onCheckedChange={(on) => {
+                      setWifiOnly(on);
+                      setWifiOnlyState(on);
+                    }}
+                  />
+                </div>
+                {cached.length > 0 && (
+                  <Button
+                    variant="outline"
+                    className="pressable mt-4 h-10 w-full rounded-full text-sm"
+                    onClick={async () => {
+                      await removeAll();
+                      toast.success('Downloads cleared.');
+                    }}
+                  >
+                    Remove all downloads
+                  </Button>
+                )}
+              </div>
+            )}
 
             {native && (
               <div className="rounded-2xl bg-[hsl(var(--learner-wash)/0.05)] p-4">

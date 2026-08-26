@@ -137,9 +137,40 @@ export default function CourseDetail() {
   const { user, loading: authLoading } = useAuth();
   const { hasActiveSubscription, loading: subLoading } = useSubscription();
   const nativeShell = isNativeShell();
+  /** lessonId -> storage path, for lessons whose media can be cached offline. */
+  const [mediaPaths, setMediaPaths] = useState<Record<string, string>>({});
+
+
   
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+
+  // Which lessons have media worth caching. Only asked for inside the shell —
+  // a browser has nowhere to put it, so the query would be wasted.
+  useEffect(() => {
+    if (!nativeShell || lessons.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from('lesson_blocks')
+        .select('lesson_id, payload')
+        .eq('block_type', 'video')
+        .in('lesson_id', lessons.map((l) => l.id));
+      if (cancelled) return;
+      const map: Record<string, string> = {};
+      for (const row of data ?? []) {
+        const payload = row.payload as { source?: string; path?: string } | null;
+        // Only uploaded media has a storage path; linked URLs are not ours to cache.
+        if (payload?.source === 'storage' && payload.path) {
+          map[row.lesson_id as string] = payload.path;
+        }
+      }
+      setMediaPaths(map);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [nativeShell, lessons]);
   const [modules, setModules] = useState<Module[]>([]);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [practicalSessions, setPracticalSessions] = useState<PracticalSession[]>([]);
@@ -682,6 +713,8 @@ export default function CourseDetail() {
               onQuizClick={handleQuizClick}
               canAccessCourse={!!canAccessCourse}
               requiresSubscription={requiresSubscription}
+              courseId={nativeShell ? course.id : undefined}
+              mediaPaths={mediaPaths}
             />
 
             {/* F. Safety & Governance (PBS courses) */}
