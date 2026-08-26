@@ -9,6 +9,8 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Clock, Play, CheckCircle2, Loader2 } from '@/components/icons';
+import { useIsNative } from '@/lib/native';
+import { NativeLearn } from '@/components/native/NativeLearn';
 
 interface EnrolledCourse {
   id: string;
@@ -25,6 +27,7 @@ interface EnrolledCourse {
 export default function MyLearning() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const native = useIsNative();
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -201,6 +204,16 @@ export default function MyLearning() {
       </CardContent>
     </Card>
   );
+
+  // The phone leads with the next required lesson rather than a stat grid and a
+  // three-way switcher; see NativeLearn.
+  if (native) {
+    return (
+      <DashboardLayout>
+        <NativeLearn />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

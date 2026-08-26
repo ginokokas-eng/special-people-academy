@@ -67,6 +67,8 @@ interface Props {
   onMarkComplete: (lessonId: string) => void;
 }
 
+type PlayerTab = 'lectures' | 'transcript' | 'notes' | 'more';
+
 type MoreView =
   | 'menu'
   | 'about'
@@ -99,7 +101,7 @@ export function MobileCoursePlayer({
   const { user } = useAuth();
   const { organisationName } = useGeneralSettings();
   const providerName = organisationName || DEFAULT_PROVIDER_NAME;
-  const [tab, setTab] = useState<'lectures' | 'more'>('lectures');
+  const [tab, setTab] = useState<PlayerTab>('lectures');
   const [moreView, setMoreView] = useState<MoreView>('menu');
   const [favourite, setFavourite] = useState(false);
   const [certificateEarned, setCertificateEarned] = useState(false);
@@ -113,7 +115,7 @@ export function MobileCoursePlayer({
       return;
     }
     (async () => {
-      const { count } = await (supabase as any)
+      const { count } = await supabase
         .from('certificates')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
@@ -200,23 +202,6 @@ export function MobileCoursePlayer({
       label: 'Q&A',
       icon: <MessageCircleQuestion className="h-5 w-5" />,
       onClick: () => setMoreView('qa'),
-      enabled: true,
-      drillIn: true,
-    },
-    {
-      key: 'notes',
-      label: 'Notes',
-      icon: <StickyNote className="h-5 w-5" />,
-      onClick: () => setMoreView('notes'),
-      enabled: true,
-      drillIn: true,
-    },
-    {
-      key: 'transcript',
-      label: 'Transcript',
-      subtitle: hasTranscript ? undefined : 'Not available for this lesson yet',
-      icon: <FileText className="h-5 w-5" />,
-      onClick: () => setMoreView('transcript'),
       enabled: true,
       drillIn: true,
     },
@@ -340,25 +325,61 @@ export function MobileCoursePlayer({
         <Tabs
           value={tab}
           onValueChange={(v) => {
-            setTab(v as 'lectures' | 'more');
+            setTab(v as PlayerTab);
             if (v === 'more') setMoreView('menu');
           }}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <TabsList className="material-chrome relative z-20 grid h-12 w-full shrink-0 grid-cols-2 rounded-none p-0">
+          {/* Lesson · Transcript · Notes are one tap away while learning; the
+              rest (About, Q&A, Resources, Announcements, Certificate) stay in
+              the overflow, which keeps its existing drill-in behaviour. */}
+          <TabsList className="material-chrome relative z-20 grid h-12 w-full shrink-0 grid-cols-[1fr_1fr_1fr_auto] rounded-none p-0">
             <TabsTrigger
               value="lectures"
-              className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="h-full rounded-none border-b-2 border-transparent text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
-              <ListChecks className="mr-1.5 h-4 w-4" /> Lectures
+              <ListChecks className="mr-1.5 h-4 w-4" /> Lesson
+            </TabsTrigger>
+            <TabsTrigger
+              value="transcript"
+              className="h-full rounded-none border-b-2 border-transparent text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Transcript
+            </TabsTrigger>
+            <TabsTrigger
+              value="notes"
+              className="h-full rounded-none border-b-2 border-transparent text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Notes
             </TabsTrigger>
             <TabsTrigger
               value="more"
-              className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              aria-label="More"
+              className="h-full rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
-              <LayoutGrid className="mr-1.5 h-4 w-4" /> More
+              <LayoutGrid className="h-4 w-4" />
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="transcript" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4">
+            <MobileTranscript
+              transcript={transcript}
+              loading={transcriptLoading}
+              canSeek={canSeek}
+              controllerRef={controllerRef}
+              lessonTitle={activeLesson?.title}
+            />
+          </TabsContent>
+
+          <TabsContent value="notes" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4">
+            <NotesTab
+              courseId={course.id}
+              activeLesson={activeLesson}
+              lessons={lessons}
+              canSeek={canSeek}
+              controllerRef={controllerRef}
+            />
+          </TabsContent>
 
           <TabsContent value="lectures" className="mt-0 min-h-0 flex-1 overflow-y-auto">
             <MobileLectureList
