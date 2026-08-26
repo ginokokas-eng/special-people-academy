@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles
 } from '@/components/icons';
+import { isNativeShell } from '@/lib/native';
 
 interface CourseHeroProps {
   title: string;
@@ -66,6 +67,8 @@ export function CourseHero({
   progress,
   isEssential = true,
 }: CourseHeroProps) {
+  const nativeShell = isNativeShell();
+
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -242,6 +245,7 @@ export function CourseHero({
           </div>
 
           {/* Right - Course thumbnail */}
+          {!nativeShell && (
           <div className="hidden lg:block">
             <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
               {thumbnailUrl ? (
@@ -278,6 +282,7 @@ export function CourseHero({
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
