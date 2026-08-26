@@ -159,7 +159,7 @@ export default function InviteAccept() {
                   className="h-11 rounded-[10px]"
                 />
                 {nameError && (
-                  <p id="invite-name-error" className="text-sm text-destructive">
+                  <p id="invite-name-error" className="text-sm text-[hsl(var(--destructive-ink))]">
                     {nameError}
                   </p>
                 )}
@@ -195,7 +195,7 @@ export default function InviteAccept() {
           {status === 'error' && (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <span
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning))]"
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning-ink))]"
                 aria-hidden="true"
               >
                 <AlertTriangle className="h-5 w-5" />
@@ -215,7 +215,7 @@ export default function InviteAccept() {
           )}
         </div>
 
-        <p className="mt-5 text-center text-xs text-muted-foreground/80">
+        <p className="mt-5 text-center text-xs text-muted-foreground">
           Care training by Special People Academy
         </p>
       </div>

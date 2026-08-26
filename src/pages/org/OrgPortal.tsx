@@ -415,7 +415,7 @@ export default function OrgPortal() {
               activeLicences.length > 0 ? (
                 <>
                   {seatTotals.used}
-                  <span className="text-muted-foreground/60">/{seatTotals.total}</span>
+                  <span className="text-muted-foreground/80">/{seatTotals.total}</span>
                 </>
               ) : (
                 '—'
@@ -459,7 +459,7 @@ export default function OrgPortal() {
             <div className="flex flex-col gap-3 p-5 sm:p-6">
               <div className="flex items-center gap-2.5">
                 <span
-                  className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning))]"
+                  className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning-ink))]"
                   aria-hidden="true"
                 >
                   <AlertTriangle className="h-4 w-4" />
@@ -610,7 +610,7 @@ export default function OrgPortal() {
                             {p.ended_at ? (
                               <span className="text-sm text-muted-foreground">Ended {fmtDate(p.ended_at)}</span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--success))]">
+                              <span className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--success-ink))]">
                                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" aria-hidden="true" />
                                 Active
                               </span>
@@ -667,7 +667,7 @@ export default function OrgPortal() {
                             </TableCell>
                             <TableCell>
                               {expired ? (
-                                <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+                                <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning-ink))]">
                                   Expired {fmtDate(inv.expires_at)}
                                 </span>
                               ) : (
@@ -678,7 +678,7 @@ export default function OrgPortal() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 rounded-full text-muted-foreground hover:text-destructive"
+                                className="h-8 rounded-full text-muted-foreground hover:text-[hsl(var(--destructive-ink))]"
                                 disabled={revoking === inv.id}
                                 onClick={() => void handleRevoke(inv.id)}
                               >
@@ -814,14 +814,15 @@ export default function OrgPortal() {
                     </Table>
                   </div>
                   <p className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
+                    <span className="font-medium">Learner dot:</span>
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[hsl(var(--success))]" aria-hidden="true" /> All courses complete
                     </span>
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--warning))]" aria-hidden="true" /> In progress
+                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--warning-ink))]" aria-hidden="true" /> In progress
                     </span>
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-muted-foreground/25" aria-hidden="true" /> Not started
+                      <span className="h-2 w-2 rounded-full bg-muted-foreground/75" aria-hidden="true" /> Not started
                     </span>
                   </p>
                 </>
@@ -953,13 +954,13 @@ function CertStatusChip({ status }: { status: string }) {
   }
   if (status === 'expiring_soon') {
     return (
-      <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+      <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning-ink))]">
         Expiring soon
       </span>
     );
   }
   return (
-    <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success))]">
+    <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success-ink))]">
       Valid
     </span>
   );
@@ -977,11 +978,11 @@ function LicenceCard({ licence }: { licence: OrgLicence }) {
         <h3 className="font-display text-[16px] leading-snug text-foreground">{licence.course_title}</h3>
         {active ? (
           expiring ? (
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning-ink))]">
               Expires {fmtDate(licence.expires_at)}
             </span>
           ) : (
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success))]">
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success-ink))]">
               Active
             </span>
           )
@@ -995,7 +996,7 @@ function LicenceCard({ licence }: { licence: OrgLicence }) {
       <div>
         <p className="font-display text-[26px] leading-none tracking-tight text-foreground tabular-nums">
           {licence.seats_used}
-          <span className="text-muted-foreground/60">/{licence.seats_total}</span>
+          <span className="text-muted-foreground/80">/{licence.seats_total}</span>
         </p>
         <p className="mt-1 text-[13px] text-muted-foreground">
           seats in use · {seatsLeft} {seatsLeft === 1 ? 'seat' : 'seats'} free

@@ -153,7 +153,7 @@ export function BulkInviteForm({
         <p className="text-sm text-muted-foreground">
           {pastedCount} {pastedCount === 1 ? 'address' : 'addresses'} pasted.
           {seatsLeft !== null && pastedCount > seatsLeft && (
-            <span className="ml-1 text-destructive">
+            <span className="ml-1 text-[hsl(var(--destructive-ink))]">
               That is more than the seats available — the extras will report “seats full”.
             </span>
           )}
@@ -190,7 +190,7 @@ export function BulkInviteForm({
                     <p
                       className={cn(
                         'mt-0.5 inline-flex items-center gap-1 text-xs',
-                        failed ? 'text-destructive' : 'text-[hsl(var(--success))]',
+                        failed ? 'text-[hsl(var(--destructive-ink))]' : 'text-[hsl(var(--success-ink))]',
                       )}
                     >
                       {failed ? (

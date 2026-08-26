@@ -80,9 +80,9 @@ export function StatTile({ icon: Icon, wash, value, label, sub, subTone = 'defau
           <p
             className={cn(
               'mt-0.5 text-xs',
-              subTone === 'warning' && 'font-medium text-[hsl(var(--warning))]',
-              subTone === 'success' && 'font-medium text-[hsl(var(--success))]',
-              subTone === 'default' && 'text-muted-foreground/80',
+              subTone === 'warning' && 'font-medium text-[hsl(var(--warning-ink))]',
+              subTone === 'success' && 'font-medium text-[hsl(var(--success-ink))]',
+              subTone === 'default' && 'text-muted-foreground',
             )}
           >
             {sub}
@@ -122,7 +122,7 @@ export type MatrixState = 'completed' | 'in_progress' | 'not_started';
 export function MatrixStatus({ state, percent }: { state: MatrixState; percent?: number }) {
   if (state === 'completed') {
     return (
-      <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success))]">
+      <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success-ink))]">
         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
         Completed
       </span>
@@ -137,7 +137,7 @@ export function MatrixStatus({ state, percent }: { state: MatrixState; percent?:
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/70">
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" aria-hidden="true" />
       Not started
     </span>
@@ -162,8 +162,8 @@ export function ComplianceDot({ completed, total, started }: { completed: number
         fully
           ? 'bg-[hsl(var(--success))]'
           : started > 0
-            ? 'bg-[hsl(var(--warning))]'
-            : 'bg-muted-foreground/25',
+            ? 'bg-[hsl(var(--warning-ink))]'
+            : 'bg-muted-foreground/75',
       )}
     />
   );
@@ -191,4 +191,4 @@ export function EmptyState({ icon: Icon, title, body, action }: EmptyStateProps)
 }
 
 /** Quiet uppercase table header cell text. */
-export const thClass = 'text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80';
+export const thClass = 'text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground';

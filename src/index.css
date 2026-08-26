@@ -44,6 +44,13 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
+    /* Text-safe semantic inks: darkened so 11–14px text and meaningful glyphs
+       hold ≥4.5:1 on white AND on their own 10–14% tint chips. The full-strength
+       --success/--warning stay for fills, bars and white-on-colour buttons. */
+    --success-ink: 152 60% 26%;
+    --warning-ink: 32 75% 30%;
+    --destructive-ink: 0 70% 40%;
+
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
 
@@ -169,6 +176,12 @@
     --status-warning: 38 92% 55%;
     --status-warning-foreground: 48 90% 90%;
     --status-warning-bg: 38 40% 18%;
+
+    /* Dark-theme inks: lightened instead of darkened. */
+    --success-ink: 152 55% 65%;
+    --warning-ink: 38 85% 65%;
+    --destructive-ink: 0 80% 72%;
+
     --status-error: 0 70% 55%;
     --status-error-foreground: 0 80% 90%;
     --status-error-bg: 0 40% 18%;

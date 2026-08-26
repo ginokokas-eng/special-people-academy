@@ -119,7 +119,7 @@ export default function VerifyCertificate() {
                   'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
                   expired
                     ? 'bg-muted-foreground/10 text-muted-foreground'
-                    : 'bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))]',
+                    : 'bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success-ink))]',
                 )}
                 aria-hidden="true"
               >
@@ -138,7 +138,7 @@ export default function VerifyCertificate() {
             </div>
 
             {expiringSoon && (
-              <p className="border-t border-border/40 bg-[hsl(var(--warning)/0.1)] px-6 py-2.5 text-[13px] font-medium text-[hsl(var(--warning))] sm:px-8">
+              <p className="border-t border-border/40 bg-[hsl(var(--warning)/0.1)] px-6 py-2.5 text-[13px] font-medium text-[hsl(var(--warning-ink))] sm:px-8">
                 Expires soon — valid until {fmt(cert.expires_at)}.
               </p>
             )}
@@ -181,7 +181,7 @@ export default function VerifyCertificate() {
           </div>
         )}
 
-        <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground/80">
+        <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
           This page confirms certificates issued by{' '}
           <Link to="/" className="underline underline-offset-2 hover:text-foreground">
             Special People Academy

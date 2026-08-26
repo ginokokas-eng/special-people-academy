@@ -89,7 +89,7 @@ export function PortalShell({ orgName, actions, children }: PortalShellProps) {
       <main className="flex-1">{children}</main>
 
       <footer className="mt-10 pb-8">
-        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-2 px-4 text-xs text-muted-foreground/80 md:px-6">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-2 px-4 text-xs text-muted-foreground md:px-6">
           <p className="inline-flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             Certificates can be checked by anyone at {window.location.origin}/verify
