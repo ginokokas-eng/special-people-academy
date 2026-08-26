@@ -194,7 +194,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
+        <div className="page-heading">
           <h1 className="text-3xl font-bold text-foreground">My Dashboard</h1>
           <p className="text-muted-foreground mt-1">Track your learning progress</p>
         </div>

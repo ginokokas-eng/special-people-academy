@@ -162,7 +162,7 @@ export default function Notifications() {
       <main className="container py-8 lg:py-12">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
+          <div className="page-heading">
             <h1 className="text-3xl font-bold">Notifications</h1>
             <p className="text-muted-foreground mt-1">
               {unreadCount > 0 

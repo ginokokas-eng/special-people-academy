@@ -141,7 +141,7 @@ export default function Certificates() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
+        <div className="page-heading">
           <h1 className="text-3xl font-bold text-foreground">My Certificates</h1>
           <p className="text-muted-foreground mt-1">View and download your earned certificates</p>
         </div>
