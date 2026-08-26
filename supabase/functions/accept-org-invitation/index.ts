@@ -199,10 +199,13 @@ Deno.serve(async (req) => {
     if (!userId) {
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
-        password: crypto.randomUUID() + crypto.randomUUID(),
+        // Without a chosen password the account stays passwordless-only, and the
+        // learner signs in with an emailed code.
+        password: chosenPassword ?? crypto.randomUUID() + crypto.randomUUID(),
         email_confirm: true,
         user_metadata: displayName ? { full_name: displayName } : undefined,
       });
+
       if (createErr || !created?.user) {
         console.error('[org-invite-accept] createUser failed:', createErr?.message);
         return json({ error: 'failed', message: 'We could not set up your account.' }, 500);
