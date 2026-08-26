@@ -91,7 +91,7 @@ export default function VerifyCertificate() {
             </div>
           </div>
         ) : !cert ? (
-          <div className="learner-card flex flex-col items-center gap-3 p-8 text-center sm:p-10">
+          <div className="learner-card material-in flex flex-col items-center gap-3 p-8 text-center sm:p-10">
             <span
               className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground"
               aria-hidden="true"
@@ -106,7 +106,7 @@ export default function VerifyCertificate() {
             </p>
           </div>
         ) : (
-          <div className="learner-card overflow-hidden">
+          <div className="learner-card material-in overflow-hidden">
             {/* Verdict band — the answer, before any detail. */}
             <div
               className={cn(

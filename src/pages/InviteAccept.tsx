@@ -126,7 +126,7 @@ export default function InviteAccept() {
           </p>
         </div>
 
-        <div className="learner-card p-7 sm:p-8">
+        <div key={status} className="learner-card material-in p-7 sm:p-8">
           {status === 'name' && (
             <form
               className="space-y-5"
@@ -206,7 +206,7 @@ export default function InviteAccept() {
               <p className="text-sm leading-relaxed text-muted-foreground">{message}</p>
               <Button
                 variant="outline"
-                className="mt-1 rounded-full"
+                className="pressable mt-1 rounded-full"
                 onClick={() => navigate('/auth', { replace: true })}
               >
                 Go to sign in

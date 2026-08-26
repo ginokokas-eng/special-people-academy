@@ -62,12 +62,18 @@ interface StatTileProps {
   label: string;
   sub?: ReactNode;
   subTone?: 'default' | 'warning' | 'success';
+  /** Stagger for the one-time arrival animation (ms). */
+  entranceDelay?: number;
 }
 
 /** Overview number with a brand-wash icon chip. */
-export function StatTile({ icon: Icon, wash, value, label, sub, subTone = 'default' }: StatTileProps) {
+export function StatTile({ icon: Icon, wash, value, label, sub, subTone = 'default', entranceDelay = 0 }: StatTileProps) {
   return (
-    <div className="learner-card learner-wash flex flex-col gap-3 p-4 sm:p-5" data-wash={wash}>
+    <div
+      className="learner-card learner-wash settle-in flex flex-col gap-3 p-4 sm:p-5"
+      data-wash={wash}
+      style={entranceDelay ? { animationDelay: `${entranceDelay}ms` } : undefined}
+    >
       <span className="learner-wash-chip flex h-9 w-9 items-center justify-center rounded-[10px]" aria-hidden="true">
         <Icon className="h-[18px] w-[18px]" />
       </span>

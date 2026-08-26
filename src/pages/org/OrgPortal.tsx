@@ -29,6 +29,7 @@ import {
   AlertTriangle,
   Award,
   Building2,
+  Check,
   Copy,
   Loader2,
   Mail,
@@ -118,6 +119,7 @@ export default function OrgPortal() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [peopleFilter, setPeopleFilter] = useState('');
   const [matrixFilter, setMatrixFilter] = useState('');
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!organisation) return;
@@ -309,6 +311,9 @@ export default function OrgPortal() {
 
   const copyCode = (code: string) => {
     void navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    // Transient inline confirmation right where the click happened.
+    window.setTimeout(() => setCopiedCode((current) => (current === code ? null : current)), 1600);
     toast.success('Verification code copied');
   };
 
@@ -328,7 +333,7 @@ export default function OrgPortal() {
           Invite people
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto data-[state=open]:duration-300 data-[state=closed]:duration-200 sm:max-w-xl">
         <SheetHeader className="text-left">
           <SheetTitle className="font-display text-xl">Invite your team</SheetTitle>
           <SheetDescription>
@@ -356,7 +361,7 @@ export default function OrgPortal() {
             variant="ghost"
             size="icon"
             aria-label="Refresh data"
-            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+            className="pressable h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
             onClick={() => void loadData()}
             disabled={loading}
           >
@@ -400,6 +405,7 @@ export default function OrgPortal() {
           <StatTile
             icon={Users}
             wash="violet"
+            entranceDelay={0}
             value={activeMembers.length}
             label={activeMembers.length === 1 ? 'Team member' : 'Team members'}
             sub={
@@ -411,6 +417,7 @@ export default function OrgPortal() {
           <StatTile
             icon={Ticket}
             wash="teal"
+            entranceDelay={40}
             value={
               activeLicences.length > 0 ? (
                 <>
@@ -431,6 +438,7 @@ export default function OrgPortal() {
           <StatTile
             icon={Trophy}
             wash="amber"
+            entranceDelay={80}
             value={licensedCourses.length > 0 ? `${matrixStats.percent}%` : '—'}
             label="Training complete"
             sub={
@@ -442,6 +450,7 @@ export default function OrgPortal() {
           <StatTile
             icon={Award}
             wash="coral"
+            entranceDelay={120}
             value={certStats.valid}
             label={certStats.valid === 1 ? 'Valid certificate' : 'Valid certificates'}
             sub={certStats.expiringSoon > 0 ? `${certStats.expiringSoon} expiring soon` : 'None expiring soon'}
@@ -452,7 +461,7 @@ export default function OrgPortal() {
         {/* ---------------- Needs attention ---------------- */}
         {attentionCount > 0 && (
           <PortalCard
-            className="learner-accent mt-4"
+            className="learner-accent settle-in mt-4"
             // Reuse the house accent bar in warning colour.
             style={{ ['--learner-wash' as never]: 'var(--warning)' } as CSSProperties}
           >
@@ -491,7 +500,7 @@ export default function OrgPortal() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 rounded-full"
+                      className="pressable h-8 rounded-full"
                       onClick={() => void handleReleaseExpired()}
                     >
                       Release the seats
@@ -531,7 +540,7 @@ export default function OrgPortal() {
           </TabsList>
 
           {/* ---------------- People ---------------- */}
-          <TabsContent value="people" className="mt-6 space-y-5">
+          <TabsContent value="people" className="settle-in mt-6 space-y-5">
             <SectionCard
               title="Members"
               description={`Everyone linked to ${organisation.name}.`}
@@ -559,7 +568,7 @@ export default function OrgPortal() {
                   title="No members yet"
                   body="Invite your team and they will appear here with their training progress."
                   action={
-                    <Button size="sm" className="rounded-full" onClick={() => setInviteOpen(true)}>
+                    <Button size="sm" className="pressable rounded-full" onClick={() => setInviteOpen(true)}>
                       <UserPlus className="mr-1.5 h-3.5 w-3.5" />
                       Invite people
                     </Button>
@@ -632,7 +641,7 @@ export default function OrgPortal() {
               description="Each pending invitation holds a seat until it is accepted or withdrawn."
               aside={
                 expiredInvitations.length > 0 ? (
-                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => void handleReleaseExpired()}>
+                  <Button variant="outline" size="sm" className="pressable rounded-full" onClick={() => void handleReleaseExpired()}>
                     Release expired seats
                   </Button>
                 ) : undefined
@@ -678,7 +687,7 @@ export default function OrgPortal() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 rounded-full text-muted-foreground hover:text-[hsl(var(--destructive-ink))]"
+                                className="pressable h-8 rounded-full text-muted-foreground hover:text-[hsl(var(--destructive-ink))]"
                                 disabled={revoking === inv.id}
                                 onClick={() => void handleRevoke(inv.id)}
                               >
@@ -697,7 +706,7 @@ export default function OrgPortal() {
           </TabsContent>
 
           {/* ---------------- Compliance ---------------- */}
-          <TabsContent value="compliance" className="mt-6">
+          <TabsContent value="compliance" className="settle-in mt-6">
             <SectionCard
               title="Compliance matrix"
               description="Progress counts required lessons only — the same rule learners see."
@@ -732,7 +741,7 @@ export default function OrgPortal() {
                   }
                   action={
                     licensedCourses.length > 0 ? (
-                      <Button size="sm" className="rounded-full" onClick={() => setInviteOpen(true)}>
+                      <Button size="sm" className="pressable rounded-full" onClick={() => setInviteOpen(true)}>
                         <UserPlus className="mr-1.5 h-3.5 w-3.5" />
                         Invite people
                       </Button>
@@ -831,7 +840,7 @@ export default function OrgPortal() {
           </TabsContent>
 
           {/* ---------------- Licences ---------------- */}
-          <TabsContent value="licences" className="mt-6">
+          <TabsContent value="licences" className="settle-in mt-6">
             {licencesLoading ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -854,7 +863,7 @@ export default function OrgPortal() {
           </TabsContent>
 
           {/* ---------------- Certificates ---------------- */}
-          <TabsContent value="certificates" className="mt-6">
+          <TabsContent value="certificates" className="settle-in mt-6">
             <SectionCard
               title="Certificates"
               description="Issued certificates for your team. Anyone can check one at /verify with its code."
@@ -899,11 +908,15 @@ export default function OrgPortal() {
                               <button
                                 type="button"
                                 onClick={() => copyCode(cert.verification_code!)}
-                                className="mt-0.5 inline-flex items-center gap-1 rounded font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="pressable mt-0.5 inline-flex items-center gap-1 rounded font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 aria-label={`Copy verification code ${cert.verification_code}`}
                               >
                                 {cert.verification_code}
-                                <Copy className="h-3 w-3" aria-hidden="true" />
+                                {copiedCode === cert.verification_code ? (
+                                  <Check className="h-3 w-3 text-[hsl(var(--success-ink))]" aria-hidden="true" />
+                                ) : (
+                                  <Copy className="h-3 w-3" aria-hidden="true" />
+                                )}
                               </button>
                             )}
                           </TableCell>
@@ -920,7 +933,7 @@ export default function OrgPortal() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="rounded-full"
+                              className="pressable rounded-full"
                               onClick={() => void downloadCertificate(cert.id)}
                               disabled={downloading === cert.id}
                             >
