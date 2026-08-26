@@ -925,6 +925,7 @@ export type Database = {
           completed_at: string | null
           course_id: string
           enrolled_at: string
+          entitlement_exempt: boolean
           id: string
           licence_seat_id: string | null
           user_id: string
@@ -933,6 +934,7 @@ export type Database = {
           completed_at?: string | null
           course_id: string
           enrolled_at?: string
+          entitlement_exempt?: boolean
           id?: string
           licence_seat_id?: string | null
           user_id: string
@@ -941,6 +943,7 @@ export type Database = {
           completed_at?: string | null
           course_id?: string
           enrolled_at?: string
+          entitlement_exempt?: boolean
           id?: string
           licence_seat_id?: string | null
           user_id?: string
@@ -2909,6 +2912,10 @@ export type Database = {
         }
         Returns: string
       }
+      can_access_course: {
+        Args: { _course: string; _user: string }
+        Returns: boolean
+      }
       create_licence: {
         Args: {
           _amount_gbp?: number
@@ -2921,6 +2928,17 @@ export type Database = {
           _po_reference?: string
           _seats_total: number
           _starts_at: string
+        }
+        Returns: string
+      }
+      fulfil_purchase: {
+        Args: {
+          _amount_gbp: number
+          _course: string
+          _offering: string
+          _payment_ref: string
+          _seats?: number
+          _user: string
         }
         Returns: string
       }
@@ -2993,6 +3011,7 @@ export type Database = {
         Args: { _course_id: string; _user_id: string }
         Returns: boolean
       }
+      is_internal_member: { Args: { _user: string }; Returns: boolean }
       is_ops_training_admin: { Args: { _user_id: string }; Returns: boolean }
       is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_admin_of_member: {
