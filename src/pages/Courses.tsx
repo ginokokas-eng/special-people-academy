@@ -91,7 +91,7 @@ export default function Courses() {
           {/* Editorial header — web/marketing only. In the native app the
               catalogue goes straight to search + facet chips + grid. */}
           {!native && (
-            <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
               <div className="lg:col-span-7">
                 <h1 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
                   Courses for every shift,

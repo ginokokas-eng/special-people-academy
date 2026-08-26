@@ -195,7 +195,7 @@ export default function Contact() {
       {/* Contact Forms */}
       <section className="py-16 md:py-24 px-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Forms */}
             <div className="lg:col-span-2">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -221,7 +221,7 @@ export default function Contact() {
                     </CardHeader>
                     <CardContent>
                       <form onSubmit={handleSalesSubmit} className="space-y-4">
-                        <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="sales-name">Name *</Label>
                             <Input
@@ -262,7 +262,7 @@ export default function Contact() {
                           />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="sales-role">Your Role *</Label>
                             <Select 
@@ -359,7 +359,7 @@ export default function Contact() {
                     </CardHeader>
                     <CardContent>
                       <form onSubmit={handleSupportSubmit} className="space-y-4">
-                        <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="support-name">Name *</Label>
                             <Input
@@ -387,7 +387,7 @@ export default function Contact() {
                           </div>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="support-issue">Issue Type *</Label>
                             <Select 

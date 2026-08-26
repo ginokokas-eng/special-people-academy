@@ -264,7 +264,7 @@ export default function Pricing() {
       {/* Pricing Cards */}
       <section className="py-8 md:py-16 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, index) => (
               <Card 
                 key={index}

@@ -57,7 +57,7 @@ export function CourseOverview({
             <CardTitle className="text-xl">What you'll learn</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {learningOutcomes.map((outcome, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />

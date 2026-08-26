@@ -196,8 +196,8 @@ export default function ScormPlayer() {
     <div className="h-screen flex flex-col bg-background">
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b bg-card shadow-sm">
-        <div className="flex items-center gap-3">
-          <h1 className="text-sm font-semibold truncate max-w-md">
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="min-w-0 text-sm font-semibold truncate max-w-md">
             {scormPackage?.title || 'Video'}
           </h1>
           <Badge

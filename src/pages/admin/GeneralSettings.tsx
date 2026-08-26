@@ -61,7 +61,7 @@ export default function GeneralSettingsPage() {
             <CardDescription>Your organisation's identity and contact information.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="organisationName">Organisation Name</Label>
                 <Input id="organisationName" value={form.organisationName} onChange={e => update('organisationName', e.target.value)} />
@@ -118,7 +118,7 @@ export default function GeneralSettingsPage() {
             <CardDescription>Global defaults for certificates and quizzes. Individual courses can override these.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="expiryAwareness">Awareness Certificate Expiry (months)</Label>
                 <Input id="expiryAwareness" type="number" min={1} value={form.defaultCertificateExpiryMonthsAwareness}

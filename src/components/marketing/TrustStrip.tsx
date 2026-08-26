@@ -22,7 +22,7 @@ export const TrustStrip = () => {
           Trusted across UK care
         </div>
 
-        <div className="grid gap-8 lg:gap-10 md:grid-cols-2 items-center">
+        <div className="grid grid-cols-1 gap-8 lg:gap-10 md:grid-cols-2 items-center">
           {/* Sector pills */}
           <ul className="flex flex-wrap justify-center md:justify-start gap-2.5">
             {sectors.map((s) => {

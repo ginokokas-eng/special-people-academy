@@ -172,7 +172,7 @@ function CardDeckBlock({
           {revealed.size}/{cards.length} revealed
         </Badge>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {cards.map((card) => {
           const open = revealed.has(card.id);
           return (
@@ -667,7 +667,7 @@ export function LessonBlocks({
               >
                 <RevealOnScroll index={rowIndex} opacityOnly={opacityOnly}>
                   {row.length === 2 ? (
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       {row.map((block) => (
                         <div key={block.id}>{renderBlock(block)}</div>
                       ))}

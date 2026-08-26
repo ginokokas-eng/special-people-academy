@@ -104,7 +104,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
         <Plus className="mr-2 h-4 w-4" /> Add answer
       </Button>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-correct`}>Correct answer</Label>
           <Select
@@ -241,7 +241,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
                 </Button>
               </div>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor={`${idPrefix}-item-${item.id}`}>Item text</Label>
                 <Input
@@ -312,7 +312,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
         </Label>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-fb-correct`}>Feedback when correct</Label>
           <Input
@@ -358,7 +358,7 @@ export function FlipCardsBlockForm({ payload, onChange, idPrefix }: FormProps<Fl
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-heading`}>Heading (optional)</Label>
           <Input
@@ -416,7 +416,7 @@ export function FlipCardsBlockForm({ payload, onChange, idPrefix }: FormProps<Fl
                 </Button>
               </div>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor={`${idPrefix}-front-${card.id}`}>Front</Label>
                 <Input
@@ -472,7 +472,7 @@ export function ChecklistBlockForm({ payload, onChange, idPrefix }: FormProps<Ch
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-heading`}>Heading (optional)</Label>
           <Input

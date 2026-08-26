@@ -149,7 +149,7 @@ const WebNavbar = () => {
               className="h-9 w-9 object-contain flex-shrink-0 drop-shadow-[0_1px_2px_rgba(76,29,149,0.15)]"
             />
             <span
-              className="font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
+              className="min-w-0 font-heading font-bold leading-tight text-[hsl(259_72%_14%)] truncate"
               title={platformName}
             >
               <span className="block text-[15px] sm:text-base tracking-tight">Special People</span>

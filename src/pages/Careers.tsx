@@ -207,7 +207,7 @@ export default function Careers() {
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {whyWorkHere.map((item, index) => (
               <Card key={index} className="text-center border-none shadow-sm">
                 <CardHeader>
@@ -237,7 +237,7 @@ export default function Careers() {
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
               <Card key={index} className="border-none shadow-sm">
                 <CardHeader className="pb-2">
@@ -265,7 +265,7 @@ export default function Careers() {
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {hiringSteps.map((step, index) => (
               <div key={index} className="text-center">
                 <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-xl font-bold">

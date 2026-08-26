@@ -30,7 +30,7 @@ export function CourseAssessment({
             <p className="text-sm text-muted-foreground">{assessmentDetails}</p>
           )}
           
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="p-4 rounded-lg border bg-muted/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-full bg-primary/10">

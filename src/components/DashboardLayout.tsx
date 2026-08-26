@@ -129,9 +129,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             
-            <a href="/" className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+            <a href="/" className="flex min-w-0 items-center gap-2.5 font-bold text-lg whitespace-nowrap">
               <img src={logo} alt={platformName} className="h-8 w-8 object-contain flex-shrink-0" />
-              <span className="hidden sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
+              <span className="hidden min-w-0 sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
             </a>
           </div>
 

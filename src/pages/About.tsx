@@ -148,7 +148,7 @@ export default function About() {
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {values.map((value, index) => (
               <Card key={index} className="border-none shadow-sm">
                 <CardHeader>
@@ -182,7 +182,7 @@ export default function About() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {inclusiveTrainingPoints.map((point, index) => (
               <div key={index} className="flex items-start gap-3 p-4 rounded-lg bg-muted/30">
                 <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
@@ -206,7 +206,7 @@ export default function About() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {team.map((member, index) => (
               <Card key={index} className="text-center">
                 <CardHeader>

@@ -207,7 +207,7 @@ export default function Features() {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {benefitCards.map((benefit, index) => (
               <div 
                 key={index}
@@ -240,7 +240,7 @@ export default function Features() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreFeatures.map((feature, index) => (
               <div 
                 key={index}
@@ -273,7 +273,7 @@ export default function Features() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {useCases.map((useCase, index) => (
               <div 
                 key={index}
@@ -309,7 +309,7 @@ export default function Features() {
       {/* Accessibility Commitment */}
       <section className="py-16 md:py-24 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium bg-accent/10 text-accent rounded-full">
                 Our Commitment
@@ -359,7 +359,7 @@ export default function Features() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <div 
                 key={index}

@@ -330,7 +330,7 @@ export default function HelpCenter() {
             <p className="text-muted-foreground">Choose the option that works best for you.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="text-center p-6">
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="h-7 w-7 text-primary" />

@@ -164,7 +164,7 @@ export default function Webinars() {
             <p className="text-muted-foreground">Watch anytime. No registration required.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {onDemandWebinars.map((webinar) => (
               <Card key={webinar.id} className="hover:shadow-md transition-shadow flex flex-col">
                 <CardHeader className="flex-grow">

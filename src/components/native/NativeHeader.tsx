@@ -38,7 +38,7 @@ export const NativeHeader = ({ title, backTo, actions }: NativeHeaderProps) => {
 
         <span
           className={cn(
-            'native-chrome-el font-heading font-semibold text-[17px] truncate transition-opacity duration-200',
+            'native-chrome-el min-w-0 font-heading font-semibold text-[17px] truncate transition-opacity duration-200',
             collapsed ? 'opacity-100' : 'opacity-0',
           )}
         >

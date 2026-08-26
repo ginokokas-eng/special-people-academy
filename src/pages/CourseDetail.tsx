@@ -616,9 +616,9 @@ export default function CourseDetail() {
 
       {/* Main Content */}
       <div className="container py-8 lg:py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="min-w-0 lg:col-span-2 space-y-8">
             {/* Progress Tracker - only show when enrolled */}
             {enrollment && canAccessCourse && (
               <CourseProgressTracker

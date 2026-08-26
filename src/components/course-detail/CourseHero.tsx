@@ -135,9 +135,9 @@ export function CourseHero({
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
       
       <div className="container py-8 lg:py-12 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Left content */}
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {isEssential && (

@@ -73,7 +73,7 @@ export function TextBlockForm({ payload, onChange, idPrefix }: FormProps<TextPay
 export function CalloutBlockForm({ payload, onChange, idPrefix }: FormProps<CalloutPayload>) {
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-variant`}>Style</Label>
           <Select
@@ -122,7 +122,7 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-heading`}>Heading (optional)</Label>
           <Input
@@ -158,7 +158,7 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor={`${idPrefix}-front-${card.id}`}>Front (prompt)</Label>
                 <Input
@@ -488,7 +488,7 @@ export function VideoBlockForm({
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-video-title`}>Title (optional)</Label>
           <Input
