@@ -80,11 +80,20 @@ export default function InviteAccept() {
       return;
     }
     setNameError(null);
+
+    // A password is what makes the mobile app usable later: invited staff are
+    // provisioned without one, so this is their only chance to choose it up front.
+    if (password.length < 8 || password.length > 72) {
+      setPasswordError('Please choose a password of at least 8 characters.');
+      return;
+    }
+    setPasswordError(null);
     setStatus('working');
 
     const { data, error } = await supabase.functions.invoke('accept-org-invitation', {
-      body: { token, display_name: name },
+      body: { token, display_name: name, password },
     });
+
 
     if (error) {
       let detail = '';
