@@ -6,6 +6,13 @@ import logo from '@/assets/logo.svg';
  * Pre-session native boot screen. Deliberately minimal — never the marketing
  * homepage. "Sign in" hands off to the existing /auth flow, which lands the
  * learner on /my-learning.
+ *
+ * This screen CANNOT start Ariadne SSO. That exchange is one-directional and
+ * begins in the Ariadne carer app, which posts its own access token to
+ * sso-from-ariadne and launches us by intent at /sso (see useNativeSsoHandoff).
+ * Opened cold we hold no Ariadne token, so there is nothing to exchange — the
+ * copy below points at the route that works instead of promising one we
+ * cannot honour here.
  */
 export const NativeWelcome = () => {
   const navigate = useNavigate();
@@ -25,7 +32,7 @@ export const NativeWelcome = () => {
           className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
           onClick={() => navigate('/auth')}
         >
-          Continue with your employer
+          Sign in
         </Button>
         <Button
           variant="outline"
@@ -35,8 +42,8 @@ export const NativeWelcome = () => {
           Browse courses
         </Button>
         <p className="px-1 pt-1 text-[12px] leading-relaxed text-muted-foreground">
-          You&rsquo;ll be signed in through Ariadne. No password to remember, no employer code to
-          type on a ward.
+          Using the Ariadne carer app? Open <strong className="font-semibold">Training</strong>{' '}
+          there and you are signed in automatically &mdash; no password needed.
         </p>
       </div>
     </div>
