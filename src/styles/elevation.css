@@ -1,0 +1,36 @@
+/* Radii, borders and shadows.
+   The product runs two radius families: shadcn's 8px (--radius) in the app
+   shell, and a much softer editorial set on marketing surfaces — 24px cards,
+   16px image frames, fully-round pills. Shadows are violet-tinted, never grey,
+   and stay low; hover raises rather than darkens. */
+:root {
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius: 8px;               /* app default (--radius in src/index.css) */
+  --radius-learner: 15px;      /* learner surfaces (P8) */
+  --radius-frame: 16px;        /* card image frame, rounded-2xl */
+  --radius-card: 24px;         /* editorial card, rounded-3xl */
+  --radius-pill: 9999px;
+
+  --border-hairline: 1px;
+  --border-dashed-frame: 1px dashed var(--sp-line-hover);
+
+  /* App elevation (violet ink at low alpha) */
+  --shadow-xs: 0 1px 2px 0 hsl(270 25% 15% / 0.04);
+  --shadow-sm: 0 1px 3px 0 hsl(270 25% 15% / 0.08), 0 1px 2px -1px hsl(270 25% 15% / 0.06);
+  --shadow-md: 0 4px 6px -1px hsl(270 25% 15% / 0.08), 0 2px 4px -1px hsl(270 25% 15% / 0.04);
+  --shadow-lg: 0 10px 15px -3px hsl(270 25% 15% / 0.08), 0 4px 6px -2px hsl(270 25% 15% / 0.04);
+  --shadow-card: 0 2px 8px -2px hsl(270 25% 15% / 0.06);
+  --shadow-card-hover: 0 8px 24px -4px hsl(270 25% 15% / 0.12);
+
+  /* Editorial elevation (marketing cards — a whisper at rest, a lift on hover) */
+  --shadow-editorial: 0 1px 2px rgba(20, 10, 60, 0.04);
+  --shadow-editorial-hover: 0 18px 40px -22px rgba(76, 29, 149, 0.18);
+  --shadow-menu: 0 20px 60px -15px rgba(76, 29, 149, 0.25);
+  --shadow-cta: 0 6px 18px -6px rgba(124, 58, 237, 0.55);
+  --shadow-cta-ink: 0 6px 18px -6px rgba(15, 11, 48, 0.55);
+
+  /* Learner surfaces: depth from tint + layered shadow, never hairlines */
+  --shadow-learner: 0 1px 2px hsl(258 38% 15% / 0.06), 0 8px 24px hsl(258 38% 15% / 0.07);
+  --shadow-learner-lg: 0 2px 4px hsl(258 38% 15% / 0.07), 0 18px 40px hsl(258 38% 15% / 0.11);
+}

@@ -5,6 +5,7 @@ import { PublicLayout } from '@/components/layouts/PublicLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, BookOpen, Loader2, ArrowRight } from '@/components/icons';
+import { FilterPill } from '@/components/ds/FilterPill';
 import { EditorialCourseCard, type EditorialCourse } from '@/components/courses/EditorialCourseCard';
 import { useIsNative } from '@/lib/native';
 
@@ -122,30 +123,15 @@ export default function Courses() {
 
           {/* Filter pills */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            {CATEGORY_FILTERS.map((f) => {
-              const count = counts[f.key] ?? 0;
-              const isActive = activeFilter === f.key;
-              return (
-                <button
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)] focus-visible:ring-offset-2 ${
-                    isActive
-                      ? 'bg-[hsl(259_72%_14%)] text-white border border-[hsl(259_72%_14%)]'
-                      : 'bg-white text-[hsl(259_72%_14%)] border border-[#EEEAF8] hover:border-[#D6CCF5]'
-                  }`}
-                >
-                  {f.label}
-                  <span
-                    className={`tabular-nums text-[11px] font-medium ${
-                      isActive ? 'text-white/70' : 'text-[hsl(259_20%_55%)]'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+            {CATEGORY_FILTERS.map((f) => (
+              <FilterPill
+                key={f.key}
+                label={f.label}
+                count={counts[f.key] ?? 0}
+                selected={activeFilter === f.key}
+                onClick={() => setActiveFilter(f.key)}
+              />
+            ))}
           </div>
 
           <p className="text-[13px] text-[hsl(259_20%_45%)] mb-10">

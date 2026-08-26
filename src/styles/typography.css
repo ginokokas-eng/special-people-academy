@@ -1,0 +1,47 @@
+/* Typography — Baloo 2 for headings, Poppins for everything else.
+   Sizes are the ones the product actually ships (marketing hero 88px down to
+   the 10px uppercase kicker); learner display type uses Bricolage Grotesque. */
+:root {
+  --font-heading: "Baloo 2", "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Inconsolata", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Marketing / editorial scale */
+  --type-hero: 88px;          /* home hero, lg breakpoint */
+  --type-hero-line: 1.0;
+  --type-page-title: 52px;    /* catalogue h1 */
+  --type-page-title-line: 1.05;
+  --type-section: 32px;
+  --type-card-title: 20px;    /* editorial course card */
+  --type-app-title: 30px;     /* in-app h1 (My Dashboard) */
+  --type-app-section: 20px;   /* in-app h2 */
+
+  /* Body */
+  --type-lead: 18px;          /* hero paragraph */
+  --type-body: 16px;
+  --type-body-sm: 15px;       /* nav links, editorial body */
+  --type-ui: 14px;            /* buttons, inputs, table cells */
+  --type-meta: 13px;          /* card meta rows, filter pills */
+  --type-caption: 12px;
+  --type-kicker: 10px;        /* uppercase category kicker */
+  --type-lesson: 17px;        /* lesson-content body (P7) */
+
+  /* Weights — Baloo 2 headings sit at 700, UI text at 500/600 */
+  --weight-body: 400;
+  --weight-ui: 500;
+  --weight-semibold: 600;
+  --weight-heading: 700;
+
+  /* Tracking */
+  --track-display: -0.025em;  /* tracking-tight on headings */
+  --track-normal: 0em;
+  --track-kicker: 0.12em;     /* card kickers */
+  --track-brandmark: 0.22em;  /* "TRAINING ACADEMY" lockup */
+
+  /* Leading */
+  --leading-tight: 1.05;
+  --leading-snug: 1.375;
+  --leading-body: 1.625;
+  --leading-lesson: 1.65;
+}

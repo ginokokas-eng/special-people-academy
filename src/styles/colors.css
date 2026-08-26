@@ -1,0 +1,110 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Colour — Special People Training Academy
+   Values lifted verbatim from the product: src/index.css (semantic HSL
+   triplets consumed by Tailwind) and the marketing surfaces, which hard-code
+   an editorial ink/violet/teal palette in HeroSection.tsx, Courses.tsx,
+   EditorialCourseCard.tsx, Navbar.tsx and Footer.tsx.
+
+   Two layers:
+   1. Raw brand values (--sp-*) — the palette itself.
+   2. Semantic aliases — what a surface should reach for.
+   The Tailwind HSL triplets deliberately live ONLY in src/index.css: these
+   files are imported unlayered and would otherwise outrank its @layer base.
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  /* ── Brand ink and violet ─────────────────────────────────────────── */
+  --sp-ink: hsl(259 72% 14%);            /* editorial headings, dark pills */
+  --sp-ink-deep: #0f0b30;               /* marketing CTA, deepest ground */
+  --sp-ink-mid: hsl(259 20% 35%);        /* body copy on white */
+  --sp-ink-soft: hsl(259 20% 55%);       /* captions, counts */
+  --sp-violet: #7c3aed;                  /* the brand action colour */
+  --sp-violet-bright: hsl(262 83% 58%);  /* links, kickers, focus */
+  --sp-violet-deep: #6d28d9;             /* hover on violet */
+  --sp-violet-ink: hsl(262 83% 45%);     /* violet text at body size */
+  --sp-violet-900: #2d0e6b;              /* logo's darkest figure */
+
+  /* ── Teal → green (the "carers" gradient in the hero) ──────────────── */
+  --sp-teal-deep: #0e7490;
+  --sp-teal: #0d9488;
+  --sp-teal-kicker: hsl(189 94% 30%);    /* category kickers on cards */
+  --sp-teal-tint: hsl(189 94% 94%);      /* CPD chip background */
+  --sp-teal-tint-ink: hsl(189 94% 22%);  /* CPD chip text */
+  --sp-green: #10b981;
+
+  /* ── Logo figure hues — the six people in the mark ─────────────────── */
+  --sp-figure-violet: #7c3aed;
+  --sp-figure-amber: #f59e0b;
+  --sp-figure-indigo: #2d0e6b;
+  --sp-figure-pink: #ec4899;
+  --sp-figure-cyan: #06b6d4;
+  --sp-figure-green: #10b981;
+
+  /* ── Hero card grounds (HeroSection.tsx) ───────────────────────────── */
+  --sp-peach-100: #f5c6bc;   /* portrait card gradient, top-left */
+  --sp-peach-200: #f1b8ae;
+  --sp-peach-300: #eba89e;   /* …bottom-right */
+  --sp-night-100: #1a1448;   /* live-stats card gradient, top-left */
+  --sp-night-200: #16123e;
+  --sp-night-300: #0f0b30;   /* …bottom-right, = --sp-ink-deep */
+  --gradient-portrait: linear-gradient(135deg, #f5c6bc 0%, #f1b8ae 50%, #eba89e 100%);
+  --gradient-night: linear-gradient(135deg, #1a1448 0%, #16123e 50%, #0f0b30 100%);
+
+  /* ── Lilac structure: borders, hairlines, washes ───────────────────── */
+  --sp-line: #eeeaf8;                    /* default card border */
+  --sp-line-strong: #e8e4f7;             /* nav + chrome border */
+  --sp-line-hover: #d6ccf5;              /* border on hover, dashed frames */
+  --sp-line-soft: #f1ecf9;               /* inner dividers */
+  --sp-line-faint: #f0edfa;              /* unscrolled nav border */
+  --sp-wash: hsl(262 50% 97%);           /* image-frame wash */
+  --sp-wash-deep: hsl(262 50% 98%);      /* empty-state ground */
+  --sp-canvas: hsl(270 15% 98%);         /* app background */
+  --sp-learner-canvas: hsl(268 25% 97%); /* learner surfaces */
+  --sp-violet-soft: hsl(268 60% 95%);    /* learner chips */
+  --sp-violet-soft-ink: hsl(268 45% 28%);
+  --sp-white: #ffffff;
+
+  /* ── Status ────────────────────────────────────────────────────────── */
+  --sp-success: hsl(152 55% 42%);
+  --sp-success-ink: hsl(152 60% 26%);
+  --sp-success-tint: hsl(142 76% 94%);
+  --sp-warning: hsl(38 92% 50%);
+  --sp-warning-ink: hsl(32 75% 30%);
+  --sp-warning-tint: hsl(48 96% 89%);
+  --sp-danger: hsl(0 72% 50%);
+  --sp-danger-ink: hsl(0 70% 40%);
+  --sp-danger-tint: hsl(0 93% 94%);
+  --sp-info: hsl(217 91% 60%);
+  --sp-info-tint: hsl(214 95% 93%);
+
+  /* ── Semantic aliases ─────────────────────────────────────────────── */
+  --surface-page: var(--sp-white);
+  --surface-app: var(--sp-canvas);
+  --surface-learner: var(--sp-learner-canvas);
+  --surface-card: var(--sp-white);
+  --surface-frame: var(--sp-wash);
+  --surface-chip: var(--sp-violet-soft);
+
+  --text-display: var(--sp-ink);
+  --text-body: var(--sp-ink-mid);
+  --text-muted: var(--sp-ink-soft);
+  --text-kicker: var(--sp-teal-kicker);
+  --text-link: var(--sp-violet-bright);
+  --text-on-dark: var(--sp-white);
+
+  --border-card: var(--sp-line);
+  --border-card-hover: var(--sp-line-hover);
+  --border-chrome: var(--sp-line-strong);
+  --border-divider: var(--sp-line-soft);
+
+  --action-primary: var(--sp-violet);
+  --action-primary-hover: var(--sp-violet-deep);
+  --action-contrast: var(--sp-ink-deep);
+  --action-contrast-hover: #1a1448;
+  --focus-ring: var(--sp-violet-bright);
+
+  /* ── Gradients ─────────────────────────────────────────────────────── */
+  --gradient-primary: linear-gradient(135deg, hsl(268 55% 50%) 0%, hsl(268 45% 60%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(152 55% 42%) 0%, hsl(160 50% 38%) 100%);
+  --gradient-hero: linear-gradient(135deg, hsl(268 40% 18%) 0%, hsl(268 35% 25%) 50%, hsl(270 30% 20%) 100%);
+  --gradient-carers: linear-gradient(90deg, var(--sp-teal-deep) 0%, var(--sp-teal) 50%, var(--sp-green) 100%);
+}

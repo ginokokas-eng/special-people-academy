@@ -1,8 +1,16 @@
+/* @import must lead the file — anything after a real rule is dropped.
+   Design-system tokens (--sp-*) are named aliases for the values defined
+   below; the Tailwind HSL triplets in this file stay the single source. */
+@import './styles/colors.css';
+@import './styles/typography.css';
+@import './styles/spacing.css';
+@import './styles/elevation.css';
+@import './styles/motion.css';
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap');
 
 @layer base {
   :root {
@@ -351,6 +359,13 @@
     animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
+  /* Transform-only arrival (keyframes in styles/motion.css). Use where the
+     element's own opacity carries meaning — a muted/unearned state — which an
+     opacity keyframe would overwrite. */
+  .animate-pop-in {
+    animation: sp-pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   @keyframes fadeUp {
     from {
       opacity: 0;
@@ -407,6 +422,7 @@
   .animate-fade-up,
   .animate-fade-in,
   .animate-scale-in,
+  .animate-pop-in,
   .animate-nav-in {
     animation: none !important;
     opacity: 1 !important;
@@ -637,6 +653,24 @@
   .learner-wash .learner-wash-chip {
     background-color: hsl(var(--wash) / 0.16);
     color: hsl(var(--wash));
+  }
+
+  /* Dashboard hero band: brand wash + a dot texture that fades out toward the
+     bottom-right so the ring and figures sit on clean ground. */
+  .sp-hero-band {
+    background-color: hsl(var(--learner-wash) / 0.05);
+  }
+  .sp-hero-band::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: hsl(var(--learner-wash));
+    opacity: 0.12;
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom right, #000 0%, transparent 62%);
+    mask-image: linear-gradient(to bottom right, #000 0%, transparent 62%);
   }
 
   /* Designed lesson header: faint brand wash + clipped logo watermark. */

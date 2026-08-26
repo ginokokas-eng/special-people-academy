@@ -1,0 +1,32 @@
+/* Motion — the product's own easings and durations (src/index.css P13/P14).
+   Feedback is immediate on pointer-down; arrival is a short rise or a
+   blur+scale "material" transition; everything collapses under
+   prefers-reduced-motion. */
+:root {
+  --ease-arrival: cubic-bezier(0.32, 0.72, 0, 1);   /* material in/out, settle */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1); /* fade-up, scale-in */
+  --ease-out: ease-out;
+
+  --dur-press: 100ms;      /* .pressable */
+  --dur-material: 250ms;   /* material-in / settle-in */
+  --dur-fade: 500ms;       /* animate-fade-in */
+  --dur-rise: 600ms;       /* animate-fade-up */
+  --dur-sheen: 700ms;      /* CTA sheen sweep */
+  --stagger-card: 60ms;    /* catalogue card cascade, capped at 8 cards */
+
+  --press-scale: 0.98;
+  --hover-lift: -2px;
+}
+
+@keyframes sp-fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sp-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sp-scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+/* Transform-only variants — use these when the element's own opacity is
+   meaningful (a muted state, a watermark) rather than purely decorative. */
+@keyframes sp-rise-in { from { transform: translateY(10px); } to { transform: translateY(0); } }
+@keyframes sp-pop-in { from { transform: scale(0.9); } to { transform: scale(1); } }
+@keyframes sp-settle-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-press: 0.01ms; --dur-material: 0.01ms; --dur-fade: 0.01ms; --dur-rise: 0.01ms; }
+}

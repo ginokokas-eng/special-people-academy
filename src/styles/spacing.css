@@ -1,0 +1,33 @@
+/* Spacing — Tailwind's 4px step, as used across the product, plus the
+   section rhythm the marketing pages share (.section-y / .section-container
+   in src/index.css). */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-28: 112px;
+
+  /* Layout */
+  --container-max: 1280px;      /* max-w-7xl */
+  --container-pad: 24px;        /* px-6 */
+  --container-pad-lg: 32px;     /* lg:px-8 */
+  --section-y: 80px;            /* py-20 */
+  --section-y-lg: 112px;        /* lg:py-28 */
+  --app-shell-header: 64px;     /* DashboardLayout header */
+  --marketing-header: 72px;     /* Navbar at lg */
+  --app-sidebar: 256px;         /* w-64 */
+  --card-pad: 20px;             /* editorial card p-5 */
+  --card-pad-app: 24px;         /* shadcn card p-6 */
+  --grid-gap: 24px;             /* catalogue gap-6 */
+  --grid-gap-app: 16px;         /* dashboard gap-4 */
+  --hit-min: 44px;              /* coarse-pointer minimum */
+}
