@@ -477,7 +477,8 @@ export default function OrgPortal() {
               </div>
               <ul className="space-y-2.5 text-sm text-foreground/90">
                 {expiringLicences.map((l) => (
-                  <li key={l.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <li key={l.id} className="flex items-start gap-2.5">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--warning-ink))]" aria-hidden="true" />
                     <span>
                       Your <strong className="font-semibold">{l.course_title}</strong> licence expires on{' '}
                       {fmtDate(l.expires_at)}
@@ -491,8 +492,9 @@ export default function OrgPortal() {
                   </li>
                 ))}
                 {expiredInvitations.length > 0 && (
-                  <li className="flex flex-wrap items-center justify-between gap-2">
-                    <span>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--warning-ink))]" aria-hidden="true" />
+                    <span className="flex flex-1 flex-wrap items-center justify-between gap-2"><span>
                       {expiredInvitations.length}{' '}
                       {expiredInvitations.length === 1 ? 'invitation has' : 'invitations have'} expired and still hold
                       a seat.
@@ -504,14 +506,15 @@ export default function OrgPortal() {
                       onClick={() => void handleReleaseExpired()}
                     >
                       Release the seats
-                    </Button>
+                    </Button></span>
                   </li>
                 )}
                 {certStats.expiringSoon > 0 && (
-                  <li>
-                    {certStats.expiringSoon}{' '}
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--warning-ink))]" aria-hidden="true" />
+                    <span>{certStats.expiringSoon}{' '}
                     {certStats.expiringSoon === 1 ? 'certificate expires' : 'certificates expire'} soon — plan
-                    refresher training before the renewal date.
+                    refresher training before the renewal date.</span>
                   </li>
                 )}
               </ul>
@@ -576,13 +579,13 @@ export default function OrgPortal() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="[&_td]:py-3 [&_th]:h-10">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
                         <TableHead className={thClass}>Name</TableHead>
-                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Role</TableHead>
-                        <TableHead className={cn(thClass, 'hidden sm:table-cell')}>Status</TableHead>
-                        <TableHead className={cn(thClass, 'text-right')}>Joined</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-48 md:table-cell')}>Role</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-36 sm:table-cell')}>Status</TableHead>
+                        <TableHead className={cn(thClass, 'w-32 text-right')}>Joined</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -656,13 +659,13 @@ export default function OrgPortal() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="[&_td]:py-3 [&_th]:h-10">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
                         <TableHead className={thClass}>Email</TableHead>
-                        <TableHead className={cn(thClass, 'hidden sm:table-cell')}>Role</TableHead>
-                        <TableHead className={thClass}>Expires</TableHead>
-                        <TableHead className={cn(thClass, 'text-right')}>Action</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-48 sm:table-cell')}>Role</TableHead>
+                        <TableHead className={cn(thClass, 'w-40')}>Expires</TableHead>
+                        <TableHead className={cn(thClass, 'w-32 text-right')}>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -751,7 +754,7 @@ export default function OrgPortal() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="[&_td]:py-3">
                       <TableHeader>
                         <TableRow className="hover:bg-transparent">
                           <TableHead className={cn(thClass, 'portal-sticky-col min-w-[200px]')}>Learner</TableHead>
@@ -877,15 +880,15 @@ export default function OrgPortal() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="[&_td]:py-3 [&_th]:h-10">
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
                         <TableHead className={thClass}>Learner</TableHead>
                         <TableHead className={thClass}>Course</TableHead>
-                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Issued</TableHead>
-                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Expires</TableHead>
-                        <TableHead className={thClass}>Status</TableHead>
-                        <TableHead className={cn(thClass, 'text-right')}>Certificate</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-32 md:table-cell')}>Issued</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-32 md:table-cell')}>Expires</TableHead>
+                        <TableHead className={cn(thClass, 'w-36')}>Status</TableHead>
+                        <TableHead className={cn(thClass, 'w-36 text-right')}>Certificate</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
