@@ -25,9 +25,6 @@ import { CourseProgressTracker } from '@/components/course-detail/CourseProgress
 import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisite';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { isNativeShell } from '@/lib/native';
-
-// Purchase/checkout surfaces never render inside the native app (Play policy).
-const nativeShell = isNativeShell();
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
 
@@ -137,6 +134,7 @@ export default function CourseDetail() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { hasActiveSubscription, loading: subLoading } = useSubscription();
+  const nativeShell = isNativeShell();
   
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -516,12 +514,14 @@ export default function CourseDetail() {
       }
 
       // Create registration
+      if (!course?.id) return;
+
       const { data: newReg, error: regError } = await supabase
         .from('scorm_registrations')
         .insert({
           scorm_package_id: lessonData.scorm_package_id,
           user_id: user.id,
-          course_id: course?.id!,
+          course_id: course.id,
           lesson_id: lesson.id,
           status: 'not_attempted',
         })
@@ -716,9 +716,10 @@ export default function CourseDetail() {
           </div>
 
           {/* Right Column - Sticky Sidebar */}
+          {!nativeShell && (
           <div className="hidden lg:block space-y-6">
             {/* Booking Panel - show for external courses with offerings */}
-            {!course.is_internal && !nativeShell && (
+            {!course.is_internal && (
               <CourseBookingPanel
                 courseId={course.id}
                 courseTitle={course.title}
@@ -744,6 +745,7 @@ export default function CourseDetail() {
               hasActiveSubscription={hasActiveSubscription}
             />
           </div>
+          )}
         </div>
       </div>
 
@@ -761,9 +763,11 @@ export default function CourseDetail() {
         hasActiveSubscription={hasActiveSubscription}
       />
 
+      {!nativeShell && (
       <div className="hidden lg:block">
         <Footer />
       </div>
+      )}
     </div>
   );
 }
