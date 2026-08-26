@@ -42,7 +42,10 @@ export default function InviteAccept() {
   const [status, setStatus] = useState<Status>('name');
   const [message, setMessage] = useState<string>('');
   const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
 
   const fail = (text: string) => {
     setMessage(text);
