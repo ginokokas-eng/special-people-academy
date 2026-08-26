@@ -42,7 +42,10 @@ export default function InviteAccept() {
   const [status, setStatus] = useState<Status>('name');
   const [message, setMessage] = useState<string>('');
   const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
 
   const fail = (text: string) => {
     setMessage(text);
@@ -77,11 +80,20 @@ export default function InviteAccept() {
       return;
     }
     setNameError(null);
+
+    // A password is what makes the mobile app usable later: invited staff are
+    // provisioned without one, so this is their only chance to choose it up front.
+    if (password.length < 8 || password.length > 72) {
+      setPasswordError('Please choose a password of at least 8 characters.');
+      return;
+    }
+    setPasswordError(null);
     setStatus('working');
 
     const { data, error } = await supabase.functions.invoke('accept-org-invitation', {
-      body: { token, display_name: name },
+      body: { token, display_name: name, password },
     });
+
 
     if (error) {
       let detail = '';
@@ -140,7 +152,8 @@ export default function InviteAccept() {
                   Welcome to your training
                 </h1>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Your workplace has set up a course for you. First, tell us your name.
+                  Your workplace has set up a course for you. Tell us your name and choose a
+                  password.
                 </p>
               </div>
 
@@ -164,6 +177,33 @@ export default function InviteAccept() {
                   </p>
                 )}
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="invite-password">Choose a password</Label>
+                <Input
+                  id="invite-password"
+                  type="password"
+                  autoComplete="new-password"
+                  maxLength={72}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={passwordError ? true : undefined}
+                  aria-describedby={passwordError ? 'invite-password-error' : 'invite-password-hint'}
+                  placeholder="At least 8 characters"
+                  className="h-11 rounded-[10px]"
+                />
+                {passwordError ? (
+                  <p id="invite-password-error" className="text-sm text-[hsl(var(--destructive-ink))]">
+                    {passwordError}
+                  </p>
+                ) : (
+                  <p id="invite-password-hint" className="text-xs text-muted-foreground">
+                    You'll use this to sign in on the web and in the mobile app.
+                  </p>
+                )}
+              </div>
+
+
 
               <Button type="submit" className="pressable h-11 w-full rounded-[10px] text-[15px] font-semibold">
                 Continue to my course

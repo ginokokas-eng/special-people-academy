@@ -15,8 +15,15 @@ interface AuthContextType {
   isOpsTrainingAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; roles?: string[] }>;
+  /** Email a single-use sign-in code to an EXISTING account (never creates one). */
+  sendEmailCode: (email: string) => Promise<{ error: Error | null }>;
+  /** Exchange an emailed code for a session. */
+  verifyEmailCode: (email: string, code: string) => Promise<{ error: Error | null; roles?: string[] }>;
+  requestPasswordReset: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
   refreshRoles: () => Promise<string[]>;
+
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -174,6 +181,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
+  /**
+   * Passwordless sign-in for people who never chose a password — invited
+   * organisation staff in particular, who otherwise have no way into the
+   * Android app. shouldCreateUser is false so this can never be used to
+   * provision accounts from the public sign-in form.
+   */
+  const sendEmailCode = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+    return { error: error as Error | null };
+  };
+
+  const verifyEmailCode = async (email: string, code: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: code.replace(/\s+/g, ''),
+      type: 'email',
+    });
+
+    if (!error && data.user) {
+      const roles = await checkUserRoles(data.user.id);
+      return { error: null, roles };
+    }
+
+    return { error: error as Error | null };
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error: error as Error | null };
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error: error as Error | null };
+  };
+
+
   const signOut = async (): Promise<{ error: Error | null }> => {
     try {
       console.log('[Auth] Signing out...');
@@ -223,8 +275,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isOpsTrainingAdmin, 
       signUp, 
       signIn, 
+      sendEmailCode,
+      verifyEmailCode,
+      requestPasswordReset,
+      updatePassword,
       signOut,
       refreshRoles 
+
     }}>
       {children}
     </AuthContext.Provider>

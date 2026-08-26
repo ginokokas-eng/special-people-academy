@@ -14,8 +14,10 @@ import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
 import { computeRoleFlags } from '@/lib/roles';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
+import { EmailCodeSignIn } from '@/components/auth/EmailCodeSignIn';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import defaultLogo from '@/assets/logo.svg';
+
 
 const emailSchema = z.string().email('Please enter a valid email address');
 // Sign-in accepts internal/staff addresses (e.g. name@local) that are valid
@@ -29,10 +31,14 @@ const nameSchema = z.string().min(2, 'Name must be at least 2 characters');
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signIn, signUp, loading } = useAuth();
+  const { user, signIn, signUp, requestPasswordReset, loading } = useAuth();
   const { loginRedirectUrl } = useRedirectSettings();
   const branding = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Invited organisation staff have no password, so passwordless is a
+  // first-class alternative rather than a recovery afterthought.
+  const [loginMode, setLoginMode] = useState<'password' | 'code'>('password');
+
   
   // Determine initial tab based on route
   const initialTab = location.pathname === '/sign-up' ? 'signup' : 'login';
@@ -99,20 +105,47 @@ export default function Auth() {
       }
     } else {
       toast.success('Welcome back!');
-      // Ensure any active staff profile is reflected in the user's roles
-      // (server-side, tamper-resistant), then redirect based on roles.
-      let effectiveRoles = roles || [];
-      const { data: synced } = await supabase.rpc('sync_staff_role');
-      if (synced) {
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
-        effectiveRoles = rolesData?.map(r => r.role) || effectiveRoles;
-      }
-      navigate(landingForRoles(effectiveRoles));
+      await finishSignIn(roles || []);
+
     }
   };
+
+  // Shared tail for any successful sign-in: sync staff roles server-side,
+  // then land the user on the right home screen.
+  const finishSignIn = async (roles: string[]) => {
+    let effectiveRoles = roles;
+    const { data: synced } = await supabase.rpc('sync_staff_role');
+    if (synced) {
+      const { data: authData } = await supabase.auth.getUser();
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authData.user?.id ?? '');
+      effectiveRoles = rolesData?.map(r => r.role) || effectiveRoles;
+    }
+    navigate(landingForRoles(effectiveRoles));
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      loginEmailSchema.parse(loginEmail);
+    } catch {
+      toast.error('Enter your email address first, then tap "Forgot password".');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const { error } = await requestPasswordReset(loginEmail);
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success('If that email has an account, a reset link is on its way.');
+  };
+
+
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,9 +260,19 @@ export default function Auth() {
             <TabsContent value="login">
               <CardHeader className="pt-0">
                 <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>Enter your credentials to access your account</CardDescription>
+                <CardDescription>
+                  {loginMode === 'password'
+                    ? 'Enter your credentials to access your account'
+                    : 'Sign in with a code we email you'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
+                {loginMode === 'code' ? (
+                  <EmailCodeSignIn
+                    onSignedIn={(roles) => void finishSignIn(roles)}
+                    onCancel={() => setLoginMode('password')}
+                  />
+                ) : (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
@@ -243,7 +286,16 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <div className="flex items-center justify-between gap-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <Input
                       id="login-password"
                       type="password"
@@ -263,7 +315,17 @@ export default function Auth() {
                       'Sign In'
                     )}
                   </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setLoginMode('code')}
+                  >
+                    Email me a sign-in code instead
+                  </Button>
                 </form>
+                )}
+
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
