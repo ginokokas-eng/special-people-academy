@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Lock, CreditCard } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
+import { useIsNative } from '@/lib/native';
 
 interface MobileBottomCTAProps {
   isLoggedIn: boolean;
@@ -30,15 +31,17 @@ export function MobileBottomCTA({
   hasActiveSubscription,
 }: MobileBottomCTAProps) {
   const navigate = useNavigate();
+  const native = useIsNative();
 
   const getButtonContent = () => {
     if (!isLoggedIn) {
       return isInternal ? 'Sign in to access' : 'Sign in to subscribe';
     }
     
-    // External course - needs subscription
+    // External course - needs subscription. Digital-content purchases stay on
+    // the web entirely (Play policy), so the app never sells or prices.
     if (!isInternal && !hasActiveSubscription) {
-      return 'Subscribe to access';
+      return native ? 'Not in your plan yet' : 'Subscribe to access';
     }
     
     if (!isEnrolled) {
@@ -55,6 +58,7 @@ export function MobileBottomCTA({
     
     // External course without subscription
     if (!isInternal && !hasActiveSubscription) {
+      if (native) return; // no purchase route in the app
       navigate('/contact?reason=subscription');
       return;
     }
@@ -66,10 +70,11 @@ export function MobileBottomCTA({
     }
   };
 
-  const showSubscriptionCTA = !isInternal && !hasActiveSubscription && isLoggedIn;
+  const showSubscriptionCTA = !isInternal && !hasActiveSubscription && isLoggedIn && !native;
+  const showPlanNotice = !isInternal && !hasActiveSubscription && isLoggedIn && native;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 lg:hidden z-50 shadow-lg">
+    <div className={`fixed bottom-0 left-0 right-0 p-4 lg:hidden z-40 ${native ? 'native-above-tabbar material-chrome' : 'bg-background border-t shadow-lg'}`}>
       <div className="container flex items-center gap-4">
         {isEnrolled && canAccessCourse && progress > 0 && (
           <div className="flex-1 max-w-[100px]">
@@ -85,9 +90,16 @@ export function MobileBottomCTA({
           </div>
         )}
         
+        {showPlanNotice && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Lock className="h-3 w-3" />
+            <span>Ask your organisation for access</span>
+          </div>
+        )}
+
         <Button 
           onClick={handleClick}
-          disabled={enrolling}
+          disabled={enrolling || showPlanNotice}
           className={`flex-1 h-12 font-semibold ${
             showSubscriptionCTA ? 'bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90' : ''
           }`}

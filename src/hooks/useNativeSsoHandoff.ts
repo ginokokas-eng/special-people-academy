@@ -22,6 +22,17 @@ import { useNavigate } from 'react-router-dom';
 /** Module-level so a remount can never re-handle a consumed link. */
 const handledUrls = new Set<string>();
 
+/**
+ * Resolves once the launch-URL check has finished (or was impossible), so the
+ * native boot gate can never redirect over an in-flight /sso navigation.
+ * Behaviour of the handoff itself is unchanged.
+ */
+let resolveSettled: () => void = () => {};
+export const nativeSsoHandoffSettled = new Promise<void>((resolve) => {
+  resolveSettled = resolve;
+});
+
+
 function ssoTargetFor(rawUrl: string): string | null {
   let parsed: URL;
   try {
@@ -69,9 +80,13 @@ export function useNativeSsoHandoff() {
         // Dynamic import so the web build never pulls the native bridge in on boot.
         ({ App: CapApp } = await import('@capacitor/app'));
       } catch {
+        resolveSettled();
         return;
       }
-      if (cancelled) return;
+      if (cancelled) {
+        resolveSettled();
+        return;
+      }
 
       try {
         const listener = await CapApp.addListener('appUrlOpen', (event) => {
@@ -89,8 +104,11 @@ export function useNativeSsoHandoff() {
         handle(launch?.url);
       } catch {
         // No launch URL (normal launcher start, or web).
+      } finally {
+        resolveSettled();
       }
     })();
+
 
     return () => {
       cancelled = true;

@@ -3,8 +3,15 @@ import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
 import { useGeneralSettings } from "@/hooks/useGeneralSettings";
+import { isNativeShell } from "@/lib/native";
 
 export const Footer = () => {
+  // No marketing footer inside the native app shell.
+  if (isNativeShell()) return null;
+  return <WebFooter />;
+};
+
+const WebFooter = () => {
   const branding = useBranding();
   const generalSettings = useGeneralSettings();
   const logo = branding.logoMarkUrl || defaultLogo;

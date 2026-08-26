@@ -29,6 +29,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRedirectSettings } from "@/hooks/useRedirectSettings";
 import { useCart } from "@/hooks/useCart";
+import { isNativeShell } from "@/lib/native";
+import { NativeChrome } from "@/components/native/NativeChrome";
 import { useBranding } from "@/hooks/useBrandingSettings";
 import { useGeneralSettings } from "@/hooks/useGeneralSettings";
 import defaultLogo from "@/assets/logo.svg";
@@ -75,6 +77,15 @@ const resourcesLinks: DropdownItem[] = [
 ];
 
 export const Navbar = () => {
+  // Native shell: the website navbar is replaced wholesale by native chrome
+  // (collapsing header + bottom tab bar). Web/desktop is untouched.
+  if (isNativeShell()) {
+    return <NativeChrome />;
+  }
+  return <WebNavbar />;
+};
+
+const WebNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
