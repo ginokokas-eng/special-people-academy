@@ -30,6 +30,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { learnerNavItems, learnerDropdownItems } from '@/config/navigation';
 import { useOrgAdmin } from '@/hooks/useOrgAdmin';
+import { isNativeShell } from '@/lib/native';
+import { NativeShell } from '@/components/native/NativeShell';
+import { activeTabFor } from '@/components/native/nativeTabs';
+
+/** Native header titles for learner routes that are not tab roots. */
+const NATIVE_TITLES: Record<string, string> = {
+  '/my-learning': 'Learn',
+  '/dashboard': 'Learn',
+  '/my-courses': 'My courses',
+  '/certificates': 'Certificates',
+  '/profile': 'Profile',
+  '/notifications': 'Notifications',
+};
+
 import { Building2 } from '@/components/icons';
 
 interface DashboardLayoutProps {
@@ -83,7 +97,23 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { isOrgAdmin } = useOrgAdmin();
   const showOrgLink = isOrgAdmin && !showAdminLink;
 
+  // ---------------------------------------------------------------------------
+  // Native shell: the single seam. Inside the Capacitor app every learner page
+  // that wraps itself in DashboardLayout gets bottom tabs + a collapsing
+  // large-title header instead of the web navbar/sidebar. Web is untouched.
+  // ---------------------------------------------------------------------------
+  if (isNativeShell()) {
+    const title = NATIVE_TITLES[location.pathname] ?? activeTabFor(location.pathname)?.title ?? '';
+    return (
+      <NativeShell title={title}>
+        {children}
+        <NotificationsSheet open={notificationsOpen} onOpenChange={setNotificationsOpen} />
+      </NativeShell>
+    );
+  }
+
   return (
+
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">

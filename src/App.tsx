@@ -8,6 +8,9 @@ import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { NativeSsoHandoff } from "@/hooks/useNativeSsoHandoff";
+import { NativeBootGate } from "@/components/native/NativeBootGate";
+import { NativeWelcome } from "@/components/native/NativeWelcome";
+
 
 import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -83,13 +86,17 @@ const App = () => (
               <ScrollToTop />
               <NativeSsoHandoff />
 
+              <NativeBootGate />
+
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/sso" element={<SsoCallback />} />
+                <Route path="/native-welcome" element={<NativeWelcome />} />
 
                 <Route path="/sign-in" element={<Auth />} />
                 <Route path="/sign-up" element={<Auth />} />
+
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:id" element={<CourseDetail />} />

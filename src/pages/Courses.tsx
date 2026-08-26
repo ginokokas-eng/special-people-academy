@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, BookOpen, Loader2, ArrowRight } from '@/components/icons';
 import { EditorialCourseCard, type EditorialCourse } from '@/components/courses/EditorialCourseCard';
+import { useIsNative } from '@/lib/native';
 
 interface Course extends EditorialCourse {
   is_published: boolean;
@@ -30,6 +31,7 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const native = useIsNative();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -85,23 +87,27 @@ export default function Courses() {
   return (
     <PublicLayout title="Courses" description="Browse our CPD-certified training courses">
       <section className="bg-white">
-        <div className="section-container py-14 lg:py-20">
-          {/* Editorial header */}
-          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
-            <div className="lg:col-span-7">
-              <h1 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
-                Courses for every shift,
-                <br />
-                every role, every registration.
-              </h1>
+        <div className={`section-container ${native ? 'pt-2 pb-8' : 'py-14 lg:py-20'}`}>
+          {/* Editorial header — web/marketing only. In the native app the
+              catalogue goes straight to search + facet chips + grid. */}
+          {!native && (
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mb-10 lg:mb-14">
+              <div className="lg:col-span-7">
+                <h1 className="font-heading text-[34px] sm:text-[42px] lg:text-[52px] leading-[1.05] tracking-tight font-bold text-[hsl(259_72%_14%)]">
+                  Courses for every shift,
+                  <br />
+                  every role, every registration.
+                </h1>
+              </div>
+              <div className="lg:col-span-5 lg:pt-6">
+                <p className="text-[15px] lg:text-base leading-relaxed text-[hsl(259_20%_35%)]">
+                  From the Care Certificate onward. Mapped to the 2024 Adult Social Care
+                  workforce framework and reviewed by registered clinicians quarterly.
+                </p>
+              </div>
             </div>
-            <div className="lg:col-span-5 lg:pt-6">
-              <p className="text-[15px] lg:text-base leading-relaxed text-[hsl(259_20%_35%)]">
-                From the Care Certificate onward. Mapped to the 2024 Adult Social Care
-                workforce framework and reviewed by registered clinicians quarterly.
-              </p>
-            </div>
-          </div>
+          )}
+
 
           {/* Search */}
           <div className="relative max-w-xl mb-6">

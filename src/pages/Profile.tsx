@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Save } from '@/components/icons';
+import { User, Loader2, Save, LogOut, Building2 } from '@/components/icons';
+import { useIsNative } from '@/lib/native';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -19,8 +20,10 @@ interface Profile {
 }
 
 export default function Profile() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const native = useIsNative();
+  const [orgName, setOrgName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
     avatar_url: '',
@@ -62,6 +65,15 @@ export default function Profile() {
           department: data.department || '',
         });
       }
+      // Home/funding organisation, for the account panel. Read-only, best effort.
+      const { data: membership } = await supabase
+        .from('organisation_members')
+        .select('organisations(name)')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      const org = (membership as { organisations?: { name?: string } | null } | null)?.organisations;
+      if (org?.name) setOrgName(org.name);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -114,10 +126,12 @@ export default function Profile() {
   return (
     <DashboardLayout>
       <div className="max-w-2xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-          <p className="text-muted-foreground mt-1">Manage your account information</p>
-        </div>
+        {!native && (
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+            <p className="text-muted-foreground mt-1">Manage your account information</p>
+          </div>
+        )}
 
         <Card>
           <CardHeader>
@@ -209,6 +223,15 @@ export default function Profile() {
               <p className="text-sm font-medium">Email Address</p>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
+            {orgName && (
+              <div>
+                <p className="text-sm font-medium flex items-center gap-1.5">
+                  <Building2 className="h-4 w-4" aria-hidden="true" />
+                  Organisation
+                </p>
+                <p className="text-sm text-muted-foreground">{orgName}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium">Member Since</p>
               <p className="text-sm text-muted-foreground">
@@ -221,6 +244,20 @@ export default function Profile() {
                   : 'Unknown'}
               </p>
             </div>
+
+            {native && (
+              <Button
+                variant="outline"
+                className="pressable w-full h-12 rounded-full text-destructive"
+                onClick={async () => {
+                  await signOut();
+                  navigate('/native-welcome', { replace: true });
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
+                Sign out
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>

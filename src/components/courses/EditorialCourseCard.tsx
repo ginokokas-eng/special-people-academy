@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Star, ShoppingCart } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useIsNative } from "@/lib/native";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -44,6 +45,7 @@ const getDefaultOfferingId = (
 export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourseCardProps) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const native = useIsNative();
   const { user } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -144,6 +146,8 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
           </span>
         </div>
 
+        {/* Basket CTA is web-only: digital-content purchases never happen in the app. */}
+        {!native && (
         <Button
           variant="outline"
           size="sm"
@@ -154,6 +158,7 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
           <ShoppingCart className="h-4 w-4 mr-2" />
           {isAdding ? "Adding..." : "Add to Basket"}
         </Button>
+        )}
       </div>
     </article>
   );

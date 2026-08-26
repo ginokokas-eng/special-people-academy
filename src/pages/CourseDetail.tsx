@@ -24,6 +24,10 @@ import { CourseResources } from '@/components/course-detail/CourseResources';
 import { CourseProgressTracker } from '@/components/course-detail/CourseProgressTracker';
 import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisite';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
+import { isNativeShell } from '@/lib/native';
+
+// Purchase/checkout surfaces never render inside the native app (Play policy).
+const nativeShell = isNativeShell();
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
 
@@ -714,7 +718,7 @@ export default function CourseDetail() {
           {/* Right Column - Sticky Sidebar */}
           <div className="hidden lg:block space-y-6">
             {/* Booking Panel - show for external courses with offerings */}
-            {!course.is_internal && (
+            {!course.is_internal && !nativeShell && (
               <CourseBookingPanel
                 courseId={course.id}
                 courseTitle={course.title}

@@ -899,3 +899,65 @@
     }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   NATIVE APP SHELL (Capacitor only — `html.native` is set at boot).
+   Edge-to-edge chrome, safe-area padding, bottom tab bar, peer cross-fade.
+   The class is never added on web, so nothing here affects the website.
+   --------------------------------------------------------------------------- */
+:root {
+  --native-tabbar-h: 60px;
+}
+
+/* Safe-area resolution: env() first, then the CSS vars injected by
+   @capacitor-community/safe-area (Android zeroes env() insets on targetSdk 35/36). */
+html.native {
+  --native-inset-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --native-inset-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  overscroll-behavior: none;
+}
+
+html.native body {
+  overscroll-behavior-y: none;
+  padding-bottom: calc(var(--native-tabbar-h) + var(--native-inset-bottom));
+}
+
+html.native .native-header {
+  padding-top: var(--native-inset-top);
+}
+
+html.native .native-tabbar {
+  padding-bottom: var(--native-inset-bottom);
+}
+
+/* Chrome elements only: no tap flash, no text selection. Content keeps both. */
+html.native .native-chrome-el {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Peer navigation between tabs: a short cross-fade, never a slide. */
+html.native .native-crossfade {
+  animation: native-crossfade 0.2s ease-out both;
+}
+
+/* Fixed page CTAs sit above the tab bar rather than under it. */
+html.native .native-above-tabbar {
+  bottom: calc(var(--native-tabbar-h) + var(--native-inset-bottom));
+}
+
+@keyframes native-crossfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.native .native-crossfade {
+    animation: none !important;
+  }
+}
