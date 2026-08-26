@@ -120,6 +120,43 @@ export default function Auth() {
     }
   };
 
+  // Shared tail for any successful sign-in: sync staff roles server-side,
+  // then land the user on the right home screen.
+  const finishSignIn = async (roles: string[]) => {
+    let effectiveRoles = roles;
+    const { data: synced } = await supabase.rpc('sync_staff_role');
+    if (synced) {
+      const { data: authData } = await supabase.auth.getUser();
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authData.user?.id ?? '');
+      effectiveRoles = rolesData?.map(r => r.role) || effectiveRoles;
+    }
+    navigate(landingForRoles(effectiveRoles));
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      loginEmailSchema.parse(loginEmail);
+    } catch {
+      toast.error('Enter your email address first, then tap "Forgot password".');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const { error } = await requestPasswordReset(loginEmail);
+    setIsSubmitting(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success('If that email has an account, a reset link is on its way.');
+  };
+
+
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
