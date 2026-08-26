@@ -181,6 +181,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
+  /**
+   * Passwordless sign-in for people who never chose a password — invited
+   * organisation staff in particular, who otherwise have no way into the
+   * Android app. shouldCreateUser is false so this can never be used to
+   * provision accounts from the public sign-in form.
+   */
+  const sendEmailCode = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+    return { error: error as Error | null };
+  };
+
+  const verifyEmailCode = async (email: string, code: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: code.replace(/\s+/g, ''),
+      type: 'email',
+    });
+
+    if (!error && data.user) {
+      const roles = await checkUserRoles(data.user.id);
+      return { error: null, roles };
+    }
+
+    return { error: error as Error | null };
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error: error as Error | null };
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error: error as Error | null };
+  };
+
+
   const signOut = async (): Promise<{ error: Error | null }> => {
     try {
       console.log('[Auth] Signing out...');
