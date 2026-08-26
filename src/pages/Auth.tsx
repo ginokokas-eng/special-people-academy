@@ -14,8 +14,10 @@ import { lovable } from '@/integrations/lovable';
 import { supabase } from '@/integrations/supabase/client';
 import { computeRoleFlags } from '@/lib/roles';
 import { PublicLayout } from '@/components/layouts/PublicLayout';
+import { EmailCodeSignIn } from '@/components/auth/EmailCodeSignIn';
 import { useBranding } from '@/hooks/useBrandingSettings';
 import defaultLogo from '@/assets/logo.svg';
+
 
 const emailSchema = z.string().email('Please enter a valid email address');
 // Sign-in accepts internal/staff addresses (e.g. name@local) that are valid
