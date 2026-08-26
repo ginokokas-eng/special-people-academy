@@ -275,8 +275,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isOpsTrainingAdmin, 
       signUp, 
       signIn, 
+      sendEmailCode,
+      verifyEmailCode,
+      requestPasswordReset,
+      updatePassword,
       signOut,
       refreshRoles 
+
     }}>
       {children}
     </AuthContext.Provider>
