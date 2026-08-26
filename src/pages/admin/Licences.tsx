@@ -223,13 +223,18 @@ export default function Licences() {
                 <SelectValue placeholder={loadingRefs ? 'Loading…' : 'Select an organisation'} />
               </SelectTrigger>
               <SelectContent>
-                {orgs.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>
-                    {o.name}
-                    {o.kind === 'internal' ? ' (internal)' : ''}
-                    {o.is_active ? '' : ' — inactive'}
-                  </SelectItem>
-                ))}
+                {/* Individual buyers each hold a kind='personal' shell org. Their
+                    licences are minted by fulfil_purchase, never issued by hand,
+                    so listing them here would only be noise. */}
+                {orgs
+                  .filter((o) => o.kind !== 'personal')
+                  .map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name}
+                      {o.kind === 'internal' ? ' (internal)' : ''}
+                      {o.is_active ? '' : ' — inactive'}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </CardContent>

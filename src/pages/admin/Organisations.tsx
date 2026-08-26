@@ -68,6 +68,9 @@ export default function Organisations() {
   const [orgs, setOrgs] = useState<Organisation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  // Every self-employed buyer gets a kind='personal' shell organisation, so
+  // without this the customer list drowns in one-person rows.
+  const [showPersonal, setShowPersonal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -199,7 +202,10 @@ export default function Organisations() {
     await openMembers(membersOf);
   };
 
+  const personalCount = orgs.filter((o) => o.kind === 'personal').length;
+
   const filtered = orgs.filter((o) => {
+    if (!showPersonal && o.kind === 'personal') return false;
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return o.name.toLowerCase().includes(q) || o.slug.includes(q) || (o.contact_email ?? '').includes(q);
@@ -225,8 +231,8 @@ export default function Organisations() {
         </div>
 
         <Card>
-          <CardHeader>
-            <div className="relative max-w-sm">
+          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+            <div className="relative max-w-sm flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
@@ -236,6 +242,12 @@ export default function Organisations() {
                 aria-label="Search organisations"
               />
             </div>
+            {personalCount > 0 && (
+              <label className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
+                <Switch checked={showPersonal} onCheckedChange={setShowPersonal} />
+                Show individual buyers ({personalCount})
+              </label>
+            )}
           </CardHeader>
           <CardContent>
             <Table>
