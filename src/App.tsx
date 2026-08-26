@@ -70,6 +70,7 @@ import Organisations from "./pages/admin/Organisations";
 import Licences from "./pages/admin/Licences";
 import OrgPortal from "./pages/org/OrgPortal";
 import InviteAccept from "./pages/InviteAccept";
+import Renewals from "./pages/Renewals";
 
 const queryClient = new QueryClient();
 
@@ -160,6 +161,7 @@ const App = () => (
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
                 <Route path="/scorm/launch/:registrationId" element={<ScormPlayer />} />
+                <Route path="/renewals" element={<Renewals />} />
                 <Route path="/invite" element={<InviteAccept />} />
                 <Route path="/org" element={<OrgPortal />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

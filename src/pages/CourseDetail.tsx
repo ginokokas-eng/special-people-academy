@@ -9,6 +9,7 @@ import { Loader2 } from '@/components/icons';
 import { toast } from 'sonner';
 
 import { CourseHero } from '@/components/course-detail/CourseHero';
+import { NativeCourseHero } from '@/components/native/NativeCourseHero';
 import { CourseSidebar } from '@/components/course-detail/CourseSidebar';
 import { CourseContent } from '@/components/course-detail/CourseContent';
 import { CourseOverview } from '@/components/course-detail/CourseOverview';
@@ -92,6 +93,7 @@ interface Course {
   is_internal: boolean;
   has_certificate: boolean;
   cpd_hours: number;
+  renewal_months: number | null;
   pass_mark: number;
   language: string;
   last_updated: string | null;
@@ -195,6 +197,7 @@ export default function CourseDetail() {
         is_internal: courseData.is_internal !== false,
         has_certificate: courseData.has_certificate !== false,
         cpd_hours: courseData.cpd_hours || 0,
+        renewal_months: courseData.renewal_months ?? null,
         pass_mark: courseData.pass_mark || 70,
         language: courseData.language || 'English',
         // Pricing fields
@@ -592,7 +595,21 @@ export default function CourseDetail() {
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section — the phone gets a decision-first band instead. */}
+      {nativeShell ? (
+        <NativeCourseHero
+          title={course.title}
+          category={course.category}
+          level={course.level}
+          isMandatory={course.is_mandatory}
+          durationMinutes={course.duration_minutes || 0}
+          cpdHours={course.cpd_hours}
+          renewalMonths={course.renewal_months}
+          progress={progress}
+          isEnrolled={!!enrollment}
+          onStart={handleStart}
+        />
+      ) : (
       <CourseHero
         title={course.title}
         subtitle={course.subtitle || undefined}
@@ -613,6 +630,7 @@ export default function CourseDetail() {
         isEnrolled={!!enrollment}
         progress={progress}
       />
+      )}
 
       {/* Main Content */}
       <div className="container py-8 lg:py-12">

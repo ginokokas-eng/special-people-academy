@@ -1001,6 +1001,16 @@ html.native .native-header {
   padding-top: var(--native-inset-top);
 }
 
+/* Course-detail resume bar: sits directly on top of the tab bar, which already
+   carries the bottom safe-area inset. */
+html.native .native-course-cta {
+  bottom: calc(var(--native-tabbar-h) + var(--native-inset-bottom));
+}
+/* Outside the shell (forced-native QA in a browser) there is no inset. */
+.native-course-cta {
+  bottom: var(--native-tabbar-h, 60px);
+}
+
 html.native .native-tabbar {
   padding-bottom: var(--native-inset-bottom);
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsNative } from '@/lib/native';
+import { NativeCertificates } from '@/components/native/NativeCertificates';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,7 @@ interface Certificate {
 export default function Certificates() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const native = useIsNative();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -134,6 +137,15 @@ export default function Certificates() {
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // On the phone this tab is a wallet, not a list — see NativeCertificates.
+  if (native) {
+    return (
+      <DashboardLayout>
+        <NativeCertificates />
       </DashboardLayout>
     );
   }
