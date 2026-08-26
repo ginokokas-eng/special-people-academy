@@ -173,7 +173,7 @@ export function CourseContent({
     return (
       <div
         key={lesson.id}
-        className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
+        className={`flex w-full min-w-0 items-center gap-4 p-4 rounded-lg transition-colors ${
           isClickable ? 'hover:bg-muted/50 cursor-pointer' : 'opacity-75'
         } ${isLocked ? 'bg-muted/20' : ''} ${isQuiz && isClickable ? 'hover:bg-primary/5 border border-transparent hover:border-primary/20' : ''}`}
         onClick={handleClick}
@@ -190,12 +190,12 @@ export function CourseContent({
         </div>
 
         {/* Lesson info */}
-        <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
           <p className={`font-medium text-sm truncate ${isLocked ? 'text-muted-foreground' : ''}`}>
             {index + 1}. {lesson.title}
           </p>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline" className="text-xs px-2 py-0 h-5">
+          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
+            <Badge variant="outline" className="h-5 flex-shrink-0 px-2 py-0 text-xs">
               {lessonTypeIcons[lesson.lesson_type || 'video']}
               <span className="ml-1">{lessonTypeLabels[lesson.lesson_type || 'video']}</span>
             </Badge>
@@ -204,8 +204,8 @@ export function CourseContent({
               if (!meta) return null;
               const isVideo = lesson.lesson_type === 'video' || lesson.lesson_type === 'scorm';
               return (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  {isVideo && <Clock className="h-3 w-3" />}
+                <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+                  {isVideo && <Clock className="h-3 w-3 flex-shrink-0" />}
                   {meta}
                 </span>
               );
@@ -263,8 +263,8 @@ export function CourseContent({
                   className="border rounded-lg px-4"
                 >
                   <AccordionTrigger className="hover:no-underline py-4">
-                    <div className="flex items-center justify-between w-full pr-4">
-                      <div className="text-left">
+                    <div className="flex w-full min-w-0 items-center justify-between pr-4">
+                      <div className="min-w-0 text-left">
                         <h4 className="font-semibold">{module.title}</h4>
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {moduleLessons.length} lessons • {formatDuration(moduleDuration)}

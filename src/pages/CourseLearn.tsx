@@ -968,7 +968,7 @@ export default function CourseLearn() {
             <ArrowLeft className="mr-1 h-4 w-4" />
             <span className="hidden sm:inline">Course</span>
           </Button>
-          <h1 className="truncate text-sm font-semibold text-foreground">{course.title}</h1>
+          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{course.title}</h1>
         </div>
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>

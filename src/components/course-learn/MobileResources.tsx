@@ -113,7 +113,7 @@ function ResourceGroup({
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger className="flex min-h-[60px] w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{title}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {items.length} resource{items.length === 1 ? '' : 's'}

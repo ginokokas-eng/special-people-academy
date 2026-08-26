@@ -146,7 +146,7 @@ function Section({
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="border-b">
       <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 bg-muted/30 px-4 py-3.5 text-left transition-colors hover:bg-muted/50">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{title}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{progressLabel}</p>
         </div>
@@ -196,14 +196,14 @@ function LessonRow({
   return (
     <div
       className={cn(
-        'flex items-start gap-3 border-l-2 px-4 py-3.5 transition-colors',
+        'flex min-w-0 items-start gap-3 border-l-2 px-4 py-3.5 transition-colors',
         active ? 'border-primary bg-primary/10' : 'border-transparent'
       )}
     >
       <button
         onClick={onSelect}
         disabled={locked}
-        className="flex min-h-[44px] flex-1 items-start gap-3 text-left disabled:cursor-not-allowed"
+        className="flex min-h-[44px] min-w-0 flex-1 items-start gap-3 text-left disabled:cursor-not-allowed"
       >
         {/* Status: check when completed, lock when locked, else number */}
         <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center">
@@ -264,14 +264,14 @@ function LessonRow({
                 key={r.id}
                 onClick={() => download(r.id, r.title)}
                 disabled={downloadingId === r.id}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted"
+                className="flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted"
               >
                 {downloadingId === r.id ? (
                   <Loader2 className="h-3.5 w-3.5 flex-shrink-0 animate-spin" />
                 ) : (
                   <Download className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
                 )}
-                <span className="truncate">{r.title}</span>
+                <span className="min-w-0 flex-1 truncate">{r.title}</span>
               </button>
             ))}
           </PopoverContent>
