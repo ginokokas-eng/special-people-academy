@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from '@/components/icons';
+import { AlertTriangle, Award, Loader2 } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import logoMark from '@/assets/logo.svg';
 
 /**
  * /invite?token=… — organisation invitation acceptance.
@@ -18,6 +19,9 @@ import { Label } from '@/components/ui/label';
  *
  * The function replies with a single-use token_hash; we verify it here to
  * establish the session, exactly like /sso, then land on the course.
+ *
+ * This is the first thing an invited employee ever sees of the Academy, so it
+ * carries the full brand treatment.
  */
 
 type Status = 'name' | 'working' | 'error';
@@ -108,73 +112,112 @@ export default function InviteAccept() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+    <div className="learner-surface flex min-h-screen flex-col items-center justify-center px-5 py-10">
       <Helmet>
         <title>Accepting your invitation | Academy</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="w-full max-w-sm text-center space-y-4">
-        {status === 'name' && (
-          <form
-            className="space-y-4 text-left"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void redeem();
-            }}
-          >
-            <div className="text-center space-y-1">
-              <h1 className="text-lg font-semibold text-foreground">Welcome to your training</h1>
-              <p className="text-sm text-muted-foreground">
-                Your name appears on your certificate, so please enter it as it should be printed.
+      <div className="w-full max-w-[420px]">
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <img src={logoMark} alt="" className="h-11 w-11" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--learner-kicker))]">
+            Special People Academy
+          </p>
+        </div>
+
+        <div className="learner-card p-7 sm:p-8">
+          {status === 'name' && (
+            <form
+              className="space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void redeem();
+              }}
+            >
+              <div className="space-y-1.5 text-center">
+                <h1 className="font-display text-[24px] leading-tight tracking-tight text-foreground">
+                  Welcome to your training
+                </h1>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Your workplace has set up a course for you. First, tell us your name.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="invite-full-name">Your full name</Label>
+                <Input
+                  id="invite-full-name"
+                  autoFocus
+                  autoComplete="name"
+                  maxLength={100}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  aria-invalid={nameError ? true : undefined}
+                  aria-describedby={nameError ? 'invite-name-error' : 'invite-name-hint'}
+                  placeholder="e.g. Alex Morgan"
+                  className="h-11 rounded-[10px]"
+                />
+                {nameError && (
+                  <p id="invite-name-error" className="text-sm text-destructive">
+                    {nameError}
+                  </p>
+                )}
+              </div>
+
+              <Button type="submit" className="pressable h-11 w-full rounded-[10px] text-[15px] font-semibold">
+                Continue to my course
+              </Button>
+
+              <p
+                id="invite-name-hint"
+                className="flex items-start gap-2 rounded-xl bg-[hsl(var(--learner-wash)/0.05)] px-3.5 py-3 text-left text-xs leading-relaxed text-muted-foreground"
+              >
+                <Award className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                Your name is printed on your certificate exactly as you type it here, so write it as it
+                should appear.
+              </p>
+            </form>
+          )}
+
+          {status === 'working' && (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <Loader2 className="h-7 w-7 animate-spin text-primary" aria-hidden="true" />
+              <h1 className="font-display text-[20px] tracking-tight text-foreground">
+                Setting up your training…
+              </h1>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                We’re adding your course and signing you in. This only takes a moment.
               </p>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="invite-full-name">Your full name</Label>
-              <Input
-                id="invite-full-name"
-                autoFocus
-                autoComplete="name"
-                maxLength={100}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                aria-invalid={nameError ? true : undefined}
-                aria-describedby={nameError ? 'invite-name-error' : undefined}
-                placeholder="e.g. Alex Morgan"
-              />
-              {nameError && (
-                <p id="invite-name-error" className="text-sm text-destructive">
-                  {nameError}
-                </p>
-              )}
+          {status === 'error' && (
+            <div className="flex flex-col items-center gap-3 py-2 text-center">
+              <span
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning))]"
+                aria-hidden="true"
+              >
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+              <h1 className="font-display text-[20px] tracking-tight text-foreground">
+                We couldn’t open this invitation
+              </h1>
+              <p className="text-sm leading-relaxed text-muted-foreground">{message}</p>
+              <Button
+                variant="outline"
+                className="mt-1 rounded-full"
+                onClick={() => navigate('/auth', { replace: true })}
+              >
+                Go to sign in
+              </Button>
             </div>
+          )}
+        </div>
 
-            <Button type="submit" className="w-full">
-              Continue
-            </Button>
-          </form>
-        )}
-
-        {status === 'working' && (
-          <>
-            <Loader2 className="h-7 w-7 animate-spin text-primary mx-auto" aria-hidden="true" />
-            <h1 className="text-lg font-semibold text-foreground">Setting up your training…</h1>
-            <p className="text-sm text-muted-foreground">
-              We’re adding your course and signing you in. This only takes a moment.
-            </p>
-          </>
-        )}
-
-        {status === 'error' && (
-          <>
-            <h1 className="text-lg font-semibold text-foreground">We couldn’t open this invitation</h1>
-            <p className="text-sm text-muted-foreground">{message}</p>
-            <Button variant="outline" onClick={() => navigate('/auth', { replace: true })}>
-              Go to sign in
-            </Button>
-          </>
-        )}
+        <p className="mt-5 text-center text-xs text-muted-foreground/80">
+          Care training by Special People Academy
+        </p>
       </div>
     </div>
   );

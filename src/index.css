@@ -635,6 +635,25 @@
     box-shadow: var(--shadow-learner);
   }
 
+  /* Org portal — sticky learner column in the compliance matrix. Rows keep a
+     plain card background (no hover tint) so the frozen cell never seams. */
+  .portal-sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background-color: hsl(var(--card));
+  }
+  .portal-sticky-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -10px;
+    width: 10px;
+    pointer-events: none;
+    background: linear-gradient(to right, hsl(258 38% 15% / 0.06), transparent);
+  }
+
 
   /* Primary actions inside learner surfaces: solid brand, radius 10, 600. */
   .learner-surface :is(button, a).bg-primary {

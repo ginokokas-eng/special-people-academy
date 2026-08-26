@@ -1,18 +1,45 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrgAdmin } from '@/hooks/useOrgAdmin';
-import { useOrgLicences } from '@/components/org/useOrgLicences';
+import { useOrgLicences, type OrgLicence } from '@/components/org/useOrgLicences';
 import { BulkInviteForm } from '@/components/org/BulkInviteForm';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PortalShell } from '@/components/org/PortalShell';
+import {
+  ComplianceDot,
+  EmptyState,
+  InitialsAvatar,
+  MatrixStatus,
+  PortalCard,
+  SectionCard,
+  StatTile,
+  thClass,
+  type MatrixState,
+} from '@/components/org/PortalBits';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, Users, Building2, Trophy, Award, RefreshCw } from '@/components/icons';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  AlertTriangle,
+  Award,
+  Building2,
+  Copy,
+  Loader2,
+  Mail,
+  RefreshCw,
+  Search,
+  Ticket,
+  Trophy,
+  UserPlus,
+  Users,
+} from '@/components/icons';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface OrgPerson {
@@ -63,24 +90,10 @@ interface MatrixRow {
 const fmtDate = (value: string | null) =>
   value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
-function StatusCell({ row }: { row: MatrixRow | undefined }) {
-  if (!row || row.status === 'not_started') {
-    return <span className="text-sm text-muted-foreground">Not started</span>;
-  }
-  if (row.status === 'completed') {
-    return (
-      <Badge variant="secondary" className="bg-secondary text-secondary-foreground">
-        Completed
-      </Badge>
-    );
-  }
-  return (
-    <div className="space-y-1 min-w-[110px]">
-      <p className="text-sm font-medium">In progress · {row.percent}%</p>
-      <Progress value={row.percent} className="h-1.5" />
-    </div>
-  );
-}
+const daysUntil = (value: string | null) => {
+  if (!value) return Infinity;
+  return Math.ceil((new Date(value).getTime() - Date.now()) / 86_400_000);
+};
 
 /**
  * /org — the buyer-facing portal for organisation admins.
@@ -102,6 +115,9 @@ export default function OrgPortal() {
   const [revoking, setRevoking] = useState<string | null>(null);
   const [certificates, setCertificates] = useState<OrgCertificate[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [peopleFilter, setPeopleFilter] = useState('');
+  const [matrixFilter, setMatrixFilter] = useState('');
 
   const loadData = useCallback(async () => {
     if (!organisation) return;
@@ -182,6 +198,27 @@ export default function OrgPortal() {
     await Promise.all([loadData(), reloadLicences()]);
   };
 
+  const downloadCertificate = async (certificateId: string) => {
+    setDownloading(certificateId);
+    try {
+      // Entitlement-checked: the storage path comes from the row server-side.
+      const { data, error } = await supabase.functions.invoke('issue-certificate', {
+        body: { action: 'download', certificate_id: certificateId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast.error(data?.error ?? 'Certificate is not available yet');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not open that certificate');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   const licensedCourses = useMemo(() => {
     const map = new Map<string, string>();
     for (const l of licences) map.set(l.course_id, l.course_title);
@@ -209,358 +246,680 @@ export default function OrgPortal() {
     return Array.from(learners, ([userId, value]) => ({ userId, ...value }));
   }, [matrix]);
 
+  /* ---------- derived overview numbers (display only) ---------- */
+
+  const activeMembers = useMemo(() => people.filter((p) => !p.ended_at), [people]);
+  const activeLicences = useMemo(() => licences.filter((l) => l.status === 'active'), [licences]);
+  const seatTotals = useMemo(
+    () =>
+      activeLicences.reduce(
+        (acc, l) => ({ used: acc.used + l.seats_used, total: acc.total + l.seats_total }),
+        { used: 0, total: 0 },
+      ),
+    [activeLicences],
+  );
+  const matrixStats = useMemo(() => {
+    const total = matrix.length;
+    const completed = matrix.filter((r) => r.status === 'completed').length;
+    const started = matrix.filter((r) => r.status !== 'not_started').length;
+    return { total, completed, started, percent: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  }, [matrix]);
+  const certStats = useMemo(() => {
+    const valid = certificates.filter((c) => c.status !== 'expired').length;
+    const expiringSoon = certificates.filter((c) => c.status === 'expiring_soon').length;
+    return { valid, expiringSoon };
+  }, [certificates]);
+
+  const expiringLicences = useMemo(
+    () => activeLicences.filter((l) => daysUntil(l.expires_at) <= 60),
+    [activeLicences],
+  );
+  const expiredInvitations = useMemo(
+    () => invitations.filter((inv) => daysUntil(inv.expires_at) < 0),
+    [invitations],
+  );
+  const attentionCount = expiringLicences.length + (expiredInvitations.length > 0 ? 1 : 0) + (certStats.expiringSoon > 0 ? 1 : 0);
+
+  const filteredPeople = useMemo(() => {
+    const q = peopleFilter.trim().toLowerCase();
+    if (!q) return people;
+    return people.filter(
+      (p) => (p.full_name ?? '').toLowerCase().includes(q) || (p.email ?? '').toLowerCase().includes(q),
+    );
+  }, [people, peopleFilter]);
+
+  const filteredLearners = useMemo(() => {
+    const q = matrixFilter.trim().toLowerCase();
+    if (!q) return matrixByLearner;
+    return matrixByLearner.filter(
+      (l) => l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q),
+    );
+  }, [matrixByLearner, matrixFilter]);
+
+  const courseCompletion = useMemo(() => {
+    const byCourse = new Map<string, { completed: number; total: number }>();
+    for (const row of matrix) {
+      const entry = byCourse.get(row.course_id) ?? { completed: 0, total: 0 };
+      entry.total += 1;
+      if (row.status === 'completed') entry.completed += 1;
+      byCourse.set(row.course_id, entry);
+    }
+    return byCourse;
+  }, [matrix]);
+
+  const copyCode = (code: string) => {
+    void navigator.clipboard.writeText(code);
+    toast.success('Verification code copied');
+  };
+
   if (authLoading || orgLoading || !organisation) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="learner-surface flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const downloadCertificate = async (certificateId: string) => {
-    setDownloading(certificateId);
-    try {
-      // Entitlement-checked: the storage path comes from the row server-side.
-      const { data, error } = await supabase.functions.invoke('issue-certificate', {
-        body: { action: 'download', certificate_id: certificateId },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      } else {
-        toast.error(data?.error ?? 'Certificate is not available yet');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not open that certificate');
-    } finally {
-      setDownloading(null);
-    }
-  };
+  const inviteSheet = (
+    <Sheet open={inviteOpen} onOpenChange={setInviteOpen}>
+      <SheetTrigger asChild>
+        <Button className="pressable h-9 rounded-[10px] font-semibold">
+          <UserPlus className="mr-2 h-4 w-4" />
+          Invite people
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+        <SheetHeader className="text-left">
+          <SheetTitle className="font-display text-xl">Invite your team</SheetTitle>
+          <SheetDescription>
+            Choose the licence their seat comes from, then paste email addresses. People with an
+            account are enrolled straight away; everyone else gets an invitation link.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="mt-5">
+          <BulkInviteForm
+            variant="bare"
+            licences={licences}
+            onCompleted={() => void Promise.all([loadData(), reloadLicences()])}
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
 
   return (
-    <div className="min-h-screen bg-background">
+    <PortalShell
+      orgName={organisation.name}
+      actions={
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Refresh data"
+            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+            onClick={() => void loadData()}
+            disabled={loading}
+          >
+            <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
+          </Button>
+          {inviteSheet}
+        </>
+      }
+    >
       <Helmet>
         <title>{organisation.name} training portal | Academy</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="mx-auto max-w-[1200px] px-4 py-10 md:px-6">
-        <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-              <Building2 className="h-6 w-6 text-primary" />
+      <div className="mx-auto max-w-[1200px] px-4 pb-4 pt-8 md:px-6">
+        {/* ---------------- Identity ---------------- */}
+        <header className="mb-6 flex items-center gap-4">
+          {organisation.logo_url ? (
+            <img
+              src={organisation.logo_url}
+              alt=""
+              className="h-12 w-12 shrink-0 rounded-xl bg-card object-contain p-1 shadow-[var(--shadow-learner)]"
+            />
+          ) : (
+            <span className="learner-chip h-12 w-12 rounded-xl" aria-hidden="true">
+              <Building2 className="h-6 w-6" />
             </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">{organisation.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                Your team’s training, seats and compliance in one place.
-              </p>
-            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--learner-kicker))]">
+              Training overview
+            </p>
+            <h1 className="font-display truncate text-[26px] leading-tight tracking-tight text-foreground sm:text-[30px]">
+              {organisation.name}
+            </h1>
           </div>
-          <Button variant="outline" onClick={() => void loadData()} disabled={loading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
         </header>
 
-        <Tabs defaultValue="people" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="people">People</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            <TabsTrigger value="licences">Licences</TabsTrigger>
-            <TabsTrigger value="certificates">Certificates</TabsTrigger>
+        {/* ---------------- Overview ---------------- */}
+        <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatTile
+            icon={Users}
+            wash="violet"
+            value={activeMembers.length}
+            label={activeMembers.length === 1 ? 'Team member' : 'Team members'}
+            sub={
+              invitations.length > 0
+                ? `${invitations.length} ${invitations.length === 1 ? 'invitation' : 'invitations'} pending`
+                : 'Everyone is on board'
+            }
+          />
+          <StatTile
+            icon={Ticket}
+            wash="teal"
+            value={
+              activeLicences.length > 0 ? (
+                <>
+                  {seatTotals.used}
+                  <span className="text-muted-foreground/60">/{seatTotals.total}</span>
+                </>
+              ) : (
+                '—'
+              )
+            }
+            label="Seats in use"
+            sub={
+              activeLicences.length > 0
+                ? `across ${activeLicences.length} ${activeLicences.length === 1 ? 'licence' : 'licences'}`
+                : 'No active licences yet'
+            }
+          />
+          <StatTile
+            icon={Trophy}
+            wash="amber"
+            value={licensedCourses.length > 0 ? `${matrixStats.percent}%` : '—'}
+            label="Training complete"
+            sub={
+              licensedCourses.length > 0
+                ? `${matrixStats.completed} of ${matrixStats.total} course places finished`
+                : 'No licensed courses yet'
+            }
+          />
+          <StatTile
+            icon={Award}
+            wash="coral"
+            value={certStats.valid}
+            label={certStats.valid === 1 ? 'Valid certificate' : 'Valid certificates'}
+            sub={certStats.expiringSoon > 0 ? `${certStats.expiringSoon} expiring soon` : 'None expiring soon'}
+            subTone={certStats.expiringSoon > 0 ? 'warning' : 'default'}
+          />
+        </section>
+
+        {/* ---------------- Needs attention ---------------- */}
+        {attentionCount > 0 && (
+          <PortalCard
+            className="learner-accent mt-4"
+            // Reuse the house accent bar in warning colour.
+            style={{ ['--learner-wash' as never]: 'var(--warning)' } as CSSProperties}
+          >
+            <div className="flex flex-col gap-3 p-5 sm:p-6">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[hsl(var(--warning)/0.14)] text-[hsl(var(--warning))]"
+                  aria-hidden="true"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                </span>
+                <h2 className="font-display text-[16px] text-foreground">Needs your attention</h2>
+              </div>
+              <ul className="space-y-2.5 text-sm text-foreground/90">
+                {expiringLicences.map((l) => (
+                  <li key={l.id} className="flex flex-wrap items-center justify-between gap-2">
+                    <span>
+                      Your <strong className="font-semibold">{l.course_title}</strong> licence expires on{' '}
+                      {fmtDate(l.expires_at)}
+                      {l.seats_total - l.seats_used > 0 && (
+                        <span className="text-muted-foreground">
+                          {' '}
+                          · {l.seats_total - l.seats_used} unused {l.seats_total - l.seats_used === 1 ? 'seat' : 'seats'}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+                {expiredInvitations.length > 0 && (
+                  <li className="flex flex-wrap items-center justify-between gap-2">
+                    <span>
+                      {expiredInvitations.length}{' '}
+                      {expiredInvitations.length === 1 ? 'invitation has' : 'invitations have'} expired and still hold
+                      a seat.
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 rounded-full"
+                      onClick={() => void handleReleaseExpired()}
+                    >
+                      Release the seats
+                    </Button>
+                  </li>
+                )}
+                {certStats.expiringSoon > 0 && (
+                  <li>
+                    {certStats.expiringSoon}{' '}
+                    {certStats.expiringSoon === 1 ? 'certificate expires' : 'certificates expire'} soon — plan
+                    refresher training before the renewal date.
+                  </li>
+                )}
+              </ul>
+            </div>
+          </PortalCard>
+        )}
+
+        {/* ---------------- Tabs ---------------- */}
+        <Tabs defaultValue="people" className="mt-7">
+          {/* scroll-mt keeps the row clear of the sticky header when focus scrolls it into view */}
+          <TabsList className="h-auto w-full scroll-mt-20 justify-start gap-1 overflow-x-auto rounded-none border-b border-border/60 bg-transparent p-0">
+            {[
+              { value: 'people', label: 'People' },
+              { value: 'compliance', label: 'Compliance' },
+              { value: 'licences', label: 'Licences' },
+              { value: 'certificates', label: 'Certificates' },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="relative h-10 shrink-0 scroll-mt-20 rounded-none border-b-2 border-transparent bg-transparent px-4 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* ---------------- People ---------------- */}
-          <TabsContent value="people" className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {licences.map((l) => (
-                <Card key={l.id}>
-                  <CardHeader className="pb-2">
-                    <CardDescription>{l.course_title}</CardDescription>
-                    <CardTitle className="text-xl">
-                      {l.seats_used}/{l.seats_total} seats
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Progress value={(l.seats_used / Math.max(l.seats_total, 1)) * 100} className="h-1.5" />
-                    <p className="mt-2 text-xs text-muted-foreground">Expires {fmtDate(l.expires_at)}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <BulkInviteForm licences={licences} onCompleted={() => void Promise.all([loadData(), reloadLicences()])} />
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Members
-                </CardTitle>
-                <CardDescription>Everyone linked to {organisation.name}.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Joined</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {people.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                          No members yet — invite your team above.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {people.map((p) => (
-                      <TableRow key={`${p.user_id}-${p.started_at}`}>
-                        <TableCell className="font-medium">{p.full_name ?? 'Unnamed'}</TableCell>
-                        <TableCell>{p.email ?? '—'}</TableCell>
-                        <TableCell>
-                          <Badge variant={p.org_role === 'org_admin' ? 'default' : 'outline'}>
-                            {p.org_role === 'org_admin' ? 'Organisation admin' : 'Member'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {p.ended_at ? (
-                            <span className="text-sm text-muted-foreground">Ended {fmtDate(p.ended_at)}</span>
-                          ) : (
-                            <Badge variant="secondary">Active</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{fmtDate(p.started_at)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                  <CardTitle>Pending invitations</CardTitle>
-                  <CardDescription>Each pending invitation holds a seat until it is accepted.</CardDescription>
+          <TabsContent value="people" className="mt-6 space-y-5">
+            <SectionCard
+              title="Members"
+              description={`Everyone linked to ${organisation.name}.`}
+              aside={
+                <div className="relative">
+                  <Search
+                    className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="org-people-filter"
+                    value={peopleFilter}
+                    onChange={(e) => setPeopleFilter(e.target.value)}
+                    placeholder="Find a person"
+                    aria-label="Find a person"
+                    className="h-9 w-44 rounded-full border-0 bg-[hsl(var(--learner-wash)/0.06)] pl-8 text-sm sm:w-56"
+                  />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => void handleReleaseExpired()}>
-                  Release expired
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Expires</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invitations.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                          No invitations waiting.
-                        </TableCell>
+              }
+              flush
+            >
+              {people.length === 0 ? (
+                <EmptyState
+                  icon={Users}
+                  title="No members yet"
+                  body="Invite your team and they will appear here with their training progress."
+                  action={
+                    <Button size="sm" className="rounded-full" onClick={() => setInviteOpen(true)}>
+                      <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                      Invite people
+                    </Button>
+                  }
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className={thClass}>Name</TableHead>
+                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Role</TableHead>
+                        <TableHead className={cn(thClass, 'hidden sm:table-cell')}>Status</TableHead>
+                        <TableHead className={cn(thClass, 'text-right')}>Joined</TableHead>
                       </TableRow>
-                    )}
-                    {invitations.map((inv) => (
-                      <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.email}</TableCell>
-                        <TableCell>{inv.org_role === 'org_admin' ? 'Organisation admin' : 'Member'}</TableCell>
-                        <TableCell>{fmtDate(inv.expires_at)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={revoking === inv.id}
-                            onClick={() => void handleRevoke(inv.id)}
-                          >
-                            {revoking === inv.id && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-                            Withdraw
-                          </Button>
-                        </TableCell>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPeople.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
+                            No one matches “{peopleFilter}”.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {filteredPeople.map((p) => (
+                        <TableRow key={`${p.user_id}-${p.started_at}`} className="border-border/50">
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <InitialsAvatar name={p.full_name} email={p.email} />
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-foreground">
+                                  {p.full_name ?? 'Unnamed'}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">{p.email ?? '—'}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {p.org_role === 'org_admin' ? (
+                              <Badge className="rounded-full bg-[hsl(var(--violet-soft))] text-[hsl(var(--violet-soft-foreground))] hover:bg-[hsl(var(--violet-soft))]">
+                                Organisation admin
+                              </Badge>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Member</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            {p.ended_at ? (
+                              <span className="text-sm text-muted-foreground">Ended {fmtDate(p.ended_at)}</span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--success))]">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" aria-hidden="true" />
+                                Active
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
+                            {fmtDate(p.started_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </SectionCard>
+
+            <SectionCard
+              title="Pending invitations"
+              description="Each pending invitation holds a seat until it is accepted or withdrawn."
+              aside={
+                expiredInvitations.length > 0 ? (
+                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => void handleReleaseExpired()}>
+                    Release expired seats
+                  </Button>
+                ) : undefined
+              }
+              flush
+            >
+              {invitations.length === 0 ? (
+                <EmptyState
+                  icon={Mail}
+                  title="No invitations waiting"
+                  body="Invitations you send appear here until they are accepted, with their expiry date."
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className={thClass}>Email</TableHead>
+                        <TableHead className={cn(thClass, 'hidden sm:table-cell')}>Role</TableHead>
+                        <TableHead className={thClass}>Expires</TableHead>
+                        <TableHead className={cn(thClass, 'text-right')}>Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {invitations.map((inv) => {
+                        const expired = daysUntil(inv.expires_at) < 0;
+                        return (
+                          <TableRow key={inv.id} className="border-border/50">
+                            <TableCell className="text-sm font-medium">{inv.email}</TableCell>
+                            <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
+                              {inv.org_role === 'org_admin' ? 'Organisation admin' : 'Member'}
+                            </TableCell>
+                            <TableCell>
+                              {expired ? (
+                                <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+                                  Expired {fmtDate(inv.expires_at)}
+                                </span>
+                              ) : (
+                                <span className="text-sm text-muted-foreground tabular-nums">{fmtDate(inv.expires_at)}</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 rounded-full text-muted-foreground hover:text-destructive"
+                                disabled={revoking === inv.id}
+                                onClick={() => void handleRevoke(inv.id)}
+                              >
+                                {revoking === inv.id && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                                Withdraw
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </SectionCard>
           </TabsContent>
 
           {/* ---------------- Compliance ---------------- */}
-          <TabsContent value="compliance">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-primary" />
-                  Compliance matrix
-                </CardTitle>
-                <CardDescription>
-                  Progress counts required lessons only — the same rule learners see.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[180px]">Learner</TableHead>
-                      {licensedCourses.map((c) => (
-                        <TableHead key={c.id} className="min-w-[150px]">
-                          {c.title}
-                        </TableHead>
-                      ))}
-                      <TableHead className="text-right">CPD hours</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {matrixByLearner.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={licensedCourses.length + 2} className="text-center text-muted-foreground">
-                          No learners on a licence yet.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {matrixByLearner.map((learner) => (
-                      <TableRow key={learner.userId}>
-                        <TableCell>
-                          <p className="font-medium">{learner.name}</p>
-                          <p className="text-xs text-muted-foreground">{learner.email}</p>
-                        </TableCell>
-                        {licensedCourses.map((c) => (
-                          <TableCell key={c.id}>
-                            <StatusCell row={learner.rows.get(c.id)} />
-                          </TableCell>
-                        ))}
-                        <TableCell className="text-right font-medium">{learner.cpd.toFixed(1)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="compliance" className="mt-6">
+            <SectionCard
+              title="Compliance matrix"
+              description="Progress counts required lessons only — the same rule learners see."
+              aside={
+                matrixByLearner.length > 0 ? (
+                  <div className="relative">
+                    <Search
+                      className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      id="org-matrix-filter"
+                      value={matrixFilter}
+                      onChange={(e) => setMatrixFilter(e.target.value)}
+                      placeholder="Find a learner"
+                      aria-label="Find a learner"
+                      className="h-9 w-44 rounded-full border-0 bg-[hsl(var(--learner-wash)/0.06)] pl-8 text-sm sm:w-56"
+                    />
+                  </div>
+                ) : undefined
+              }
+              flush
+            >
+              {licensedCourses.length === 0 || matrixByLearner.length === 0 ? (
+                <EmptyState
+                  icon={Trophy}
+                  title="Nothing to track yet"
+                  body={
+                    licensedCourses.length === 0
+                      ? 'The matrix fills in once your organisation holds a licence and people start training.'
+                      : 'No learners are on a licence yet — invite your team to begin.'
+                  }
+                  action={
+                    licensedCourses.length > 0 ? (
+                      <Button size="sm" className="rounded-full" onClick={() => setInviteOpen(true)}>
+                        <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                        Invite people
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className={cn(thClass, 'portal-sticky-col min-w-[200px]')}>Learner</TableHead>
+                          {licensedCourses.map((c) => {
+                            const stats = courseCompletion.get(c.id);
+                            return (
+                              <TableHead key={c.id} className={cn(thClass, 'min-w-[150px]')}>
+                                <span className="block max-w-[190px] truncate normal-case text-xs font-semibold tracking-normal text-foreground" title={c.title}>
+                                  {c.title}
+                                </span>
+                                {stats && (
+                                  <span className="mt-0.5 block text-[11px] font-normal normal-case tracking-normal text-muted-foreground">
+                                    {stats.completed} of {stats.total} complete
+                                  </span>
+                                )}
+                              </TableHead>
+                            );
+                          })}
+                          <TableHead className={cn(thClass, 'text-right')}>CPD hours</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredLearners.length === 0 && (
+                          <TableRow>
+                            <TableCell
+                              colSpan={licensedCourses.length + 2}
+                              className="py-8 text-center text-sm text-muted-foreground"
+                            >
+                              No learner matches “{matrixFilter}”.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {filteredLearners.map((learner) => {
+                          const rows = licensedCourses.map((c) => learner.rows.get(c.id));
+                          const completed = rows.filter((r) => r?.status === 'completed').length;
+                          const started = rows.filter((r) => r && r.status !== 'not_started').length;
+                          return (
+                            <TableRow key={learner.userId} className="border-border/50 hover:bg-transparent">
+                              <TableCell className="portal-sticky-col">
+                                <div className="flex items-center gap-2.5">
+                                  <ComplianceDot completed={completed} total={licensedCourses.length} started={started} />
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-foreground">{learner.name}</p>
+                                    <p className="truncate text-xs text-muted-foreground">{learner.email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              {licensedCourses.map((c) => {
+                                const row = learner.rows.get(c.id);
+                                const state: MatrixState =
+                                  !row || row.status === 'not_started'
+                                    ? 'not_started'
+                                    : row.status === 'completed'
+                                      ? 'completed'
+                                      : 'in_progress';
+                                return (
+                                  <TableCell key={c.id}>
+                                    <MatrixStatus state={state} percent={row?.percent} />
+                                  </TableCell>
+                                );
+                              })}
+                              <TableCell className="text-right text-sm font-medium tabular-nums">
+                                {learner.cpd.toFixed(1)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <p className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--success))]" aria-hidden="true" /> All courses complete
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--warning))]" aria-hidden="true" /> In progress
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-muted-foreground/25" aria-hidden="true" /> Not started
+                    </span>
+                  </p>
+                </>
+              )}
+            </SectionCard>
           </TabsContent>
 
           {/* ---------------- Licences ---------------- */}
-          <TabsContent value="licences">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your licences</CardTitle>
-                <CardDescription>What you have bought and how much of it is in use.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Course</TableHead>
-                      <TableHead>Seats</TableHead>
-                      <TableHead>Window</TableHead>
-                      <TableHead>Order</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {licencesLoading && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                          Loading…
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {!licencesLoading && licences.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                          No licences yet.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {licences.map((l) => (
-                      <TableRow key={l.id}>
-                        <TableCell className="font-medium">{l.course_title}</TableCell>
-                        <TableCell>
-                          {l.seats_used}/{l.seats_total}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {fmtDate(l.starts_at)} – {fmtDate(l.expires_at)}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {l.order_reference ?? '—'}
-                          {l.order_po_reference ? ` · PO ${l.order_po_reference}` : ''}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={l.status === 'active' ? 'secondary' : 'outline'}>{l.status}</Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="licences" className="mt-6">
+            {licencesLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : licences.length === 0 ? (
+              <PortalCard>
+                <EmptyState
+                  icon={Ticket}
+                  title="No licences yet"
+                  body="Licences are issued by the Academy team when your order is agreed. They appear here with live seat usage."
+                />
+              </PortalCard>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {licences.map((l) => (
+                  <LicenceCard key={l.id} licence={l} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* ---------------- Certificates ---------------- */}
-          <TabsContent value="certificates">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" />
-                  Certificates
-                </CardTitle>
-                <CardDescription>
-                  Issued certificates for your team. Anyone can check one at /verify with its code.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {certificates.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Certificates appear here once issued.</p>
-                ) : (
+          <TabsContent value="certificates" className="mt-6">
+            <SectionCard
+              title="Certificates"
+              description="Issued certificates for your team. Anyone can check one at /verify with its code."
+              flush
+            >
+              {certificates.length === 0 ? (
+                <EmptyState
+                  icon={Award}
+                  title="No certificates yet"
+                  body="Certificates are issued automatically when someone completes a licensed course, and stay valid even after a licence ends."
+                />
+              ) : (
+                <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Learner</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Issued</TableHead>
-                        <TableHead>Expires</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Certificate</TableHead>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className={thClass}>Learner</TableHead>
+                        <TableHead className={thClass}>Course</TableHead>
+                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Issued</TableHead>
+                        <TableHead className={cn(thClass, 'hidden md:table-cell')}>Expires</TableHead>
+                        <TableHead className={thClass}>Status</TableHead>
+                        <TableHead className={cn(thClass, 'text-right')}>Certificate</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {certificates.map((cert) => (
-                        <TableRow key={cert.id}>
+                        <TableRow key={cert.id} className="border-border/50">
                           <TableCell>
-                            <p className="font-medium">{cert.full_name || cert.email || 'Learner'}</p>
-                            <p className="text-xs text-muted-foreground">{cert.email}</p>
+                            <div className="flex items-center gap-3">
+                              <InitialsAvatar name={cert.full_name} email={cert.email} />
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-foreground">
+                                  {cert.full_name || cert.email || 'Learner'}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">{cert.email}</p>
+                              </div>
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <p>{cert.course_title}</p>
+                            <p className="text-sm">{cert.course_title}</p>
                             {cert.verification_code && (
-                              <p className="font-mono text-xs text-muted-foreground">{cert.verification_code}</p>
+                              <button
+                                type="button"
+                                onClick={() => copyCode(cert.verification_code!)}
+                                className="mt-0.5 inline-flex items-center gap-1 rounded font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={`Copy verification code ${cert.verification_code}`}
+                              >
+                                {cert.verification_code}
+                                <Copy className="h-3 w-3" aria-hidden="true" />
+                              </button>
                             )}
                           </TableCell>
-                          <TableCell>{fmtDate(cert.issued_at)}</TableCell>
-                          <TableCell>{cert.expires_at ? fmtDate(cert.expires_at) : 'No expiry'}</TableCell>
+                          <TableCell className="hidden text-sm text-muted-foreground tabular-nums md:table-cell">
+                            {fmtDate(cert.issued_at)}
+                          </TableCell>
+                          <TableCell className="hidden text-sm text-muted-foreground tabular-nums md:table-cell">
+                            {cert.expires_at ? fmtDate(cert.expires_at) : 'No expiry'}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={cert.status === 'expired' ? 'outline' : 'secondary'}>
-                              {cert.status === 'expired'
-                                ? 'Expired'
-                                : cert.status === 'expiring_soon'
-                                  ? 'Expiring soon'
-                                  : 'Valid'}
-                            </Badge>
+                            <CertStatusChip status={cert.status} />
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="outline"
                               size="sm"
+                              className="rounded-full"
                               onClick={() => void downloadCertificate(cert.id)}
                               disabled={downloading === cert.id}
                             >
@@ -574,12 +933,87 @@ export default function OrgPortal() {
                       ))}
                     </TableBody>
                   </Table>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              )}
+            </SectionCard>
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </PortalShell>
+  );
+}
+
+function CertStatusChip({ status }: { status: string }) {
+  if (status === 'expired') {
+    return (
+      <span className="inline-flex h-6 items-center rounded-full bg-muted px-2.5 text-xs font-medium text-muted-foreground">
+        Expired
+      </span>
+    );
+  }
+  if (status === 'expiring_soon') {
+    return (
+      <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+        Expiring soon
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex h-6 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success))]">
+      Valid
+    </span>
+  );
+}
+
+function LicenceCard({ licence }: { licence: OrgLicence }) {
+  const seatsLeft = Math.max(licence.seats_total - licence.seats_used, 0);
+  const usedPct = (licence.seats_used / Math.max(licence.seats_total, 1)) * 100;
+  const active = licence.status === 'active';
+  const expiring = active && daysUntil(licence.expires_at) <= 60;
+
+  return (
+    <PortalCard className={cn('flex flex-col gap-4 p-5 sm:p-6', !active && 'opacity-70')}>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-display text-[16px] leading-snug text-foreground">{licence.course_title}</h3>
+        {active ? (
+          expiring ? (
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--warning)/0.14)] px-2.5 text-xs font-medium text-[hsl(var(--warning))]">
+              Expires {fmtDate(licence.expires_at)}
+            </span>
+          ) : (
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success))]">
+              Active
+            </span>
+          )
+        ) : (
+          <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-muted px-2.5 text-xs font-medium capitalize text-muted-foreground">
+            {licence.status}
+          </span>
+        )}
+      </div>
+
+      <div>
+        <p className="font-display text-[26px] leading-none tracking-tight text-foreground tabular-nums">
+          {licence.seats_used}
+          <span className="text-muted-foreground/60">/{licence.seats_total}</span>
+        </p>
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          seats in use · {seatsLeft} {seatsLeft === 1 ? 'seat' : 'seats'} free
+        </p>
+        <Progress value={usedPct} className="mt-2.5 h-1.5" aria-hidden="true" />
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px]">
+        <dt className="text-muted-foreground">Window</dt>
+        <dd className="text-right text-foreground tabular-nums">
+          {fmtDate(licence.starts_at)} – {fmtDate(licence.expires_at)}
+        </dd>
+        <dt className="text-muted-foreground">Order</dt>
+        <dd className="text-right text-foreground">
+          {licence.order_reference ?? '—'}
+          {licence.order_po_reference ? ` · PO ${licence.order_po_reference}` : ''}
+        </dd>
+      </dl>
+    </PortalCard>
   );
 }
