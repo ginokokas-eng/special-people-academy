@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Loader2, Save, LogOut, Building2, Accessibility } from '@/components/icons';
+import { User, Loader2, Save, LogOut, Building2, Accessibility, Bell } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { haptics } from '@/hooks/useHaptics';
 import { useIsNative } from '@/lib/native';
@@ -28,6 +28,12 @@ export default function Profile() {
   // Read once — useHaptics reads the same key at call time, so this state only
   // drives the control, never the gate itself.
   const [hapticsOn, setHapticsOn] = useState(() => localStorage.getItem('spa.haptics') !== 'off');
+  const [renewalReminders, setRenewalReminders] = useState(
+    () => localStorage.getItem('spa.reminders.renewals') !== 'off',
+  );
+  const [quietHours, setQuietHours] = useState(
+    () => localStorage.getItem('spa.reminders.quiet') !== 'off',
+  );
   const [orgName, setOrgName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
@@ -249,6 +255,52 @@ export default function Profile() {
                   : 'Unknown'}
               </p>
             </div>
+
+            {native && (
+              <div className="rounded-2xl bg-[hsl(var(--learner-wash)/0.05)] p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-foreground">Reminders</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <Label htmlFor="renewal-reminders" className="text-sm font-normal leading-relaxed">
+                      Renewal reminders
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        30, 14 and 3 days before a certificate expires.
+                      </span>
+                    </Label>
+                    <Switch
+                      id="renewal-reminders"
+                      checked={renewalReminders}
+                      onCheckedChange={(on) => {
+                        localStorage.setItem('spa.reminders.renewals', on ? 'on' : 'off');
+                        setRenewalReminders(on);
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <Label htmlFor="quiet-hours" className="text-sm font-normal leading-relaxed">
+                      Quiet hours
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Nothing between 22:00 and 07:00.
+                      </span>
+                    </Label>
+                    <Switch
+                      id="quiet-hours"
+                      checked={quietHours}
+                      onCheckedChange={(on) => {
+                        localStorage.setItem('spa.reminders.quiet', on ? 'on' : 'off');
+                        setQuietHours(on);
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Set a reminder on a specific renewal from the Renewals list.
+                </p>
+              </div>
+            )}
 
             {native && (
               <div className="rounded-2xl bg-[hsl(var(--learner-wash)/0.05)] p-4">
