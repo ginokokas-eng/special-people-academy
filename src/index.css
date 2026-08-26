@@ -947,6 +947,19 @@ html.native .native-above-tabbar {
   bottom: calc(var(--native-tabbar-h) + var(--native-inset-bottom));
 }
 
+/* The native large title IS the screen title: one heading per screen.
+   Page-level h1 + subtitle blocks are suppressed inside the native shell,
+   and the following sibling's stack gap is collapsed so no orphan space
+   is left under the header. Web rendering is unaffected. */
+html.native .native-shell .page-heading {
+  display: none;
+}
+
+html.native .native-shell .page-heading + * {
+  margin-top: 0 !important;
+}
+
+
 @keyframes native-crossfade {
   from {
     opacity: 0;
