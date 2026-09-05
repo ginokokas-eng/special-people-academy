@@ -24,7 +24,7 @@ import {
 import { AlertTriangle, Check, Loader2, Sparkles, Trash2 } from '@/components/icons';
 import { BlockList } from './BlockList';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
-import { mapDraftBlocks, type DraftBlock } from '@/lib/aiAuthoring';
+import { draftBlockIssues, mapDraftBlocks, type DraftBlock } from '@/lib/aiAuthoring';
 import {
   BLOCK_LABELS,
   defaultContributesToCompletion,
@@ -178,7 +178,7 @@ export function CopilotPanel({
           { id: next.client_id, block_type: next.block_type, payload: next.payload },
         ]).filter((i) => i.block_id === next.client_id);
         const issues = [
-          ...mapDraftIssues(next.block_type, next.payload),
+          ...draftBlockIssues({ block_type: next.block_type, payload: next.payload }),
           ...visibility.map((i) => i.message),
         ];
         return { ...next, issues };
@@ -440,11 +440,3 @@ export function CopilotPanel({
     </Sheet>
   );
 }
-
-/** Re-run the draft checks after an inline edit. */
-function mapDraftIssues(block_type: BlockType, payload: BlockPayload): string[] {
-  // Kept in one place: the same pure checker used when the draft arrived.
-  return draftIssuesFor({ block_type, payload });
-}
-
-import { draftBlockIssues as draftIssuesFor } from '@/lib/aiAuthoring';
