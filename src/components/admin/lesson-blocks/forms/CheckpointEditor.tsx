@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Trash2, AlertTriangle } from '@/components/icons';
+import { Plus, Trash2, AlertTriangle, Loader2, Sparkles } from '@/components/icons';
+import { draftToCheckpoint, type DraftCheckpoint } from '@/lib/aiAuthoring';
 import {
   checkpointIssues,
   mmSsToSeconds,
@@ -20,6 +23,8 @@ interface Props {
   payload: VideoPayload;
   onChange: (next: VideoPayload) => void;
   idPrefix: string;
+  /** Needed to look up the lesson transcript AI suggestions are drawn from. */
+  lessonId?: string;
 }
 
 /**
@@ -27,11 +32,78 @@ interface Props {
  * touch quizzes or quiz_attempts. Unsupported on pasted YouTube/Vimeo links
  * because those play in their own player and cannot be paused by us.
  */
-export function CheckpointEditor({ payload, onChange, idPrefix }: Props) {
+export function CheckpointEditor({ payload, onChange, idPrefix, lessonId }: Props) {
   const supported = supportsCheckpoints(payload);
   const checkpoints = videoCheckpoints(payload);
   /** Raw mm:ss text per checkpoint while typing; parsed on every change. */
   const [raw, setRaw] = useState<Record<string, string>>({});
+  /** Transcript timings, needed before AI can suggest cue points. */
+  const [segments, setSegments] = useState<{ start: number; end?: number; text: string }[] | null>(
+    null
+  );
+  const [suggesting, setSuggesting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!lessonId) return;
+    (async () => {
+      const { data } = await supabase
+        .from('lesson_transcripts')
+        .select('segments')
+        .eq('lesson_id', lessonId)
+        .maybeSingle();
+      if (!active) return;
+      const list = Array.isArray(data?.segments)
+        ? (data!.segments as { start?: number; end?: number; text?: string }[])
+        : [];
+      setSegments(
+        list
+          .filter((s) => Number.isFinite(Number(s.start)))
+          .map((s) => ({ start: Number(s.start), end: s.end, text: String(s.text ?? '') }))
+      );
+    })();
+    return () => {
+      active = false;
+    };
+  }, [lessonId]);
+
+  const suggest = async () => {
+    if (!segments?.length) return;
+    setSuggesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('author-lesson-blocks', {
+        body: {
+          mode: 'suggest_checkpoints',
+          lesson_id: lessonId,
+          input: { segments, count: 3 },
+        },
+      });
+      let message = '';
+      if (error) {
+        const res = (error as unknown as { context?: Response }).context;
+        const parsed = res && typeof res.json === 'function' ? await res.json().catch(() => null) : null;
+        message = parsed?.error ? String(parsed.error) : 'Suggestions could not be made.';
+      } else if (data?.error) {
+        message = String(data.error);
+      }
+      if (message) {
+        toast.error(message);
+        return;
+      }
+      const list = Array.isArray(data?.checkpoints) ? (data.checkpoints as DraftCheckpoint[]) : [];
+      if (!list.length) {
+        toast.error('No suggestions came back. Please try again.');
+        return;
+      }
+      // Ids are minted here, never taken from the model.
+      update([...checkpoints, ...list.map((c) => draftToCheckpoint(c))]);
+      toast.success(
+        `${list.length} suggested checkpoint${list.length === 1 ? '' : 's'} added — review every word before saving`
+      );
+    } finally {
+      setSuggesting(false);
+    }
+  };
 
   const update = (list: VideoCheckpoint[]) => onChange({ ...payload, checkpoints: list });
 
@@ -60,14 +132,26 @@ export function CheckpointEditor({ payload, onChange, idPrefix }: Props) {
             it right.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => update([...checkpoints, newCheckpoint(0)])}
-        >
-          <Plus className="mr-1.5 h-3.5 w-3.5" /> Add checkpoint
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {!!segments?.length && (
+            <Button type="button" variant="outline" size="sm" onClick={suggest} disabled={suggesting}>
+              {suggesting ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Suggest checkpoints
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => update([...checkpoints, newCheckpoint(0)])}
+          >
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Add checkpoint
+          </Button>
+        </div>
       </div>
 
       {checkpoints.length > 0 && (

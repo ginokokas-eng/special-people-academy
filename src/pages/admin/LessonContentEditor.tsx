@@ -14,6 +14,7 @@ import type { LessonTemplate } from '@/components/admin/lesson-blocks/templates'
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
+import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 
 import {
   defaultContributesToCompletion,
@@ -114,6 +115,19 @@ export default function LessonContentEditor() {
         payload: defaultPayload(type),
         contributes_to_completion: defaultContributesToCompletion(type),
       },
+    ]);
+
+  /** Appends AI drafts the author explicitly accepted. Unsaved until Save. */
+  const addBlocks = (accepted: { block_type: BlockType; payload: BlockPayload }[]) =>
+    mutate((prev) => [
+      ...prev,
+      ...accepted.map((a) => ({
+        id: null,
+        client_id: crypto.randomUUID(),
+        block_type: a.block_type,
+        payload: a.payload,
+        contributes_to_completion: defaultContributesToCompletion(a.block_type),
+      })),
     ]);
 
   /**
@@ -276,6 +290,13 @@ export default function LessonContentEditor() {
         </div>
         <div className="flex items-center gap-2">
           {dirty && <Badge variant="outline">Unsaved changes</Badge>}
+          <CopilotPanel
+            lessonId={lessonId}
+            courseId={courseId}
+            lessonTitle={lesson?.title}
+            blocks={blocks}
+            onAccept={addBlocks}
+          />
           <Button
             variant="outline"
             onClick={() => {
