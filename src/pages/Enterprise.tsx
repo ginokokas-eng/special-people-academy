@@ -18,7 +18,6 @@ import {
   Heart,
   Layers,
   UserCog,
-  FileText,
   FileText
 } from "@/components/icons";
 
