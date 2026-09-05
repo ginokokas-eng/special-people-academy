@@ -10,6 +10,11 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  test: {
+    // `tests/sso` holds Deno tests (they import from https: URLs) — vitest
+    // must never pick them up.
+    exclude: ["**/node_modules/**", "**/dist/**", "tests/sso/**"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
