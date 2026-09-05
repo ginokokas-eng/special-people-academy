@@ -1,91 +1,59 @@
-# Site walkthrough audit — verified causes, corrections, one-turn fix list
+# Menu audit — second pass (Resources, Contact, deferred items)
 
-I read the code behind every item. Below: confirmed / corrected, then a single prioritised build list and what I'd deliberately leave out.
+I read all the pages named plus the ones your list assumed were fine. Your reading of J and K is right, and your proposal for J is the one I'd take. But the audit stopped one page short: **/pricing is the most serious problem on the site, and it isn't on your list.** Two of the three pages you were treating as "real, on-brand" are template content as well.
 
-## A. Navbar
+## What the code confirms
 
-- **A1 — confirmed, your fix is right.** `navigationMenuTriggerStyle()` includes `focus:bg-accent focus:text-accent-foreground`; the Navbar's trigger class list overrides only the backgrounds (`focus:!bg-transparent`) and never the text colour, so on focus the label becomes accent-foreground (white) on transparent. Add `focus:!text-[hsl(259_72%_14%)]` to both triggers and keep `data-[state=open]:!text-[hsl(262_83%_58%)]`. Slightly better: also add `focus-visible:` ring parity so keyboard focus is visible, since the trigger currently has no visible focus state at all once the accent background is suppressed.
-- **A2 — content decision, not a bug.** The arrays are real code (`forOrganisationsLinks`, `resourcesLinks`), and 4 of 6 org links and 3 of 6 resource links point at `/enterprise` / `/help-center`. Existing distinct destinations are `/partners`, `/case-studies`, `/blog`, `/webinars`, `/help-center`, `/enterprise`. I'd trim to distinct destinations now (org: Care Homes/Domiciliary/Supported Living/NHS collapse into one "For care providers" → `/enterprise`, keep Local Authorities and Multi-site) and re-expand when the pages exist. **Your call on wording** — flagging.
+- **/case-studies** — three invented customers, `[Quote from program coordinator…]`, `[Program Coordinator Name]`, and a visible "these are examples with editable placeholders" banner. Confirmed.
+- **/help-center** — 375 lines about learner plans, caregivers, weekly summaries, CSV export, "SPA syncs data automatically", a chat widget that does not exist, plus `[Support Email]` and `[Support Hours: Mon–Fri, 9am–6pm GMT]`. Confirmed.
+- **/blog** — eight posts in `src/data/blogPosts.ts`, life-skills teaching. Confirmed.
+- **/webinars** — three sessions, all `[Date TBD]` / `[Time TBD]`. Confirmed.
+- **/contact** — `[Support Email]`, `[Sales Email]`, `[Phone Number]`, `[Company Address]` all render. Tab state starts at `sales` with no URL handling, so "Contact Support" lands on Sales & Demos. Confirmed.
+- **Branding fields** — `BrandingSettings` has `platformName`, `platformTagline`, logo/favicon URLs, `footerTextLeft`, `footerTextRight`, and `socialLinks { linkedin, facebook, instagram, youtube, email }`. **There is no phone or address field**, so K cannot be implemented as described without adding two fields to that settings shape and its Branding Settings form.
 
-## B. Courses
+### Corrections to your L1 assumptions
 
-- **B1 — confirmed in principle, needs Publish.** The preview and the published app are separate deploys; code changes only reach `grow-shine-campus.lovable.app` after a publish. The RLS migration, though, applies to the shared backend immediately, so the live site's empty-lesson symptom is already fixed while the chips are not.
-- **B2 — confirmed.** `EditorialCourseCard.formatDuration` returns `"—"` for null/0. Better than hiding just the text: hide the whole badge when there's no duration, and keep the dash nowhere. Note the root cause is missing lesson durations in the data — the Course Builder duration audit fills those.
-- **B3 — confirmed.** Category renders twice (pill on the frame, eyebrow under). Drop the pill; the eyebrow is the accessible, non-overlapping one.
-- **B4 — correct diagnosis, partly already there.** The card is already `flex flex-col h-full` with an `mt-auto` meta row, but the CTA sits *after* that row and is rendered for every card, disabled when there's no offering, and `opacity-0` until hover — so non-purchasable cards reserve an invisible button's height. Fix: render the CTA only when `offeringId` exists (and not native).
-- **B5 — confirmed.** Header is `bg-white/90` (scrolled) / `bg-white/85` (top). Raise both toward `.97`.
-- **B6 — corrected: this is mostly data, not code.** Footer social hrefs come from branding settings (`socialLinks.linkedin` etc.), already conditionally rendered — the `YOUR_LINKEDIN_URL` values are stored settings, fixable in Admin → Branding without a build. The code fix worth doing is treating placeholder-looking values as absent. `Company No. 12345678` **is** hardcoded in `Footer.tsx` and should be removed until real.
+- **/pricing is not on-brand and is actively dangerous.** It advertises £29 / £99 / £249 *monthly subscriptions* and its buttons call `create-checkout`, which creates a Stripe session in `mode: "subscription"` against three hardcoded price IDs. Nothing in the current model reads a subscription: access comes from licence seats (`fulfil_purchase` → `licences` → `licence_seats`), and `user_subscriptions` was dropped in the B2B work. A card payment here therefore charges a recurring fee and grants **no course access at all**. The plan copy is also template ("For a caregiver or single learner plan", learner slots, 14-day trial, CSV/API tiers). This outranks everything else in your list.
+- **/partners is not a local-authorities page.** It is a partner-programme page (implementation / content / referral partners, "share SPA with organizations", `[Dedicated partner support line…]`). Pointing "Local authorities" at it is wrong.
+- **/features (14 template hits) and /integrations (4)** are also off-product, and the footer's whole "Compliance" column points five separate labels — CQC audit packs, Care Inspectorate, CIW Wales, Skills for Care, CPD certification — at `/features`. Same class of defect as J.
+- **Navbar dropdowns are worse than the trim implies**: four of six "For organisations" items point at the same `/enterprise` page, and "Downloads / Resources" and "CQC Inspection Guide" both point at `/help-center` while promising content that isn't there.
 
-## C. About
+### The other L items
 
-- **C1 — agreed, product decision.** Six bracketed placeholder names ship live. I'd remove the section this turn; restoring it later is trivial. **Your call.**
-- **C2 — confirmed.** 5 items in a 3-col grid. Cleanest here: keep 3 columns and let the last row centre (`lg:[&>*:nth-child(4)]:col-start-1` is fragile) — simpler is a 5-up auto-fit grid at `lg`.
-- **C3 — confirmed, copy decision.** The About subtitle describes life-skills training for "special individuals… families, educators", contradicting the homepage's UK care-workforce positioning. Needs your words, not my invention. **Flagged, no code.**
+- **L2** — agreed, and note /enterprise's "How SPA helps" panels and role list ("caregivers, observers") need the same pass, not just Use Cases.
+- **L3** — agreed, restyle only.
+- **L4** — `cpdLogged` in `Dashboard.tsx` is already correct: it sums `courses.cpd_hours` over *completed* enrolments only. So it reads 0 because no course has completed, not because the field is unused. Hiding it when 0 hides a legitimate "nothing banked yet" state; I'd keep the tile and label it "No CPD hours banked yet" rather than remove it, and hide it only when no enrolled course carries `cpd_hours` at all.
+- **L5** — agreed, no nav change.
 
-## D. Sign in
+## Recommendation
 
-- **D1 — confirmed, and it is not fixable from here today.** `useAuth.sendEmailCode` calls `supabase.auth.signInWithOtp` (`shouldCreateUser: false`), which renders the managed **Magic Link** template. That template is Lovable-managed (`no-reply@auth.lovable.cloud`) and not editable unless you set up your own sender domain — I confirmed no email domain is configured for this project. So `{{ .Token }}` cannot be added yet. **Two honest options:** (i) keep the passwordless route but change the UI to "we've sent you a sign-in link" and drop the six code boxes, or (ii) set up a sender domain, after which editable templates can carry both link and code. I'd ship (i) now because today the route is a dead end, and revisit (ii) with the domain.
-- **D2 — confirmed.** The code panel keeps its own email state; pass `loginEmail` in and lift the setter.
-- **D3 — confirmed.** Page H1 "Welcome back" plus card `CardTitle` "Welcome Back", and logo twice. Drop the card title/description.
-- **D4 — confirmed for the link path.** `emailRedirectTo` is `${origin}/`, so magic links land on the homepage. `Index.tsx` only redirects *staff* onward; learners stay. Fix: point the link at `/dashboard` (respecting the configured login redirect) rather than adding a blanket homepage redirect, which would break signed-in people browsing marketing pages.
+**Don't delete the four Resources pages — neutralise the routes and keep the files.** Redirect `/case-studies`, `/blog`, `/blog/:slug`, `/webinars` to `/help-center`, and remove them from the navbar dropdown and footer. The components stay in the repo unreferenced, so real content later is a re-route, not a rebuild. I would not keep any of the three as live pages: an empty webinars page with "[Date TBD]" reads worse than no page, and a case-studies page is unpublishable when zero certificates have ever been issued.
 
-## E. Learner portal shell
+**Take /pricing off the public site in the same turn.** Two options, and I recommend the first: redirect `/pricing` to `/contact` (with the sales tab) and remove it from nav and footer, leaving individual course prices on the course pages as the only self-serve price. The alternative — rewriting it as a per-course pricing explainer — is a bigger content job and can wait. Either way the subscription buttons must stop being reachable this turn. `create-checkout` itself stays untouched (out of scope, but it should be retired separately).
 
-- **E1 — confirmed.** Brand span is `truncate max-w-[180px]` with the full platform name on one line and no `title`. Use the public navbar's two-line "Special People / TRAINING ACADEMY" lockup — consistent and it fits.
-- **E2 — confirmed** (`bg-background/95`). Same treatment as B5.
-- **E3 — confirmed.** `useOrgAdmin()` resolves async and the sidebar row appears late. Gate the org row on the check having resolved (render nothing rather than a shifting list).
-- **E4/E5 — confirmed.** Dashboard truncates the resume title at 34 chars inside the button; the course name is already in the line above. Button → "Resume course". Continue-Learning titles get `title` + `line-clamp-2`.
-- **E6 — flagged, product/data.** Hero "CPD logged" and the "Learning Time" stat are two different computations (CPD hours vs summed lesson minutes) and can legitimately disagree; 0h vs 26h suggests CPD hours aren't populated on courses. Needs a decision on which number learners should see.
+**Help Centre**: rewrite from features that demonstrably exist — signing in (password, email link, Google), being invited to an organisation and setting a password, enrolling and buying a course, the lesson player and what counts as complete, quizzes and attempts, practical sign-off, certificates and `/verify/<code>`, renewals, the organisation portal (people, licences, seats, invitations, compliance view). No hours, no SLAs, no chat widget, no policies.
 
-## F. My Courses / My Learning
+**Contact**: add `contactEmail`, `contactPhone`, `contactAddress` to `BrandingSettings` (defaults empty), render each row only when non-empty and not placeholder-looking (reuse the `YOUR_`/`[`-bracket test the footer socials now use), and read the tab from `?tab=support|sales`, with the navbar "Contact Support" link pointing at `/contact?tab=support`.
 
-- **F1 — confirmed, and your reading of the cause is right in shape.** `MyCourses` derives "Assigned" from `course.is_internal`, In Progress from `0 < progress < 100`, Completed from `progress === 100 || completedAt`. Those are three overlapping, non-exhaustive predicates — a purchased course at 0% belongs to none, hence 4+1+0 ≠ 7. `MyLearning` uses Not Started / In Progress / Completed, which *is* exhaustive. Fix: one shared helper (`src/lib/progress.ts`) returning a single exclusive status per enrolment, used by both pages, and show "Assigned" as a *badge*, not a tab.
-- **F2 — flagged.** Two nav items over one dataset is real duplication, and `learnerCoursesNavDestination` already re-points one of them. Consolidation is a product decision; I wouldn't do it in the same turn as F1.
-- **F3 — confirmed.** Hide the duration row when null instead of printing "N/A".
-- **F4 — confirmed**, same flex-column/`mt-auto` treatment.
-- **F5 — data.** Wrong `thumbnail_url` on that course; fix the image, no code.
+**Dropdowns** (revised from your L1):
 
-## G. Organisation portal
+- For organisations → "Care providers" (/enterprise), "Pricing" → drop, "Talk to sales" (/contact). Drop Local Authorities and Multi-site Teams until there is a page behind them.
+- Resources → "Help Centre" (/help-center), "Contact" (/contact).
+- Footer: same two-item Resources column; collapse the five-label Compliance column to a single honest link or remove it until /features is rewritten.
 
-- **G1 — confirmed.** `OrgPortal` renders `'—'` when there are no licensed courses / no seats. For counters, `0` is truthful and reads better; keep `—` only for genuinely unknown values like dates.
-- **G2 — confirmed**, same opacity fix.
-- **G3 — confirmed.** Add "Back to my learning" to the portal user menu.
+## Prioritised list for one build turn
 
-## H. Profile
+1. **Stop the dead subscription checkout being reachable.** Redirect `/pricing` → `/contact?tab=support=false` (sales tab); remove Pricing from navbar, footer, mobile menu, and any CTA that links to it. *(App.tsx, Navbar.tsx, Footer.tsx, FuturisticMobileMenu.tsx, plus CTA components that link /pricing.)*
+2. **Neutralise the four template Resources routes.** Redirect `/case-studies`, `/blog`, `/blog/:slug`, `/webinars` → `/help-center`. *(App.tsx.)*
+3. **Trim navbar + footer + mobile menu** to the surviving destinations above, including the /features Compliance column and the duplicate /enterprise entries. *(Navbar.tsx, Footer.tsx, FuturisticMobileMenu.tsx.)*
+4. **Rewrite /help-center** for this app, no placeholders, UK spelling. *(HelpCenter.tsx.)*
+5. **Contact page**: three new branding fields + form row, placeholder-safe rendering, `?tab=` support, navbar Contact Support → `/contact?tab=support`. *(useBrandingSettings.tsx, admin/BrandingSettings.tsx, Contact.tsx, Navbar.tsx, DashboardLayout.tsx.)*
+6. **About + /enterprise copy** rewrite to homepage positioning, UK spelling, no "SPA", use cases = Care homes / Domiciliary care / Supported living / NHS trusts, no invented numbers. *(About.tsx, Enterprise.tsx.)*
+7. **Mobile menu restyle** to the light violet system, keeping the collapsible groups. *(FuturisticMobileMenu.tsx.)*
+8. **Dashboard CPD tile**: keep it, show "No CPD hours banked yet" at 0, hide only when no enrolled course carries CPD hours. *(Dashboard.tsx.)*
 
-- **H1 — confirmed.** `DashboardLayout` derives initials from `user.email.slice(0,2)`; `Profile` derives them from `full_name`. One helper preferring full name, falling back to email.
-- **H2 — confirmed**, placeholder-only change.
+Out of this turn: rewriting /features and /integrations (redirect or rewrite as its own turn), retiring `create-checkout`'s subscription plans server-side, real case studies/blog/webinar content, merging My Courses and My Learning, email templates.
 
-## I. Phone menu
+## Technical notes
 
-- **I1 — confirmed.** `FuturisticMobileMenu` receives a hand-written 5-item list; the two dropdown arrays and About never appear on a phone. Rebuild the list from `forOrganisationsLinks` / `resourcesLinks` as collapsible groups plus About.
-- **I2 — flagged, product/design.** Black ground, neon grid, monospace "NAVIGATION", "v · 2026" — a different visual world from the light violet site. Restyling is a bigger design call than a bug fix; **your decision**, and I'd do it as its own turn.
-- **I3 — confirmed.** The item is labelled "All Courses" but `coursesHref` becomes `/my-courses` when signed in. Label it from the destination.
-
----
-
-## The one-turn fix list (in order)
-
-1. **D1** — remove the unreachable 6-digit code UI; passwordless becomes "email me a sign-in link". (Highest: a promise the product cannot keep.)
-2. **F1** — shared exclusive status derivation for `/my-courses` and `/my-learning`; Assigned becomes a badge. Counts add up.
-3. **I1 + I3** — phone menu built from the real link arrays as collapsible groups; courses item labelled from its destination.
-4. **A1** — focused nav trigger text colour + visible focus ring.
-5. **D4, D2, D3** — magic-link landing to the configured learner home; email carried across modes; de-duplicate the welcome heading/logo.
-6. **E1, E3, E4, E5** — two-line brand lockup; org sidebar row gated on resolution; "Resume course"; tooltip + two-line titles.
-7. **B2, B3, B4** — hide empty duration badge; drop duplicate category pill; render basket CTA only when purchasable.
-8. **F3, F4** — hide null duration rows; pin card footers.
-9. **G1, G3** — zero instead of a dash on counters; "Back to my learning" in the portal menu.
-10. **H1, H2** — one initials helper; care-sector placeholders.
-11. **B5, E2, G2** — header opacity to `.97` in the three shells.
-12. **B6** — remove the hardcoded company number; ignore placeholder-looking social URLs.
-13. **C1, C2** — remove the placeholder team section; fix the 5-in-3 values grid.
-14. **Publish** at the end so all of it reaches the live site (B1).
-
-## Left out, and why
-
-- **A2 link trimming** and **C3 About copy** — need your words/decisions, not my invention.
-- **I2 mobile menu restyle** — a design direction, and large enough to swamp the rest of the turn.
-- **E6 CPD vs Learning Time** — a definition question; I'd be guessing which number is authoritative.
-- **F2 My Courses / My Learning consolidation** — removing a nav item is a product change; F1 already makes both pages truthful.
-- **F5 thumbnail, B6 social URLs, B2's missing durations, HeyGen lesson titles** — database content, changeable without a build.
-- **Editable auth email templates carrying `{{ .Token }}`** — blocked until a sender domain you own is configured.
+Redirects as `<Route path="…" element={<Navigate to="/help-center" replace />} />` keeps the page components in the tree unreferenced — no deletions, consistent with the no-rebuild constraint. The placeholder test should be one shared helper (`isPlaceholder(value)` matching `YOUR_`, leading `[`, empty) used by Footer, Contact and any future settings-driven row, rather than three copies.
