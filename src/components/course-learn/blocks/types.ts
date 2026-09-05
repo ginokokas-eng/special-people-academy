@@ -438,7 +438,64 @@ export function defaultPayload(type: BlockType): BlockPayload {
         caption: 'Your assessor completes the real sign-off in person.',
         steps: [{ id: crypto.randomUUID(), step_title: '', instruction: '', safety_note: '' }],
       } satisfies ChecklistPayload;
+    case 'scenario':
+      return defaultScenarioPayload();
   }
+}
+
+/**
+ * Starter scenario: one decision with two choices, leading to a good ending and
+ * an unsafe ending. Slugs are prefilled so authors can see the shape at once.
+ */
+export function defaultScenarioPayload(): ScenarioPayload {
+  const start = crypto.randomUUID();
+  const good = crypto.randomUUID();
+  const bad = crypto.randomUUID();
+  return {
+    version: 1,
+    start_id: start,
+    require_best_path: false,
+    debrief: '',
+    nodes: [
+      {
+        id: start,
+        slug: 'the-situation',
+        kind: 'decision',
+        title: 'The situation',
+        body: 'Describe what the learner walks into, in two or three sentences.',
+        choices: [
+          {
+            id: crypto.randomUUID(),
+            label: 'The safe thing to do',
+            next_id: good,
+            quality: 'best',
+            feedback: 'Explain why this is the right call.',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: 'The tempting shortcut',
+            next_id: bad,
+            quality: 'unsafe',
+            feedback: 'Explain what goes wrong and what to do instead.',
+          },
+        ],
+      },
+      {
+        id: good,
+        slug: 'safe-ending',
+        kind: 'end',
+        title: 'A safe outcome',
+        body: 'Describe what good practice looked like here.',
+      },
+      {
+        id: bad,
+        slug: 'unsafe-ending',
+        kind: 'end',
+        title: 'An unsafe outcome',
+        body: 'Describe the consequence, and the point at which they should stop and escalate.',
+      },
+    ],
+  };
 }
 
 /** Blocks that need a learner interaction before the lesson can be completed. */
@@ -451,15 +508,16 @@ export function isInteractive(type: BlockType): boolean {
     type === 'carousel' ||
     type === 'hot_graphic' ||
     type === 'mcq' ||
-    type === 'drag_match'
+    type === 'drag_match' ||
+    type === 'scenario'
   );
 }
 
 /**
  * Whether the completion switch starts ON for a newly added block.
- * Card decks, knowledge checks, matching activities, story carousels and
- * labelled images default ON; video, accordion, flip cards and the practical
- * checklist default OFF.
+ * Card decks, knowledge checks, matching activities, story carousels, labelled
+ * images and scenarios default ON; video, accordion, flip cards and the
+ * practical checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
   return (
@@ -467,7 +525,8 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
     type === 'mcq' ||
     type === 'drag_match' ||
     type === 'carousel' ||
-    type === 'hot_graphic'
+    type === 'hot_graphic' ||
+    type === 'scenario'
   );
 }
 
@@ -477,7 +536,7 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
  * Payload-aware: a video block only persists once it carries checkpoints.
  */
 export function persistsResponse(type: BlockType, payload?: BlockPayload): boolean {
-  if (type === 'mcq' || type === 'drag_match') return true;
+  if (type === 'mcq' || type === 'drag_match' || type === 'scenario') return true;
   if (type === 'video') return videoCheckpoints(payload as VideoPayload | undefined).length > 0;
   return false;
 }
