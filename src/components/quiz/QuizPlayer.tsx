@@ -232,8 +232,9 @@ export function QuizPlayer({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Your score</span>
-              <span>Pass mark: {passingScore}%</span>
+              {passingScore > 0 && <span>Pass mark: {passingScore}%</span>}
             </div>
+
             <div className="relative h-3 bg-muted rounded-full overflow-hidden">
               <div 
                 className={cn(
