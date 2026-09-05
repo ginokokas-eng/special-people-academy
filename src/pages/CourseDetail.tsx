@@ -644,7 +644,7 @@ export default function CourseDetail() {
           category={course.category}
           level={course.level}
           isMandatory={course.is_mandatory}
-          durationMinutes={course.duration_minutes || 0}
+          durationMinutes={heroDurationMinutes}
           cpdHours={course.cpd_hours}
           renewalMonths={course.renewal_months}
           progress={progress}
@@ -661,7 +661,7 @@ export default function CourseDetail() {
         isMandatory={course.is_mandatory}
         isInternal={course.is_internal}
         hasCertificate={course.has_certificate}
-        durationMinutes={course.duration_minutes || 0}
+        durationMinutes={heroDurationMinutes}
         lastUpdated={course.last_updated || undefined}
         language={course.language}
         thumbnailUrl={course.thumbnail_url || undefined}
