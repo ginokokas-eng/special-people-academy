@@ -22,6 +22,8 @@ interface Props {
   payload: VideoPayload;
   /** Called when the learner has finished watching (player `onEnded`, or confirm for embeds). */
   onWatched: (watched: boolean) => void;
+  /** Checkpoint outcome for conditional blocks. null = nothing answered yet. */
+  onOutcome?: (isCorrect: boolean | null) => void;
   /** Admin preview — still plays, just never reports completion. */
   preview?: boolean;
   blockId?: string;
@@ -52,6 +54,7 @@ export function BlockVideo({
   blockId,
   lessonId: lessonIdProp,
   lessonCompleted,
+  onOutcome,
 }: Props) {
   const { prefs, setPrefs } = useLearnerPrefs();
   const controllerRef = useRef<MediaController | null>(null);
@@ -203,6 +206,20 @@ export function BlockVideo({
   useEffect(() => {
     if (activeId) setExitingCheckpoint(null);
   }, [activeId]);
+
+  /**
+   * Checkpoint outcome for conditional blocks: correct once every checkpoint is
+   * right, incorrect while at least one answered checkpoint is still wrong.
+   * Hydrated from the saved answers, so remediation survives a return visit.
+   */
+  useEffect(() => {
+    if (!hasCheckpoints) {
+      onOutcome?.(null);
+      return;
+    }
+    const answeredAny = checkpoints.some((c) => !!answers[c.id]);
+    onOutcome?.(allAnswered ? true : answeredAny ? false : null);
+  }, [hasCheckpoints, checkpoints, answers, allAnswered, onOutcome]);
 
   // Done-signal: played to the end AND every checkpoint answered.
   useEffect(() => {

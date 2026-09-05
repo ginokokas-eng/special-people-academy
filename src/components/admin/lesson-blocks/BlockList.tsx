@@ -7,7 +7,12 @@ import {
   BLOCK_LABELS,
   allowsHalfWidth,
   blockLayout,
+  blockVisibility,
+  canBeVisibilitySource,
   isInteractive,
+  VISIBILITY_SOURCE_TYPES,
+  type VisibilityIssue,
+  type VisibilityWhen,
   type AccordionPayload,
   type BlockDraft,
   type BlockPayload,
@@ -23,8 +28,16 @@ import {
   type McqPayload,
   type ScenarioPayload,
   type TextPayload,
+  type VisibilityAware,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AccordionBlockForm,
   CalloutBlockForm,
@@ -52,7 +65,26 @@ interface BlockListProps {
   /** Used by the video block to build storage paths for uploads. */
   courseId?: string;
   lessonId?: string;
+  /** Problems with conditional visibility, keyed by the block's client id. */
+  visibilityIssues?: VisibilityIssue[];
 }
+
+/** Short preview of a block's own wording, to tell two MCQs apart in a list. */
+function blockSummary(payload: BlockPayload): string {
+  const p = payload as unknown as Record<string, unknown>;
+  const raw = [p.question, p.heading, p.title, p.instruction, p.prompt].find(
+    (v) => typeof v === 'string' && v.trim()
+  ) as string | undefined;
+  if (!raw) return '';
+  const text = raw.trim();
+  return text.length > 44 ? `${text.slice(0, 44)}…` : text;
+}
+
+const WHEN_OPTIONS: { value: VisibilityWhen; label: string }[] = [
+  { value: 'if_incorrect', label: 'they get it wrong' },
+  { value: 'if_correct', label: 'they get it right' },
+  { value: 'if_complete', label: 'they finish it' },
+];
 
 /** Ordered, editable list of the lesson's blocks. */
 export function BlockList({
@@ -63,6 +95,7 @@ export function BlockList({
   onRemove,
   courseId,
   lessonId,
+  visibilityIssues = [],
 }: BlockListProps) {
   if (!blocks.length) {
     return (
@@ -87,13 +120,18 @@ export function BlockList({
         const pairedWithNext = isHalf && !pairedWithPrev && nextIsHalf;
 
         return (
-          <div key={block.id ?? `new-${index}`} className="rounded-lg border bg-card p-4">
+          <div key={block.client_id} className="rounded-lg border bg-card p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
                   {index + 1}. {BLOCK_LABELS[block.block_type]}
                 </Badge>
                 {!block.id && <Badge variant="outline">Unsaved</Badge>}
+                {blockVisibility(block.payload) && (
+                  <Badge variant="outline" className="border-primary/40 text-primary">
+                    Conditional
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <Button
@@ -273,6 +311,72 @@ export function BlockList({
                 )}
               </div>
             )}
+
+            {/* Adaptive remediation: show this block only after an earlier
+                activity. Sources must come earlier, so nothing can depend on
+                something the learner has not reached yet. */}
+            {(() => {
+              const vis = blockVisibility(block.payload);
+              const eligible = blocks
+                .slice(0, index)
+                .filter((b) => VISIBILITY_SOURCE_TYPES.includes(b.block_type));
+              if (!eligible.length && !vis) return null;
+              const issues = visibilityIssues.filter((i) => i.block_id === block.client_id);
+              const setVisibility = (next?: { when: VisibilityWhen; block_id: string }) => {
+                const rest = { ...(block.payload as VisibilityAware) };
+                if (next) rest.visibility = next;
+                else delete rest.visibility;
+                setPayload(rest as BlockPayload);
+              };
+              const value = vis ? `${vis.block_id}::${vis.when}` : 'always';
+              return (
+                <div className="mt-3 space-y-2 border-t pt-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Label
+                      htmlFor={`${idPrefix}-visibility`}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      Show this block…
+                    </Label>
+                    <Select
+                      value={value}
+                      onValueChange={(v) => {
+                        if (v === 'always') return setVisibility(undefined);
+                        const [block_id, when] = v.split('::');
+                        setVisibility({ block_id, when: when as VisibilityWhen });
+                      }}
+                    >
+                      <SelectTrigger id={`${idPrefix}-visibility`} className="h-8 w-auto min-w-[18rem] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="always">Always</SelectItem>
+                        {eligible.flatMap((source) => {
+                          const position = blocks.indexOf(source) + 1;
+                          const summary = blockSummary(source.payload);
+                          return WHEN_OPTIONS.filter((o) =>
+                            canBeVisibilitySource(source.block_type, o.value)
+                          ).map((o) => (
+                            <SelectItem
+                              key={`${source.client_id}-${o.value}`}
+                              value={`${source.client_id}::${o.value}`}
+                            >
+                              Only if {o.label} — {position}. {BLOCK_LABELS[source.block_type]}
+                              {summary ? `: ${summary}` : ''}
+                            </SelectItem>
+                          ));
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {issues.map((issue) => (
+                    <p key={issue.code} className="text-xs font-medium text-destructive">
+                      {issue.message}
+                    </p>
+                  ))}
+                </div>
+              );
+            })()}
 
             {isInteractive(block.block_type) && (
               <div className="mt-3 flex items-center gap-2 border-t pt-3">

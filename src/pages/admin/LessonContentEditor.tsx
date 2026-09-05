@@ -20,6 +20,7 @@ import {
   defaultPayload,
   hasInvalidCheckpoints,
   validateScenario,
+  validateVisibility,
   type ScenarioPayload,
   type BlockDraft,
   type BlockPayload,
@@ -73,6 +74,7 @@ export default function LessonContentEditor() {
       setBlocks(
         (blocksRes.data || []).map((row) => ({
           id: row.id,
+          client_id: row.id,
           block_type: row.block_type as BlockType,
           payload: (row.payload ?? {}) as unknown as BlockPayload,
           contributes_to_completion: row.contributes_to_completion,
@@ -107,6 +109,7 @@ export default function LessonContentEditor() {
       ...prev,
       {
         id: null,
+        client_id: crypto.randomUUID(),
         block_type: type,
         payload: defaultPayload(type),
         contributes_to_completion: defaultContributesToCompletion(type),
@@ -144,6 +147,7 @@ export default function LessonContentEditor() {
       const source = prev[index];
       const copy: BlockDraft = {
         id: null,
+        client_id: crypto.randomUUID(),
         block_type: source.block_type,
         payload: JSON.parse(JSON.stringify(source.payload)) as BlockPayload,
         contributes_to_completion: source.contributes_to_completion,
@@ -190,6 +194,9 @@ export default function LessonContentEditor() {
       if (inserts.length) {
         const { error } = await supabase.from('lesson_blocks').insert(
           inserts.map(({ b, index }) => ({
+            // The client-minted id is used as the row id, so any conditional
+            // block pointing at this draft keeps pointing at it after saving.
+            id: b.client_id,
             lesson_id: lessonId,
             block_type: b.block_type,
             payload: b.payload as never,
@@ -224,8 +231,14 @@ export default function LessonContentEditor() {
     (b) => b.block_type === 'scenario' && validateScenario(b.payload as ScenarioPayload).length > 0
   );
 
+  // Conditional visibility issues (dangling/forward/ineligible sources).
+  const visibilityIssues = validateVisibility(
+    blocks.map((b) => ({ id: b.client_id, block_type: b.block_type, payload: b.payload }))
+  );
+  const visibilityInvalid = visibilityIssues.length > 0;
+
   const previewBlocks: LessonBlock[] = blocks.map((b, index) => ({
-    id: b.id ?? `preview-${index}`,
+    id: b.client_id,
     lesson_id: lessonId ?? '',
     order_index: index,
     block_type: b.block_type,
@@ -282,6 +295,11 @@ export default function LessonContentEditor() {
               Fix the checkpoint problems below to save
             </span>
           )}
+          {!checkpointsInvalid && !scenariosInvalid && visibilityInvalid && (
+            <span className="text-xs font-medium text-destructive">
+              Fix the “show this block” problems below to save
+            </span>
+          )}
           {!checkpointsInvalid && scenariosInvalid && (
             <span className="text-xs font-medium text-destructive">
               Fix the scenario problems below to save
@@ -289,7 +307,9 @@ export default function LessonContentEditor() {
           )}
           <Button
             onClick={handleSave}
-            disabled={saving || !dirty || checkpointsInvalid || scenariosInvalid}
+            disabled={
+              saving || !dirty || checkpointsInvalid || scenariosInvalid || visibilityInvalid
+            }
           >
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -355,6 +375,7 @@ export default function LessonContentEditor() {
             onMove={moveBlock}
             onDuplicate={duplicateBlock}
             onRemove={removeBlock}
+            visibilityIssues={visibilityIssues}
             courseId={courseId}
             lessonId={lessonId}
           />

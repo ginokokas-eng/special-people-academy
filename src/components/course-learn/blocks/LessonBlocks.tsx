@@ -25,8 +25,12 @@ import { ActivityShell } from './ActivityShell';
 
 import {
 
+  BLOCK_LABELS,
   blockLayout,
+  blockVisibility,
   isInteractive,
+  VISIBILITY_WHEN_LABELS,
+  visibleBlockIds,
   parseBlockText,
   type AccordionPayload,
   type CalloutPayload,
@@ -41,6 +45,7 @@ import {
   type McqPayload,
   type ScenarioPayload,
   type TextPayload,
+  type VisibilityWhen,
   videoCheckpoints,
   type VideoPayload,
 } from './types';
@@ -364,12 +369,51 @@ export function LessonBlocks({
   trickleEnabled,
 }: LessonBlocksProps) {
   const [deckState, setDeckState] = useState<Record<string, boolean>>({});
+  /** Right/wrong per assessed block. null = attempted-but-not-assessed/unknown. */
+  const [blockOutcome, setBlockOutcome] = useState<Record<string, boolean | null>>({});
   const [revealAll, setRevealAll] = useState(false);
 
   const setSignal = (id: string, done: boolean) =>
     setDeckState((prev) => (prev[id] === done ? prev : { ...prev, [id]: done }));
 
-  const interactiveRequired = blocks.filter(
+  const setOutcome = (id: string, isCorrect: boolean | null) =>
+    setBlockOutcome((prev) =>
+      id in prev && prev[id] === isCorrect ? prev : { ...prev, [id]: isCorrect }
+    );
+
+  /**
+   * Conditional visibility (adaptive remediation). Computed ONCE here, before
+   * rows are grouped, so every downstream calculation — gates, completion,
+   * trickle, the sticky strip, accent bars — simply never sees a hidden block.
+   *
+   * In the admin preview every conditional block is shown (with a chip saying
+   * what it waits on) so authors can read and edit what they wrote.
+   */
+  const visibleIds = useMemo(
+    () => visibleBlockIds(blocks, deckState, blockOutcome),
+    [blocks, deckState, blockOutcome]
+  );
+  const visibleBlocks = useMemo(
+    () => (preview ? blocks : blocks.filter((b) => visibleIds.has(b.id))),
+    [preview, blocks, visibleIds]
+  );
+
+  /** Conditional blocks that have just appeared get a gentle settle-in. */
+  const [justShown, setJustShown] = useState<Set<string>>(new Set());
+  const shownRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (preview) return;
+    const conditional = blocks.filter((b) => blockVisibility(b.payload));
+    const nowShown = new Set(conditional.filter((b) => visibleIds.has(b.id)).map((b) => b.id));
+    const fresh = [...nowShown].filter((id) => !shownRef.current.has(id));
+    shownRef.current = nowShown;
+    if (!fresh.length) return;
+    setJustShown(new Set(fresh));
+    const t = window.setTimeout(() => setJustShown(new Set()), 600);
+    return () => window.clearTimeout(t);
+  }, [preview, blocks, visibleIds]);
+
+  const interactiveRequired = visibleBlocks.filter(
     (b) => b.contributes_to_completion && isInteractive(b.block_type)
   );
   const allSatisfied = interactiveRequired.every((b) => deckState[b.id]);
@@ -407,9 +451,9 @@ export function LessonBlocks({
   const rows = useMemo(() => {
     const grouped: LessonBlock[][] = [];
     let i = 0;
-    while (i < blocks.length) {
-      const block = blocks[i];
-      const next = blocks[i + 1];
+    while (i < visibleBlocks.length) {
+      const block = visibleBlocks[i];
+      const next = visibleBlocks[i + 1];
       const isHalf = blockLayout(block.block_type, block.payload) === 'half';
       const nextIsHalf = !!next && blockLayout(next.block_type, next.payload) === 'half';
 
@@ -423,7 +467,7 @@ export function LessonBlocks({
       }
     }
     return grouped;
-  }, [blocks]);
+  }, [visibleBlocks]);
 
   /**
    * First row index that is veiled by trickle: the row AFTER the one holding the
@@ -491,7 +535,7 @@ export function LessonBlocks({
 
 
 
-  if (!blocks.length) {
+  if (!visibleBlocks.length) {
     return (
       <div className="learner-card p-6">
         <p className="text-sm text-muted-foreground">No content for this lesson yet.</p>
@@ -528,6 +572,7 @@ export function LessonBlocks({
           lessonCompleted={completed}
           preview={preview}
           onWatched={(done) => setSignal(block.id, done)}
+          onOutcome={(value) => setOutcome(block.id, value)}
         />
       )}
       {block.block_type === 'carousel' && (
@@ -558,6 +603,7 @@ export function LessonBlocks({
           lessonId={block.lesson_id}
           preview={preview}
           onAnswered={(done) => setSignal(block.id, done)}
+          onOutcome={(value) => setOutcome(block.id, value)}
         />
       )}
       {block.block_type === 'drag_match' && (
@@ -567,6 +613,7 @@ export function LessonBlocks({
           lessonId={block.lesson_id}
           preview={preview}
           onSolved={(done) => setSignal(block.id, done)}
+          onOutcome={(value) => setOutcome(block.id, value)}
         />
       )}
       {block.block_type === 'scenario' && (
@@ -576,6 +623,7 @@ export function LessonBlocks({
           lessonId={block.lesson_id}
           preview={preview}
           onFinished={(done) => setSignal(block.id, done)}
+          onOutcome={(value) => setOutcome(block.id, value)}
         />
       )}
       {block.block_type === 'checklist' && (
@@ -590,13 +638,42 @@ export function LessonBlocks({
    */
   const renderBlock = (block: LessonBlock) => {
     const gating = block.contributes_to_completion && isInteractive(block.block_type);
-    if (!gating) return renderBlockBody(block);
-    return (
+    const body = gating ? (
       <ActivityShell blockType={block.block_type} done={!!deckState[block.id]}>
         {renderBlockBody(block)}
       </ActivityShell>
+    ) : (
+      renderBlockBody(block)
+    );
+
+    const vis = blockVisibility(block.payload);
+    if (!vis) return body;
+
+    // Authoring preview: say what this block waits on, since it is always shown.
+    if (preview) {
+      const source = blocks.find((b) => b.id === vis.block_id);
+      return (
+        <div>
+          <Badge variant="outline" className="mb-2 border-primary/40 text-primary">
+            Shown only if: {source ? BLOCK_LABELS[source.block_type] : 'a removed activity'} is{' '}
+            {VISIBILITY_WHEN_LABELS[vis.when as VisibilityWhen]}
+          </Badge>
+          {body}
+        </div>
+      );
+    }
+
+    // Learner: a plain, non-punitive line explaining where this came from.
+    return (
+      <div className={cn(justShown.has(block.id) && 'material-in')}>
+        <p className="mb-2 text-xs font-medium text-muted-foreground">
+          Shown because of your answer above
+        </p>
+        {body}
+      </div>
     );
   };
+
 
   return (
     // Reading measure: ~68-72ch of body copy, centred. Wide activities are
@@ -605,7 +682,7 @@ export function LessonBlocks({
       {/* Deep-scroll orientation: hidden on lessons with no gating activities
           and in the editor preview so authoring visuals stay unchanged. */}
       {!preview && <LessonProgressStrip done={gateCounts.done} total={gateCounts.total} />}
-      {!preview && blocks.length > 5 && <BackToTop />}
+      {!preview && visibleBlocks.length > 5 && <BackToTop />}
       {preview && trickleEnabled && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl bg-primary/[0.07] p-3">
           <p className="text-sm text-foreground">

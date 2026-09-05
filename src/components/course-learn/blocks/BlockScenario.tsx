@@ -23,6 +23,8 @@ interface BlockScenarioProps {
   preview?: boolean;
   /** Done-signal: any run has reached an ending. */
   onFinished: (finished: boolean) => void;
+  /** Best-path outcome for conditional blocks; null when not assessed. */
+  onOutcome?: (isCorrect: boolean | null) => void;
 }
 
 /** Quality tint for feedback and choice state, using the brand wash tokens. */
@@ -57,6 +59,7 @@ export function BlockScenario({
   lessonId,
   preview,
   onFinished,
+  onOutcome,
 }: BlockScenarioProps) {
   const enabled = !preview;
   const { existing, loaded, record } = useBlockResponse(blockId, lessonId, enabled);
@@ -103,6 +106,23 @@ export function BlockScenario({
   useEffect(() => {
     onFinished(runs.length > 0 || finished);
   }, [runs.length, finished, onFinished]);
+
+  /**
+   * Outcome for conditional blocks. Only meaningful when the scenario is
+   * assessed on the best path; otherwise it stays null (not assessed).
+   * Restored runs feed this too, so remediation survives a return visit.
+   */
+  useEffect(() => {
+    if (!payload.require_best_path) {
+      onOutcome?.(null);
+      return;
+    }
+    if (!runs.length) {
+      onOutcome?.(null);
+      return;
+    }
+    onOutcome?.(runs.some((r) => r.is_clean));
+  }, [payload.require_best_path, runs, onOutcome]);
 
   /* ------------------------------- persistence ----------------------------- */
   const save = useCallback(

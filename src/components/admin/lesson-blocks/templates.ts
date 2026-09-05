@@ -29,11 +29,31 @@ const uid = () => crypto.randomUUID();
 function block(block_type: BlockType, payload: BlockPayload): BlockDraft {
   return {
     id: null,
+    client_id: uid(),
     block_type,
     payload,
     contributes_to_completion: defaultContributesToCompletion(block_type),
   };
 }
+
+/**
+ * A knowledge check plus a worked example of adaptive remediation: the callout
+ * is shown only to learners who got the question wrong. Placeholder copy — the
+ * author is expected to rewrite it.
+ */
+const knowledgeCheckWithRemediation = (question: string): BlockDraft[] => {
+  const check = knowledgeCheck(question);
+  const remediation = block('callout', {
+    variant: 'info',
+    title: 'If you got that wrong…',
+    text: 'Re-explain the point in the simplest words you can, then say where to look it up or who to ask on shift.',
+  });
+  remediation.payload = {
+    ...remediation.payload,
+    visibility: { when: 'if_incorrect', block_id: check.client_id },
+  } as BlockPayload;
+  return [check, remediation];
+};
 
 const introText = (heading: string, text: string) => block('text', { heading, text });
 
@@ -71,7 +91,7 @@ export const LESSON_TEMPLATES: LessonTemplate[] = [
     id: 'knowledge',
     name: 'Knowledge lesson',
     description: 'Teach a topic, then check understanding.',
-    outline: 'Text → Video → Safety callout → Card deck → Knowledge check',
+    outline: 'Text → Video → Safety callout → Card deck → Knowledge check → Callout shown only if they got it wrong',
     build: () => [
       introText(
         'What this lesson covers',
@@ -93,7 +113,9 @@ export const LESSON_TEMPLATES: LessonTemplate[] = [
           { id: uid(), front: 'Second term', back: 'Plain-English explanation.' },
         ],
       }),
-      knowledgeCheck('Write one question that checks the most important point in this lesson.'),
+      ...knowledgeCheckWithRemediation(
+        'Write one question that checks the most important point in this lesson.'
+      ),
     ],
   },
   {
