@@ -1,59 +1,100 @@
-# Menu audit — second pass (Resources, Contact, deferred items)
+# Third-pass audit — learner second tier
 
-I read all the pages named plus the ones your list assumed were fine. Your reading of J and K is right, and your proposal for J is the one I'd take. But the audit stopped one page short: **/pricing is the most serious problem on the site, and it isn't on your list.** Two of the three pages you were treating as "real, on-brand" are template content as well.
+Every cause below was checked against the code and the live database today. Where your diagnosis was slightly off I say so.
 
-## What the code confirms
+## M. Five different progress numbers (confirmed, four separate rules)
 
-- **/case-studies** — three invented customers, `[Quote from program coordinator…]`, `[Program Coordinator Name]`, and a visible "these are examples with editable placeholders" banner. Confirmed.
-- **/help-center** — 375 lines about learner plans, caregivers, weekly summaries, CSV export, "SPA syncs data automatically", a chat widget that does not exist, plus `[Support Email]` and `[Support Hours: Mon–Fri, 9am–6pm GMT]`. Confirmed.
-- **/blog** — eight posts in `src/data/blogPosts.ts`, life-skills teaching. Confirmed.
-- **/webinars** — three sessions, all `[Date TBD]` / `[Time TBD]`. Confirmed.
-- **/contact** — `[Support Email]`, `[Sales Email]`, `[Phone Number]`, `[Company Address]` all render. Tab state starts at `sales` with no URL handling, so "Contact Support" lands on Sales & Demos. Confirmed.
-- **Branding fields** — `BrandingSettings` has `platformName`, `platformTagline`, logo/favicon URLs, `footerTextLeft`, `footerTextRight`, and `socialLinks { linkedin, facebook, instagram, youtube, email }`. **There is no phone or address field**, so K cannot be implemented as described without adding two fields to that settings shape and its Branding Settings form.
+| Surface | Rule in code | Enteral Feeding result |
+| --- | --- | --- |
+| Dashboard | required lessons only (`src/pages/Dashboard.tsx`, uses the shared rule) | 31% |
+| Course page hero + right sidebar | **all** lessons: `lessons.filter(completed)/lessons.length` (`CourseDetail.tsx` ~line 579) | 24% |
+| Course page content header | same all-lessons count | 13/54 |
+| Course page left "Your Progress" card | **not lesson progress at all** — `CourseProgressTracker` scores three milestones (all lessons done / all quizzes passed / practical done) as 0 or 1 each | 0% |
+| Lesson hub + module rings | required lessons only via `requiredProgress()` | 12/39 |
+| Hub sidebar module line | all lessons in the module | 2/2 vs 1 of 1 |
 
-### Corrections to your L1 assumptions
+Correction to your reading: the 0% card is not reading a different *field*, it is a milestone checklist rendered as a percentage — with 54 lessons it can only ever show 0% until literally everything is done.
 
-- **/pricing is not on-brand and is actively dangerous.** It advertises £29 / £99 / £249 *monthly subscriptions* and its buttons call `create-checkout`, which creates a Stripe session in `mode: "subscription"` against three hardcoded price IDs. Nothing in the current model reads a subscription: access comes from licence seats (`fulfil_purchase` → `licences` → `licence_seats`), and `user_subscriptions` was dropped in the B2B work. A card payment here therefore charges a recurring fee and grants **no course access at all**. The plan copy is also template ("For a caregiver or single learner plan", learner slots, 14-day trial, CSV/API tiers). This outranks everything else in your list.
-- **/partners is not a local-authorities page.** It is a partner-programme page (implementation / content / referral partners, "share SPA with organizations", `[Dedicated partner support line…]`). Pointing "Local authorities" at it is wrong.
-- **/features (14 template hits) and /integrations (4)** are also off-product, and the footer's whole "Compliance" column points five separate labels — CQC audit packs, Care Inspectorate, CIW Wales, Skills for Care, CPD certification — at `/features`. Same class of defect as J.
-- **Navbar dropdowns are worse than the trim implies**: four of six "For organisations" items point at the same `/enterprise` page, and "Downloads / Resources" and "CQC Inspection Guide" both point at `/help-center` while promising content that isn't there.
+Fix (one rule, one place):
+- `CourseDetail` computes progress with `requiredProgress()` over the same lesson list, and the content header prints `x/y required lessons`.
+- `CourseContentSidebar` module/section lines switch to `requiredProgress()` so hub sidebar and hub cards agree.
+- Remove the left "Your Progress / Overall completion" card from the course page; keep the requirement checklist rows (lessons / assessments / practical / certificate) as a checklist with no percentage, since that is the actual certificate gate.
+- Dashboard already correct — no change.
 
-### The other L items
+## N. Durations (confirmed)
 
-- **L2** — agreed, and note /enterprise's "How SPA helps" panels and role list ("caregivers, observers") need the same pass, not just Use Cases.
-- **L3** — agreed, restyle only.
-- **L4** — `cpdLogged` in `Dashboard.tsx` is already correct: it sums `courses.cpd_hours` over *completed* enrolments only. So it reads 0 because no course has completed, not because the field is unused. Hiding it when 0 hides a legitimate "nothing banked yet" state; I'd keep the tile and label it "No CPD hours banked yet" rather than remove it, and hide it only when no enrolled course carries `cpd_hours` at all.
-- **L5** — agreed, no nav change.
+`lessonMeta`/`CourseContent` read `duration_seconds` only, so the 26 resource lessons you filled with `duration_minutes` contribute nothing (645 s → "11 min"). The hero prints `courses.duration_minutes` (180 → "3h"); IPC, Medication Awareness and Respiratory have 0 there and print "0 min".
 
-## Recommendation
+Fix:
+- One helper `lessonDurationSeconds(l) = l.duration_seconds ?? (l.duration_minutes ?? 0) * 60`, used by the course-page totals, module rows, hub sidebar and the catalogue card.
+- Hero falls back to the summed lesson duration when `courses.duration_minutes` is null or 0.
+- Pluralise lesson counts and hide the duration segment entirely when the total is 0 (no "0 min", no dash).
 
-**Don't delete the four Resources pages — neutralise the routes and keep the files.** Redirect `/case-studies`, `/blog`, `/blog/:slug`, `/webinars` to `/help-center`, and remove them from the navbar dropdown and footer. The components stay in the repo unreferenced, so real content later is a re-route, not a rebuild. I would not keep any of the three as live pages: an empty webinars page with "[Date TBD]" reads worse than no page, and a case-studies page is unpublishable when zero certificates have ever been issued.
+## O. Deep link ignored (cause is different from your proposal)
 
-**Take /pricing off the public site in the same turn.** Two options, and I recommend the first: redirect `/pricing` to `/contact` (with the sales tab) and remove it from nav and footer, leaving individual course prices on the course pages as the only self-serve price. The alternative — rewriting it as a per-course pricing explainer — is a bigger content job and can wait. Either way the subscription buttons must stop being reachable this turn. `create-checkout` itself stays untouched (out of scope, but it should be retired separately).
+The `?lesson=` param *is* read (`CourseLearn.tsx` line 128). The problem is that Module 3 Knowledge Check has **0 questions**, and `visibleLessons` drops quiz lessons with no questions (line 149); `activeLesson` then silently falls back to `visibleLessons[0]`, which is the Pre-Course Knowledge Check. All ten module knowledge checks in this course have 0 questions, so the same trap applies to every one of them.
 
-**Help Centre**: rewrite from features that demonstrably exist — signing in (password, email link, Google), being invited to an organisation and setting a password, enrolling and buying a course, the lesson player and what counts as complete, quizzes and attempts, practical sign-off, certificates and `/verify/<code>`, renewals, the organisation portal (people, licences, seats, invitations, compliance view). No hours, no SLAs, no chat widget, no policies.
+Fix:
+- No silent fallback: when `?lesson=` names a lesson that exists but is not learner-visible, show a small "This lesson isn't available yet" panel with a link back to the hub, keeping the URL honest.
+- When the id matches nothing at all, drop the param and show the hub.
 
-**Contact**: add `contactEmail`, `contactPhone`, `contactAddress` to `BrandingSettings` (defaults empty), render each row only when non-empty and not placeholder-looking (reuse the `YOUR_`/`[`-bracket test the footer socials now use), and read the tab from `?tab=support|sales`, with the navbar "Contact Support" link pointing at `/contact?tab=support`.
+## P. Quiz sentinels (confirmed)
 
-**Dropdowns** (revised from your L1):
+`attempts_allowed = 99` is stored as "effectively unlimited", and `passing_score = 0` marks an ungraded self-check; the UI prints both literally.
 
-- For organisations → "Care providers" (/enterprise), "Pricing" → drop, "Talk to sales" (/contact). Drop Local Authorities and Multi-site Teams until there is a page behind them.
-- Resources → "Help Centre" (/help-center), "Contact" (/contact).
-- Footer: same two-item Resources column; collapse the five-label Compliance column to a single honest link or remove it until /features is rewritten.
+Fix:
+- Treat `attempts_allowed` null, 0 or >= 99 as unlimited: "Unlimited attempts", no "x of y remaining", no last-attempt warning.
+- Hide the pass-mark tile and the "pass mark 0%" line in `QuizPlayer` when the quiz is ungraded (`isUngraded` already exists in `QuizContainer`).
+
+Where quiz completion comes from: the lesson tick is a `lesson_progress` row written when the learner submits (ungraded check) or passes (graded), and is completely independent of `quiz_attempts` rows — so "Completed" plus "99 of 99 remaining" is not a contradiction, just bad copy. The unlimited-attempts change removes the clash.
+
+Also in scope:
+- Completed quiz card in the lesson view: button becomes "Review answers" (and shows the best score when an attempt exists) instead of "Start Assessment".
+- Quiz page leaving the learner shell is **not deliberate** — `QuizPage` renders the public `Navbar`/`Footer`. Wrap it in the learn chrome with a "Back to lesson" link.
+- Print the lesson title once on the quiz lesson view (keep the hero, drop the card and overview-tab repeats).
+
+## Q. Compliance tab empty for the internal org (confirmed, precise cause)
+
+The RPC is already called unconditionally, and it returns 185 rows. The table's columns come from `licensedCourses`, which is built only from `licences` (`OrgPortal.tsx` line 226) — 0 licences means 0 columns, so the empty state fires.
+
+Fix:
+- Build the course column list from the union of licence courses and the `course_id`/`course_title` pairs the matrix already returns.
+- Derive the empty state from `matrixByLearner.length` only, and word it without mentioning licences ("No one has been assigned training yet").
+
+## R. Sign Up (confirmed)
+
+`initialTab` is derived from `location.pathname === '/sign-up'`, so `?mode=signup` is ignored.
+
+Fix: read `mode` from the query string as well; keep the `/sign-up` path working. Replace "John Doe" with "Your full name" and show the password rule (8–72 characters) that the code already enforces.
+
+**Product decision to make:** self-signup now creates an account with no entitlement. Recommendation — keep the tab (self-serve individual purchase is the planned path B) but add a line under it: "Invited by your employer? Use the link in your invitation email." Removing the tab is also defensible; say which you want and I will follow it.
+
+## S. Data (no code)
+
+- Falls Prevention "test" lesson (`80dd646a…`) — required, no blocks, blocks 100% for every learner. No reason to keep it; delete.
+- EFAW published with zero lessons — unpublish until it has content, otherwise it is buyable/enrollable and instantly "complete".
+
+Both are data changes and need your go-ahead; I will do them in the build turn if you approve.
+
+## T. Smaller (confirmed)
+
+- Hub shows two back links: the top bar's "← Course" and `CourseHome`'s "Course page" (two places, lines 247 and 274). Keep the top-bar one, drop the in-page ones.
+- Sidebar module titles: add `title` attributes on truncated titles.
+- `/auth`: sticky header ghosting — give the auth card top spacing clear of the header.
 
 ## Prioritised list for one build turn
 
-1. **Stop the dead subscription checkout being reachable.** Redirect `/pricing` → `/contact?tab=support=false` (sales tab); remove Pricing from navbar, footer, mobile menu, and any CTA that links to it. *(App.tsx, Navbar.tsx, Footer.tsx, FuturisticMobileMenu.tsx, plus CTA components that link /pricing.)*
-2. **Neutralise the four template Resources routes.** Redirect `/case-studies`, `/blog`, `/blog/:slug`, `/webinars` → `/help-center`. *(App.tsx.)*
-3. **Trim navbar + footer + mobile menu** to the surviving destinations above, including the /features Compliance column and the duplicate /enterprise entries. *(Navbar.tsx, Footer.tsx, FuturisticMobileMenu.tsx.)*
-4. **Rewrite /help-center** for this app, no placeholders, UK spelling. *(HelpCenter.tsx.)*
-5. **Contact page**: three new branding fields + form row, placeholder-safe rendering, `?tab=` support, navbar Contact Support → `/contact?tab=support`. *(useBrandingSettings.tsx, admin/BrandingSettings.tsx, Contact.tsx, Navbar.tsx, DashboardLayout.tsx.)*
-6. **About + /enterprise copy** rewrite to homepage positioning, UK spelling, no "SPA", use cases = Care homes / Domiciliary care / Supported living / NHS trusts, no invented numbers. *(About.tsx, Enterprise.tsx.)*
-7. **Mobile menu restyle** to the light violet system, keeping the collapsible groups. *(FuturisticMobileMenu.tsx.)*
-8. **Dashboard CPD tile**: keep it, show "No CPD hours banked yet" at 0, hide only when no enrolled course carries CPD hours. *(Dashboard.tsx.)*
+1. M — one progress rule everywhere; drop the duplicate progress card.
+2. Q — compliance columns from the matrix, licence-free empty copy.
+3. O — honest deep-link handling, no silent fallback.
+4. P — unlimited attempts, hidden pass mark, "Review answers", quiz page inside the learn shell, single lesson title.
+5. N — shared duration helper, hero fallback, pluralisation, zero-hiding.
+6. R — `?mode=signup`, placeholder, password rule, invitation hint.
+7. T — single back link, title tooltips, `/auth` spacing.
+8. S — data cleanup (delete the "test" lesson, unpublish EFAW) if approved.
 
-Out of this turn: rewriting /features and /integrations (redirect or rewrite as its own turn), retiring `create-checkout`'s subscription plans server-side, real case studies/blog/webinar content, merging My Courses and My Learning, email templates.
+Out of scope: completion/gating logic in `check-course-completion`, media or SCORM config, merging My Courses and My Learning, quiz authoring (the empty knowledge checks stay hidden rather than being authored here).
 
 ## Technical notes
 
-Redirects as `<Route path="…" element={<Navigate to="/help-center" replace />} />` keeps the page components in the tree unreferenced — no deletions, consistent with the no-rebuild constraint. The placeholder test should be one shared helper (`isPlaceholder(value)` matching `YOUR_`, leading `[`, empty) used by Footer, Contact and any future settings-driven row, rather than three copies.
+Files expected to change: `src/pages/CourseDetail.tsx`, `src/components/course-detail/CourseContent.tsx`, `CourseSidebar.tsx`, `CourseProgressTracker.tsx`, `CourseHero.tsx`, `src/components/course-learn/CourseContentSidebar.tsx`, `CourseHome.tsx`, `lessonMeta.tsx`, `src/pages/CourseLearn.tsx`, `src/pages/QuizPage.tsx`, `src/components/quiz/QuizContainer.tsx`, `QuizPlayer.tsx`, `src/pages/org/OrgPortal.tsx`, `src/pages/Auth.tsx`, plus a small duration helper next to `src/lib/progress.ts`. No migrations; the data items in S are direct row updates.
