@@ -202,6 +202,8 @@ export default function Dashboard() {
       outstanding: mandatory.filter(c => !c.completed).length,
       // CPD is only banked once a course is finished.
       cpdLogged: enrolledCourses.filter(c => c.completed).reduce((a, c) => a + c.cpd_hours, 0),
+      // Only show the CPD tile when at least one enrolled course carries CPD hours.
+      hasCpdCourses: enrolledCourses.some(c => (c.cpd_hours ?? 0) > 0),
       resume: inProgress[0] ?? null,
       rest: inProgress.slice(1, 5),
     };
@@ -294,14 +296,22 @@ export default function Dashboard() {
                         {overview.mandatoryDone}
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                        CPD logged
-                      </dt>
-                      <dd className="font-display text-[22px] leading-none tabular-nums text-foreground">
-                        {overview.cpdLogged.toFixed(overview.cpdLogged % 1 ? 1 : 0)}h
-                      </dd>
-                    </div>
+                    {overview.hasCpdCourses && (
+                      <div>
+                        <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                          CPD logged
+                        </dt>
+                        {overview.cpdLogged > 0 ? (
+                          <dd className="font-display text-[22px] leading-none tabular-nums text-foreground">
+                            {overview.cpdLogged.toFixed(overview.cpdLogged % 1 ? 1 : 0)}h
+                          </dd>
+                        ) : (
+                          <dd className="text-[13px] leading-tight text-muted-foreground">
+                            No CPD hours banked yet
+                          </dd>
+                        )}
+                      </div>
+                    )}
                   </dl>
                 </div>
               )}
