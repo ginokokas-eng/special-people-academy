@@ -74,9 +74,9 @@ export function CourseAssessment({
               <p className="text-sm text-muted-foreground">{certificateDetails}</p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Upon successful completion of all course requirements, you will receive a 
-                certificate of completion. This certificate will be stored in your profile 
-                and can be downloaded at any time.
+                Finish the course and your certificate is issued automatically. It stays in
+                your profile and you can download it whenever you need it — for supervision,
+                an interview, or a CQC inspection.
               </p>
             )}
             

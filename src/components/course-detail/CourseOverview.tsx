@@ -26,7 +26,7 @@ export function CourseOverview({
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Info className="h-5 w-5 text-primary" />
-              Scope of This Course
+              What this course covers
             </CardTitle>
           </CardHeader>
           <CardContent>

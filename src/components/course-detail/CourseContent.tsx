@@ -198,7 +198,10 @@ export function CourseContent({
 
         {/* Lesson info */}
           <div className="min-w-0 flex-1">
-          <p className={`font-medium text-sm truncate ${isLocked ? 'text-muted-foreground' : ''}`}>
+          <p
+            title={lesson.title}
+            className={`font-medium text-sm line-clamp-2 leading-snug ${isLocked ? 'text-muted-foreground' : ''}`}
+          >
             {index + 1}. {lesson.title}
           </p>
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
