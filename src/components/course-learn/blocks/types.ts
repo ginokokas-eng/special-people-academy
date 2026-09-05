@@ -672,3 +672,141 @@ export function hasInvalidCheckpoints(payload?: VideoPayload | null): boolean {
   if (!supportsCheckpoints(payload)) return false;
   return videoCheckpoints(payload).some((cp) => checkpointIssues(cp).length > 0);
 }
+
+/* --------------------------- scenario validation --------------------------- */
+
+export type ScenarioIssueCode =
+  | 'no_start'
+  | 'empty_body'
+  | 'duplicate_slug'
+  | 'unreachable'
+  | 'dangling_choice'
+  | 'dangling_next'
+  | 'too_few_choices'
+  | 'outcome_missing_next'
+  | 'end_has_next'
+  | 'no_end_reachable';
+
+export interface ScenarioIssue {
+  code: ScenarioIssueCode;
+  message: string;
+  /** Node the author should jump to, when the issue belongs to one. */
+  node_id?: string;
+  choice_id?: string;
+}
+
+export const SCENARIO_ISSUE_MESSAGES: Record<ScenarioIssueCode, string> = {
+  no_start: 'Choose which node the scenario starts at.',
+  empty_body: 'Add the wording learners read at this step.',
+  duplicate_slug: 'Two nodes share the same short key — make each one unique.',
+  unreachable: 'Learners can never reach this node. Link it from a choice, or delete it.',
+  dangling_choice: 'This choice points at a node that no longer exists.',
+  dangling_next: 'This node points at a node that no longer exists.',
+  too_few_choices: 'A decision needs at least two choices.',
+  outcome_missing_next: 'An outcome needs to say what happens next.',
+  end_has_next: 'An ending cannot lead anywhere — remove what happens next.',
+  no_end_reachable: 'No ending can be reached from the start, so the scenario never finishes.',
+};
+
+/** Breadth-first order of reachable node ids, grouped by depth from the start. */
+export function scenarioDepths(payload: ScenarioPayload): Map<string, number> {
+  const byId = new Map((payload.nodes ?? []).map((n) => [n.id, n]));
+  const depths = new Map<string, number>();
+  const start = payload.start_id;
+  if (!start || !byId.has(start)) return depths;
+  const queue: string[] = [start];
+  depths.set(start, 0);
+  while (queue.length) {
+    const id = queue.shift() as string;
+    const node = byId.get(id);
+    if (!node) continue;
+    const targets: string[] = [];
+    if (node.kind === 'decision') for (const c of node.choices ?? []) targets.push(c.next_id);
+    if (node.kind === 'outcome' && node.next_id) targets.push(node.next_id);
+    for (const t of targets) {
+      if (!t || !byId.has(t) || depths.has(t)) continue;
+      depths.set(t, (depths.get(id) ?? 0) + 1);
+      queue.push(t);
+    }
+  }
+  return depths;
+}
+
+/** Author-facing problems with a scenario. Empty array = publishable. */
+export function validateScenario(payload?: ScenarioPayload | null): ScenarioIssue[] {
+  const issues: ScenarioIssue[] = [];
+  if (!payload) return issues;
+  const nodes = payload.nodes ?? [];
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+
+  const issue = (code: ScenarioIssueCode, extra?: Partial<ScenarioIssue>) =>
+    issues.push({ code, message: SCENARIO_ISSUE_MESSAGES[code], ...extra });
+
+  if (!payload.start_id || !byId.has(payload.start_id)) issue('no_start');
+
+  const seen = new Set<string>();
+  for (const node of nodes) {
+    const slug = (node.slug || '').trim().toLowerCase();
+    if (slug && seen.has(slug)) issue('duplicate_slug', { node_id: node.id });
+    if (slug) seen.add(slug);
+
+    if (!node.body?.trim()) issue('empty_body', { node_id: node.id });
+
+    if (node.kind === 'decision') {
+      const choices = node.choices ?? [];
+      if (choices.length < 2) issue('too_few_choices', { node_id: node.id });
+      for (const c of choices) {
+        if (!c.next_id || !byId.has(c.next_id))
+          issue('dangling_choice', { node_id: node.id, choice_id: c.id });
+      }
+    }
+    if (node.kind === 'outcome') {
+      if (!node.next_id) issue('outcome_missing_next', { node_id: node.id });
+      else if (!byId.has(node.next_id)) issue('dangling_next', { node_id: node.id });
+    }
+    if (node.kind === 'end' && node.next_id) issue('end_has_next', { node_id: node.id });
+  }
+
+  const depths = scenarioDepths(payload);
+  for (const node of nodes) {
+    if (!depths.has(node.id)) issue('unreachable', { node_id: node.id });
+  }
+  const reachesEnd = nodes.some((n) => n.kind === 'end' && depths.has(n.id));
+  if (!reachesEnd) issue('no_end_reachable');
+
+  return issues;
+}
+
+/* ---------------------------- scenario responses --------------------------- */
+
+export interface ScenarioStep {
+  node_id: string;
+  choice_id: string;
+}
+
+export interface ScenarioRun {
+  started_at: string;
+  ended_at: string;
+  end_node_id: string;
+  /** No choice of quality 'unsafe' was taken. */
+  is_clean: boolean;
+  path: ScenarioStep[];
+}
+
+export interface ScenarioResponse {
+  kind: 'scenario';
+  version: 1;
+  runs: ScenarioRun[];
+  current?: { started_at: string; path: ScenarioStep[] };
+}
+
+export const SCENARIO_RUN_CAP = 10;
+
+/**
+ * Keep the stored run list at the cap by keeping the FIRST run (the learner's
+ * very first attempt) and the most recent ones.
+ */
+export function trimScenarioRuns(runs: ScenarioRun[], cap = SCENARIO_RUN_CAP): ScenarioRun[] {
+  if (runs.length <= cap) return runs;
+  return [runs[0], ...runs.slice(runs.length - (cap - 1))];
+}
