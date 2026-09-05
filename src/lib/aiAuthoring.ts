@@ -222,7 +222,7 @@ export function draftBlockIssues(block: {
   payload: BlockPayload;
 }): string[] {
   const issues: string[] = [];
-  const p = block.payload as Record<string, unknown>;
+  const p = block.payload as unknown as Record<string, unknown>;
   if (block.block_type === 'text' && !clean(p.text as string)) issues.push('This draft has no text.');
   if (block.block_type === 'callout' && !clean(p.text as string))
     issues.push('This callout has no text.');
