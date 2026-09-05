@@ -15,6 +15,16 @@ import {
   Gamepad2,
   Package
 } from '@/components/icons';
+import { requiredProgress } from '@/lib/progress';
+import {
+  formatLessonsDuration,
+  formatMinutes,
+  lessonCountLabel,
+  lessonDurationSeconds,
+  minutesFromSeconds,
+} from '@/lib/duration';
+
+
 
 interface Lesson {
   id: string;
