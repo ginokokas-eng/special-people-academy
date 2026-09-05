@@ -118,8 +118,7 @@ const featuresData: FeatureCardData[] = [
       "Practical sign-off and expiry date for hands-on courses.",
     ],
     ctas: [
-      { label: "View Pricing", href: "/pricing", variant: "default" },
-      { label: "Contact Sales", href: "/contact", variant: "outline" },
+      { label: "Contact Sales", href: "/contact?tab=sales", variant: "default" },
     ],
   },
 ];

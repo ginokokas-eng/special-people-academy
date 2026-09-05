@@ -126,8 +126,7 @@ export default function TermsOfService() {
             
             <h3>5.1 Subscription Plans</h3>
             <p>
-              Access to certain features of the Platform requires a paid subscription. Details of available plans, features, and pricing are described on our{" "}
-              <Link to="/pricing" className="text-primary hover:underline">Pricing page</Link>.
+              Access to certain features of the Platform requires a paid subscription. Prices for individual courses are shown on each course page, and organisation licences are quoted directly.
             </p>
             
             <h3>5.2 Billing</h3>

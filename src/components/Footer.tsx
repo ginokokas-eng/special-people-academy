@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import defaultLogo from "@/assets/logo.svg";
 import { useBranding } from "@/hooks/useBrandingSettings";
 import { useGeneralSettings } from "@/hooks/useGeneralSettings";
+import { hasRealValue } from "@/lib/placeholders";
 import { isNativeShell } from "@/lib/native";
 
 export const Footer = () => {
@@ -48,7 +49,7 @@ const WebFooter = () => {
   return (
     <footer className="bg-white text-[hsl(259_72%_14%)] border-t border-[#EEEAF8]">
       <div className="section-container py-14 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-10 mb-12">
           {/* Brand column */}
           <div className="col-span-2">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5">

@@ -393,7 +393,6 @@ export default function Features() {
         title="Ready to Build Skills with Confidence?"
         subtitle="Join hundreds of families, schools, and organizations using Special People Training to deliver meaningful, measurable learning experiences."
         primaryCTA={{ text: "Request a demo", href: "/contact" }}
-        secondaryCTA={{ text: "View pricing", href: "/pricing" }}
       />
     </MarketingLayout>
   );

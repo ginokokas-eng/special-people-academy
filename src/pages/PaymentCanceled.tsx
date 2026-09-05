@@ -22,13 +22,13 @@ export default function PaymentCanceled() {
             </p>
             <div className="flex flex-col gap-2">
               <Button asChild>
-                <Link to="/pricing">
+                <Link to="/courses">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Return to Pricing
+                  Back to courses
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/contact">
+                <Link to="/contact?tab=support">
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Contact Support
                 </Link>
