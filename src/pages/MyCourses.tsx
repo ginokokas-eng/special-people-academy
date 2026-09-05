@@ -332,8 +332,8 @@ export default function MyCourses() {
         ) : (
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-              <TabsTrigger value="assigned">
-                Assigned ({assignedCourses.length})
+              <TabsTrigger value="not-started">
+                Not Started ({notStartedCourses.length})
               </TabsTrigger>
               <TabsTrigger value="in-progress">
                 In Progress ({inProgressCourses.length})
@@ -346,17 +346,18 @@ export default function MyCourses() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="assigned" className="mt-6">
-              {assignedCourses.length === 0 ? (
-                <TabEmptyState message="No assigned courses. Courses assigned by your organisation will appear here." />
+            <TabsContent value="not-started" className="mt-6">
+              {notStartedCourses.length === 0 ? (
+                <TabEmptyState message="Nothing waiting to be started — every course you have is underway or finished." />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {assignedCourses.map(course => (
+                  {notStartedCourses.map(course => (
                     <CourseCard key={course.id} course={course} />
                   ))}
                 </div>
               )}
             </TabsContent>
+
 
             <TabsContent value="in-progress" className="mt-6">
               {inProgressCourses.length === 0 ? (
