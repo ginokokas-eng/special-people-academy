@@ -67,7 +67,6 @@ const featuresData: FeatureCardData[] = [
     ],
     ctas: [
       { label: "Browse training", href: "/courses", variant: "default" },
-      { label: "Browse training", href: "/courses", variant: "outline" },
     ],
   },
   {
