@@ -238,15 +238,8 @@ export function CourseHome({
             className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[hsl(var(--learner-canvas))]"
           />
           <div className="relative mx-auto w-full max-w-5xl space-y-3 px-4 pb-14 pt-5 sm:px-6 sm:pb-20 sm:pt-8">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBackToCourse}
-              className="-ml-2 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
-            </Button>
             <h1 className="font-display font-display-hero text-2xl text-primary-foreground sm:text-4xl">
+
               {courseTitle}
             </h1>
             {courseSubtitle?.trim() && (

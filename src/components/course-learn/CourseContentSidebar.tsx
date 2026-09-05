@@ -5,7 +5,7 @@ import { CheckCircle2, Circle, ChevronDown, Paperclip, Download, Loader2 } from 
 import { lessonTypeIcon, lessonMetaLabel, totalDuration } from './lessonMeta';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnLesson, LearnModule, LearnResource } from './types';
-import { requiredLessons } from '@/lib/progress';
+import { requiredLessons, requiredProgress } from '@/lib/progress';
 
 interface Props {
   courseId: string;
