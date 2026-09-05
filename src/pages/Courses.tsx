@@ -121,11 +121,11 @@ export default function Courses() {
 
           {/* Filter pills */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            {CATEGORY_FILTERS.map((f) => (
+            {categoryFilters.map((f) => (
               <FilterPill
                 key={f.key}
                 label={f.label}
-                count={counts[f.key] ?? 0}
+                count={f.count}
                 selected={activeFilter === f.key}
                 onClick={() => setActiveFilter(f.key)}
               />
