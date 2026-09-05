@@ -159,8 +159,7 @@ const WebFooter = () => {
         {/* Divider + bottom bar */}
         <div className="pt-8 border-t border-[#EEEAF8] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <p className="text-xs text-[hsl(259_20%_45%)]">
-            © {year} Special People Training Academy Ltd. Registered in England & Wales. Company
-            No. 12345678.
+            © {year} Special People Training Academy Ltd. Registered in England & Wales.
           </p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[hsl(259_20%_45%)]">
             <Link to="/privacy-policy" className="hover:text-[hsl(259_72%_14%)] transition-colors">

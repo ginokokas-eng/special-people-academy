@@ -427,7 +427,8 @@ export default function OrgPortal() {
                   <span className="text-muted-foreground/80">/{seatTotals.total}</span>
                 </>
               ) : (
-                '—'
+                // A dash read as "unknown"; zero seats is a known, actionable fact.
+                0
               )
             }
             label="Seats in use"
@@ -441,7 +442,7 @@ export default function OrgPortal() {
             icon={Trophy}
             wash="amber"
             entranceDelay={80}
-            value={licensedCourses.length > 0 ? `${matrixStats.percent}%` : '—'}
+            value={licensedCourses.length > 0 ? `${matrixStats.percent}%` : '0%'}
             label="Training complete"
             sub={
               licensedCourses.length > 0

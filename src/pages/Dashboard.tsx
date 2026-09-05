@@ -344,7 +344,10 @@ export default function Dashboard() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--learner-kicker))]">
                     {resume.category}
                   </p>
-                  <h3 className="font-display mt-1.5 text-[26px] leading-tight tracking-tight text-foreground">
+                  <h3
+                    title={resume.title}
+                    className="font-display mt-1.5 line-clamp-2 text-[26px] leading-tight tracking-tight text-foreground"
+                  >
                     {resume.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -369,7 +372,7 @@ export default function Dashboard() {
                       className="pressable rounded-[10px] font-semibold"
                       onClick={() => navigate(`/courses/${resume.id}/learn`)}
                     >
-                      Continue
+                      Resume course
                     </Button>
                     {resume.cpd_hours > 0 && (
                       <span className="inline-flex h-7 items-center rounded-full bg-[hsl(189_94%_94%)] px-3 text-xs font-semibold text-[hsl(189_94%_30%)]">

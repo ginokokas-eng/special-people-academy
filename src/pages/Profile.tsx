@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { initialsFor } from '@/lib/initials';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -132,11 +133,7 @@ export default function Profile() {
     }
   };
 
-  const userInitials = profile.full_name
-    ?.split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase() || user?.email?.slice(0, 2).toUpperCase() || 'U';
+  const userInitials = initialsFor(profile.full_name, user?.email);
 
   if (authLoading || loading) {
     return (
@@ -208,7 +205,7 @@ export default function Profile() {
                   id="jobTitle"
                   value={profile.job_title || ''}
                   onChange={(e) => setProfile({ ...profile, job_title: e.target.value })}
-                  placeholder="Software Engineer"
+                  placeholder="Senior Care Assistant"
                 />
               </div>
 
@@ -218,7 +215,7 @@ export default function Profile() {
                   id="department"
                   value={profile.department || ''}
                   onChange={(e) => setProfile({ ...profile, department: e.target.value })}
-                  placeholder="Engineering"
+                  placeholder="Domiciliary Care"
                 />
               </div>
             </div>

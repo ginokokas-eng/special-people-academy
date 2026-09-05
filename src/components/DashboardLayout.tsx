@@ -33,6 +33,7 @@ import { useOrgAdmin } from '@/hooks/useOrgAdmin';
 import { isNativeShell } from '@/lib/native';
 import { NativeShell } from '@/components/native/NativeShell';
 import { activeTabFor } from '@/components/native/nativeTabs';
+import { initialsFor } from '@/lib/initials';
 
 /** Native header titles for learner routes that are not tab roots. */
 const NATIVE_TITLES: Record<string, string> = {
@@ -90,12 +91,18 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   };
 
-  const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
+  // Shared with /profile so one person never sees two different avatars.
+  const userInitials = initialsFor(
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name,
+    user?.email
+  );
   const showAdminLink = isAdmin || isSuperAdmin || isOpsTrainingAdmin || isTrainer;
   // Organisation admins get a /org link. Platform staff use the admin portal
   // instead, so the link is hidden for them even if they hold a membership.
-  const { isOrgAdmin } = useOrgAdmin();
-  const showOrgLink = isOrgAdmin && !showAdminLink;
+  // Wait for the membership lookup to resolve, otherwise the Organisation row
+  // popped into the sidebar a beat after the rest of the shell had painted.
+  const { isOrgAdmin, loading: orgAdminLoading } = useOrgAdmin();
+  const showOrgLink = !orgAdminLoading && isOrgAdmin && !showAdminLink;
 
   // ---------------------------------------------------------------------------
   // Native shell: the single seam. Inside the Capacitor app every learner page
@@ -116,7 +123,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-50 bg-background/[.97] backdrop-blur border-b border-border">
         <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           {/* Left side */}
           <div className="flex items-center gap-4">
@@ -129,9 +136,15 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             
-            <a href="/" className="flex min-w-0 items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+            {/* Two-line lockup: the single line truncated to "Special People Tr…". */}
+            <a href="/" className="flex min-w-0 items-center gap-2.5">
               <img src={logo} alt={platformName} className="h-8 w-8 object-contain flex-shrink-0" />
-              <span className="hidden min-w-0 sm:inline text-foreground tracking-tight truncate max-w-[180px]">{platformName}</span>
+              <span className="hidden min-w-0 sm:block font-heading font-bold leading-tight">
+                <span className="block text-[15px] text-foreground tracking-tight">Special People</span>
+                <span className="block text-[10px] font-bold tracking-[0.2em] text-primary">
+                  TRAINING ACADEMY
+                </span>
+              </span>
             </a>
           </div>
 

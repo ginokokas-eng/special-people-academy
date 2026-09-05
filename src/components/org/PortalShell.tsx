@@ -74,7 +74,7 @@ export function PortalShell({ orgName, actions, children }: PortalShellProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate('/my-learning')}>
                   <GraduationCap className="mr-2 h-4 w-4" />
-                  My learning
+                  Back to my learning
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => void handleSignOut()}>
                   <LogOut className="mr-2 h-4 w-4" />
