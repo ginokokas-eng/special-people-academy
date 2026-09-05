@@ -23,6 +23,8 @@ interface BlockDragMatchProps {
   preview?: boolean;
   /** Done-signal: completed correctly, per the plan. */
   onSolved: (solved: boolean) => void;
+  /** Right/wrong signal for conditional blocks. null = not yet checked. */
+  onOutcome?: (isCorrect: boolean | null) => void;
 }
 
 /** placement map: item id -> target id (absent = still in the pool) */
@@ -134,6 +136,7 @@ export function BlockDragMatch({
   lessonId,
   preview,
   onSolved,
+  onOutcome,
 }: BlockDragMatchProps) {
   const items = payload.items ?? [];
   const targets = payload.targets ?? [];
@@ -168,6 +171,12 @@ export function BlockDragMatch({
   useEffect(() => {
     onSolved(items.length === 0 || solved);
   }, [solved, items.length, onSolved]);
+
+  // Outcome for conditional blocks: correct once solved, incorrect once a check
+  // has been made without solving it. Hydrated from the saved response above.
+  useEffect(() => {
+    onOutcome?.(solved ? true : checked ? false : null);
+  }, [solved, checked, onOutcome]);
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 

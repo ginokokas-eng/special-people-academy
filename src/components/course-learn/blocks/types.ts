@@ -44,14 +44,38 @@ export const IMAGE_MAX_MB = 10;
 export const IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp';
 export const IMAGE_ALLOWED_EXT = ['png', 'jpg', 'jpeg', 'webp'] as const;
 
+/* ------------------------ conditional visibility --------------------------- */
+
+/**
+ * When a block is shown. Absence of `visibility` means "always" — every block
+ * authored before adaptive remediation keeps behaving exactly as before.
+ *
+ * `block_id` points at an EARLIER interactive block in the same lesson:
+ *  - if_complete  → that block's completion signal is satisfied
+ *  - if_correct   → that block was answered correctly
+ *  - if_incorrect → that block was answered, but not correctly
+ */
+export type VisibilityWhen = 'if_correct' | 'if_incorrect' | 'if_complete';
+
+export interface BlockVisibility {
+  when: VisibilityWhen;
+  block_id: string;
+}
+
+/** Every payload may carry a visibility condition. */
+export interface VisibilityAware {
+  visibility?: BlockVisibility;
+}
+
 /* ------------------------------- half width -------------------------------- */
 
 export type BlockLayout = 'full' | 'half';
 
 /** Payloads that may opt into a half-width column. */
-export interface LayoutAware {
+export interface LayoutAware extends VisibilityAware {
   layout?: BlockLayout;
 }
+
 
 /** Block types where the width toggle is offered. Everything else is full-only. */
 export const HALF_ELIGIBLE_TYPES: readonly BlockType[] = [
@@ -94,7 +118,7 @@ export interface DeckCard {
   back: string;
 }
 
-export interface CardDeckPayload {
+export interface CardDeckPayload extends VisibilityAware {
   heading?: string;
   instruction?: string;
   cards: DeckCard[];
@@ -118,7 +142,7 @@ export interface AccordionItemPayload {
   body: string;
 }
 
-export interface AccordionPayload {
+export interface AccordionPayload extends VisibilityAware {
   heading?: string;
   items: AccordionItemPayload[];
 }
@@ -143,7 +167,7 @@ export interface VideoCheckpoint {
  * `storage` sources hold a `lesson-media` object path and are played through a
  * short-lived signed URL; `url` sources hold an external/direct link.
  */
-export interface VideoPayload {
+export interface VideoPayload extends VisibilityAware {
   source: 'storage' | 'url';
   /** Object path in the private `lesson-media` bucket: {course_id}/{lesson_id}/{uuid}.{ext} */
   path?: string;
@@ -226,7 +250,7 @@ export interface DragMatchItem {
   target_id: string;
 }
 
-export interface DragMatchPayload {
+export interface DragMatchPayload extends VisibilityAware {
   prompt: string;
   targets: DragMatchTarget[];
   items: DragMatchItem[];
@@ -250,7 +274,7 @@ export interface ChecklistStep {
   safety_note?: string;
 }
 
-export interface ChecklistPayload {
+export interface ChecklistPayload extends VisibilityAware {
   heading?: string;
   caption?: string;
   steps: ChecklistStep[];
@@ -284,7 +308,7 @@ export interface ScenarioNode {
   next_id?: string;
 }
 
-export interface ScenarioPayload {
+export interface ScenarioPayload extends VisibilityAware {
   version: 1;
   start_id: string;
   /** When on, the block is assessed: a clean run (no unsafe choice) is correct. */
@@ -324,6 +348,12 @@ export interface LessonBlock {
 export interface BlockDraft {
   /** Existing row id, or null for a new block. */
   id: string | null;
+  /**
+   * Stable id for the draft, minted client-side and used as the row id when the
+   * block is inserted. Conditional visibility can therefore point at a block
+   * that has not been saved yet, and the reference survives the save.
+   */
+  client_id: string;
   block_type: BlockType;
   payload: BlockPayload;
   contributes_to_completion: boolean;
@@ -809,4 +839,158 @@ export const SCENARIO_RUN_CAP = 10;
 export function trimScenarioRuns(runs: ScenarioRun[], cap = SCENARIO_RUN_CAP): ScenarioRun[] {
   if (runs.length <= cap) return runs;
   return [runs[0], ...runs.slice(runs.length - (cap - 1))];
+}
+
+/* --------------------------- visibility validation ------------------------- */
+
+/** Read the visibility condition off any payload. */
+export function blockVisibility(payload?: BlockPayload | null): BlockVisibility | null {
+  const v = (payload as VisibilityAware | undefined | null)?.visibility;
+  if (!v || !v.block_id || !v.when) return null;
+  return v;
+}
+
+/**
+ * Blocks that can be a visibility SOURCE. All of these report a completion
+ * signal, so `if_complete` works for any of them.
+ */
+export const VISIBILITY_SOURCE_TYPES: readonly BlockType[] = [
+  'mcq',
+  'drag_match',
+  'video',
+  'hot_graphic',
+  'scenario',
+  'card_deck',
+  'accordion',
+  'flip_cards',
+  'carousel',
+];
+
+/** Sources that carry a right/wrong outcome, so `if_correct`/`if_incorrect` work. */
+export const VISIBILITY_OUTCOME_TYPES: readonly BlockType[] = [
+  'mcq',
+  'drag_match',
+  'video',
+  'scenario',
+];
+
+export function canBeVisibilitySource(type: BlockType, when: VisibilityWhen): boolean {
+  if (when === 'if_complete') return VISIBILITY_SOURCE_TYPES.includes(type);
+  return VISIBILITY_OUTCOME_TYPES.includes(type);
+}
+
+export const VISIBILITY_WHEN_LABELS: Record<VisibilityWhen, string> = {
+  if_correct: 'answered correctly',
+  if_incorrect: 'answered, but not correctly',
+  if_complete: 'finished',
+};
+
+export type VisibilityIssueCode =
+  | 'dangling_source'
+  | 'forward_reference'
+  | 'self_reference'
+  | 'source_not_interactive'
+  | 'source_no_outcome'
+  | 'source_conditional';
+
+export interface VisibilityIssue {
+  code: VisibilityIssueCode;
+  message: string;
+  /** The conditional block the author needs to fix. */
+  block_id: string;
+}
+
+export const VISIBILITY_ISSUE_MESSAGES: Record<VisibilityIssueCode, string> = {
+  dangling_source: 'This block waits on an activity that is no longer in the lesson.',
+  forward_reference: 'The activity it waits on must come earlier in the lesson.',
+  self_reference: 'A block cannot wait on itself.',
+  source_not_interactive: 'Only an activity learners take part in can decide this.',
+  source_no_outcome:
+    'That activity has no right or wrong answer, so choose “is finished” instead.',
+  source_conditional: 'The activity it waits on is itself conditional — keep it to one step.',
+};
+
+/** The minimum a block needs to expose for visibility validation/evaluation. */
+export interface VisibilityBlock {
+  id: string;
+  block_type: BlockType;
+  payload: BlockPayload;
+}
+
+/**
+ * Author-facing problems with conditional visibility, across a whole lesson in
+ * running order (array order = order_index). Empty array = publishable.
+ */
+export function validateVisibility(blocks: readonly VisibilityBlock[]): VisibilityIssue[] {
+  const issues: VisibilityIssue[] = [];
+  const indexOf = new Map(blocks.map((b, i) => [b.id, i]));
+
+  blocks.forEach((block, index) => {
+    const vis = blockVisibility(block.payload);
+    if (!vis) return;
+    const push = (code: VisibilityIssueCode) =>
+      issues.push({ code, message: VISIBILITY_ISSUE_MESSAGES[code], block_id: block.id });
+
+    if (vis.block_id === block.id) {
+      push('self_reference');
+      return;
+    }
+    const sourceIndex = indexOf.get(vis.block_id);
+    if (sourceIndex === undefined) {
+      push('dangling_source');
+      return;
+    }
+    if (sourceIndex >= index) {
+      push('forward_reference');
+      return;
+    }
+    const source = blocks[sourceIndex];
+    if (!VISIBILITY_SOURCE_TYPES.includes(source.block_type)) {
+      push('source_not_interactive');
+      return;
+    }
+    if (!canBeVisibilitySource(source.block_type, vis.when)) {
+      push('source_no_outcome');
+      return;
+    }
+    // v1 is one level deep: a condition may not hang off a conditional block.
+    if (blockVisibility(source.payload)) push('source_conditional');
+  });
+
+  return issues;
+}
+
+/**
+ * Which blocks a learner can currently see. Pure, so both the player and the
+ * tests share exactly one rule.
+ *
+ * `deckState` is the completion signal map, `blockOutcome` the right/wrong map
+ * (null = attempted-but-not-assessed or unknown). A block with no condition is
+ * always visible; an invalid condition (dangling source) hides the block rather
+ * than showing remediation out of nowhere.
+ */
+export function visibleBlockIds(
+  blocks: readonly VisibilityBlock[],
+  deckState: Record<string, boolean>,
+  blockOutcome: Record<string, boolean | null>
+): Set<string> {
+  const known = new Set(blocks.map((b) => b.id));
+  const visible = new Set<string>();
+  for (const block of blocks) {
+    const vis = blockVisibility(block.payload);
+    if (!vis) {
+      visible.add(block.id);
+      continue;
+    }
+    if (!known.has(vis.block_id) || vis.block_id === block.id) continue;
+    const outcome = blockOutcome[vis.block_id];
+    const met =
+      vis.when === 'if_complete'
+        ? !!deckState[vis.block_id]
+        : vis.when === 'if_correct'
+          ? outcome === true
+          : outcome === false;
+    if (met) visible.add(block.id);
+  }
+  return visible;
 }

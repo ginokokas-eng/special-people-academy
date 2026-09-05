@@ -12,6 +12,8 @@ interface BlockMcqProps {
   preview?: boolean;
   /** Done-signal: an attempt exists (answered), per the plan. */
   onAnswered: (answered: boolean) => void;
+  /** Right/wrong signal, used by conditional blocks. null = not yet answered. */
+  onOutcome?: (isCorrect: boolean | null) => void;
 }
 
 /**
@@ -19,7 +21,14 @@ interface BlockMcqProps {
  * wrong answer, every attempt persisted to `lesson_block_responses`.
  * Never writes to `quizzes` / `quiz_attempts`.
  */
-export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: BlockMcqProps) {
+export function BlockMcq({
+  payload,
+  blockId,
+  lessonId,
+  preview,
+  onAnswered,
+  onOutcome,
+}: BlockMcqProps) {
   const options = payload.options ?? [];
   const enabled = !preview;
   const { existing, loaded, record } = useBlockResponse(blockId, lessonId, enabled);
@@ -40,6 +49,12 @@ export function BlockMcq({ payload, blockId, lessonId, preview, onAnswered }: Bl
   }, [answered, onAnswered]);
 
   const isCorrect = selected != null && selected === payload.correct_id;
+
+  // Reported on hydrate as well as on answer, so a returning learner keeps any
+  // remediation that was shown to them last time.
+  useEffect(() => {
+    onOutcome?.(answered ? isCorrect : null);
+  }, [answered, isCorrect, onOutcome]);
 
   const choose = (id: string) => {
     if (answered && isCorrect) return; // correct answers lock
