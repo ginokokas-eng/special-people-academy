@@ -220,8 +220,12 @@ export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?:
           <Metric label="Learners" value={String(stat.learners)} />
           <Metric label="Completed" value={`${stat.completed} (${pctOf(stat.completed, stat.learners)}%)`} />
           <Metric
-            label="Right first time"
-            value={`${stat.correct_without_retry} (${pctOf(stat.correct_without_retry, stat.learners)}%)`}
+            label={stat.block_type === 'scenario' ? 'Clean first run' : 'Right first time'}
+            value={
+              stat.block_type === 'scenario' && !(payload as ScenarioPayload | undefined)?.require_best_path
+                ? 'Not assessed'
+                : `${stat.correct_without_retry} (${pctOf(stat.correct_without_retry, stat.learners)}%)`
+            }
           />
           <Metric label="Avg attempts" value={formatAvgAttempts(stat.avg_attempts)} />
         </dl>
@@ -231,6 +235,9 @@ export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?:
           <DragMatchBreakdown stat={stat} payload={payload as DragMatchPayload | undefined} />
         )}
         {stat.block_type === 'video' && <VideoBreakdown stat={stat} payload={payload as VideoPayload | undefined} />}
+        {stat.block_type === 'scenario' && (
+          <ScenarioBreakdown stat={stat} payload={payload as ScenarioPayload | undefined} />
+        )}
       </CardContent>
     </Card>
   );
@@ -334,6 +341,79 @@ function VideoBreakdown({ stat, payload }: { stat: BlockItemStat; payload?: Vide
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function ScenarioBreakdown({
+  stat,
+  payload,
+}: {
+  stat: BlockItemStat;
+  payload?: ScenarioPayload;
+}) {
+  const nodeLabel = (id: string) => {
+    const node = payload?.nodes?.find((n) => n.id === id);
+    return node?.title?.trim() || node?.slug || 'Ending';
+  };
+  const choiceLabel = (id: string) => {
+    for (const node of payload?.nodes ?? []) {
+      const choice = node.choices?.find((c) => c.id === id);
+      if (choice) return { label: choice.label || 'Choice', quality: choice.quality };
+    }
+    return { label: 'Choice', quality: 'acceptable' as const };
+  };
+
+  const endings = (stat.confusion ?? []).slice(0, 6);
+  const picks = Object.entries(stat.option_counts ?? {})
+    .filter(([, v]) => typeof v === 'number')
+    .map(([id, count]) => ({ id, count: count as number, ...choiceLabel(id) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  if (!endings.length && !picks.length) {
+    return <p className="text-sm text-muted-foreground">No scenario runs recorded yet.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {endings.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Endings reached</p>
+          <ul className="space-y-1 text-sm">
+            {endings.map((e) => (
+              <li key={`${e.item_id}-${e.target_id}`} className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 truncate" title={nodeLabel(e.item_id)}>
+                  {nodeLabel(e.item_id)}
+                  {e.target_id === 'unsafe' && (
+                    <span className="ml-1.5 text-muted-foreground">(unsafe choice on the way)</span>
+                  )}
+                </span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">{e.count}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {picks.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Most-taken choices</p>
+          <ul className="space-y-1 text-sm">
+            {picks.map((p) => (
+              <li key={p.id} className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 truncate" title={p.label}>
+                  {p.label}
+                  {p.quality === 'unsafe' && (
+                    <span className="ml-1.5 text-destructive">unsafe</span>
+                  )}
+                </span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">{p.count}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
