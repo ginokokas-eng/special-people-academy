@@ -19,6 +19,8 @@ import {
   defaultContributesToCompletion,
   defaultPayload,
   hasInvalidCheckpoints,
+  validateScenario,
+  type ScenarioPayload,
   type BlockDraft,
   type BlockPayload,
   type BlockType,
@@ -216,6 +218,12 @@ export default function LessonContentEditor() {
     (b) => b.block_type === 'video' && hasInvalidCheckpoints(b.payload as VideoPayload)
   );
 
+  // Scenarios must hang together before they can be saved: broken links or an
+  // unreachable ending would strand a learner mid-story.
+  const scenariosInvalid = blocks.some(
+    (b) => b.block_type === 'scenario' && validateScenario(b.payload as ScenarioPayload).length > 0
+  );
+
   const previewBlocks: LessonBlock[] = blocks.map((b, index) => ({
     id: b.id ?? `preview-${index}`,
     lesson_id: lessonId ?? '',
@@ -274,7 +282,15 @@ export default function LessonContentEditor() {
               Fix the checkpoint problems below to save
             </span>
           )}
-          <Button onClick={handleSave} disabled={saving || !dirty || checkpointsInvalid}>
+          {!checkpointsInvalid && scenariosInvalid && (
+            <span className="text-xs font-medium text-destructive">
+              Fix the scenario problems below to save
+            </span>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={saving || !dirty || checkpointsInvalid || scenariosInvalid}
+          >
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

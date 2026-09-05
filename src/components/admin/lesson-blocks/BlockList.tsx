@@ -21,6 +21,7 @@ import {
   type ImagePayload,
   type LayoutAware,
   type McqPayload,
+  type ScenarioPayload,
   type TextPayload,
   type VideoPayload,
 } from '@/components/course-learn/blocks/types';
@@ -33,6 +34,7 @@ import {
   VideoBlockForm,
 } from './forms/BlockForms';
 import { CarouselBlockForm, HotGraphicBlockForm } from './forms/RichBlockForms';
+import { ScenarioForm } from './forms/ScenarioForm';
 import {
   ChecklistBlockForm,
   DragMatchBlockForm,
@@ -218,6 +220,15 @@ export function BlockList({
                 payload={block.payload as DragMatchPayload}
                 onChange={setPayload}
                 idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'scenario' && (
+              <ScenarioForm
+                payload={block.payload as ScenarioPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+                courseId={courseId}
+                lessonId={lessonId}
               />
             )}
             {block.block_type === 'checklist' && (

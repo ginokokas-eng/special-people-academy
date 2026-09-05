@@ -19,6 +19,7 @@ import { BlockFlipCards } from './BlockFlipCards';
 import { BlockChecklist } from './BlockChecklist';
 import { BlockCarousel } from './BlockCarousel';
 import { BlockHotGraphic } from './BlockHotGraphic';
+import { BlockScenario } from './BlockScenario';
 import { SignedImage } from './SignedImage';
 import { ActivityShell } from './ActivityShell';
 
@@ -38,6 +39,7 @@ import {
   type ImagePayload,
   type LessonBlock,
   type McqPayload,
+  type ScenarioPayload,
   type TextPayload,
   videoCheckpoints,
   type VideoPayload,
@@ -319,6 +321,7 @@ const WIDE_TYPES = new Set<LessonBlock['block_type']>([
   'hot_graphic',
   'drag_match',
   'carousel',
+  'scenario',
 ]);
 
 /** Human label for the activity a trickle veil is waiting on. */
@@ -331,6 +334,7 @@ const GATE_LABELS: Partial<Record<LessonBlock['block_type'], string>> = {
   hot_graphic: 'labelled image',
   mcq: 'knowledge check',
   drag_match: 'matching activity',
+  scenario: 'scenario',
 };
 
 /**
@@ -394,6 +398,7 @@ export function LessonBlocks({
   if (pendingTypes.has('hot_graphic')) reasons.push('explore every point on the image');
   if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
   if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
+  if (pendingTypes.has('scenario')) reasons.push('work through the scenario to an ending');
   const disabledReason = reasons.length
     ? `Please ${reasons.join(', ')} above to finish this lesson.`
     : '';
@@ -562,6 +567,15 @@ export function LessonBlocks({
           lessonId={block.lesson_id}
           preview={preview}
           onSolved={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'scenario' && (
+        <BlockScenario
+          payload={block.payload as ScenarioPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          preview={preview}
+          onFinished={(done) => setSignal(block.id, done)}
         />
       )}
       {block.block_type === 'checklist' && (

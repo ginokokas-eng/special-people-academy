@@ -8,6 +8,7 @@ import {
   GalleryHorizontal,
   Image as ImageIcon,
   ArrowLeftRight,
+  GitBranch,
   Rows3,
   RefreshCw,
 } from '@/components/icons';
@@ -34,6 +35,7 @@ const ACTIVITY_META: Partial<
   hot_graphic: { label: 'Labelled image', Icon: ImageIcon },
   mcq: { label: 'Knowledge check', Icon: HelpCircle },
   drag_match: { label: 'Matching activity', Icon: ArrowLeftRight },
+  scenario: { label: 'Scenario', Icon: GitBranch },
 };
 
 export function ActivityShell({

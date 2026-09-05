@@ -19,6 +19,7 @@ export const BLOCK_TYPES = [
   'mcq',
   'drag_match',
   'checklist',
+  'scenario',
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
@@ -255,6 +256,43 @@ export interface ChecklistPayload {
   steps: ChecklistStep[];
 }
 
+/* ----------------------------- branching scenario -------------------------- */
+
+export type ScenarioQuality = 'best' | 'acceptable' | 'unsafe';
+
+export interface ScenarioChoice {
+  id: string;
+  label: string;
+  /** Node this choice leads to. */
+  next_id: string;
+  feedback?: string;
+  quality: ScenarioQuality;
+}
+
+export interface ScenarioNode {
+  id: string;
+  /** Author-visible short key, unique within the scenario. */
+  slug: string;
+  kind: 'decision' | 'outcome' | 'end';
+  title?: string;
+  body: string;
+  /** STORAGE PATH in the private `lesson-media` bucket — never a URL. */
+  image_path?: string;
+  /** Decision nodes only, two or more. */
+  choices?: ScenarioChoice[];
+  /** Outcome nodes only (required there, forbidden on end nodes). */
+  next_id?: string;
+}
+
+export interface ScenarioPayload {
+  version: 1;
+  start_id: string;
+  /** When on, the block is assessed: a clean run (no unsafe choice) is correct. */
+  require_best_path: boolean;
+  debrief?: string;
+  nodes: ScenarioNode[];
+}
+
 export type BlockPayload =
   | TextPayload
   | CalloutPayload
@@ -267,7 +305,9 @@ export type BlockPayload =
   | McqPayload
   | DragMatchPayload
   | FlipCardsPayload
-  | ChecklistPayload;
+  | ChecklistPayload
+  | ScenarioPayload;
+
 
 
 export interface LessonBlock {
@@ -302,6 +342,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   mcq: 'Knowledge check',
   drag_match: 'Matching activity',
   checklist: 'Practical checklist',
+  scenario: 'Scenario',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
@@ -317,6 +358,7 @@ export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   mcq: 'A single multiple-choice question with instant feedback.',
   drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
   checklist: 'Read-only practical steps learners can study before assessment.',
+  scenario: 'Branching decision story with consequences.',
 };
 
 
@@ -396,7 +438,64 @@ export function defaultPayload(type: BlockType): BlockPayload {
         caption: 'Your assessor completes the real sign-off in person.',
         steps: [{ id: crypto.randomUUID(), step_title: '', instruction: '', safety_note: '' }],
       } satisfies ChecklistPayload;
+    case 'scenario':
+      return defaultScenarioPayload();
   }
+}
+
+/**
+ * Starter scenario: one decision with two choices, leading to a good ending and
+ * an unsafe ending. Slugs are prefilled so authors can see the shape at once.
+ */
+export function defaultScenarioPayload(): ScenarioPayload {
+  const start = crypto.randomUUID();
+  const good = crypto.randomUUID();
+  const bad = crypto.randomUUID();
+  return {
+    version: 1,
+    start_id: start,
+    require_best_path: false,
+    debrief: '',
+    nodes: [
+      {
+        id: start,
+        slug: 'the-situation',
+        kind: 'decision',
+        title: 'The situation',
+        body: 'Describe what the learner walks into, in two or three sentences.',
+        choices: [
+          {
+            id: crypto.randomUUID(),
+            label: 'The safe thing to do',
+            next_id: good,
+            quality: 'best',
+            feedback: 'Explain why this is the right call.',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: 'The tempting shortcut',
+            next_id: bad,
+            quality: 'unsafe',
+            feedback: 'Explain what goes wrong and what to do instead.',
+          },
+        ],
+      },
+      {
+        id: good,
+        slug: 'safe-ending',
+        kind: 'end',
+        title: 'A safe outcome',
+        body: 'Describe what good practice looked like here.',
+      },
+      {
+        id: bad,
+        slug: 'unsafe-ending',
+        kind: 'end',
+        title: 'An unsafe outcome',
+        body: 'Describe the consequence, and the point at which they should stop and escalate.',
+      },
+    ],
+  };
 }
 
 /** Blocks that need a learner interaction before the lesson can be completed. */
@@ -409,15 +508,16 @@ export function isInteractive(type: BlockType): boolean {
     type === 'carousel' ||
     type === 'hot_graphic' ||
     type === 'mcq' ||
-    type === 'drag_match'
+    type === 'drag_match' ||
+    type === 'scenario'
   );
 }
 
 /**
  * Whether the completion switch starts ON for a newly added block.
- * Card decks, knowledge checks, matching activities, story carousels and
- * labelled images default ON; video, accordion, flip cards and the practical
- * checklist default OFF.
+ * Card decks, knowledge checks, matching activities, story carousels, labelled
+ * images and scenarios default ON; video, accordion, flip cards and the
+ * practical checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
   return (
@@ -425,7 +525,8 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
     type === 'mcq' ||
     type === 'drag_match' ||
     type === 'carousel' ||
-    type === 'hot_graphic'
+    type === 'hot_graphic' ||
+    type === 'scenario'
   );
 }
 
@@ -435,7 +536,7 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
  * Payload-aware: a video block only persists once it carries checkpoints.
  */
 export function persistsResponse(type: BlockType, payload?: BlockPayload): boolean {
-  if (type === 'mcq' || type === 'drag_match') return true;
+  if (type === 'mcq' || type === 'drag_match' || type === 'scenario') return true;
   if (type === 'video') return videoCheckpoints(payload as VideoPayload | undefined).length > 0;
   return false;
 }
@@ -570,4 +671,142 @@ export function parseBlockText(text: string): TextChunk[] {
 export function hasInvalidCheckpoints(payload?: VideoPayload | null): boolean {
   if (!supportsCheckpoints(payload)) return false;
   return videoCheckpoints(payload).some((cp) => checkpointIssues(cp).length > 0);
+}
+
+/* --------------------------- scenario validation --------------------------- */
+
+export type ScenarioIssueCode =
+  | 'no_start'
+  | 'empty_body'
+  | 'duplicate_slug'
+  | 'unreachable'
+  | 'dangling_choice'
+  | 'dangling_next'
+  | 'too_few_choices'
+  | 'outcome_missing_next'
+  | 'end_has_next'
+  | 'no_end_reachable';
+
+export interface ScenarioIssue {
+  code: ScenarioIssueCode;
+  message: string;
+  /** Node the author should jump to, when the issue belongs to one. */
+  node_id?: string;
+  choice_id?: string;
+}
+
+export const SCENARIO_ISSUE_MESSAGES: Record<ScenarioIssueCode, string> = {
+  no_start: 'Choose which node the scenario starts at.',
+  empty_body: 'Add the wording learners read at this step.',
+  duplicate_slug: 'Two nodes share the same short key — make each one unique.',
+  unreachable: 'Learners can never reach this node. Link it from a choice, or delete it.',
+  dangling_choice: 'This choice points at a node that no longer exists.',
+  dangling_next: 'This node points at a node that no longer exists.',
+  too_few_choices: 'A decision needs at least two choices.',
+  outcome_missing_next: 'An outcome needs to say what happens next.',
+  end_has_next: 'An ending cannot lead anywhere — remove what happens next.',
+  no_end_reachable: 'No ending can be reached from the start, so the scenario never finishes.',
+};
+
+/** Breadth-first order of reachable node ids, grouped by depth from the start. */
+export function scenarioDepths(payload: ScenarioPayload): Map<string, number> {
+  const byId = new Map((payload.nodes ?? []).map((n) => [n.id, n]));
+  const depths = new Map<string, number>();
+  const start = payload.start_id;
+  if (!start || !byId.has(start)) return depths;
+  const queue: string[] = [start];
+  depths.set(start, 0);
+  while (queue.length) {
+    const id = queue.shift() as string;
+    const node = byId.get(id);
+    if (!node) continue;
+    const targets: string[] = [];
+    if (node.kind === 'decision') for (const c of node.choices ?? []) targets.push(c.next_id);
+    if (node.kind === 'outcome' && node.next_id) targets.push(node.next_id);
+    for (const t of targets) {
+      if (!t || !byId.has(t) || depths.has(t)) continue;
+      depths.set(t, (depths.get(id) ?? 0) + 1);
+      queue.push(t);
+    }
+  }
+  return depths;
+}
+
+/** Author-facing problems with a scenario. Empty array = publishable. */
+export function validateScenario(payload?: ScenarioPayload | null): ScenarioIssue[] {
+  const issues: ScenarioIssue[] = [];
+  if (!payload) return issues;
+  const nodes = payload.nodes ?? [];
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+
+  const issue = (code: ScenarioIssueCode, extra?: Partial<ScenarioIssue>) =>
+    issues.push({ code, message: SCENARIO_ISSUE_MESSAGES[code], ...extra });
+
+  if (!payload.start_id || !byId.has(payload.start_id)) issue('no_start');
+
+  const seen = new Set<string>();
+  for (const node of nodes) {
+    const slug = (node.slug || '').trim().toLowerCase();
+    if (slug && seen.has(slug)) issue('duplicate_slug', { node_id: node.id });
+    if (slug) seen.add(slug);
+
+    if (!node.body?.trim()) issue('empty_body', { node_id: node.id });
+
+    if (node.kind === 'decision') {
+      const choices = node.choices ?? [];
+      if (choices.length < 2) issue('too_few_choices', { node_id: node.id });
+      for (const c of choices) {
+        if (!c.next_id || !byId.has(c.next_id))
+          issue('dangling_choice', { node_id: node.id, choice_id: c.id });
+      }
+    }
+    if (node.kind === 'outcome') {
+      if (!node.next_id) issue('outcome_missing_next', { node_id: node.id });
+      else if (!byId.has(node.next_id)) issue('dangling_next', { node_id: node.id });
+    }
+    if (node.kind === 'end' && node.next_id) issue('end_has_next', { node_id: node.id });
+  }
+
+  const depths = scenarioDepths(payload);
+  for (const node of nodes) {
+    if (!depths.has(node.id)) issue('unreachable', { node_id: node.id });
+  }
+  const reachesEnd = nodes.some((n) => n.kind === 'end' && depths.has(n.id));
+  if (!reachesEnd) issue('no_end_reachable');
+
+  return issues;
+}
+
+/* ---------------------------- scenario responses --------------------------- */
+
+export interface ScenarioStep {
+  node_id: string;
+  choice_id: string;
+}
+
+export interface ScenarioRun {
+  started_at: string;
+  ended_at: string;
+  end_node_id: string;
+  /** No choice of quality 'unsafe' was taken. */
+  is_clean: boolean;
+  path: ScenarioStep[];
+}
+
+export interface ScenarioResponse {
+  kind: 'scenario';
+  version: 1;
+  runs: ScenarioRun[];
+  current?: { started_at: string; path: ScenarioStep[] };
+}
+
+export const SCENARIO_RUN_CAP = 10;
+
+/**
+ * Keep the stored run list at the cap by keeping the FIRST run (the learner's
+ * very first attempt) and the most recent ones.
+ */
+export function trimScenarioRuns(runs: ScenarioRun[], cap = SCENARIO_RUN_CAP): ScenarioRun[] {
+  if (runs.length <= cap) return runs;
+  return [runs[0], ...runs.slice(runs.length - (cap - 1))];
 }

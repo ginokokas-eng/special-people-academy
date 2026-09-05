@@ -7,12 +7,13 @@
  */
 import {
   defaultContributesToCompletion,
+  defaultScenarioPayload,
   type BlockDraft,
   type BlockPayload,
   type BlockType,
 } from '@/components/course-learn/blocks/types';
 
-export type LessonTemplateId = 'blank' | 'knowledge' | 'practical' | 'assessment';
+export type LessonTemplateId = 'blank' | 'knowledge' | 'practical' | 'assessment' | 'scenario';
 
 export interface LessonTemplate {
   id: LessonTemplateId;
@@ -174,5 +175,19 @@ export const LESSON_TEMPLATES: LessonTemplate[] = [
         }),
       ];
     },
+  },
+  {
+    id: 'scenario',
+    name: 'Scenario practice',
+    description: 'A short brief, a branching decision story, then one question.',
+    outline: 'Text → Scenario → Knowledge check',
+    build: () => [
+      introText(
+        'Before you start',
+        'Set the scene in two or three sentences: who the person is, where you are, and what has just happened.'
+      ),
+      block('scenario', defaultScenarioPayload()),
+      knowledgeCheck('Ask about the decision point that matters most in this scenario.'),
+    ],
   },
 ];

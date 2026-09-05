@@ -13,6 +13,8 @@ import {
   type CarouselPayload,
   type HotGraphicPayload,
   type VideoPayload,
+  validateScenario,
+  type ScenarioPayload,
 
 } from '@/components/course-learn/blocks/types';
 
@@ -197,6 +199,13 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     tab: 'Modules & Lessons → Edit content',
   });
 
+  const badScenarioLessons = new Set<string>();
+  for (const row of blockRows) {
+    if (row.block_type !== 'scenario') continue;
+    if (validateScenario((row.payload || {}) as ScenarioPayload).length > 0)
+      badScenarioLessons.add(row.lesson_id);
+  }
+
   const badHotGraphics = [...badHotGraphicLessons].map(lessonTitle);
   checks.push({
     id: 'hot_graphic',
@@ -206,7 +215,14 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     tab: 'Modules & Lessons → Edit content',
   });
 
-
+  const badScenarios = [...badScenarioLessons].map(lessonTitle);
+  checks.push({
+    id: 'scenario',
+    label: 'Scenarios are complete',
+    passed: badScenarios.length === 0,
+    detail: `Every step needs wording, each decision needs at least two choices that lead somewhere, and an ending must be reachable. Please check: ${names(badScenarios)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
 
   const noVideo = videoLessons
     .filter((l) => !l.video_url?.trim() && !sourceLessons.has(l.id))

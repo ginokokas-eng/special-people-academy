@@ -12,7 +12,7 @@ import type { BlockPayload, BlockType } from '@/components/course-learn/blocks/t
 import { BLOCK_LABELS } from '@/components/course-learn/blocks/types';
 
 /** Block types that produce answers worth analysing. */
-export const INSIGHT_BLOCK_TYPES = ['mcq', 'drag_match', 'video', 'hot_graphic'] as const;
+export const INSIGHT_BLOCK_TYPES = ['mcq', 'drag_match', 'video', 'hot_graphic', 'scenario'] as const;
 export type InsightBlockType = (typeof INSIGHT_BLOCK_TYPES)[number];
 
 export interface BlockItemStat {
