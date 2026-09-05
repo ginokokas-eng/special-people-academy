@@ -272,8 +272,8 @@ export function CourseContent({
           <Accordion type="multiple" className="space-y-2" defaultValue={modules.map(m => m.id)}>
             {modules.map((module) => {
               const moduleLessons = lessons.filter(l => l.module_id === module.id);
-              const moduleCompleted = moduleLessons.filter(l => l.completed).length;
-              const moduleDuration = videoTotalMinutes(moduleLessons);
+              const moduleProgress = requiredProgress(moduleLessons);
+              const moduleDurationLabel = formatLessonsDuration(moduleLessons);
 
               return (
                 <AccordionItem 
@@ -286,16 +286,18 @@ export function CourseContent({
                       <div className="min-w-0 text-left">
                         <h4 className="font-semibold">{module.title}</h4>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          {moduleLessons.length} lessons • {formatDuration(moduleDuration)}
-                          {canAccessCourse && moduleCompleted > 0 && (
+                          {lessonCountLabel(moduleLessons.length)}
+                          {moduleDurationLabel ? ` • ${moduleDurationLabel}` : ''}
+                          {canAccessCourse && moduleProgress.total > 0 && (
                             <span className="text-success ml-2">
-                              ({moduleCompleted}/{moduleLessons.length} complete)
+                              ({moduleProgress.completed}/{moduleProgress.total} required lessons)
                             </span>
                           )}
                         </p>
                       </div>
                     </div>
                   </AccordionTrigger>
+
                   <AccordionContent className="pb-4">
                     <div className="space-y-1">
                       {moduleLessons
