@@ -47,7 +47,10 @@ export const LessonRow = ({
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{category}</p>
-        <p className="truncate font-heading text-[15px] font-semibold text-foreground">{title}</p>
+        {/* Two lines, not one: 138 of 292 lesson titles are long enough to clip, and
+            `truncate` with no title attribute made the rest of the string unreachable
+            on every device rather than just awkward on small ones. */}
+        <p title={title} className="line-clamp-2 font-heading text-[15px] font-semibold leading-snug text-foreground">{title}</p>
         <Progress value={done ? 100 : progress} className="mt-2 h-1" />
       </div>
       <span className="text-xs tabular-nums text-muted-foreground">{done ? 'Done' : `${progress}%`}</span>

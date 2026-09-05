@@ -15,15 +15,9 @@ interface Course extends EditorialCourse {
   enrollmentCount?: number;
 }
 
-const CATEGORY_FILTERS = [
-  { key: 'all', label: 'All courses' },
-  { key: 'Mandatory', label: 'Mandatory' },
-  { key: 'Clinical', label: 'Clinical' },
-  { key: 'Dementia & EOL', label: 'Dementia & EOL' },
-  { key: 'Safeguarding', label: 'Safeguarding' },
-  { key: 'Leadership', label: 'Leadership' },
-  { key: 'Specialist', label: 'Specialist' },
-];
+// Categories are derived from the courses actually loaded (see `categoryFilters`
+// below) — a hardcoded list went stale and every chip returned zero results.
+const HIDDEN_CATEGORIES = new Set(['Uncategorized', 'Test']);
 
 export default function Courses() {
   const navigate = useNavigate();
@@ -56,14 +50,18 @@ export default function Courses() {
     fetchCourses();
   }, []);
 
-  const counts = useMemo(() => {
-    const tally: Record<string, number> = { all: courses.length };
+  const categoryFilters = useMemo(() => {
+    const tally = new Map<string, number>();
     courses.forEach((c) => {
-      if (!c.category) return;
-      tally[c.category] = (tally[c.category] || 0) + 1;
+      if (!c.category || HIDDEN_CATEGORIES.has(c.category)) return;
+      tally.set(c.category, (tally.get(c.category) || 0) + 1);
     });
-    return tally;
+    const derived = Array.from(tally.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: key, count }));
+    return [{ key: 'all', label: 'All courses', count: courses.length }, ...derived];
   }, [courses]);
+
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
@@ -123,11 +121,11 @@ export default function Courses() {
 
           {/* Filter pills */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            {CATEGORY_FILTERS.map((f) => (
+            {categoryFilters.map((f) => (
               <FilterPill
                 key={f.key}
                 label={f.label}
-                count={counts[f.key] ?? 0}
+                count={f.count}
                 selected={activeFilter === f.key}
                 onClick={() => setActiveFilter(f.key)}
               />

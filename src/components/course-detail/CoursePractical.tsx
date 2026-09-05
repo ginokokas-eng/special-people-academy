@@ -78,9 +78,8 @@ export function CoursePractical({ practicalDetails, sessions }: CoursePracticalP
         ) : (
           <div className="p-4 rounded-lg border border-dashed bg-muted/20 text-center">
             <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium">To be confirmed</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Practical session dates will be announced soon
+            <p className="text-sm text-muted-foreground">
+              Practical session dates aren't set yet. We'll email everyone enrolled as soon as they are.
             </p>
           </div>
         )}

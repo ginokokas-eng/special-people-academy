@@ -224,8 +224,9 @@ function LessonRow({
         </span>
         <span className="min-w-0 flex-1">
           <span
+            title={lesson.title}
             className={cn(
-              'block text-sm leading-snug',
+              'block text-sm leading-snug line-clamp-2',
               active ? 'font-semibold text-primary' : 'font-medium text-foreground'
             )}
           >

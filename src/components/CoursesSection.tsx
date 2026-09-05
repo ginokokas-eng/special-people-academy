@@ -10,15 +10,9 @@ interface Course extends EditorialCourse {
   duration_minutes: number;
 }
 
-const CATEGORY_FILTERS = [
-  { key: "all", label: "All courses" },
-  { key: "Mandatory", label: "Mandatory" },
-  { key: "Clinical", label: "Clinical" },
-  { key: "Dementia & EOL", label: "Dementia & EOL" },
-  { key: "Safeguarding", label: "Safeguarding" },
-  { key: "Leadership", label: "Leadership" },
-  { key: "Specialist", label: "Specialist" },
-];
+// Chips are derived from the featured courses actually rendered below — the old
+// hardcoded list matched no real category, so every chip showed 0 and emptied the grid.
+const HIDDEN_CATEGORIES = new Set(["Uncategorized", "Test"]);
 
 export const CoursesSection = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -63,12 +57,25 @@ export const CoursesSection = () => {
     fetchData();
   }, []);
 
+  const categoryFilters = useMemo(() => {
+    const tally = new Map<string, number>();
+    courses.forEach((c) => {
+      if (!c.category || HIDDEN_CATEGORIES.has(c.category)) return;
+      tally.set(c.category, (tally.get(c.category) || 0) + 1);
+    });
+    const derived = Array.from(tally.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: key, count }));
+    return [{ key: "all", label: "All courses", count: courses.length }, ...derived];
+  }, [courses]);
+
   const visibleCourses = useMemo(() => {
     if (activeFilter === "all") return courses;
     return courses.filter((c) => c.category === activeFilter);
   }, [courses, activeFilter]);
 
   const totalCount = counts.all || 0;
+
 
   return (
     <section id="courses" className="section-y bg-white">
@@ -97,8 +104,8 @@ export const CoursesSection = () => {
 
         {/* Filter row */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {CATEGORY_FILTERS.map((f) => {
-            const count = counts[f.key] ?? 0;
+          {categoryFilters.map((f) => {
+            const count = f.count;
             const isActive = activeFilter === f.key;
             return (
               <button

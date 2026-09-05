@@ -153,7 +153,10 @@ function LessonRow({
           )}
         </span>
         <span className="flex-1 min-w-0">
-          <span className={`block text-sm leading-snug ${active ? 'text-primary font-medium' : 'text-foreground'}`}>
+          <span
+            title={lesson.title}
+            className={`block text-sm leading-snug line-clamp-2 ${active ? 'text-primary font-medium' : 'text-foreground'}`}
+          >
             {lesson.title}
           </span>
           {(() => {
