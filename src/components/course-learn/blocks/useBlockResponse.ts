@@ -23,11 +23,21 @@ interface RecordArgs {
   response: unknown;
 }
 
+/** One entry per saved answer, newest last. */
+export interface BlockResponseHistoryEntry {
+  at: string;
+  is_correct: boolean | null;
+  value: unknown;
+}
+
+const HISTORY_LIMIT = 10;
+
 export function useBlockResponse(blockId: string, lessonId: string, enabled: boolean) {
   const { user } = useAuth();
   const [existing, setExisting] = useState<BlockResponseRow | null>(null);
   const [loaded, setLoaded] = useState(false);
   const attemptsRef = useRef(0);
+  const historyRef = useRef<BlockResponseHistoryEntry[]>([]);
 
   useEffect(() => {
     let cancelled = false;
