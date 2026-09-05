@@ -15,6 +15,7 @@ import { CourseVideoTab } from '@/components/admin/course-builder/CourseVideoTab
 import { CourseQuizTab } from '@/components/admin/course-builder/CourseQuizTab';
 import { CoursePublishingTab } from '@/components/admin/course-builder/CoursePublishingTab';
 import { ScormPackageManager } from '@/components/admin/ScormPackageManager';
+import { CourseInsightsTab } from '@/components/admin/course-builder/CourseInsightsTab';
 
 interface Course {
   id: string;
@@ -185,7 +186,7 @@ export default function CourseEditor() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="modules">Modules & Lessons</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
@@ -193,6 +194,7 @@ export default function CourseEditor() {
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
             <TabsTrigger value="scorm">SCORM</TabsTrigger>
             <TabsTrigger value="publishing">Publishing</TabsTrigger>
+            <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -226,6 +228,10 @@ export default function CourseEditor() {
               isSuperAdmin={isAdmin}
               userEmail={user?.email || ''}
             />
+          </TabsContent>
+
+          <TabsContent value="insights">
+            <CourseInsightsTab courseId={course.id} />
           </TabsContent>
         </Tabs>
       </div>
