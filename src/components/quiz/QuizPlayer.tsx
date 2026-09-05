@@ -452,8 +452,10 @@ export function QuizPlayer({
           <AlertDialogHeader>
             <AlertDialogTitle>This is your final attempt</AlertDialogTitle>
             <AlertDialogDescription>
-              Your score will be locked in once you submit. Pass mark: {passingScore}%.
+              Your score will be locked in once you submit.
+              {passingScore > 0 ? ` Pass mark: ${passingScore}%.` : ''}
             </AlertDialogDescription>
+
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Go back</AlertDialogCancel>
