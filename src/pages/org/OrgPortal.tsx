@@ -7,6 +7,7 @@ import { useOrgAdmin } from '@/hooks/useOrgAdmin';
 import { useOrgLicences, type OrgLicence } from '@/components/org/useOrgLicences';
 import { BulkInviteForm } from '@/components/org/BulkInviteForm';
 import { PortalShell } from '@/components/org/PortalShell';
+import { OrgLessonInsights } from '@/components/org/OrgLessonInsights';
 import {
   ComplianceDot,
   EmptyState,
@@ -538,6 +539,7 @@ export default function OrgPortal() {
               { value: 'compliance', label: 'Compliance' },
               { value: 'licences', label: 'Licences' },
               { value: 'certificates', label: 'Certificates' },
+              { value: 'insights', label: 'Insights' },
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -955,6 +957,11 @@ export default function OrgPortal() {
                 </div>
               )}
             </SectionCard>
+          </TabsContent>
+
+          {/* ---------------- Insights ---------------- */}
+          <TabsContent value="insights" className="settle-in mt-6">
+            <OrgLessonInsights organisationId={organisation.id} licences={licences} />
           </TabsContent>
         </Tabs>
       </div>

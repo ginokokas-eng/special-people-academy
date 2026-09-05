@@ -2948,6 +2948,20 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_lesson_block_learner_detail: {
+        Args: { _lesson: string; _org?: string }
+        Returns: {
+          attempt_count: number
+          block_id: string
+          block_type: string
+          email: string
+          full_name: string
+          is_correct: boolean
+          state: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_org_certificates: {
         Args: { _org: string }
         Returns: {
@@ -2982,6 +2996,21 @@ export type Database = {
           seat_status: string
           status: string
           user_id: string
+        }[]
+      }
+      get_org_lesson_block_stats: {
+        Args: { _lesson: string; _org: string }
+        Returns: {
+          avg_attempts: number
+          block_id: string
+          block_type: string
+          completed: number
+          confusion: Json
+          correct: number
+          correct_without_retry: number
+          learners: number
+          option_counts: Json
+          position: number
         }[]
       }
       get_org_people: {
@@ -3020,6 +3049,36 @@ export type Database = {
       }
       is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      lesson_block_item_stats: {
+        Args: { _lesson: string }
+        Returns: {
+          avg_attempts: number
+          block_id: string
+          block_type: string
+          completed: number
+          confusion: Json
+          correct: number
+          correct_without_retry: number
+          learners: number
+          option_counts: Json
+          position: number
+        }[]
+      }
+      lesson_block_stats_core: {
+        Args: { _lesson: string; _org: string }
+        Returns: {
+          avg_attempts: number
+          block_id: string
+          block_type: string
+          completed: number
+          confusion: Json
+          correct: number
+          correct_without_retry: number
+          learners: number
+          option_counts: Json
+          position: number
+        }[]
+      }
       release_expired_invitation_seats:
         | { Args: never; Returns: number }
         | { Args: { _org: string }; Returns: number }

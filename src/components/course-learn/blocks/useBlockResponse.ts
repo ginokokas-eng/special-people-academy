@@ -23,11 +23,21 @@ interface RecordArgs {
   response: unknown;
 }
 
+/** One entry per saved answer, newest last. */
+export interface BlockResponseHistoryEntry {
+  at: string;
+  is_correct: boolean | null;
+  value: unknown;
+}
+
+const HISTORY_LIMIT = 10;
+
 export function useBlockResponse(blockId: string, lessonId: string, enabled: boolean) {
   const { user } = useAuth();
   const [existing, setExisting] = useState<BlockResponseRow | null>(null);
   const [loaded, setLoaded] = useState(false);
   const attemptsRef = useRef(0);
+  const historyRef = useRef<BlockResponseHistoryEntry[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +56,10 @@ export function useBlockResponse(blockId: string, lessonId: string, enabled: boo
       if (error) console.error('Error loading block response:', error);
       if (data) {
         attemptsRef.current = data.attempt_count ?? 0;
+        const prevHistory = (data.response as { history?: unknown } | null)?.history;
+        historyRef.current = Array.isArray(prevHistory)
+          ? (prevHistory as BlockResponseHistoryEntry[]).slice(-HISTORY_LIMIT)
+          : [];
         setExisting(data as BlockResponseRow);
       }
       setLoaded(true);
@@ -59,6 +73,22 @@ export function useBlockResponse(blockId: string, lessonId: string, enabled: boo
     async ({ state, is_correct, response }: RecordArgs) => {
       if (!enabled || !user?.id || !blockId || !lessonId) return;
       attemptsRef.current += 1;
+
+      // Keep a short answer history alongside the current answer so item
+      // analysis can see retries. Capped at the last 10 entries; existing keys
+      // on the stored response are preserved.
+      const prev = historyRef.current;
+      const history = [
+        ...prev,
+        { at: new Date().toISOString(), is_correct, value: response },
+      ].slice(-HISTORY_LIMIT);
+      historyRef.current = history;
+
+      const payload =
+        response && typeof response === 'object' && !Array.isArray(response)
+          ? { ...(response as Record<string, unknown>), history }
+          : { value: response, history };
+
       const { error } = await supabase.from('lesson_block_responses').upsert(
         {
           user_id: user.id,
@@ -67,7 +97,7 @@ export function useBlockResponse(blockId: string, lessonId: string, enabled: boo
           state,
           is_correct,
           attempt_count: attemptsRef.current,
-          response: response as never,
+          response: payload as never,
         },
         { onConflict: 'user_id,block_id' }
       );
