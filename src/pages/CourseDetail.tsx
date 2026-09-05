@@ -26,6 +26,9 @@ import { CourseProgressTracker } from '@/components/course-detail/CourseProgress
 import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisite';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { isNativeShell } from '@/lib/native';
+import { requiredProgress } from '@/lib/progress';
+import { minutesFromSeconds, totalDurationSeconds } from '@/lib/duration';
+
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
 
@@ -682,9 +685,10 @@ export default function CourseDetail() {
                 courseId={course.id}
                 userId={user!.id}
                 lessonProgress={{
-                  total: lessons.length,
-                  completed: lessons.filter(l => l.completed).length,
+                  total: lessonProgressStats.total,
+                  completed: lessonProgressStats.completed,
                 }}
+
                 quizProgress={quizProgress}
                 practicalProgress={practicalProgress}
                 hasCertificate={course.has_certificate}
