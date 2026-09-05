@@ -40,8 +40,13 @@ export default function Auth() {
   const [loginMode, setLoginMode] = useState<'password' | 'code'>('password');
 
   
-  // Determine initial tab based on route
-  const initialTab = location.pathname === '/sign-up' ? 'signup' : 'login';
+  // Initial tab: the /sign-up path or ?mode=signup both open Sign Up.
+  const initialTab =
+    location.pathname === '/sign-up' ||
+    new URLSearchParams(location.search).get('mode') === 'signup'
+      ? 'signup'
+      : 'login';
+
   
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
