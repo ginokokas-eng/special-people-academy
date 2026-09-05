@@ -165,6 +165,49 @@ export default function BrandingSettingsPage() {
             <Separator />
 
             <div className="space-y-4">
+              <div>
+                <Label className="text-base font-medium">Contact details</Label>
+                <p className="text-xs text-muted-foreground">
+                  Shown on the Contact page. Leave a field empty to hide that row.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail">Contact email</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    placeholder="academy@specialpeople.org.uk"
+                    value={form.contactEmail ?? ''}
+                    onChange={e => setForm(p => ({ ...p, contactEmail: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone">Contact phone</Label>
+                  <Input
+                    id="contactPhone"
+                    type="tel"
+                    placeholder="e.g. 0115 000 0000"
+                    value={form.contactPhone ?? ''}
+                    onChange={e => setForm(p => ({ ...p, contactPhone: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="contactAddress">Postal address</Label>
+                  <Input
+                    id="contactAddress"
+                    placeholder="Street, town, postcode"
+                    value={form.contactAddress ?? ''}
+                    onChange={e => setForm(p => ({ ...p, contactAddress: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+
+            <div className="space-y-4">
               <Label className="text-base font-medium">Social Links</Label>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {(['linkedin', 'facebook', 'instagram', 'youtube', 'email'] as const).map(key => (
