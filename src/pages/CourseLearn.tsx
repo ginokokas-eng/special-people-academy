@@ -168,14 +168,34 @@ export default function CourseLearn() {
 
 
   const activeLesson = useMemo(
-    () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
+    () => (activeLessonId ? visibleLessons.find((l) => l.id === activeLessonId) : undefined),
     [visibleLessons, activeLessonId]
   );
+
+  // A deep link can name a lesson that exists but is not learner-visible yet
+  // (e.g. a knowledge check with no questions). We say so honestly instead of
+  // silently opening a different lesson.
+  const deepLinkHidden = useMemo(
+    () =>
+      !!activeLessonId &&
+      !activeLesson &&
+      lessons.some((l) => l.id === activeLessonId),
+    [activeLessonId, activeLesson, lessons]
+  );
+
+  // A deep link that matches nothing at all: drop the param and show the hub.
+  useEffect(() => {
+    if (!activeLessonId || activeLesson || deepLinkHidden || lessons.length === 0) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('lesson');
+    setSearchParams(next, { replace: true });
+  }, [activeLessonId, activeLesson, deepLinkHidden, lessons.length, searchParams, setSearchParams]);
 
   // No ?lesson= means the learner is on the course home (module hub). We
   // deliberately do NOT auto-fill the first lesson: choosing where to start is
   // the point of the hub. Deep links with ?lesson= are unaffected.
-  const showHub = !activeLessonId;
+  const showHub = !activeLessonId || (!activeLesson && !deepLinkHidden);
+
 
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
