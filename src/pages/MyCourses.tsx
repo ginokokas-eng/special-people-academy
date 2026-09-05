@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDeliveryType } from '@/lib/delivery';
 import { supabase } from '@/integrations/supabase/client';
-import { progressPercent } from '@/lib/progress';
+import { progressPercent, enrolmentStatus } from '@/lib/progress';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -141,7 +141,6 @@ export default function MyCourses() {
   };
 
   const formatDuration = (minutes: number) => {
-    if (!minutes) return 'N/A';
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     if (hours === 0) return `${mins}m`;
@@ -150,10 +149,11 @@ export default function MyCourses() {
   };
 
 
-  // Filter courses by tab
-  const assignedCourses = courses.filter(c => c.isAssigned);
-  const inProgressCourses = courses.filter(c => c.progress > 0 && c.progress < 100);
-  const completedCourses = courses.filter(c => c.progress === 100 || c.completedAt);
+  // One exclusive status per enrolment (src/lib/progress.ts), so the three tab
+  // counts always sum to All. "Assigned" is a badge on the card, not a tab.
+  const notStartedCourses = courses.filter(c => enrolmentStatus(c) === 'not_started');
+  const inProgressCourses = courses.filter(c => enrolmentStatus(c) === 'in_progress');
+  const completedCourses = courses.filter(c => enrolmentStatus(c) === 'completed');
   const allCourses = courses;
 
   if (authLoading || loading) {
