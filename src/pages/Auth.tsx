@@ -231,7 +231,9 @@ export default function Auth() {
 
   return (
     <PublicLayout title={initialTab === 'signup' ? 'Sign Up' : 'Sign In'}>
-      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+      {/* pt-24 keeps the card clear of the sticky site header */}
+      <div className="min-h-[60vh] flex items-center justify-center px-4 pb-12 pt-24">
+
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-3 mb-5 group">
