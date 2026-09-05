@@ -15,15 +15,9 @@ interface Course extends EditorialCourse {
   enrollmentCount?: number;
 }
 
-const CATEGORY_FILTERS = [
-  { key: 'all', label: 'All courses' },
-  { key: 'Mandatory', label: 'Mandatory' },
-  { key: 'Clinical', label: 'Clinical' },
-  { key: 'Dementia & EOL', label: 'Dementia & EOL' },
-  { key: 'Safeguarding', label: 'Safeguarding' },
-  { key: 'Leadership', label: 'Leadership' },
-  { key: 'Specialist', label: 'Specialist' },
-];
+// Categories are derived from the courses actually loaded (see `categoryFilters`
+// below) — a hardcoded list went stale and every chip returned zero results.
+const HIDDEN_CATEGORIES = new Set(['Uncategorized', 'Test']);
 
 export default function Courses() {
   const navigate = useNavigate();
