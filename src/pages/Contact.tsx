@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
 import { FAQSection } from "@/components/marketing/FAQSection";
@@ -27,22 +27,25 @@ import {
   HelpCircle
 } from '@/components/icons';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useBranding } from '@/hooks/useBrandingSettings';
+import { hasRealValue } from '@/lib/placeholders';
 
 const programSizes = [
-  '1-10 learners',
-  '11-50 learners',
-  '51-200 learners',
-  '201-500 learners',
-  '500+ learners',
+  '1-10 staff',
+  '11-50 staff',
+  '51-200 staff',
+  '201-500 staff',
+  '500+ staff',
 ];
 
 const roles = [
-  'Educator / Teacher',
-  'Program Manager',
-  'Therapist / Clinician',
+  'Registered manager',
+  'Training or learning lead',
+  'Care or nursing lead',
+  'Owner or director',
   'Administrator',
-  'Family Member',
+  'Self-employed carer',
   'Other',
 ];
 
@@ -63,29 +66,57 @@ const urgencyLevels = [
 
 const faqs = [
   {
-    question: "How do I start a trial?",
-    answer: "You can start a free trial by clicking 'Start Free Trial' on our homepage or pricing page. No credit card required—just create an account and explore the platform."
+    question: "How do my staff get access to a course?",
+    answer: "Your organisation buys training passes for a course, then your organisation admin allocates a pass to each member of staff. They receive an invitation by email and set a password the first time they sign in."
   },
   {
-    question: "Can you help us import existing plans?",
-    answer: "Yes! Our team can help you migrate existing learner plans, skill libraries, or curriculum content. Contact us for a consultation on your specific data needs."
+    question: "Can one person buy a single course?",
+    answer: "Yes. Self-employed carers can buy a course for themselves from the course page and start straight away."
   },
   {
-    question: "Do you offer training?",
-    answer: "We provide onboarding support, webinars, and help center resources for all users. Enterprise customers also receive dedicated training sessions for their teams."
+    question: "How do we prove completion to an inspector?",
+    answer: "Every completed course issues a certificate with a verification code. Anyone can check that code on our verification page, and organisation admins can see completion for their whole team in the organisation portal."
   },
   {
-    question: "Can families and staff collaborate?",
-    answer: "Absolutely. Our platform supports shared visibility between educators, therapists, and family members—so everyone stays informed on learner progress."
+    question: "Do practical courses need a face-to-face session?",
+    answer: "Some do. Those courses show a practical sign-off step, which a trainer completes with the learner before the competency certificate is issued."
   },
   {
-    question: "Do you provide accessibility accommodations?",
-    answer: "Yes. We're committed to accessibility throughout our platform and our interactions. Let us know what accommodations you need for demos, calls, or using the product."
+    question: "What happens when training expires?",
+    answer: "Courses with a renewal period show a renewal date, and learners and organisation admins can see what is due or overdue on their renewals view."
   }
 ];
 
 export default function Contact() {
-  const [activeTab, setActiveTab] = useState('sales');
+  const branding = useBranding();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') === 'support' ? 'support' : 'sales';
+  const [activeTab, setActiveTab] = useState<string>(requestedTab);
+
+  // Keep the URL and the visible tab in step, so "Contact Support" links land
+  // on the support form rather than sales.
+  useEffect(() => {
+    setActiveTab(requestedTab);
+  }, [requestedTab]);
+
+  const contactRows = [
+    hasRealValue(branding.contactEmail)
+      ? { label: 'Email', value: branding.contactEmail, href: `mailto:${branding.contactEmail}`, icon: Mail }
+      : null,
+    hasRealValue(branding.contactPhone)
+      ? { label: 'Phone', value: branding.contactPhone, href: `tel:${branding.contactPhone.replace(/\s+/g, '')}`, icon: Phone }
+      : null,
+    hasRealValue(branding.contactAddress)
+      ? { label: 'Address', value: branding.contactAddress, href: undefined, icon: MapPin }
+      : null,
+  ].filter(Boolean) as { label: string; value: string; href?: string; icon: React.ComponentType<{ className?: string }> }[];
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedType, setSubmittedType] = useState<'sales' | 'support'>('sales');
@@ -198,7 +229,7 @@ export default function Contact() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Forms */}
             <div className="lg:col-span-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <Tabs value={activeTab} onValueChange={handleTabChange}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="sales" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
@@ -470,34 +501,30 @@ export default function Contact() {
                   <CardTitle className="text-lg">Contact Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground text-sm">Support</p>
-                      <p className="text-muted-foreground text-sm">[Support Email]</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground text-sm">Sales</p>
-                      <p className="text-muted-foreground text-sm">[Sales Email]</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Phone className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground text-sm">Phone</p>
-                      <p className="text-muted-foreground text-sm">[Phone Number]</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground text-sm">Address</p>
-                      <p className="text-muted-foreground text-sm">[Company Address]</p>
-                    </div>
-                  </div>
+                  {contactRows.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Send us a message using the form and we'll come back to you by email.
+                    </p>
+                  ) : (
+                    contactRows.map((row) => (
+                      <div key={row.label} className="flex items-start gap-3">
+                        <row.icon className="h-5 w-5 text-primary mt-0.5" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground text-sm">{row.label}</p>
+                          {row.href ? (
+                            <a
+                              href={row.href}
+                              className="text-muted-foreground text-sm hover:text-foreground break-words"
+                            >
+                              {row.value}
+                            </a>
+                          ) : (
+                            <p className="text-muted-foreground text-sm break-words">{row.value}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
@@ -508,10 +535,10 @@ export default function Contact() {
                     <p className="font-medium text-foreground">Looking for answers now?</p>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Check our Help Center for guides, FAQs, and troubleshooting tips.
+                    Check our Help Centre for guides, FAQs, and troubleshooting tips.
                   </p>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link to="/help-center">Visit Help Center</Link>
+                    <Link to="/help-center">Visit Help Centre</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -534,10 +561,10 @@ export default function Contact() {
             Looking for answers now?
           </h2>
           <p className="text-muted-foreground mb-6">
-            Browse our Help Center for guides, tutorials, and troubleshooting tips.
+            Browse our Help Centre for guides, tutorials, and troubleshooting tips.
           </p>
           <Button asChild>
-            <Link to="/help-center">Visit Help Center</Link>
+            <Link to="/help-center">Visit Help Centre</Link>
           </Button>
         </div>
       </section>
