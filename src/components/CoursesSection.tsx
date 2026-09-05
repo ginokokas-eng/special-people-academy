@@ -10,15 +10,9 @@ interface Course extends EditorialCourse {
   duration_minutes: number;
 }
 
-const CATEGORY_FILTERS = [
-  { key: "all", label: "All courses" },
-  { key: "Mandatory", label: "Mandatory" },
-  { key: "Clinical", label: "Clinical" },
-  { key: "Dementia & EOL", label: "Dementia & EOL" },
-  { key: "Safeguarding", label: "Safeguarding" },
-  { key: "Leadership", label: "Leadership" },
-  { key: "Specialist", label: "Specialist" },
-];
+// Chips are derived from the featured courses actually rendered below — the old
+// hardcoded list matched no real category, so every chip showed 0 and emptied the grid.
+const HIDDEN_CATEGORIES = new Set(["Uncategorized", "Test"]);
 
 export const CoursesSection = () => {
   const [courses, setCourses] = useState<Course[]>([]);
