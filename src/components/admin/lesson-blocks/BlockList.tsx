@@ -71,7 +71,7 @@ interface BlockListProps {
 
 /** Short preview of a block's own wording, to tell two MCQs apart in a list. */
 function blockSummary(payload: BlockPayload): string {
-  const p = payload as Record<string, unknown>;
+  const p = payload as unknown as Record<string, unknown>;
   const raw = [p.question, p.heading, p.title, p.instruction, p.prompt].find(
     (v) => typeof v === 'string' && v.trim()
   ) as string | undefined;
