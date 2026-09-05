@@ -1,0 +1,450 @@
+import { useMemo, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { AlertTriangle, Check, Loader2, Sparkles, Trash2 } from '@/components/icons';
+import { BlockList } from './BlockList';
+import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
+import { mapDraftBlocks, type DraftBlock } from '@/lib/aiAuthoring';
+import {
+  BLOCK_LABELS,
+  defaultContributesToCompletion,
+  validateVisibility,
+  type BlockDraft,
+  type BlockPayload,
+  type BlockType,
+  type LessonBlock,
+} from '@/components/course-learn/blocks/types';
+
+export const AI_DISCLAIMER = 'AI drafts are suggestions. Review every word before publishing.';
+
+export interface CopilotPanelProps {
+  lessonId?: string;
+  courseId?: string;
+  lessonTitle?: string;
+  /** The editor's current in-memory blocks — read only. */
+  blocks: BlockDraft[];
+  /** Appends accepted blocks to the editor's unsaved list. */
+  onAccept: (accepted: { block_type: BlockType; payload: BlockPayload }[]) => void;
+}
+
+type Mode = 'draft_lesson' | 'knowledge_check' | 'improve_block';
+
+/** A draft awaiting Accept / Edit / Reject. Nothing here is saved. */
+interface DraftItem extends BlockDraft {
+  issues: string[];
+  editing: boolean;
+}
+
+/** Honest message from the function, or a plain fallback. */
+export function copilotErrorMessage(error: unknown, fallback = 'The draft could not be made.'): string {
+  const anyError = error as { message?: string; context?: { body?: unknown } } | null;
+  const message = anyError?.message;
+  if (typeof message === 'string' && message.trim() && !/non-2xx/i.test(message)) return message;
+  return fallback;
+}
+
+export function CopilotPanel({
+  lessonId,
+  courseId,
+  lessonTitle,
+  blocks,
+  onAccept,
+}: CopilotPanelProps) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>('draft_lesson');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<DraftItem[]>([]);
+
+  const [sourceText, setSourceText] = useState('');
+  const [questionCount, setQuestionCount] = useState('3');
+  const [improveIndex, setImproveIndex] = useState('0');
+  const [instruction, setInstruction] = useState('simplify');
+  const [freeInstruction, setFreeInstruction] = useState('');
+
+  const improvable = useMemo(
+    () =>
+      blocks
+        .map((b, index) => ({ b, index }))
+        .filter(({ b }) =>
+          ['text', 'callout', 'flip_cards', 'accordion', 'mcq', 'scenario'].includes(b.block_type)
+        ),
+    [blocks]
+  );
+
+  const toDraftItems = (list: DraftBlock[]): DraftItem[] =>
+    mapDraftBlocks(list).map((mapped) => ({
+      id: null,
+      client_id: crypto.randomUUID(),
+      block_type: mapped.block_type,
+      payload: mapped.payload,
+      contributes_to_completion: defaultContributesToCompletion(mapped.block_type),
+      issues: mapped.issues,
+      editing: false,
+    }));
+
+  const run = async (body: Record<string, unknown>) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('author-lesson-blocks', {
+        body,
+      });
+      if (fnError) {
+        // The function's own JSON body carries the honest reason.
+        let detail = '';
+        const res = (fnError as unknown as { context?: Response }).context;
+        if (res && typeof res.json === 'function') {
+          const parsed = await res.json().catch(() => null);
+          if (parsed?.error) detail = String(parsed.error);
+        }
+        setError(detail || copilotErrorMessage(fnError));
+        return null;
+      }
+      if (data?.error) {
+        setError(String(data.error));
+        return null;
+      }
+      return data as { blocks?: DraftBlock[] };
+    } catch (err) {
+      setError(copilotErrorMessage(err));
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const draftFromText = async () => {
+    const data = await run({
+      mode: 'draft_lesson',
+      lesson_id: lessonId,
+      input: { text: sourceText, title: lessonTitle, audience: 'care worker' },
+    });
+    if (data?.blocks) setDrafts(toDraftItems(data.blocks));
+  };
+
+  const knowledgeCheck = async () => {
+    const data = await run({
+      mode: 'knowledge_check',
+      lesson_id: lessonId,
+      input: {
+        count: Number(questionCount) || 3,
+        blocks: blocks.map((b) => ({ block_type: b.block_type, payload: b.payload })),
+      },
+    });
+    if (data?.blocks) setDrafts(toDraftItems(data.blocks));
+  };
+
+  const improveBlock = async () => {
+    const target = blocks[Number(improveIndex)];
+    if (!target) return;
+    const chosen = instruction === 'free' ? freeInstruction.trim() : instruction;
+    const data = await run({
+      mode: 'improve_block',
+      lesson_id: lessonId,
+      input: { block_type: target.block_type, payload: target.payload, instruction: chosen },
+    });
+    if (data?.blocks) setDrafts(toDraftItems(data.blocks));
+  };
+
+  const patchDraft = (clientId: string, patch: Partial<DraftItem>) =>
+    setDrafts((prev) =>
+      prev.map((d) => {
+        if (d.client_id !== clientId) return d;
+        const next = { ...d, ...patch };
+        // Re-validate on every edit so a fixed draft becomes acceptable.
+        const visibility = validateVisibility([
+          ...blocks.map((b) => ({ id: b.client_id, block_type: b.block_type, payload: b.payload })),
+          { id: next.client_id, block_type: next.block_type, payload: next.payload },
+        ]).filter((i) => i.block_id === next.client_id);
+        const issues = [
+          ...mapDraftIssues(next.block_type, next.payload),
+          ...visibility.map((i) => i.message),
+        ];
+        return { ...next, issues };
+      })
+    );
+
+  const accept = (clientId: string) => {
+    const draft = drafts.find((d) => d.client_id === clientId);
+    if (!draft || draft.issues.length) return;
+    onAccept([{ block_type: draft.block_type, payload: draft.payload }]);
+    setDrafts((prev) => prev.filter((d) => d.client_id !== clientId));
+  };
+
+  const acceptAll = () => {
+    const usable = drafts.filter((d) => !d.issues.length);
+    if (!usable.length) return;
+    onAccept(usable.map((d) => ({ block_type: d.block_type, payload: d.payload })));
+    setDrafts((prev) => prev.filter((d) => d.issues.length));
+  };
+
+  const previewBlock = (draft: DraftItem): LessonBlock[] => [
+    {
+      id: draft.client_id,
+      lesson_id: lessonId ?? '',
+      order_index: 0,
+      block_type: draft.block_type,
+      payload: draft.payload,
+      is_graded: false,
+      contributes_to_completion: draft.contributes_to_completion,
+    },
+  ];
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline">
+          <Sparkles className="mr-2 h-4 w-4" />
+          Draft with AI
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle>Draft with AI</SheetTitle>
+          <SheetDescription>
+            Nothing is added to the lesson until you accept it, and nothing is saved until you press
+            “Save content”.
+          </SheetDescription>
+        </SheetHeader>
+
+        <p className="mt-2 text-xs text-muted-foreground">{AI_DISCLAIMER}</p>
+
+        <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="mt-4">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
+            <TabsTrigger value="draft_lesson">Draft from text</TabsTrigger>
+            <TabsTrigger value="knowledge_check">Knowledge check</TabsTrigger>
+            <TabsTrigger value="improve_block">Improve</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="draft_lesson" className="space-y-3 pt-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="copilot-source">Paste your source text</Label>
+              <Textarea
+                id="copilot-source"
+                rows={10}
+                value={sourceText}
+                maxLength={40000}
+                placeholder="Paste the policy, handout or notes this lesson is based on."
+                onChange={(e) => setSourceText(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                {sourceText.length.toLocaleString()} of 40,000 characters. Paste text only for now —
+                documents are not read yet.
+              </p>
+            </div>
+            <Button onClick={draftFromText} disabled={busy || sourceText.trim().length < 200}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Draft this lesson
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="knowledge_check" className="space-y-3 pt-4">
+            <p className="text-sm text-muted-foreground">
+              Writes questions from the wording already in this lesson.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="copilot-count">How many questions</Label>
+              <Select value={questionCount} onValueChange={setQuestionCount}>
+                <SelectTrigger id="copilot-count" className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['1', '2', '3', '4', '5', '6'].map((n) => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={knowledgeCheck} disabled={busy || !blocks.length}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Write questions
+            </Button>
+            {!blocks.length && (
+              <p className="text-xs text-muted-foreground">Add some lesson content first.</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="improve_block" className="space-y-3 pt-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="copilot-block">Which block</Label>
+              <Select value={improveIndex} onValueChange={setImproveIndex}>
+                <SelectTrigger id="copilot-block">
+                  <SelectValue placeholder="Choose a block" />
+                </SelectTrigger>
+                <SelectContent>
+                  {improvable.map(({ b, index }) => (
+                    <SelectItem key={b.client_id} value={String(index)}>
+                      {index + 1}. {BLOCK_LABELS[b.block_type]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="copilot-instruction">What should change</Label>
+              <Select value={instruction} onValueChange={setInstruction}>
+                <SelectTrigger id="copilot-instruction">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="simplify">Make it simpler to read</SelectItem>
+                  <SelectItem value="shorten">Make it shorter</SelectItem>
+                  <SelectItem value="add_safety_callout">Add a safety note</SelectItem>
+                  <SelectItem value="free">Something else…</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {instruction === 'free' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="copilot-free">Say what you want changed</Label>
+                <Input
+                  id="copilot-free"
+                  maxLength={300}
+                  value={freeInstruction}
+                  onChange={(e) => setFreeInstruction(e.target.value)}
+                />
+              </div>
+            )}
+            <Button
+              onClick={improveBlock}
+              disabled={
+                busy ||
+                !improvable.length ||
+                (instruction === 'free' && freeInstruction.trim().length < 5)
+              }
+            >
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Redraft this block
+            </Button>
+            {!improvable.length && (
+              <p className="text-xs text-muted-foreground">
+                None of the blocks in this lesson can be redrafted by AI yet.
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {error && (
+          <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
+
+        {drafts.length > 0 && (
+          <div className="mt-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-foreground">
+                {drafts.length} draft{drafts.length === 1 ? '' : 's'} to review
+              </h3>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setDrafts([])}>
+                  Reject all
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={acceptAll}
+                  disabled={!drafts.some((d) => !d.issues.length)}
+                >
+                  Accept all
+                </Button>
+              </div>
+            </div>
+
+            {drafts.map((draft, index) => (
+              <div key={draft.client_id} className="space-y-3 rounded-lg border bg-card p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge variant="secondary">{BLOCK_LABELS[draft.block_type]}</Badge>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => patchDraft(draft.client_id, { editing: !draft.editing })}
+                    >
+                      {draft.editing ? 'Done editing' : 'Edit'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setDrafts((prev) => prev.filter((d) => d.client_id !== draft.client_id))
+                      }
+                      aria-label={`Reject draft ${index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => accept(draft.client_id)}
+                      disabled={draft.issues.length > 0}
+                    >
+                      <Check className="mr-1 h-4 w-4" />
+                      Accept
+                    </Button>
+                  </div>
+                </div>
+
+                {draft.issues.length > 0 && (
+                  <ul className="space-y-1">
+                    {draft.issues.map((issue) => (
+                      <li key={issue} className="text-xs font-medium text-destructive">
+                        {issue}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {draft.editing ? (
+                  <BlockList
+                    blocks={[draft]}
+                    onChange={(_, patch) => patchDraft(draft.client_id, patch)}
+                    onMove={() => {}}
+                    onDuplicate={() => {}}
+                    onRemove={() =>
+                      setDrafts((prev) => prev.filter((d) => d.client_id !== draft.client_id))
+                    }
+                    courseId={courseId}
+                    lessonId={lessonId}
+                  />
+                ) : (
+                  <LessonBlocks blocks={previewBlock(draft)} preview />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+/** Re-run the draft checks after an inline edit. */
+function mapDraftIssues(block_type: BlockType, payload: BlockPayload): string[] {
+  // Kept in one place: the same pure checker used when the draft arrived.
+  return draftIssuesFor({ block_type, payload });
+}
+
+import { draftBlockIssues as draftIssuesFor } from '@/lib/aiAuthoring';
