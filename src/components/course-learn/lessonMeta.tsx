@@ -131,17 +131,10 @@ export function lessonMetaLabel(lesson: LearnLesson): string {
 }
 
 export function totalDuration(lessons: LearnLesson[]): string {
-  // Only timed media (SCORM/video) contributes to module/course duration,
-  // and only from the exact uploaded media duration (duration_seconds).
-  // Resources, quizzes, practicals and certificates never add minutes.
-  const seconds = lessons.reduce(
-    (sum, l) =>
-      l.lesson_type === 'scorm' || l.lesson_type === 'video'
-        ? sum + (l.duration_seconds || 0)
-        : sum,
-    0
-  );
-  return formatDuration(videoDurationMinutes(seconds));
+  // Shared duration rule (src/lib/duration.ts): exact media seconds when known,
+  // otherwise the admin-entered minutes. Returns '' when nothing is known.
+  return formatLessonsDuration(lessons);
 }
+
 
 export { Play };

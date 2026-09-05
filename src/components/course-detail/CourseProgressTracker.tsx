@@ -123,9 +123,10 @@ export function CourseProgressTracker({
   const requirements = [
     {
       id: 'lessons',
-      label: 'Complete all lessons',
+      label: 'Complete all required lessons',
       icon: BookOpen,
       progress: `${lessonProgress.completed}/${lessonProgress.total}`,
+
       completed: lessonProgress.completed === lessonProgress.total && lessonProgress.total > 0,
       show: true,
     },
@@ -169,14 +170,7 @@ export function CourseProgressTracker({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Overall Progress */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Overall completion</span>
-            <span className="font-semibold text-primary">{overallProgress}%</span>
-          </div>
-          <Progress value={overallProgress} className="h-3" />
-        </div>
+
 
         {/* Requirements Checklist */}
         <div className="space-y-3">
