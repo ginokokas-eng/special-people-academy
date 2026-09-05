@@ -14,6 +14,7 @@ import type { LessonTemplate } from '@/components/admin/lesson-blocks/templates'
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
+import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 
 import {
   defaultContributesToCompletion,
