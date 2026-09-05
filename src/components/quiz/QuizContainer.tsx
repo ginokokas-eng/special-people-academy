@@ -354,6 +354,13 @@ export function QuizContainer({
             </div>
           </div>
 
+          {/* Attempts remaining — only when attempts are limited */}
+          {attemptsAllowed !== null && !hasPassed && (
+            <div className="text-center text-sm text-muted-foreground">
+              {attemptsRemaining} of {attemptsAllowed} attempt{attemptsAllowed === 1 ? '' : 's'} remaining
+            </div>
+          )}
+
 
           {/* Previous attempts */}
           {attempts.length > 0 && (
