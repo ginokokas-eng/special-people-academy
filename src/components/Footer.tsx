@@ -17,46 +17,30 @@ const WebFooter = () => {
   const logo = branding.logoMarkUrl || defaultLogo;
   const platformName = branding.platformName || 'Special People Training';
 
+  // Only destinations that are real, on-product pages are linked.
   const footerLinks = {
     Platform: [
-      { label: "Course catalog", href: "/courses" },
-      { label: "For care homes", href: "/enterprise" },
-      { label: "For NHS trusts", href: "/enterprise" },
-      { label: "For domiciliary", href: "/enterprise" },
-      { label: "Integrations", href: "/integrations", badge: "NEW" as const },
-    ],
-    Compliance: [
-      { label: "CQC audit packs", href: "/features" },
-      { label: "Care Inspectorate", href: "/features" },
-      { label: "CIW Wales", href: "/features" },
-      { label: "Skills for Care", href: "/features" },
-      { label: "CPD certification", href: "/features" },
+      { label: "Course catalogue", href: "/courses" },
+      { label: "For care providers", href: "/enterprise" },
+      { label: "Contact", href: "/contact" },
     ],
     Resources: [
-      { label: "Case studies", href: "/case-studies" },
-      { label: "CQC inspection guide", href: "/blog" },
-      { label: "Blog & insights", href: "/blog" },
       { label: "Help centre", href: "/help-center" },
-      { label: "Webinars", href: "/webinars" },
+      { label: "Contact", href: "/contact" },
     ],
     Company: [
       { label: "About us", href: "/about" },
       ...(generalSettings.enableCareerApplications
         ? [{ label: "Careers", href: "/careers", badge: "5" as const }]
         : []),
-      { label: "Press", href: "/about" },
-      { label: "Contact", href: "/contact" },
       { label: "Partner programme", href: "/partners" },
     ],
   };
 
-  // Branding defaults ship with "https://…/YOUR_HANDLE" placeholders; treat any
-  // of those as absent so the footer doesn't link to a dead page.
-  const isReal = (value?: string | null) => !!value && !value.includes('YOUR_');
   const socialLinks = Object.fromEntries(
     Object.entries(branding.socialLinks ?? {}).map(([k, v]) => [
       k,
-      isReal(v as string) ? v : undefined,
+      hasRealValue(v as string) ? v : undefined,
     ])
   ) as typeof branding.socialLinks;
   const year = new Date().getFullYear();
