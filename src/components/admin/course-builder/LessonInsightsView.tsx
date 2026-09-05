@@ -19,6 +19,7 @@ import type {
   BlockPayload,
   DragMatchPayload,
   McqPayload,
+  ScenarioPayload,
   VideoPayload,
 } from '@/components/course-learn/blocks/types';
 import {
