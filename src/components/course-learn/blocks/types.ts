@@ -256,6 +256,43 @@ export interface ChecklistPayload {
   steps: ChecklistStep[];
 }
 
+/* ----------------------------- branching scenario -------------------------- */
+
+export type ScenarioQuality = 'best' | 'acceptable' | 'unsafe';
+
+export interface ScenarioChoice {
+  id: string;
+  label: string;
+  /** Node this choice leads to. */
+  next_id: string;
+  feedback?: string;
+  quality: ScenarioQuality;
+}
+
+export interface ScenarioNode {
+  id: string;
+  /** Author-visible short key, unique within the scenario. */
+  slug: string;
+  kind: 'decision' | 'outcome' | 'end';
+  title?: string;
+  body: string;
+  /** STORAGE PATH in the private `lesson-media` bucket — never a URL. */
+  image_path?: string;
+  /** Decision nodes only, two or more. */
+  choices?: ScenarioChoice[];
+  /** Outcome nodes only (required there, forbidden on end nodes). */
+  next_id?: string;
+}
+
+export interface ScenarioPayload {
+  version: 1;
+  start_id: string;
+  /** When on, the block is assessed: a clean run (no unsafe choice) is correct. */
+  require_best_path: boolean;
+  debrief?: string;
+  nodes: ScenarioNode[];
+}
+
 export type BlockPayload =
   | TextPayload
   | CalloutPayload
@@ -268,7 +305,9 @@ export type BlockPayload =
   | McqPayload
   | DragMatchPayload
   | FlipCardsPayload
-  | ChecklistPayload;
+  | ChecklistPayload
+  | ScenarioPayload;
+
 
 
 export interface LessonBlock {
