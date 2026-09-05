@@ -196,6 +196,34 @@ export default function CourseLearn() {
   // the point of the hub. Deep links with ?lesson= are unaffected.
   const showHub = !activeLessonId || (!activeLesson && !deepLinkHidden);
 
+  // Best score for the active quiz lesson, so a finished check reads honestly.
+  const [quizBestScore, setQuizBestScore] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setQuizBestScore(null);
+    if (!user || !activeLesson || activeLesson.lesson_type !== 'quiz') return;
+    (async () => {
+      const { data: quizRow } = await supabase
+        .from('quizzes')
+        .select('id')
+        .eq('lesson_id', activeLesson.id)
+        .maybeSingle();
+      if (!quizRow || cancelled) return;
+      const { data: rows } = await supabase
+        .from('quiz_attempts')
+        .select('score')
+        .eq('quiz_id', quizRow.id)
+        .eq('user_id', user.id)
+        .order('score', { ascending: false })
+        .limit(1);
+      if (!cancelled && rows && rows.length > 0) setQuizBestScore(rows[0].score);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, activeLesson?.id, activeLesson?.lesson_type]);
+
+
 
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
