@@ -15,9 +15,12 @@ interface AuthContextType {
   isOpsTrainingAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; roles?: string[] }>;
-  /** Email a single-use sign-in code to an EXISTING account (never creates one). */
-  sendEmailCode: (email: string) => Promise<{ error: Error | null }>;
-  /** Exchange an emailed code for a session. */
+  /**
+   * Email a single-use sign-in link to an EXISTING account (never creates one).
+   * `redirectPath` is where the link lands — the configured learner home, not "/".
+   */
+  sendEmailCode: (email: string, redirectPath?: string) => Promise<{ error: Error | null }>;
+  /** Exchange an emailed code for a session (kept for future editable templates). */
   verifyEmailCode: (email: string, code: string) => Promise<{ error: Error | null; roles?: string[] }>;
   requestPasswordReset: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (password: string) => Promise<{ error: Error | null }>;
