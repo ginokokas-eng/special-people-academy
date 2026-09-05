@@ -149,10 +149,12 @@ export function CourseContent({
   const hasModules = modules.length > 0;
 
 
-  // Calculate totals
+  // Totals: lesson count is everything shown; progress counts required lessons
+  // only (the certificate gate), and duration uses the shared helper.
   const totalLessons = lessons.length;
-  const totalDuration = videoTotalMinutes(lessons);
-  const completedCount = lessons.filter(l => l.completed).length;
+  const totalDurationLabel = formatLessonsDuration(lessons);
+  const courseProgress = requiredProgress(lessons);
+
 
   // Determine if lessons should appear locked
   const showLockedState = requiresSubscription || (!isEnrolled && !canAccessCourse);
