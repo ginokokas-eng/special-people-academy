@@ -70,9 +70,8 @@ export function CourseProgressTracker({
     (quizProgress.passed === quizProgress.total && quizProgress.total > 0 ? 1 : 0) +
     (practicalProgress.required ? (practicalProgress.completed ? 1 : 0) : 0);
 
-  const overallProgress = totalRequirements > 0 
-    ? Math.round((completedRequirements / totalRequirements) * 100) 
-    : 0;
+
+
 
   const allComplete = completedRequirements === totalRequirements && totalRequirements > 0;
 
