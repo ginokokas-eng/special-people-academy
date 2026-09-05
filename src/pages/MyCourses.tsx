@@ -189,9 +189,11 @@ export default function MyCourses() {
   }
 
 
-  const CourseCard = ({ course }: { course: MyCourse }) => (
+  const CourseCard = ({ course }: { course: MyCourse }) => {
+    const status = enrolmentStatus(course);
+    return (
     <Card 
-      className="hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
+      className="flex h-full flex-col hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
       onClick={() => navigate(`/courses/${course.id}`)}
     >
       <div className="relative aspect-video bg-muted overflow-hidden">
@@ -206,7 +208,7 @@ export default function MyCourses() {
             <BookOpen className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
-        {course.progress === 100 && (
+        {status === 'completed' && (
           <div className="absolute top-2 right-2">
             <Badge className="bg-primary text-primary-foreground">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -214,7 +216,7 @@ export default function MyCourses() {
             </Badge>
           </div>
         )}
-        {course.isAssigned && course.progress < 100 && (
+        {course.isAssigned && status !== 'completed' && (
           <div className="absolute top-2 left-2">
             <Badge variant="secondary">Assigned</Badge>
           </div>
@@ -226,15 +228,21 @@ export default function MyCourses() {
           <span>•</span>
           <span>{formatDeliveryType(course.delivery_type)}</span>
         </div>
-        <CardTitle className="text-base line-clamp-2">{course.title}</CardTitle>
+        <CardTitle title={course.title} className="text-base line-clamp-2">{course.title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {formatDuration(course.duration_minutes)}
-          </span>
-        </div>
+      {/* Flex column with the footer pinned so buttons line up across a row even
+          when titles wrap to a different number of lines. */}
+      <CardContent className="flex flex-1 flex-col">
+        {/* Duration row appears only when there is a real total — "N/A" beside a
+            clock icon told the learner nothing. */}
+        {course.duration_minutes > 0 && (
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {formatDuration(course.duration_minutes)}
+            </span>
+          </div>
+        )}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
@@ -243,19 +251,19 @@ export default function MyCourses() {
           <Progress value={course.progress} className="h-2" />
         </div>
         <Button 
-          className="w-full mt-4" 
+          className="w-full mt-auto pt-0 md:mt-auto" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/courses/${course.id}`);
           }}
         >
-          {course.progress === 0 ? (
+          {status === 'not_started' ? (
             <>
               <Play className="h-4 w-4 mr-2" />
               Start Course
             </>
-          ) : course.progress === 100 ? (
+          ) : status === 'completed' ? (
             <>
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Review Course
@@ -269,7 +277,8 @@ export default function MyCourses() {
         </Button>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   const EmptyState = () => (
     <Card>
