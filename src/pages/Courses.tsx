@@ -50,14 +50,18 @@ export default function Courses() {
     fetchCourses();
   }, []);
 
-  const counts = useMemo(() => {
-    const tally: Record<string, number> = { all: courses.length };
+  const categoryFilters = useMemo(() => {
+    const tally = new Map<string, number>();
     courses.forEach((c) => {
-      if (!c.category) return;
-      tally[c.category] = (tally[c.category] || 0) + 1;
+      if (!c.category || HIDDEN_CATEGORIES.has(c.category)) return;
+      tally.set(c.category, (tally.get(c.category) || 0) + 1);
     });
-    return tally;
+    const derived = Array.from(tally.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: key, count }));
+    return [{ key: 'all', label: 'All courses', count: courses.length }, ...derived];
   }, [courses]);
+
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
