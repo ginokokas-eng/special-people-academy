@@ -507,7 +507,7 @@ export function VideoBlockForm({
         </div>
       </div>
 
-      <CheckpointEditor payload={payload} onChange={onChange} idPrefix={idPrefix} />
+      <CheckpointEditor payload={payload} onChange={onChange} idPrefix={idPrefix} lessonId={lessonId} />
 
       {error && <p className="text-xs font-medium text-destructive">{error}</p>}
     </div>
