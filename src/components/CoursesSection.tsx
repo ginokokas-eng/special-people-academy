@@ -57,12 +57,25 @@ export const CoursesSection = () => {
     fetchData();
   }, []);
 
+  const categoryFilters = useMemo(() => {
+    const tally = new Map<string, number>();
+    courses.forEach((c) => {
+      if (!c.category || HIDDEN_CATEGORIES.has(c.category)) return;
+      tally.set(c.category, (tally.get(c.category) || 0) + 1);
+    });
+    const derived = Array.from(tally.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([key, count]) => ({ key, label: key, count }));
+    return [{ key: "all", label: "All courses", count: courses.length }, ...derived];
+  }, [courses]);
+
   const visibleCourses = useMemo(() => {
     if (activeFilter === "all") return courses;
     return courses.filter((c) => c.category === activeFilter);
   }, [courses, activeFilter]);
 
   const totalCount = counts.all || 0;
+
 
   return (
     <section id="courses" className="section-y bg-white">
