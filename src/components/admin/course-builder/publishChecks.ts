@@ -14,7 +14,11 @@ import {
   type HotGraphicPayload,
   type VideoPayload,
   validateScenario,
+  validateVisibility,
+  type BlockPayload,
+  type BlockType,
   type ScenarioPayload,
+
 
 } from '@/components/course-learn/blocks/types';
 
