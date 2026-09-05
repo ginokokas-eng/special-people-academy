@@ -11,17 +11,9 @@ import {
   Award,
   ShoppingCart,
   Building2,
-  Home,
   HeartHandshake,
-  Stethoscope,
-  Landmark,
-  Users,
-  FileText,
   ClipboardCheck,
-  Newspaper,
   LifeBuoy,
-  Video,
-  Download,
   ArrowRight,
 } from "@/components/icons";
 import { useState, useEffect } from "react";
