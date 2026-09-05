@@ -145,15 +145,9 @@ export function CourseContent({
   courseId,
   mediaPaths,
 }: CourseContentProps) {
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  };
-
   // Group lessons by module if modules exist
   const hasModules = modules.length > 0;
+
 
   // Calculate totals
   const totalLessons = lessons.length;
