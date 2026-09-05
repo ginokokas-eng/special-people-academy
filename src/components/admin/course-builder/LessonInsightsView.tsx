@@ -77,8 +77,8 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
     if (statsRes.error) console.error('Error loading block stats:', statsRes.error);
     if (detailRes.error) console.error('Error loading learner detail:', detailRes.error);
 
-    setStats(((statsRes.data ?? []) as unknown as BlockItemStat[]) ?? []);
-    setDetail(((detailRes.data ?? []) as unknown as LearnerDetailRow[]) ?? []);
+    setStats((statsRes.data ?? []) as unknown as BlockItemStat[]);
+    setDetail((detailRes.data ?? []) as unknown as LearnerDetailRow[]);
 
     const map: Record<string, BlockRow> = {};
     for (const row of (blocksRes.data ?? []) as unknown as BlockRow[]) map[row.id] = row;

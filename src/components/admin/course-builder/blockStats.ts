@@ -49,7 +49,7 @@ export function blockLabel(type: string): string {
 /** The authored question/prompt for a block, used as the card heading. */
 export function blockPrompt(type: string, payload: BlockPayload | null | undefined): string {
   if (!payload) return blockLabel(type);
-  const p = payload as Record<string, unknown>;
+  const p = payload as unknown as Record<string, unknown>;
   const text =
     (typeof p.question === 'string' && p.question) ||
     (typeof p.prompt === 'string' && p.prompt) ||
