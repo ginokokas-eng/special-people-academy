@@ -576,9 +576,17 @@ export default function CourseDetail() {
     }
   };
 
-  const progress = lessons.length > 0 
-    ? Math.round((lessons.filter(l => l.completed).length / lessons.length) * 100)
-    : 0;
+  // One progress rule everywhere: required lessons only (src/lib/progress.ts).
+  const lessonProgressStats = requiredProgress(lessons);
+  const progress = lessonProgressStats.percent;
+
+  // The hero prefers the course-level duration, but falls back to the summed
+  // lesson durations when it is missing or zero.
+  const heroDurationMinutes =
+    course?.duration_minutes && course.duration_minutes > 0
+      ? course.duration_minutes
+      : minutesFromSeconds(totalDurationSeconds(lessons));
+
 
   const averageRating = reviews.length > 0
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
