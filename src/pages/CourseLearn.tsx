@@ -676,6 +676,20 @@ export default function CourseLearn() {
   }
 
   const renderLessonBody = () => {
+    if (deepLinkHidden) {
+      return (
+        <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-lg border bg-muted p-6 text-center">
+          <p className="font-medium text-foreground">This lesson isn't available yet</p>
+          <p className="max-w-md text-sm text-muted-foreground">
+            It is still being prepared. Everything else in this course is ready for you.
+          </p>
+          <Button variant="outline" onClick={() => setSearchParams({}, { replace: true })}>
+            Back to the course menu
+          </Button>
+        </div>
+      );
+    }
+
     if (!activeLesson) {
       return (
         <div className="flex aspect-video w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
@@ -683,6 +697,8 @@ export default function CourseLearn() {
         </div>
       );
     }
+
+
 
     if (activeLesson.lesson_type === 'scorm') {
       return (
