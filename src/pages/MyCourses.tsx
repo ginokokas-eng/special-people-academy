@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDeliveryType } from '@/lib/delivery';
 import { supabase } from '@/integrations/supabase/client';
-import { progressPercent } from '@/lib/progress';
+import { progressPercent, enrolmentStatus } from '@/lib/progress';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -141,7 +141,6 @@ export default function MyCourses() {
   };
 
   const formatDuration = (minutes: number) => {
-    if (!minutes) return 'N/A';
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     if (hours === 0) return `${mins}m`;
@@ -150,10 +149,11 @@ export default function MyCourses() {
   };
 
 
-  // Filter courses by tab
-  const assignedCourses = courses.filter(c => c.isAssigned);
-  const inProgressCourses = courses.filter(c => c.progress > 0 && c.progress < 100);
-  const completedCourses = courses.filter(c => c.progress === 100 || c.completedAt);
+  // One exclusive status per enrolment (src/lib/progress.ts), so the three tab
+  // counts always sum to All. "Assigned" is a badge on the card, not a tab.
+  const notStartedCourses = courses.filter(c => enrolmentStatus(c) === 'not_started');
+  const inProgressCourses = courses.filter(c => enrolmentStatus(c) === 'in_progress');
+  const completedCourses = courses.filter(c => enrolmentStatus(c) === 'completed');
   const allCourses = courses;
 
   if (authLoading || loading) {
@@ -189,9 +189,11 @@ export default function MyCourses() {
   }
 
 
-  const CourseCard = ({ course }: { course: MyCourse }) => (
+  const CourseCard = ({ course }: { course: MyCourse }) => {
+    const status = enrolmentStatus(course);
+    return (
     <Card 
-      className="hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
+      className="flex h-full flex-col hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
       onClick={() => navigate(`/courses/${course.id}`)}
     >
       <div className="relative aspect-video bg-muted overflow-hidden">
@@ -206,7 +208,7 @@ export default function MyCourses() {
             <BookOpen className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
-        {course.progress === 100 && (
+        {status === 'completed' && (
           <div className="absolute top-2 right-2">
             <Badge className="bg-primary text-primary-foreground">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -214,7 +216,7 @@ export default function MyCourses() {
             </Badge>
           </div>
         )}
-        {course.isAssigned && course.progress < 100 && (
+        {course.isAssigned && status !== 'completed' && (
           <div className="absolute top-2 left-2">
             <Badge variant="secondary">Assigned</Badge>
           </div>
@@ -226,16 +228,22 @@ export default function MyCourses() {
           <span>•</span>
           <span>{formatDeliveryType(course.delivery_type)}</span>
         </div>
-        <CardTitle className="text-base line-clamp-2">{course.title}</CardTitle>
+        <CardTitle title={course.title} className="text-base line-clamp-2">{course.title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {formatDuration(course.duration_minutes)}
-          </span>
-        </div>
-        <div className="space-y-2">
+      {/* Flex column with the footer pinned so buttons line up across a row even
+          when titles wrap to a different number of lines. */}
+      <CardContent className="flex flex-1 flex-col">
+        {/* Duration row appears only when there is a real total — "N/A" beside a
+            clock icon told the learner nothing. */}
+        {course.duration_minutes > 0 && (
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {formatDuration(course.duration_minutes)}
+            </span>
+          </div>
+        )}
+        <div className="space-y-2 mb-4">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium">{course.progress}%</span>
@@ -243,19 +251,19 @@ export default function MyCourses() {
           <Progress value={course.progress} className="h-2" />
         </div>
         <Button 
-          className="w-full mt-4" 
+          className="w-full mt-auto" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/courses/${course.id}`);
           }}
         >
-          {course.progress === 0 ? (
+          {status === 'not_started' ? (
             <>
               <Play className="h-4 w-4 mr-2" />
               Start Course
             </>
-          ) : course.progress === 100 ? (
+          ) : status === 'completed' ? (
             <>
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Review Course
@@ -269,7 +277,8 @@ export default function MyCourses() {
         </Button>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   const EmptyState = () => (
     <Card>
@@ -323,8 +332,8 @@ export default function MyCourses() {
         ) : (
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-              <TabsTrigger value="assigned">
-                Assigned ({assignedCourses.length})
+              <TabsTrigger value="not-started">
+                Not Started ({notStartedCourses.length})
               </TabsTrigger>
               <TabsTrigger value="in-progress">
                 In Progress ({inProgressCourses.length})
@@ -337,17 +346,18 @@ export default function MyCourses() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="assigned" className="mt-6">
-              {assignedCourses.length === 0 ? (
-                <TabEmptyState message="No assigned courses. Courses assigned by your organisation will appear here." />
+            <TabsContent value="not-started" className="mt-6">
+              {notStartedCourses.length === 0 ? (
+                <TabEmptyState message="Nothing waiting to be started — every course you have is underway or finished." />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {assignedCourses.map(course => (
+                  {notStartedCourses.map(course => (
                     <CourseCard key={course.id} course={course} />
                   ))}
                 </div>
               )}
             </TabsContent>
+
 
             <TabsContent value="in-progress" className="mt-6">
               {inProgressCourses.length === 0 ? (

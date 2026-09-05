@@ -2,7 +2,6 @@ import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { PageHero } from "@/components/marketing/PageHero";
 import { CTABanner } from "@/components/marketing/CTABanner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Heart, 
@@ -42,50 +41,7 @@ const values = [
   }
 ];
 
-const team = [
-  {
-    name: "[Founder Name]",
-    role: "Founder & CEO",
-    bio: "Background in special education and ed-tech. Passionate about making learning accessible to everyone.",
-    initials: "FN"
-  },
-  {
-    name: "[Head of Product]",
-    role: "Head of Product",
-    bio: "Former educator with expertise in curriculum design and accessibility standards.",
-    initials: "HP"
-  },
-  {
-    name: "[Lead Developer]",
-    role: "Lead Developer",
-    bio: "Builds inclusive technology with a focus on performance and usability across devices.",
-    initials: "LD"
-  },
-  {
-    name: "[Content Director]",
-    role: "Content Director",
-    bio: "Creates training content with plain language and visual supports for diverse learners.",
-    initials: "CD"
-  },
-  {
-    name: "[Customer Success]",
-    role: "Customer Success Lead",
-    bio: "Helps organizations implement effective training programs tailored to their needs.",
-    initials: "CS"
-  },
-  {
-    name: "[Accessibility Lead]",
-    role: "Accessibility Lead",
-    bio: "Ensures our platform meets WCAG guidelines and works for users of all abilities.",
-    initials: "AL"
-  }
-];
 
-const advisors = [
-  { name: "[Advisor Name]", role: "Special Education Expert", initials: "SE" },
-  { name: "[Advisor Name]", role: "Disability Advocate", initials: "DA" },
-  { name: "[Advisor Name]", role: "Workforce Development", initials: "WD" }
-];
 
 const inclusiveTrainingPoints = [
   "Content designed for varied reading levels and learning styles",
@@ -148,9 +104,16 @@ export default function About() {
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Five values: a 3-up grid left one slot visibly empty, so the last
+              row is centred instead. */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-6">
             {values.map((value, index) => (
-              <Card key={index} className="border-none shadow-sm">
+              <Card
+                key={index}
+                className={`border-none shadow-sm lg:col-span-2 ${
+                  index === 3 ? 'lg:col-start-2' : ''
+                }`}
+              >
                 <CardHeader>
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <value.icon className="h-6 w-6 text-primary" />
@@ -189,64 +152,6 @@ export default function About() {
                 <span className="text-foreground">{point}</span>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-16 md:py-24 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <Badge className="mb-4">Our Team</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              The people behind the platform
-            </h2>
-            <p className="text-muted-foreground">
-              Educators, developers, and advocates working together.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            {team.map((member, index) => (
-              <Card key={index} className="text-center">
-                <CardHeader>
-                  <Avatar className="h-20 w-20 mx-auto mb-4">
-                    <AvatarFallback className="text-lg bg-primary/10 text-primary">
-                      {member.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <CardTitle className="text-lg">{member.name}</CardTitle>
-                  <CardDescription className="text-primary font-medium">
-                    {member.role}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{member.bio}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Advisory Board */}
-          <div className="border-t border-border pt-12">
-            <h3 className="text-xl font-semibold text-foreground text-center mb-8">
-              Advisory Board
-            </h3>
-            <div className="flex flex-wrap justify-center gap-6">
-              {advisors.map((advisor, index) => (
-                <div key={index} className="flex items-center gap-3 px-4 py-3 bg-background rounded-lg border">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="text-sm bg-muted">
-                      {advisor.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-foreground text-sm">{advisor.name}</p>
-                    <p className="text-xs text-muted-foreground">{advisor.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>

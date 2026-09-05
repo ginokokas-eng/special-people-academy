@@ -258,18 +258,13 @@ export default function Auth() {
             </CardHeader>
 
             <TabsContent value="login">
-              <CardHeader className="pt-0">
-                <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>
-                  {loginMode === 'password'
-                    ? 'Enter your credentials to access your account'
-                    : 'Sign in with a code we email you'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+              {/* The page H1 above already says "Welcome back" — a second card-level
+                  title repeated it in different capitalisation. */}
+              <CardContent className="pt-2">
                 {loginMode === 'code' ? (
                   <EmailCodeSignIn
-                    onSignedIn={(roles) => void finishSignIn(roles)}
+                    email={loginEmail}
+                    onEmailChange={setLoginEmail}
                     onCancel={() => setLoginMode('password')}
                   />
                 ) : (

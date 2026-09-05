@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowUpRight } from "@/components/icons";
+import { ArrowUpRight, ChevronDown } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface FuturisticMenuItem {
@@ -11,6 +11,12 @@ export interface FuturisticMenuItem {
   onClick?: () => void;
   primary?: boolean;
   external?: boolean;
+  /**
+   * Sub-links. When present the row becomes a collapsible group instead of a
+   * link, so the phone menu can carry the same dropdown contents as the
+   * desktop nav rather than a shortened hardcoded list.
+   */
+  children?: FuturisticMenuItem[];
 }
 
 interface FuturisticMobileMenuProps {
@@ -33,6 +39,7 @@ export const FuturisticMobileMenu = ({
   const navigate = useNavigate();
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -207,6 +214,61 @@ export const FuturisticMobileMenu = ({
                       }}
                       className="border-b border-white/[0.07] last:border-b-0"
                     >
+                      {item.children ? (
+                        <div>
+                          <button
+                            type="button"
+                            aria-expanded={openGroup === item.label}
+                            onClick={() =>
+                              setOpenGroup((cur) => (cur === item.label ? null : item.label))
+                            }
+                            className="group relative flex w-full items-center justify-between gap-4 py-5 px-1 text-left transition-all duration-300 ease-out active:scale-[0.985] focus-visible:outline-none focus-visible:bg-white/[0.04] focus-visible:rounded-lg"
+                          >
+                            <span className="flex items-baseline gap-3 min-w-0">
+                              <span className="font-mono text-[10px] tracking-[0.2em] text-white/30">
+                                {String(idx + 1).padStart(2, "0")}
+                              </span>
+                              <span className="font-heading font-semibold leading-none text-[28px] text-white/90 truncate">
+                                {item.label}
+                              </span>
+                            </span>
+                            <ChevronDown
+                              aria-hidden
+                              className={cn(
+                                "h-5 w-5 shrink-0 text-white/40 transition-transform duration-300",
+                                openGroup === item.label && "rotate-180 text-white/80"
+                              )}
+                            />
+                          </button>
+                          <AnimatePresence initial={false}>
+                            {openGroup === item.label && (
+                              <motion.ul
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: EASE }}
+                                className="overflow-hidden pb-3 pl-8"
+                              >
+                                {item.children.map((child) => (
+                                  <li key={child.label}>
+                                    <a
+                                      href={child.href}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleItemClick(child);
+                                      }}
+                                      className="flex items-center justify-between gap-3 py-3.5 text-[16px] text-white/70 hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
+                                    >
+                                      {child.label}
+                                      <ArrowUpRight aria-hidden className="h-4 w-4 text-white/25" />
+                                    </a>
+                                  </li>
+                                ))}
+                              </motion.ul>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
                       <a
                         ref={idx === 0 ? firstLinkRef : undefined}
                         href={item.href}
@@ -250,6 +312,7 @@ export const FuturisticMobileMenu = ({
                           />
                         )}
                       </a>
+                      )}
                     </motion.li>
                   );
                 })}

@@ -26,8 +26,7 @@ interface EditorialCourseCardProps {
   reviews?: number;
 }
 
-const formatDuration = (minutes?: number | null) => {
-  if (!minutes) return "—";
+const formatDuration = (minutes: number) => {
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -93,10 +92,8 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
     >
       {/* Visual frame */}
       <div className="relative rounded-2xl bg-[hsl(262_50%_97%)] border border-dashed border-[#D6CCF5] aspect-[16/10] overflow-hidden mb-5">
-        <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-sm border border-[#EEEAF8] text-[10px] font-semibold uppercase tracking-wider text-[hsl(259_72%_14%)]">
-          {course.category}
-        </span>
-
+        {/* The category already appears as the eyebrow below — showing it twice
+            read as a duplicate. */}
         {course.thumbnail_url ? (
           <img
             src={course.thumbnail_url}
@@ -113,9 +110,12 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
           </div>
         )}
 
-        <span className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-full bg-[hsl(259_72%_14%)] text-white text-[11px] font-semibold tabular-nums">
-          {formatDuration(course.duration_minutes)}
-        </span>
+        {/* No total, no badge — a bare dash told the learner nothing. */}
+        {!!course.duration_minutes && course.duration_minutes > 0 && (
+          <span className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-full bg-[hsl(259_72%_14%)] text-white text-[11px] font-semibold tabular-nums">
+            {formatDuration(course.duration_minutes)}
+          </span>
+        )}
       </div>
 
       {/* Body */}
@@ -147,13 +147,15 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
         </div>
 
         {/* Basket CTA is web-only: digital-content purchases never happen in the app. */}
-        {!native && (
+        {/* Only when the course can actually be bought — otherwise an invisible
+            disabled button still reserved a row of space on every card. */}
+        {!native && offeringId && (
         <Button
           variant="outline"
           size="sm"
           className="mt-4 rounded-full border-[#E8E4F7] text-[hsl(259_72%_14%)] hover:bg-[#7C3AED] hover:text-white hover:border-[#7C3AED] transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
           onClick={handleAdd}
-          disabled={isAdding || !offeringId}
+          disabled={isAdding}
         >
           <ShoppingCart className="h-4 w-4 mr-2" />
           {isAdding ? "Adding..." : "Add to Basket"}

@@ -124,8 +124,8 @@ const WebNavbar = () => {
       className={cn(
         "sticky top-0 z-50 w-full transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 animate-nav-in",
         scrolled
-          ? "bg-white/90 backdrop-blur-xl border-b border-[#E8E4F7] shadow-[0_2px_8px_-2px_rgba(20,10,60,0.06)]"
-          : "bg-white/85 backdrop-blur-md border-b border-[#F0EDFA]"
+          ? "bg-white/[.97] backdrop-blur-xl border-b border-[#E8E4F7] shadow-[0_2px_8px_-2px_rgba(20,10,60,0.06)]"
+          : "bg-white/[.97] backdrop-blur-md border-b border-[#F0EDFA]"
       )}
     >
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -178,7 +178,7 @@ const WebNavbar = () => {
                   <NavigationMenuTrigger
                     className={cn(
                       navLinkBase,
-                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent data-[state=open]:!bg-transparent data-[state=open]:!text-[hsl(262_83%_58%)] data-[active]:!bg-transparent [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
+                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent focus:!text-[hsl(259_72%_14%)] focus-visible:!ring-2 focus-visible:!ring-[hsl(262_83%_58%/0.55)] focus-visible:!ring-offset-2 data-[state=open]:!bg-transparent data-[state=open]:!text-[hsl(262_83%_58%)] data-[active]:!bg-transparent [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
                     )}
                   >
                     <span className="relative">
@@ -223,7 +223,7 @@ const WebNavbar = () => {
                   <NavigationMenuTrigger
                     className={cn(
                       navLinkBase,
-                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent data-[state=open]:!bg-transparent data-[state=open]:!text-[hsl(262_83%_58%)] data-[active]:!bg-transparent [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
+                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent focus:!text-[hsl(259_72%_14%)] focus-visible:!ring-2 focus-visible:!ring-[hsl(262_83%_58%/0.55)] focus-visible:!ring-offset-2 data-[state=open]:!bg-transparent data-[state=open]:!text-[hsl(262_83%_58%)] data-[active]:!bg-transparent [&>svg]:ml-1 [&>svg]:h-4 [&>svg]:w-4"
                     )}
                   >
                     <span className="relative">
@@ -411,26 +411,32 @@ const WebNavbar = () => {
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         items={
-          user
-            ? [
-                { label: "All Courses", href: coursesHref },
-                { label: "Corporate Solutions", href: "/enterprise" },
-                { label: "Contact Us", href: "/contact" },
-                { label: "My Learning", href: "/my-learning" },
-                {
-                  label: "Sign Out",
-                  href: "#",
-                  onClick: handleSignOut,
-                  primary: true,
-                },
-              ]
-            : [
-                { label: "All Courses", href: coursesHref },
-                { label: "Corporate Solutions", href: "/enterprise" },
-                { label: "Contact Us", href: "/contact" },
-                { label: "Sign In", href: "/auth" },
-                { label: "Sign Up", href: "/auth?mode=signup", primary: true },
-              ]
+          // Built from the same arrays the desktop dropdowns use, so the phone
+          // menu is no longer a shortened hardcoded list.
+          [
+            { label: coursesHref === '/my-courses' ? 'My Courses' : 'All Courses', href: coursesHref },
+            {
+              label: 'For Organisations',
+              href: '#',
+              children: forOrganisationsLinks.map((l) => ({ label: l.label, href: l.href })),
+            },
+            {
+              label: 'Resources',
+              href: '#',
+              children: resourcesLinks.map((l) => ({ label: l.label, href: l.href })),
+            },
+            { label: 'About', href: '/about' },
+            { label: 'Contact Us', href: '/contact' },
+            ...(user
+              ? [
+                  { label: 'My Learning', href: '/my-learning' },
+                  { label: 'Sign Out', href: '#', onClick: handleSignOut, primary: true },
+                ]
+              : [
+                  { label: 'Sign In', href: '/auth' },
+                  { label: 'Sign Up', href: '/auth?mode=signup', primary: true },
+                ]),
+          ]
         }
       />
     </header>

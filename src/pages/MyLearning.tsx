@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Clock, Play, CheckCircle2, Loader2 } from '@/components/icons';
 import { useIsNative } from '@/lib/native';
+import { enrolmentStatus } from '@/lib/progress';
 import { NativeLearn } from '@/components/native/NativeLearn';
 
 interface EnrolledCourse {
@@ -142,9 +143,10 @@ export default function MyLearning() {
     return `${hours}h ${mins}m`;
   };
 
-  const inProgressCourses = courses.filter(c => c.progress > 0 && c.progress < 100);
-  const completedCourses = courses.filter(c => c.progress === 100);
-  const notStartedCourses = courses.filter(c => c.progress === 0);
+  // Same exclusive derivation as /my-courses (src/lib/progress.ts).
+  const inProgressCourses = courses.filter(c => enrolmentStatus(c) === 'in_progress');
+  const completedCourses = courses.filter(c => enrolmentStatus(c) === 'completed');
+  const notStartedCourses = courses.filter(c => enrolmentStatus(c) === 'not_started');
 
   if (authLoading || loading) {
     return (
@@ -158,7 +160,7 @@ export default function MyLearning() {
 
   const CourseCard = ({ course }: { course: EnrolledCourse }) => (
     <Card 
-      className="hover:shadow-lg transition-all cursor-pointer overflow-hidden"
+      className="flex h-full flex-col hover:shadow-lg transition-all cursor-pointer overflow-hidden"
       onClick={() => navigate(`/courses/${course.id}`)}
     >
       <div className="relative aspect-video bg-muted overflow-hidden">
@@ -173,7 +175,7 @@ export default function MyLearning() {
             <BookOpen className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
-        {course.progress === 100 && (
+        {enrolmentStatus(course) === 'completed' && (
           <div className="absolute top-2 right-2">
             <Badge className="bg-success text-success-foreground">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -184,17 +186,18 @@ export default function MyLearning() {
       </div>
       <CardHeader className="pb-2">
         <p className="text-xs font-medium text-primary">{course.category}</p>
-        <CardTitle className="text-base line-clamp-2">{course.title}</CardTitle>
+        <CardTitle title={course.title} className="text-base line-clamp-2">{course.title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {formatDuration(course.duration_minutes)}
-          </span>
-          
-        </div>
-        <div className="space-y-2">
+      <CardContent className="flex flex-1 flex-col">
+        {course.duration_minutes > 0 && (
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {formatDuration(course.duration_minutes)}
+            </span>
+          </div>
+        )}
+        <div className="mt-auto space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium">{course.progress}%</span>

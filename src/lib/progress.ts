@@ -41,3 +41,28 @@ export function requiredProgress<T extends RequiredProgressLesson>(
 export function progressPercent(completed: number, total: number): number {
   return total > 0 ? Math.round((completed / total) * 100) : 0;
 }
+
+/**
+ * Exactly one status per enrolment.
+ *
+ * /my-courses previously derived its tabs from three overlapping, non-exhaustive
+ * predicates (Assigned came from `is_internal`, not from progress at all), so a
+ * purchased course sitting at 0% belonged to no tab and the counts never summed
+ * to All. Both learner pages now share this single exclusive derivation.
+ */
+export type EnrolmentStatus = 'not_started' | 'in_progress' | 'completed';
+
+export function enrolmentStatus(input: {
+  progress: number;
+  completedAt?: string | null;
+}): EnrolmentStatus {
+  if (input.progress >= 100 || input.completedAt) return 'completed';
+  if (input.progress > 0) return 'in_progress';
+  return 'not_started';
+}
+
+export const ENROLMENT_STATUS_LABELS: Record<EnrolmentStatus, string> = {
+  not_started: 'Not Started',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+};
