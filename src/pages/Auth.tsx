@@ -323,7 +323,7 @@ export default function Auth() {
                     className="w-full"
                     onClick={() => setLoginMode('code')}
                   >
-                    Email me a sign-in code instead
+                    Email me a sign-in link instead
                   </Button>
                 </form>
                 )}

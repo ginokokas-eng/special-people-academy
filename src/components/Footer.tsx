@@ -34,7 +34,6 @@ const WebFooter = () => {
       ...(generalSettings.enableCareerApplications
         ? [{ label: "Careers", href: "/careers", badge: "5" as const }]
         : []),
-      { label: "Partner programme", href: "/partners" },
     ],
   };
 

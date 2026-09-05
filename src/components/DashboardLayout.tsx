@@ -1,5 +1,6 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRedirectSettings } from '@/hooks/useRedirectSettings';
 import { useRoles } from '@/hooks/useRoles';
@@ -91,8 +92,30 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   };
 
-  // Shared with /profile so one person never sees two different avatars.
+  // Shared with /profile so one person never sees two different avatars: the
+  // saved profile name wins, exactly as it does on the profile page.
+  const [profileName, setProfileName] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.id) {
+      setProfileName(null);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!cancelled) setProfileName(data?.full_name ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   const userInitials = initialsFor(
+    profileName,
     (user?.user_metadata as { full_name?: string } | undefined)?.full_name,
     user?.email
   );

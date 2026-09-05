@@ -263,7 +263,7 @@ export default function Dashboard() {
                       className="pressable rounded-[10px] font-semibold"
                       onClick={() => navigate(`/courses/${resume.id}/learn`)}
                     >
-                      Resume {resume.title.length > 34 ? `${resume.title.slice(0, 34)}…` : resume.title}
+                      Resume course
                     </Button>
                   )}
                   <Button

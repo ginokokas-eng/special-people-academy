@@ -34,13 +34,10 @@ import AdminDashboard from "./pages/AdminDashboard";
 import TrainerPortal from "./pages/TrainerPortal";
 import Contact from "./pages/Contact";
 import Booking from "./pages/Booking";
-import Features from "./pages/Features";
-import Integrations from "./pages/Integrations";
 import Enterprise from "./pages/Enterprise";
 import HelpCenter from "./pages/HelpCenter";
 import About from "./pages/About";
 import Careers from "./pages/Careers";
-import Partners from "./pages/Partners";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -139,10 +136,11 @@ const App = () => (
                 {/* Public routes */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/booking" element={<Booking />} />
-                <Route path="/features" element={<Features />} />
+                {/* Template marketing pages retired: send readers to the real content. */}
+                <Route path="/features" element={<Navigate to="/enterprise" replace />} />
                 {/* Subscription pricing is retired: send buyers to sales. */}
                 <Route path="/pricing" element={<Navigate to="/contact?tab=sales" replace />} />
-                <Route path="/integrations" element={<Integrations />} />
+                <Route path="/integrations" element={<Navigate to="/enterprise" replace />} />
                 <Route path="/enterprise" element={<Enterprise />} />
                 {/* Awaiting real content — routes park on the help centre. */}
                 <Route path="/blog" element={<Navigate to="/help-center" replace />} />
@@ -152,7 +150,7 @@ const App = () => (
                 <Route path="/case-studies" element={<Navigate to="/help-center" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/careers" element={<Careers />} />
-                <Route path="/partners" element={<Partners />} />
+                <Route path="/partners" element={<Navigate to="/contact?tab=sales" replace />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
