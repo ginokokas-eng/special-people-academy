@@ -19,7 +19,7 @@ import {
   Layers,
   UserCog,
   FileText,
-  CheckCircle
+  FileText
 } from "@/components/icons";
 
 const enterpriseNeeds = [
