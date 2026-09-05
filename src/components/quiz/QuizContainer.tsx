@@ -306,10 +306,15 @@ export function QuizContainer({
     );
   }
 
-  const attemptsAllowed = quiz.attempts_allowed && quiz.attempts_allowed > 0 ? quiz.attempts_allowed : null;
+  // Unlimited attempts are stored as null, 0 or a sentinel of 99+.
+  const attemptsAllowed =
+    quiz.attempts_allowed && quiz.attempts_allowed > 0 && quiz.attempts_allowed < 99
+      ? quiz.attempts_allowed
+      : null;
   const attemptsUsed = attempts.length;
   const attemptsRemaining = attemptsAllowed !== null ? Math.max(0, attemptsAllowed - attemptsUsed) : null;
   const isLockedOut = attemptsRemaining === 0 && !hasPassed;
+
 
   // Show quiz intro/start screen
   if (!started) {
