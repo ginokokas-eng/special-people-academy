@@ -33,9 +33,11 @@ export function CourseContentSidebar({
       <div className="px-4 py-3 border-b">
         <p className="text-sm font-semibold text-foreground">Course content</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {completedCount}/{gating.length} complete · {totalDuration(lessons) || '—'}
+          {completedCount}/{gating.length} required lessons
+          {totalDuration(lessons) ? ` · ${totalDuration(lessons)}` : ''}
         </p>
       </div>
+
       <div className="flex-1 overflow-y-auto">
         {modules.map((mod) => {
           const modLessons = lessons.filter((l) => l.module_id === mod.id);

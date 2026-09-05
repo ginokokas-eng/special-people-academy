@@ -1,5 +1,7 @@
 import { Play, FileText, HelpCircle, ClipboardCheck, MessageSquareWarning, FileType2, Video, BookOpen } from '@/components/icons';
+import { formatLessonsDuration } from '@/lib/duration';
 import type { LearnLesson } from './types';
+
 
 export function lessonTypeIcon(type: string, className = 'h-3.5 w-3.5') {
   switch (type) {
