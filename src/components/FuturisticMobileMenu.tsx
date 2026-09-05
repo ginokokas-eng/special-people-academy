@@ -30,7 +30,6 @@ interface FuturisticMobileMenuProps {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Site palette (same tokens as the desktop navbar). */
-const INK = "hsl(259_72%_14%)";
 const VIOLET = "hsl(262_83%_58%)";
 
 export const FuturisticMobileMenu = ({
