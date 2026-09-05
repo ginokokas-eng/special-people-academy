@@ -263,10 +263,8 @@ export function CourseHome({
           pickLine
         ) : (
           <div className="space-y-3">
-            <Button variant="ghost" size="sm" onClick={onBackToCourse} className="-ml-2">
-              <ArrowLeft className="mr-1 h-4 w-4" /> Course page
-            </Button>
             <h1 className="font-display font-display-hero text-2xl text-foreground sm:text-3xl">
+
               {courseTitle}
             </h1>
             {courseSubtitle?.trim() && (
