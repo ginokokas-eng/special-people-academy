@@ -380,7 +380,7 @@ export default function Auth() {
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Your full name"
                       value={signupName}
                       onChange={(e) => setSignupName(e.target.value)}
                       required
@@ -406,7 +406,12 @@ export default function Auth() {
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
+                      minLength={8}
+                      maxLength={72}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Use between 8 and 72 characters.
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? (
@@ -419,6 +424,11 @@ export default function Auth() {
                     )}
                   </Button>
                 </form>
+
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                  Invited by your employer? Use the link in your invitation email.
+                </p>
+
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
