@@ -40,7 +40,7 @@ export function PortalShell({ orgName, actions, children }: PortalShellProps) {
 
   return (
     <div className="learner-surface flex min-h-screen flex-col">
-      <header className="material-chrome sticky top-0 z-40">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/[0.97] backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-3 px-4 md:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2.5" aria-label="Special People Academy home">
             <img src={logoMark} alt="" className="h-7 w-7 shrink-0" />

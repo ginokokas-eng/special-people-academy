@@ -133,7 +133,11 @@ export default function Profile() {
     }
   };
 
-  const userInitials = initialsFor(profile.full_name, user?.email);
+  const userInitials = initialsFor(
+    profile.full_name,
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name,
+    user?.email
+  );
 
   if (authLoading || loading) {
     return (

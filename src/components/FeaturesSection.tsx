@@ -51,7 +51,6 @@ const featuresData: FeatureCardData[] = [
     ],
     ctas: [
       { label: "Browse training", href: "/courses", variant: "default" },
-      { label: "See features", href: "/features", variant: "outline" },
     ],
   },
   {
@@ -67,7 +66,7 @@ const featuresData: FeatureCardData[] = [
       "Blend online learning with in-person practical sign-off.",
     ],
     ctas: [
-      { label: "See how it works", href: "/features", variant: "default" },
+      { label: "Browse training", href: "/courses", variant: "default" },
       { label: "Browse training", href: "/courses", variant: "outline" },
     ],
   },
