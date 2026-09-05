@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_authoring_runs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          input_chars: number | null
+          lesson_id: string | null
+          mode: string
+          model: string | null
+          output_chars: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_chars?: number | null
+          lesson_id?: string | null
+          mode: string
+          model?: string | null
+          output_chars?: number | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_chars?: number | null
+          lesson_id?: string | null
+          mode?: string
+          model?: string | null
+          output_chars?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bls_competency_signoffs: {
         Row: {
           action_plan: string | null
