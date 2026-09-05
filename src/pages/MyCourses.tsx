@@ -243,7 +243,7 @@ export default function MyCourses() {
             </span>
           </div>
         )}
-        <div className="space-y-2">
+        <div className="space-y-2 mb-4">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
             <span className="font-medium">{course.progress}%</span>
@@ -251,7 +251,7 @@ export default function MyCourses() {
           <Progress value={course.progress} className="h-2" />
         </div>
         <Button 
-          className="w-full mt-auto pt-0 md:mt-auto" 
+          className="w-full mt-auto" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
