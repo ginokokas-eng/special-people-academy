@@ -76,7 +76,7 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     blockLessons.length
       ? supabase
           .from('lesson_blocks')
-          .select('lesson_id, block_type, payload')
+          .select('id, lesson_id, block_type, payload, order_index')
           .in('lesson_id', blockLessons.map((l) => l.id))
       : Promise.resolve({ data: [], error: null } as const),
     videoLessons.length
@@ -145,9 +145,11 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
   // Checkpoint questions must be answerable: they need an uploaded video (we
   // cannot pause a YouTube/Vimeo embed) and a valid question setup.
   const blockRows = (blocksRes.data || []) as {
+    id: string;
     lesson_id: string;
     block_type?: string | null;
     payload?: unknown;
+    order_index?: number | null;
   }[];
   const lessonTitle = (id: string) => lessons.find((l) => l.id === id)?.title || 'Untitled lesson';
   const badCheckpointLessons = new Set<string>();
@@ -212,6 +214,34 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     label: 'Labelled images are ready',
     passed: badHotGraphics.length === 0,
     detail: `A labelled image needs a picture, alt text and at least one point with wording. Please check: ${names(badHotGraphics)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
+
+  // Conditional blocks ("show this only if…") must point backwards at a real,
+  // eligible activity — otherwise a learner could never see them.
+  const badVisibilityLessons = new Set<string>();
+  const byLesson = new Map<string, typeof blockRows>();
+  for (const row of blockRows) {
+    const list = byLesson.get(row.lesson_id) || [];
+    list.push(row);
+    byLesson.set(row.lesson_id, list);
+  }
+  for (const [lessonId, rows] of byLesson) {
+    const ordered = [...rows]
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+      .map((r) => ({
+        id: r.id,
+        block_type: r.block_type as BlockType,
+        payload: (r.payload || {}) as BlockPayload,
+      }));
+    if (validateVisibility(ordered).length > 0) badVisibilityLessons.add(lessonId);
+  }
+  const badVisibility = [...badVisibilityLessons].map(lessonTitle);
+  checks.push({
+    id: 'block_visibility',
+    label: 'Conditional blocks point at a real activity',
+    passed: badVisibility.length === 0,
+    detail: `A block set to “show only if…” must follow the activity it waits on, and that activity must be one learners take part in. Please check: ${names(badVisibility)}.`,
     tab: 'Modules & Lessons → Edit content',
   });
 
