@@ -823,22 +823,26 @@ export default function CourseLearn() {
     }
 
     if (activeLesson.lesson_type === 'quiz') {
+      const done = !!activeLesson.completed || quizBestScore !== null;
       return (
         <div className="rounded-lg border bg-card p-8 text-center">
           <HelpCircle className="mx-auto mb-3 h-10 w-10 text-primary" />
-          <h3 className="mb-1 text-lg font-semibold">{activeLesson.title}</h3>
           {activeLesson.description && (
             <p className="mx-auto mb-4 max-w-md text-sm text-muted-foreground">
               {activeLesson.description}
             </p>
           )}
+          {quizBestScore !== null && (
+            <p className="mb-4 text-sm font-medium text-foreground">Best score: {quizBestScore}%</p>
+          )}
           <Button size="lg" onClick={() => navigate(`/courses/${courseId}/quiz?lesson=${activeLesson.id}`)}>
             <HelpCircle className="mr-2 h-4 w-4" />
-            Start Assessment
+            {done ? 'Review answers' : 'Start assessment'}
           </Button>
         </div>
       );
     }
+
 
     if (activeLesson.lesson_type === 'practical') {
       return (
