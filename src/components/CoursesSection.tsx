@@ -104,8 +104,8 @@ export const CoursesSection = () => {
 
         {/* Filter row */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          {CATEGORY_FILTERS.map((f) => {
-            const count = counts[f.key] ?? 0;
+          {categoryFilters.map((f) => {
+            const count = f.count;
             const isActive = activeFilter === f.key;
             return (
               <button
