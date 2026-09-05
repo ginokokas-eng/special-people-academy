@@ -110,10 +110,14 @@ export default function QuizPage() {
               Back to lesson
             </Button>
             <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <BookOpen className="h-4 w-4" />
-              <span>{courseName}</span>
+            <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+              <BookOpen className="h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {courseName}
+                {lessonName ? ` · ${lessonName}` : ''}
+              </span>
             </div>
+
           </div>
         </div>
       </div>
