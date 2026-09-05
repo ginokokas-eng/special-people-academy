@@ -15,6 +15,8 @@ export interface BlockResponseRow {
   is_correct: boolean | null;
   attempt_count: number;
   response: unknown;
+  /** Raw answer history, kept out of `response` so blocks never see the key. */
+  history?: BlockResponseHistoryEntry[];
 }
 
 interface RecordArgs {
@@ -60,7 +62,17 @@ export function useBlockResponse(blockId: string, lessonId: string, enabled: boo
         historyRef.current = Array.isArray(prevHistory)
           ? (prevHistory as BlockResponseHistoryEntry[]).slice(-HISTORY_LIMIT)
           : [];
-        setExisting(data as BlockResponseRow);
+        const raw = data.response;
+        let cleaned: unknown = raw;
+        if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+          const { history: _omit, ...rest } = raw as Record<string, unknown>;
+          cleaned = rest;
+        }
+        setExisting({
+          ...(data as BlockResponseRow),
+          response: cleaned,
+          history: historyRef.current,
+        });
       }
       setLoaded(true);
     })();
