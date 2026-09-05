@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
+import { ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
 import { requiredProgress } from '@/lib/progress';
 import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
 import { useLockedQuizLessons } from '@/components/quiz/useLockedQuizLessons';
