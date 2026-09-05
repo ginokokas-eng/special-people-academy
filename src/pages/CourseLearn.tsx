@@ -168,14 +168,62 @@ export default function CourseLearn() {
 
 
   const activeLesson = useMemo(
-    () => visibleLessons.find((l) => l.id === activeLessonId) || visibleLessons[0],
+    () => (activeLessonId ? visibleLessons.find((l) => l.id === activeLessonId) : undefined),
     [visibleLessons, activeLessonId]
   );
+
+  // A deep link can name a lesson that exists but is not learner-visible yet
+  // (e.g. a knowledge check with no questions). We say so honestly instead of
+  // silently opening a different lesson.
+  const deepLinkHidden = useMemo(
+    () =>
+      !!activeLessonId &&
+      !activeLesson &&
+      lessons.some((l) => l.id === activeLessonId),
+    [activeLessonId, activeLesson, lessons]
+  );
+
+  // A deep link that matches nothing at all: drop the param and show the hub.
+  useEffect(() => {
+    if (!activeLessonId || activeLesson || deepLinkHidden || lessons.length === 0) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('lesson');
+    setSearchParams(next, { replace: true });
+  }, [activeLessonId, activeLesson, deepLinkHidden, lessons.length, searchParams, setSearchParams]);
 
   // No ?lesson= means the learner is on the course home (module hub). We
   // deliberately do NOT auto-fill the first lesson: choosing where to start is
   // the point of the hub. Deep links with ?lesson= are unaffected.
-  const showHub = !activeLessonId;
+  const showHub = !activeLessonId || (!activeLesson && !deepLinkHidden);
+
+  // Best score for the active quiz lesson, so a finished check reads honestly.
+  const [quizBestScore, setQuizBestScore] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setQuizBestScore(null);
+    if (!user || !activeLesson || activeLesson.lesson_type !== 'quiz') return;
+    (async () => {
+      const { data: quizRow } = await supabase
+        .from('quizzes')
+        .select('id')
+        .eq('lesson_id', activeLesson.id)
+        .maybeSingle();
+      if (!quizRow || cancelled) return;
+      const { data: rows } = await supabase
+        .from('quiz_attempts')
+        .select('score')
+        .eq('quiz_id', quizRow.id)
+        .eq('user_id', user.id)
+        .order('score', { ascending: false })
+        .limit(1);
+      if (!cancelled && rows && rows.length > 0) setQuizBestScore(rows[0].score);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, activeLesson?.id, activeLesson?.lesson_type]);
+
+
 
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
@@ -656,6 +704,20 @@ export default function CourseLearn() {
   }
 
   const renderLessonBody = () => {
+    if (deepLinkHidden) {
+      return (
+        <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-lg border bg-muted p-6 text-center">
+          <p className="font-medium text-foreground">This lesson isn't available yet</p>
+          <p className="max-w-md text-sm text-muted-foreground">
+            It is still being prepared. Everything else in this course is ready for you.
+          </p>
+          <Button variant="outline" onClick={() => setSearchParams({}, { replace: true })}>
+            Back to the course menu
+          </Button>
+        </div>
+      );
+    }
+
     if (!activeLesson) {
       return (
         <div className="flex aspect-video w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
@@ -663,6 +725,8 @@ export default function CourseLearn() {
         </div>
       );
     }
+
+
 
     if (activeLesson.lesson_type === 'scorm') {
       return (
@@ -787,22 +851,26 @@ export default function CourseLearn() {
     }
 
     if (activeLesson.lesson_type === 'quiz') {
+      const done = !!activeLesson.completed || quizBestScore !== null;
       return (
         <div className="rounded-lg border bg-card p-8 text-center">
           <HelpCircle className="mx-auto mb-3 h-10 w-10 text-primary" />
-          <h3 className="mb-1 text-lg font-semibold">{activeLesson.title}</h3>
           {activeLesson.description && (
             <p className="mx-auto mb-4 max-w-md text-sm text-muted-foreground">
               {activeLesson.description}
             </p>
           )}
+          {quizBestScore !== null && (
+            <p className="mb-4 text-sm font-medium text-foreground">Best score: {quizBestScore}%</p>
+          )}
           <Button size="lg" onClick={() => navigate(`/courses/${courseId}/quiz?lesson=${activeLesson.id}`)}>
             <HelpCircle className="mr-2 h-4 w-4" />
-            Start Assessment
+            {done ? 'Review answers' : 'Start assessment'}
           </Button>
         </div>
       );
     }
+
 
     if (activeLesson.lesson_type === 'practical') {
       return (

@@ -199,10 +199,13 @@ export function CourseHero({
 
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-primary-foreground/70">
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4" />
-                {formatDuration(durationMinutes)}
-              </span>
+              {durationMinutes > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  {formatDuration(durationMinutes)}
+                </span>
+              )}
+
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
                 Updated {formatDate(lastUpdated)}

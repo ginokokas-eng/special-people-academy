@@ -306,10 +306,15 @@ export function QuizContainer({
     );
   }
 
-  const attemptsAllowed = quiz.attempts_allowed && quiz.attempts_allowed > 0 ? quiz.attempts_allowed : null;
+  // Unlimited attempts are stored as null, 0 or a sentinel of 99+.
+  const attemptsAllowed =
+    quiz.attempts_allowed && quiz.attempts_allowed > 0 && quiz.attempts_allowed < 99
+      ? quiz.attempts_allowed
+      : null;
   const attemptsUsed = attempts.length;
   const attemptsRemaining = attemptsAllowed !== null ? Math.max(0, attemptsAllowed - attemptsUsed) : null;
   const isLockedOut = attemptsRemaining === 0 && !hasPassed;
+
 
   // Show quiz intro/start screen
   if (!started) {
@@ -325,12 +330,14 @@ export function QuizContainer({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Quiz info */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 rounded-lg bg-muted/30">
-              <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-semibold">{isUngraded ? 'Not graded' : `${quiz.passing_score}%`}</div>
-              <div className="text-xs text-muted-foreground">{isUngraded ? 'Self-check' : 'Pass mark'}</div>
-            </div>
+          <div className={`grid gap-4 text-center ${isUngraded ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'}`}>
+            {!isUngraded && (
+              <div className="p-4 rounded-lg bg-muted/30">
+                <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-semibold">{quiz.passing_score}%</div>
+                <div className="text-xs text-muted-foreground">Pass mark</div>
+              </div>
+            )}
             <div className="p-4 rounded-lg bg-muted/30">
               <Clock className="h-6 w-6 mx-auto mb-2 text-primary" />
               <div className="text-2xl font-semibold">{questions.length}</div>
@@ -342,17 +349,18 @@ export function QuizContainer({
                 {attemptsAllowed !== null ? attemptsAllowed : '∞'}
               </div>
               <div className="text-xs text-muted-foreground">
-                {attemptsAllowed !== null ? 'Attempts allowed' : 'Retakes allowed'}
+                {attemptsAllowed !== null ? 'Attempts allowed' : 'Unlimited attempts'}
               </div>
             </div>
           </div>
 
-          {/* Attempts remaining */}
+          {/* Attempts remaining — only when attempts are limited */}
           {attemptsAllowed !== null && !hasPassed && (
             <div className="text-center text-sm text-muted-foreground">
               {attemptsRemaining} of {attemptsAllowed} attempt{attemptsAllowed === 1 ? '' : 's'} remaining
             </div>
           )}
+
 
           {/* Previous attempts */}
           {attempts.length > 0 && (

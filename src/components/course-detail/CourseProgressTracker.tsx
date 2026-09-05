@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { 
   CheckCircle, 
@@ -70,9 +69,8 @@ export function CourseProgressTracker({
     (quizProgress.passed === quizProgress.total && quizProgress.total > 0 ? 1 : 0) +
     (practicalProgress.required ? (practicalProgress.completed ? 1 : 0) : 0);
 
-  const overallProgress = totalRequirements > 0 
-    ? Math.round((completedRequirements / totalRequirements) * 100) 
-    : 0;
+
+
 
   const allComplete = completedRequirements === totalRequirements && totalRequirements > 0;
 
@@ -123,9 +121,10 @@ export function CourseProgressTracker({
   const requirements = [
     {
       id: 'lessons',
-      label: 'Complete all lessons',
+      label: 'Complete all required lessons',
       icon: BookOpen,
       progress: `${lessonProgress.completed}/${lessonProgress.total}`,
+
       completed: lessonProgress.completed === lessonProgress.total && lessonProgress.total > 0,
       show: true,
     },
@@ -169,14 +168,7 @@ export function CourseProgressTracker({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Overall Progress */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Overall completion</span>
-            <span className="font-semibold text-primary">{overallProgress}%</span>
-          </div>
-          <Progress value={overallProgress} className="h-3" />
-        </div>
+
 
         {/* Requirements Checklist */}
         <div className="space-y-3">

@@ -5,7 +5,7 @@ import { CheckCircle2, Circle, ChevronDown, Paperclip, Download, Loader2 } from 
 import { lessonTypeIcon, lessonMetaLabel, totalDuration } from './lessonMeta';
 import { useResourceDownload } from './useResourceDownload';
 import type { LearnLesson, LearnModule, LearnResource } from './types';
-import { requiredLessons } from '@/lib/progress';
+import { requiredLessons, requiredProgress } from '@/lib/progress';
 
 interface Props {
   courseId: string;
@@ -33,9 +33,11 @@ export function CourseContentSidebar({
       <div className="px-4 py-3 border-b">
         <p className="text-sm font-semibold text-foreground">Course content</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {completedCount}/{gating.length} complete · {totalDuration(lessons) || '—'}
+          {completedCount}/{gating.length} required lessons
+          {totalDuration(lessons) ? ` · ${totalDuration(lessons)}` : ''}
         </p>
       </div>
+
       <div className="flex-1 overflow-y-auto">
         {modules.map((mod) => {
           const modLessons = lessons.filter((l) => l.module_id === mod.id);
@@ -91,18 +93,25 @@ function ModuleSection({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const completed = lessons.filter((l) => l.completed).length;
+  // Same rule as the hub cards: required lessons only.
+  const prog = requiredProgress(lessons);
   const duration = totalDuration(lessons);
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="border-b">
       <CollapsibleTrigger className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground truncate">{title}</p>
+          <p className="text-sm font-semibold text-foreground truncate" title={title}>
+            {title}
+          </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {completed}/{lessons.length} · {duration || '—'}
+            {prog.total > 0
+              ? `${prog.completed}/${prog.total} required`
+              : `${lessons.length} ${lessons.length === 1 ? 'lesson' : 'lessons'}`}
+            {duration ? ` · ${duration}` : ''}
           </p>
         </div>
+
         <ChevronDown
           className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
         />

@@ -221,11 +221,15 @@ export default function OrgPortal() {
     }
   };
 
+  // Columns are the union of licence courses and any course that already shows
+  // in the compliance matrix, so internal/free access is never hidden.
   const licensedCourses = useMemo(() => {
     const map = new Map<string, string>();
     for (const l of licences) map.set(l.course_id, l.course_title);
+    for (const r of matrix) if (!map.has(r.course_id)) map.set(r.course_id, r.course_title);
     return Array.from(map, ([id, title]) => ({ id, title }));
-  }, [licences]);
+  }, [licences, matrix]);
+
 
   const matrixByLearner = useMemo(() => {
     const learners = new Map<
@@ -736,25 +740,20 @@ export default function OrgPortal() {
               }
               flush
             >
-              {licensedCourses.length === 0 || matrixByLearner.length === 0 ? (
+              {matrixByLearner.length === 0 ? (
                 <EmptyState
                   icon={Trophy}
                   title="Nothing to track yet"
-                  body={
-                    licensedCourses.length === 0
-                      ? 'The matrix fills in once your organisation holds a licence and people start training.'
-                      : 'No learners are on a licence yet — invite your team to begin.'
-                  }
+                  body="No one has been assigned training yet."
                   action={
-                    licensedCourses.length > 0 ? (
-                      <Button size="sm" className="pressable rounded-full" onClick={() => setInviteOpen(true)}>
-                        <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-                        Invite people
-                      </Button>
-                    ) : undefined
+                    <Button size="sm" className="pressable rounded-full" onClick={() => setInviteOpen(true)}>
+                      <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                      Invite people
+                    </Button>
                   }
                 />
               ) : (
+
                 <>
                   <div className="overflow-x-auto">
                     <Table className="[&_td]:py-3">

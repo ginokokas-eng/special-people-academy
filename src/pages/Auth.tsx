@@ -40,8 +40,13 @@ export default function Auth() {
   const [loginMode, setLoginMode] = useState<'password' | 'code'>('password');
 
   
-  // Determine initial tab based on route
-  const initialTab = location.pathname === '/sign-up' ? 'signup' : 'login';
+  // Initial tab: the /sign-up path or ?mode=signup both open Sign Up.
+  const initialTab =
+    location.pathname === '/sign-up' ||
+    new URLSearchParams(location.search).get('mode') === 'signup'
+      ? 'signup'
+      : 'login';
+
   
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
@@ -226,7 +231,9 @@ export default function Auth() {
 
   return (
     <PublicLayout title={initialTab === 'signup' ? 'Sign Up' : 'Sign In'}>
-      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+      {/* pt-24 keeps the card clear of the sticky site header */}
+      <div className="min-h-[60vh] flex items-center justify-center px-4 pb-12 pt-24">
+
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-3 mb-5 group">
@@ -373,7 +380,7 @@ export default function Auth() {
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Your full name"
                       value={signupName}
                       onChange={(e) => setSignupName(e.target.value)}
                       required
@@ -399,7 +406,12 @@ export default function Auth() {
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
+                      minLength={8}
+                      maxLength={72}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Use between 8 and 72 characters.
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? (
@@ -412,6 +424,11 @@ export default function Auth() {
                     )}
                   </Button>
                 </form>
+
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                  Invited by your employer? Use the link in your invitation email.
+                </p>
+
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">

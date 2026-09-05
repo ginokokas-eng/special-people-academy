@@ -26,6 +26,9 @@ import { CourseProgressTracker } from '@/components/course-detail/CourseProgress
 import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisite';
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { isNativeShell } from '@/lib/native';
+import { requiredProgress } from '@/lib/progress';
+import { minutesFromSeconds, totalDurationSeconds } from '@/lib/duration';
+
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
 
@@ -576,9 +579,17 @@ export default function CourseDetail() {
     }
   };
 
-  const progress = lessons.length > 0 
-    ? Math.round((lessons.filter(l => l.completed).length / lessons.length) * 100)
-    : 0;
+  // One progress rule everywhere: required lessons only (src/lib/progress.ts).
+  const lessonProgressStats = requiredProgress(lessons);
+  const progress = lessonProgressStats.percent;
+
+  // The hero prefers the course-level duration, but falls back to the summed
+  // lesson durations when it is missing or zero.
+  const heroDurationMinutes =
+    course?.duration_minutes && course.duration_minutes > 0
+      ? course.duration_minutes
+      : minutesFromSeconds(totalDurationSeconds(lessons));
+
 
   const averageRating = reviews.length > 0
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
@@ -633,7 +644,7 @@ export default function CourseDetail() {
           category={course.category}
           level={course.level}
           isMandatory={course.is_mandatory}
-          durationMinutes={course.duration_minutes || 0}
+          durationMinutes={heroDurationMinutes}
           cpdHours={course.cpd_hours}
           renewalMonths={course.renewal_months}
           progress={progress}
@@ -650,7 +661,7 @@ export default function CourseDetail() {
         isMandatory={course.is_mandatory}
         isInternal={course.is_internal}
         hasCertificate={course.has_certificate}
-        durationMinutes={course.duration_minutes || 0}
+        durationMinutes={heroDurationMinutes}
         lastUpdated={course.last_updated || undefined}
         language={course.language}
         thumbnailUrl={course.thumbnail_url || undefined}
@@ -674,9 +685,10 @@ export default function CourseDetail() {
                 courseId={course.id}
                 userId={user!.id}
                 lessonProgress={{
-                  total: lessons.length,
-                  completed: lessons.filter(l => l.completed).length,
+                  total: lessonProgressStats.total,
+                  completed: lessonProgressStats.completed,
                 }}
+
                 quizProgress={quizProgress}
                 practicalProgress={practicalProgress}
                 hasCertificate={course.has_certificate}

@@ -15,6 +15,16 @@ import {
   Gamepad2,
   Package
 } from '@/components/icons';
+import { requiredProgress } from '@/lib/progress';
+import {
+  formatLessonsDuration,
+  formatMinutes,
+  lessonCountLabel,
+  lessonDurationSeconds,
+  minutesFromSeconds,
+} from '@/lib/duration';
+
+
 
 interface Lesson {
   id: string;
@@ -28,14 +38,8 @@ interface Lesson {
   lesson_type: string;
   order_index: number;
   completed?: boolean;
+  is_required?: boolean | null;
   module_id?: string;
-}
-
-/** Whole minutes from exact media seconds: <60s -> 1, else round up. */
-function videoMinutes(seconds: number | null | undefined): number {
-  if (!seconds || seconds <= 0) return 0;
-  if (seconds < 60) return 1;
-  return Math.ceil(seconds / 60);
 }
 
 /** Printed pages: admin-set count if present, else estimate from content. */
@@ -52,10 +56,8 @@ function resourcePages(lesson: Lesson): number {
 function lessonMeta(lesson: Lesson): string {
   switch (lesson.lesson_type) {
     case 'scorm':
-    case 'video': {
-      const m = videoMinutes(lesson.duration_seconds);
-      return m > 0 ? `${m} min` : '';
-    }
+    case 'video':
+      return formatMinutes(minutesFromSeconds(lessonDurationSeconds(lesson)));
     case 'quiz': {
       const c = lesson.question_count ?? 0;
       return c > 0 ? `${c} question${c === 1 ? '' : 's'}` : '';
@@ -75,17 +77,6 @@ function lessonMeta(lesson: Lesson): string {
   }
 }
 
-/** Sum video-only minutes for a set of lessons. */
-function videoTotalMinutes(items: Lesson[]): number {
-  const seconds = items.reduce(
-    (sum, l) =>
-      l.lesson_type === 'scorm' || l.lesson_type === 'video'
-        ? sum + (l.duration_seconds || 0)
-        : sum,
-    0
-  );
-  return videoMinutes(seconds);
-}
 
 interface Module {
   id: string;
@@ -145,20 +136,16 @@ export function CourseContent({
   courseId,
   mediaPaths,
 }: CourseContentProps) {
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  };
-
   // Group lessons by module if modules exist
   const hasModules = modules.length > 0;
 
-  // Calculate totals
+
+  // Totals: lesson count is everything shown; progress counts required lessons
+  // only (the certificate gate), and duration uses the shared helper.
   const totalLessons = lessons.length;
-  const totalDuration = videoTotalMinutes(lessons);
-  const completedCount = lessons.filter(l => l.completed).length;
+  const totalDurationLabel = formatLessonsDuration(lessons);
+  const courseProgress = requiredProgress(lessons);
+
 
   // Determine if lessons should appear locked
   const showLockedState = requiresSubscription || (!isEnrolled && !canAccessCourse);
@@ -253,14 +240,16 @@ export function CourseContent({
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Course content</CardTitle>
           <div className="text-sm text-muted-foreground">
-            {hasModules ? `${modules.length} modules • ` : ''}
-            {totalLessons} lessons • {formatDuration(totalDuration)}
-            {canAccessCourse && completedCount > 0 && (
+            {hasModules ? `${modules.length} ${modules.length === 1 ? 'module' : 'modules'} • ` : ''}
+            {lessonCountLabel(totalLessons)}
+            {totalDurationLabel ? ` • ${totalDurationLabel}` : ''}
+            {canAccessCourse && courseProgress.total > 0 && (
               <span className="text-success ml-2">
-                ({completedCount}/{totalLessons} complete)
+                ({courseProgress.completed}/{courseProgress.total} required lessons)
               </span>
             )}
           </div>
+
         </div>
         {requiresSubscription && (
           <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
@@ -274,8 +263,8 @@ export function CourseContent({
           <Accordion type="multiple" className="space-y-2" defaultValue={modules.map(m => m.id)}>
             {modules.map((module) => {
               const moduleLessons = lessons.filter(l => l.module_id === module.id);
-              const moduleCompleted = moduleLessons.filter(l => l.completed).length;
-              const moduleDuration = videoTotalMinutes(moduleLessons);
+              const moduleProgress = requiredProgress(moduleLessons);
+              const moduleDurationLabel = formatLessonsDuration(moduleLessons);
 
               return (
                 <AccordionItem 
@@ -288,16 +277,18 @@ export function CourseContent({
                       <div className="min-w-0 text-left">
                         <h4 className="font-semibold">{module.title}</h4>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          {moduleLessons.length} lessons • {formatDuration(moduleDuration)}
-                          {canAccessCourse && moduleCompleted > 0 && (
+                          {lessonCountLabel(moduleLessons.length)}
+                          {moduleDurationLabel ? ` • ${moduleDurationLabel}` : ''}
+                          {canAccessCourse && moduleProgress.total > 0 && (
                             <span className="text-success ml-2">
-                              ({moduleCompleted}/{moduleLessons.length} complete)
+                              ({moduleProgress.completed}/{moduleProgress.total} required lessons)
                             </span>
                           )}
                         </p>
                       </div>
                     </div>
                   </AccordionTrigger>
+
                   <AccordionContent className="pb-4">
                     <div className="space-y-1">
                       {moduleLessons
