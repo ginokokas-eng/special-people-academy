@@ -19,6 +19,7 @@ export const BLOCK_TYPES = [
   'mcq',
   'drag_match',
   'checklist',
+  'scenario',
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
