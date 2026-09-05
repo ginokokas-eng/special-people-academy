@@ -117,6 +117,19 @@ export default function LessonContentEditor() {
       },
     ]);
 
+  /** Appends AI drafts the author explicitly accepted. Unsaved until Save. */
+  const addBlocks = (accepted: { block_type: BlockType; payload: BlockPayload }[]) =>
+    mutate((prev) => [
+      ...prev,
+      ...accepted.map((a) => ({
+        id: null,
+        client_id: crypto.randomUUID(),
+        block_type: a.block_type,
+        payload: a.payload,
+        contributes_to_completion: defaultContributesToCompletion(a.block_type),
+      })),
+    ]);
+
   /**
    * Seeds the lesson from a template. The seeded blocks are ordinary drafts —
    * the template choice is not recorded anywhere.
@@ -277,6 +290,13 @@ export default function LessonContentEditor() {
         </div>
         <div className="flex items-center gap-2">
           {dirty && <Badge variant="outline">Unsaved changes</Badge>}
+          <CopilotPanel
+            lessonId={lessonId}
+            courseId={courseId}
+            lessonTitle={lesson?.title}
+            blocks={blocks}
+            onAccept={addBlocks}
+          />
           <Button
             variant="outline"
             onClick={() => {
