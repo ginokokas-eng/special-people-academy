@@ -11,17 +11,9 @@ import {
   Award,
   ShoppingCart,
   Building2,
-  Home,
   HeartHandshake,
-  Stethoscope,
-  Landmark,
-  Users,
-  FileText,
   ClipboardCheck,
-  Newspaper,
   LifeBuoy,
-  Video,
-  Download,
   ArrowRight,
 } from "@/components/icons";
 import { useState, useEffect } from "react";
@@ -59,21 +51,13 @@ type DropdownItem = {
 };
 
 const forOrganisationsLinks: DropdownItem[] = [
-  { label: "Care Homes", href: "/enterprise", description: "Compliance training for residential care", icon: Building2 },
-  { label: "Domiciliary Care", href: "/enterprise", description: "Training for community care providers", icon: Home },
-  { label: "Supported Living", href: "/enterprise", description: "Person-centred learning programmes", icon: HeartHandshake },
-  { label: "NHS / Organisations", href: "/enterprise", description: "Tailored programmes for NHS trusts", icon: Stethoscope },
-  { label: "Local Authorities", href: "/partners", description: "Workforce development partnerships", icon: Landmark },
-  { label: "Multi-site Teams", href: "/case-studies", description: "Scale training across locations", icon: Users },
+  { label: "Care providers", href: "/enterprise", description: "Compliance training for care homes, domiciliary and supported living", icon: Building2 },
+  { label: "Talk to sales", href: "/contact?tab=sales", description: "Licences, seats and rollout for your team", icon: HeartHandshake },
 ];
 
 const resourcesLinks: DropdownItem[] = [
-  { label: "Case Studies", href: "/case-studies", description: "Real outcomes from our partners", icon: FileText },
-  { label: "CQC Inspection Guide", href: "/help-center", description: "Prepare with confidence", icon: ClipboardCheck },
-  { label: "Blog & Insights", href: "/blog", description: "Industry updates and best practice", icon: Newspaper },
-  { label: "Help Centre", href: "/help-center", description: "FAQs and support articles", icon: LifeBuoy },
-  { label: "Webinars", href: "/webinars", description: "Free live and on-demand sessions", icon: Video },
-  { label: "Downloads / Resources", href: "/help-center", description: "Guides, templates and toolkits", icon: Download },
+  { label: "Help Centre", href: "/help-center", description: "How the academy works, step by step", icon: LifeBuoy },
+  { label: "Contact", href: "/contact", description: "Get help or speak to our team", icon: ClipboardCheck },
 ];
 
 export const Navbar = () => {
@@ -346,7 +330,7 @@ const WebNavbar = () => {
                 </DropdownMenu>
 
                 <button
-                  onClick={() => navigate("/contact")}
+                  onClick={() => navigate("/contact?tab=support")}
                   className="hidden lg:inline-flex group relative overflow-hidden items-center justify-center rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-[14px] font-semibold px-5 py-2.5 transition-colors duration-200 shadow-[0_6px_18px_-6px_rgba(124,58,237,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2"
                 >
                   <span className="relative z-10">Contact Support</span>
@@ -365,7 +349,7 @@ const WebNavbar = () => {
                   Sign In
                 </Link>
                 <button
-                  onClick={() => navigate("/contact")}
+                  onClick={() => navigate("/contact?tab=sales")}
                   className="hidden lg:inline-flex group relative overflow-hidden items-center justify-center gap-1.5 rounded-full bg-[#0F0B30] hover:bg-[#1A1448] text-white text-[14px] font-semibold px-5 py-2.5 transition-colors duration-200 shadow-[0_6px_18px_-6px_rgba(15,11,48,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F0B30] focus-visible:ring-offset-2"
                 >
                   <span className="relative z-10">Contact Sales</span>
@@ -385,7 +369,7 @@ const WebNavbar = () => {
               className={cn(
                 "lg:hidden relative overflow-visible transition-colors duration-300",
                 isMenuOpen
-                  ? "text-white hover:text-white hover:bg-white/10"
+                  ? "text-[hsl(262_83%_58%)] hover:text-[hsl(262_83%_58%)] hover:bg-[hsl(262_83%_58%/0.08)]"
                   : "text-[hsl(259_72%_14%)] hover:text-[hsl(262_83%_58%)] hover:bg-[hsl(262_83%_58%/0.06)]"
               )}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -426,7 +410,7 @@ const WebNavbar = () => {
               children: resourcesLinks.map((l) => ({ label: l.label, href: l.href })),
             },
             { label: 'About', href: '/about' },
-            { label: 'Contact Us', href: '/contact' },
+            { label: 'Contact', href: '/contact' },
             ...(user
               ? [
                   { label: 'My Learning', href: '/my-learning' },

@@ -9,17 +9,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { 
-  Search, 
-  Rocket, 
-  BookOpen, 
-  BarChart3, 
-  CreditCard, 
+import {
+  Search,
+  Rocket,
+  BookOpen,
+  Award,
+  Building2,
+  ShieldCheck,
   AlertCircle,
   ArrowRight,
-  Mail,
-  MessageCircle,
-  Clock
 } from "@/components/icons";
 import { Link } from "react-router-dom";
 
@@ -35,185 +33,204 @@ interface HelpCategory {
   articles: Article[];
 }
 
+/**
+ * Help content describes only what this academy actually does today: the four
+ * sign-in routes, organisation invitations, course access, the lesson player,
+ * quizzes, practical sign-off, certificates, renewals and the organisation
+ * portal. No support hours, chat or response-time promises.
+ */
 const helpCategories: HelpCategory[] = [
   {
     icon: Rocket,
-    title: "Getting Started",
-    description: "New to SPA? Set up your account and create your first learner plan.",
+    title: "Signing in",
+    description: "The ways you can get into your account.",
     articles: [
       {
-        title: "Creating your first learner plan",
-        content: "Start by navigating to the Learners section and clicking 'Add Learner.' Enter basic information, then select goals from our skill library or create custom ones. Set a pace that works for the learner, and you're ready to begin."
+        title: "Sign in with your email and password",
+        content:
+          "Go to the sign-in page, enter the email address your account uses and your password. If your password is not working, use the 'Forgot your password?' link to have a reset link sent to you.",
       },
       {
-        title: "Inviting a caregiver or staff member",
-        content: "Go to Settings → Team Members and click 'Invite.' Enter their email and select a role (Caregiver, Educator, or Observer). They'll receive an email to join your organization and can start collaborating immediately."
+        title: "Sign in with an email link",
+        content:
+          "On the sign-in page choose 'Email me a sign-in link'. We send a link to your email address; opening it on the same device signs you straight in. The link only works for an account that already exists, so accept your invitation first if you are new.",
       },
       {
-        title: "Setting goals and milestones",
-        content: "Goals help you track progress toward specific skills. Create a goal from the learner's profile, break it into milestones, and assign target dates. You'll see progress visually as milestones are completed."
+        title: "Sign in with Google",
+        content:
+          "If your work email is a Google account you can use the 'Continue with Google' button instead of a password. Use the same email address your training is registered against, otherwise you will end up with a second, empty account.",
       },
       {
-        title: "Accessibility settings overview",
-        content: "SPA is designed with accessibility in mind. Go to Settings → Accessibility to enable high contrast mode, adjust text sizes, enable screen reader optimizations, and configure caption preferences for video content."
-      }
-    ]
+        title: "Resetting your password",
+        content:
+          "Request a reset from the sign-in page, open the email and choose a new password of at least 8 characters. The reset link can only be used once.",
+      },
+    ],
   },
   {
     icon: BookOpen,
-    title: "Lessons & Content",
-    description: "Build engaging lessons with step-by-step instructions and multimedia.",
+    title: "Getting on a course",
+    description: "Invitations, buying a course and enrolling.",
     articles: [
       {
-        title: "Building step-by-step lessons",
-        content: "Navigate to the Lessons library and click 'Create Lesson.' Add a title, then break the skill into individual steps. Each step can include text instructions, images, or video demonstrations. Preview the lesson before publishing."
+        title: "Accepting an organisation invitation",
+        content:
+          "If your employer has allocated you a training pass you will receive an invitation email. Open it, enter your full name and choose a password (at least 8 characters). Your name is printed on your certificates, so enter it as you want it to appear. Once accepted, the course appears under My Courses.",
       },
       {
-        title: "Adding visuals, videos, and attachments",
-        content: "Within any lesson step, click the media button to upload images, videos, or PDF attachments. Supported formats include JPG, PNG, MP4, and PDF. We recommend keeping videos under 5 minutes for best engagement."
+        title: "Buying a course for yourself",
+        content:
+          "Open the course you want from the course catalogue and use the buy button. Payment is taken by card, and access is granted as soon as the payment succeeds. If a course has no buy button it is only available through an organisation.",
       },
       {
-        title: "Using templates and skill libraries",
-        content: "Save time by starting with our pre-built templates. Browse the Template Library by category (life skills, social skills, etc.), then customize any template to fit your learner's needs. You can also save your own lessons as templates."
+        title: "Finding your courses",
+        content:
+          "My Courses lists everything you have access to, with a status of not started, in progress or completed. My Learning shows the same courses with your progress and what to do next.",
       },
       {
-        title: "Best practices for clear instructions",
-        content: "Use plain language and short sentences. One action per step works best. Include visuals whenever possible. Test your lessons with learners and adjust based on where they struggle. Consistency in formatting helps learners know what to expect."
-      }
-    ]
+        title: "Courses with a prerequisite",
+        content:
+          "Some courses require an earlier course to be completed first. Where that applies, the course page tells you which one, and enrolment unlocks once the earlier course is complete.",
+      },
+    ],
   },
   {
-    icon: BarChart3,
-    title: "Tracking & Reports",
-    description: "Monitor progress, generate reports, and export your data.",
+    icon: ShieldCheck,
+    title: "Lessons, quizzes and sign-off",
+    description: "How progress and completion are recorded.",
     articles: [
       {
-        title: "Marking mastery and progress",
-        content: "After each session, mark lesson steps as 'Needs Practice,' 'Emerging,' or 'Mastered.' You can also add notes for context. These ratings roll up into overall goal progress and help identify patterns over time."
+        title: "Using the lesson player",
+        content:
+          "Lessons play in order within each module. Video lessons record your progress as you watch, and interactive lessons record your answers as you work through them. You can leave and come back; your place is kept.",
       },
       {
-        title: "Weekly summary reports",
-        content: "Every Monday, SPA generates a summary of the previous week's activity. View it in your dashboard or enable email delivery in Settings → Notifications. Reports show sessions completed, skills practiced, and areas needing attention."
+        title: "What counts as complete",
+        content:
+          "A lesson counts as complete when you have finished its content — watched the video, or answered the interactive parts. A course counts as complete when every required lesson, every assessment and, where required, the practical sign-off are done.",
       },
       {
-        title: "Exporting CSV/PDF",
-        content: "Go to Reports → Export to download your data. Choose between PDF (formatted for sharing) or CSV (for spreadsheets and analysis). You can export by learner, by goal, or for your entire organization."
+        title: "Quizzes and attempts",
+        content:
+          "Assessments have a pass mark of 80% and a limited number of attempts. Before you start a final attempt you are warned. If you use all your attempts the assessment locks and your training lead is notified so they can arrange support and a reset.",
       },
       {
-        title: "Tips for consistent data collection",
-        content: "Set a regular time for data entry—right after sessions works best. Use the mobile app for quick updates on the go. Enable reminders in Settings to prompt team members who haven't logged data recently."
+        title: "Practical sign-off",
+        content:
+          "Clinical and practical courses include a step that a trainer must complete with you in person. Until a trainer signs your competency off, the course shows as awaiting sign-off and the competency certificate is not issued.",
       },
-      {
-        title: "Understanding trend charts",
-        content: "Trend charts show progress over time. Green lines indicate improvement, yellow suggests plateaus, and red may indicate regression. Use these insights to adjust lesson difficulty or try different teaching approaches."
-      }
-    ]
+    ],
   },
   {
-    icon: CreditCard,
-    title: "Account & Billing",
-    description: "Manage your subscription, invoices, and account settings.",
+    icon: Award,
+    title: "Certificates and renewals",
+    description: "Proving and maintaining your training.",
     articles: [
       {
-        title: "Updating your plan",
-        content: "Go to Settings → Billing → Change Plan. You'll see available options and pricing. Upgrades take effect immediately; downgrades apply at the next billing cycle. Your data is always preserved when changing plans."
+        title: "Getting your certificate",
+        content:
+          "Certificates are issued automatically once a course is complete. You can download them from the course's certificate tab or from your certificates page.",
       },
       {
-        title: "Invoices and receipts",
-        content: "All invoices are available in Settings → Billing → Invoice History. Click any invoice to view or download a PDF. For Organization and Enterprise plans, you can add a PO number and billing address to invoices."
+        title: "Completion and competency certificates",
+        content:
+          "Courses with a practical element issue two certificates: one for completing the learning, and one for competency once a trainer has signed you off.",
       },
       {
-        title: "Cancelling or pausing service",
-        content: "You can cancel anytime in Settings → Billing → Cancel Subscription. You'll retain access until the end of your billing period. To pause instead, contact support—we offer pauses up to 3 months for qualifying accounts."
+        title: "Verifying a certificate",
+        content:
+          "Each certificate carries a verification code. Anyone — an inspector, a new employer — can enter that code at /verify to confirm who it was issued to, for which course and when, without needing an account.",
       },
       {
-        title: "Discounts for non-profits and schools",
-        content: "We offer discounts for registered non-profits, schools, and educational institutions. Contact our sales team with documentation of your organization's status to learn about available pricing."
-      }
-    ]
+        title: "Renewals and expiry",
+        content:
+          "Where a course has a renewal period, the certificate shows an expiry date and the course reappears as due for renewal in good time. Organisation admins can see what is due or overdue across their team.",
+      },
+    ],
   },
   {
-    icon: AlertCircle,
-    title: "Troubleshooting",
-    description: "Solutions for common issues and how to get additional help.",
+    icon: Building2,
+    title: "For organisation admins",
+    description: "People, licences, seats and compliance.",
     articles: [
       {
-        title: "Login issues",
-        content: "If you can't log in, first try resetting your password using the 'Forgot Password' link. Check that caps lock is off and you're using the correct email. If you use SSO, contact your organization's IT team. Still stuck? Contact support."
+        title: "The organisation portal",
+        content:
+          "Signed-in organisation admins have an Organisation link in the sidebar. It shows your people, your licences and your team's compliance position in one place.",
       },
       {
-        title: "Video not playing",
-        content: "Ensure you're using a supported browser (Chrome, Firefox, Safari, Edge). Check your internet connection. Try refreshing the page or clearing your browser cache. If using a VPN, try disabling it temporarily."
+        title: "Licences and seats",
+        content:
+          "A licence covers a course for a number of seats. Each seat is one member of staff on that course. The licences view shows how many seats are used and how many are still free.",
       },
       {
-        title: "Missing permissions",
-        content: "If you can't access certain features, your role may not have permission. Ask your organization's admin to check your role in Settings → Team Members. Different roles (Admin, Educator, Caregiver, Observer) have different access levels."
+        title: "Inviting staff and allocating seats",
+        content:
+          "From your people view, invite a member of staff by email and allocate them a seat. They receive an invitation to set their name and password. Unaccepted invitations release their seat when they expire, so nothing is wasted.",
       },
       {
-        title: "Data not syncing",
-        content: "SPA syncs data automatically, but sync can be delayed on slow connections. Pull down to refresh on mobile. If data is missing, check that you're logged into the correct account. Contact support if issues persist."
+        title: "Removing someone",
+        content:
+          "Revoking a seat removes that person's access to the course and returns the seat to your licence so you can allocate it to someone else. Certificates already issued stay valid.",
       },
       {
-        title: "Contact support",
-        content: "Reach our support team at [Support Email] or use the chat widget in the app. Include your account email and a detailed description of the issue. Screenshots or screen recordings help us resolve issues faster."
-      }
-    ]
-  }
+        title: "The compliance view",
+        content:
+          "Compliance shows, per person and per course, whether training is complete, in progress, due for renewal or overdue. Your visibility is read-only: you can see your own staff's records, and nothing outside your organisation.",
+      },
+    ],
+  },
 ];
-
-// Flatten all articles for search
-const allArticles = helpCategories.flatMap(category => 
-  category.articles.map(article => ({
-    ...article,
-    category: category.title
-  }))
-);
 
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return helpCategories;
-    
+
     const query = searchQuery.toLowerCase();
-    return helpCategories.map(category => ({
-      ...category,
-      articles: category.articles.filter(
-        article => 
-          article.title.toLowerCase().includes(query) ||
-          article.content.toLowerCase().includes(query)
-      )
-    })).filter(category => category.articles.length > 0);
+    return helpCategories
+      .map((category) => ({
+        ...category,
+        articles: category.articles.filter(
+          (article) =>
+            article.title.toLowerCase().includes(query) ||
+            article.content.toLowerCase().includes(query),
+        ),
+      }))
+      .filter((category) => category.articles.length > 0);
   }, [searchQuery]);
 
   const hasResults = filteredCategories.length > 0;
 
   return (
     <MarketingLayout
-      title="Help Center"
-      description="Get setup help, training guides, troubleshooting tips, and billing support."
+      title="Help Centre"
+      description="How to sign in, get on a course, complete lessons and quizzes, get certificates and manage your organisation's training."
     >
       {/* Hero with Search */}
       <section className="py-16 md:py-24 px-6 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-3xl text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            How can we help?
+            Help Centre
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Search our knowledge base or browse categories below.
+            Answers about signing in, courses, certificates and managing your team's training.
           </p>
-          
+
           <div className="relative max-w-xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-              placeholder="Search articles…" 
+            <Input
+              placeholder="Search help…"
+              aria-label="Search help articles"
               className="pl-12 py-6 text-lg bg-background"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 ✕
@@ -223,10 +240,9 @@ export default function HelpCenter() {
 
           {searchQuery && (
             <p className="text-sm text-muted-foreground mt-4">
-              {hasResults 
+              {hasResults
                 ? `Showing results for "${searchQuery}"`
-                : `No results found for "${searchQuery}"`
-              }
+                : `No results found for "${searchQuery}"`}
             </p>
           )}
         </div>
@@ -238,24 +254,24 @@ export default function HelpCenter() {
           {!hasResults ? (
             <div className="text-center py-12">
               <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">No articles found</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-2">Nothing found</h2>
               <p className="text-muted-foreground mb-6">
-                Try a different search term or browse all categories.
+                Try a different search, or browse all the topics.
               </p>
-              <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
+              <Button onClick={() => setSearchQuery("")}>Clear search</Button>
             </div>
           ) : (
             <div className="space-y-8">
               {filteredCategories.map((category, index) => {
                 const Icon = category.icon;
                 return (
-                  <Card key={index}>
+                  <Card key={category.title}>
                     <CardHeader>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Icon className="h-6 w-6 text-primary" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <CardTitle className="text-xl">{category.title}</CardTitle>
                           <CardDescription>{category.description}</CardDescription>
                         </div>
@@ -264,9 +280,9 @@ export default function HelpCenter() {
                     <CardContent>
                       <Accordion type="single" collapsible className="w-full">
                         {category.articles.map((article, articleIndex) => (
-                          <AccordionItem key={articleIndex} value={`${index}-${articleIndex}`}>
+                          <AccordionItem key={article.title} value={`${index}-${articleIndex}`}>
                             <AccordionTrigger className="text-left hover:text-primary">
-                              <span className="flex items-center gap-2">
+                              <span className="flex items-center gap-2 min-w-0">
                                 <ArrowRight className="h-4 w-4 flex-shrink-0" />
                                 {article.title}
                               </span>
@@ -286,87 +302,31 @@ export default function HelpCenter() {
         </div>
       </section>
 
-      {/* Support CTA Strip */}
+      {/* Support CTA */}
       <section className="py-12 md:py-16 px-6 bg-primary text-primary-foreground">
         <div className="container mx-auto max-w-5xl">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="text-center lg:text-left">
               <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                Can't find what you need? We'll help.
+                Still stuck? Send us a message.
               </h2>
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm opacity-90 mt-4">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>[Support Hours: Mon–Fri, 9am–6pm GMT]</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>[Support Email]</span>
-                </div>
-              </div>
+              <p className="text-sm opacity-90">
+                Tell us what you were trying to do and we'll reply by email.
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" variant="secondary">
-                <Link to="/contact">
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Contact Support
-                </Link>
+                <Link to="/contact?tab=support">Contact support</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                <Link to="/contact">
-                  Request a Demo
-                </Link>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <Link to="/contact?tab=sales">Talk to sales</Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Help Options */}
-      <section className="py-16 md:py-24 px-6">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Other Ways to Get Help</h2>
-            <p className="text-muted-foreground">Choose the option that works best for you.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="text-center p-6">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Chat with our team in real-time during support hours.
-              </p>
-              <Button variant="outline" size="sm">Start Chat</Button>
-            </Card>
-            
-            <Card className="text-center p-6">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Email Us</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Send a message and we'll respond within 24 hours.
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/contact">Send Message</Link>
-              </Button>
-            </Card>
-            
-            <Card className="text-center p-6">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Video Tutorials</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Watch step-by-step guides for common tasks.
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/webinars">Watch Now</Link>
-              </Button>
-            </Card>
           </div>
         </div>
       </section>

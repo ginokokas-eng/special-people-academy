@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { 
   Heart, 
-  Accessibility, 
   Brain, 
   Users, 
   Target,
@@ -16,54 +15,54 @@ import {
 const values = [
   {
     icon: Heart,
-    title: "Dignity & Respect",
-    description: "Every learner deserves to be treated with respect. We use person-first language and design experiences that honor individual strengths."
+    title: "Person-first, always",
+    description: "Training written the way good care is given: plain language, respect for the people being supported, and respect for the staff doing the work."
   },
   {
-    icon: Accessibility,
-    title: "Accessibility-First",
-    description: "Accessibility isn't an afterthought—it's our foundation. We build for diverse needs from day one, not as a retrofit."
+    icon: Shield,
+    title: "Safe practice first",
+    description: "Our courses are policy-led. We teach what safe practice looks like, where the limits of a care role sit, and when to stop and escalate."
   },
   {
     icon: Brain,
-    title: "Evidence-Informed, Human-Centered",
-    description: "Our methods are grounded in research, but always adapted to the real humans we serve. Data guides us; people lead us."
+    title: "Built with practitioners",
+    description: "Content is shaped with experienced care and clinical staff, so it matches the reality of a shift rather than a textbook."
   },
   {
     icon: Users,
-    title: "Collaboration",
-    description: "The best outcomes happen when learners, families, educators, and support teams work together with shared visibility."
+    title: "Made for whole teams",
+    description: "Managers can see who is trained, what is outstanding and what is due for renewal, without chasing paperwork."
   },
   {
     icon: Target,
-    title: "Practical Outcomes",
-    description: "Skills should transfer to real life. We focus on functional, meaningful progress—not just completion rates."
+    title: "Evidence you can show",
+    description: "Every completion produces a verifiable certificate, so CQC readiness is a by-product of doing the training properly."
   }
 ];
 
 
 
 const inclusiveTrainingPoints = [
-  "Content designed for varied reading levels and learning styles",
-  "Visual supports, captions, and screen reader compatibility",
-  "Flexible pacing—learners move at their own speed",
-  "Step-by-step breakdowns that reduce cognitive load",
-  "Progress tracking that celebrates growth, not just completion",
-  "Collaboration tools for families, educators, and support staff"
+  "Plain-English content written for busy care staff",
+  "Captions and transcripts on video lessons",
+  "Learners work at their own pace and keep their place",
+  "Short lessons that fit around a shift",
+  "Scenario questions drawn from real care situations",
+  "Practical sign-off by a trainer where competency must be observed"
 ];
 
 export default function About() {
   return (
     <MarketingLayout 
-      title="About Us" 
-      description="Our mission is to make skill-building inclusive, measurable, and empowering—supporting learners, families, and educators."
+      title="About us" 
+      description="CPD training for UK care providers: person-first courses, verifiable certificates and a clear view of team compliance."
     >
       <PageHero 
         badge="About Us" 
-        title="Made with care—for every learner" 
-        subtitle="Special People Training exists to help special individuals build essential life skills through inclusive training tools that respect each person's pace and strengths."
-        primaryCTA={{ text: "Partner With Us", href: "/partners" }}
-        secondaryCTA={{ text: "Contact Us", href: "/contact" }}
+        title="Training built by care people, for care people" 
+        subtitle="Special People Training provides CPD training for UK care providers — clear, policy-led courses that help staff practise safely and help managers stay inspection-ready."
+        primaryCTA={{ text: "Browse courses", href: "/courses" }}
+        secondaryCTA={{ text: "Talk to sales", href: "/contact?tab=sales" }}
       />
 
       {/* Mission Section */}
@@ -72,23 +71,24 @@ export default function About() {
           <div className="text-center mb-12">
             <Badge className="mb-4">Our Mission</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Skill-building that's inclusive, measurable, and empowering
+              Training that holds up on a real shift — and in an inspection
             </h2>
           </div>
           
           <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
             <p>
-              We believe that every person—regardless of ability—deserves access to training that helps them grow. 
-              Special People Training was built to make that possible.
+              Care staff deserve training that respects their time and prepares them for the situations they
+              actually meet. Special People Training was built to provide exactly that: CPD courses for care
+              homes, domiciliary care and supported living services across the UK.
             </p>
             <p>
-              Our platform helps educators, therapists, families, and program leaders deliver consistent, 
-              personalized skill-building. We focus on practical outcomes: life skills, job readiness, 
-              communication, and independence.
+              Our courses are policy-led. They teach what safe practice looks like, where a care role's limits
+              sit and when to stop and escalate. Where competency has to be observed, a trainer signs the
+              learner off in person before a competency certificate is issued.
             </p>
             <p>
-              We design for real people with real needs. That means clear language, visual supports, 
-              flexible pacing, and tools that work for everyone on the team—from the learner to the caregiver.
+              For managers, the same work produces the evidence: completions, renewal dates and verifiable
+              certificates, so CQC readiness stops being a spreadsheet exercise.
             </p>
           </div>
         </div>
@@ -104,15 +104,13 @@ export default function About() {
             </h2>
           </div>
           
-          {/* Five values: a 3-up grid left one slot visibly empty, so the last
-              row is centred instead. */}
+          {/* Five values: the first two share a wider row, the last three sit in a
+              three-up row, so no slot is ever left empty. */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-6">
             {values.map((value, index) => (
               <Card
-                key={index}
-                className={`border-none shadow-sm lg:col-span-2 ${
-                  index === 3 ? 'lg:col-start-2' : ''
-                }`}
+                key={value.title}
+                className={`border-none shadow-sm ${index < 2 ? 'lg:col-span-3' : 'lg:col-span-2'}`}
               >
                 <CardHeader>
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -135,13 +133,13 @@ export default function About() {
       <section className="py-16 md:py-24 px-6">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <Badge className="mb-4">Inclusive Training</Badge>
+            <Badge className="mb-4">Our courses</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              What we mean by "inclusive training"
+              What our courses are like
             </h2>
             <p className="text-lg text-muted-foreground">
-              Inclusive training isn't just about accessibility checkboxes. It's about designing experiences 
-              that work for people with different abilities, learning styles, and support needs—from the start.
+              Short, practical lessons that a member of staff can finish between visits, with assessments
+              that check understanding rather than memory.
             </p>
           </div>
           
@@ -168,14 +166,12 @@ export default function About() {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-muted-foreground">
-                We are committed to making Special People Training accessible to all users, 
-                including those who use assistive technologies. Our platform is designed to meet 
-                WCAG 2.1 AA standards and is continuously tested with real users.
+                We want every member of staff to be able to complete their training, including those who
+                use assistive technology. We build towards WCAG 2.1 AA and fix barriers as we find them.
               </p>
               <p className="text-muted-foreground">
-                This includes: keyboard navigation, screen reader compatibility, captions and transcripts, 
-                high contrast options, and clear, predictable layouts. If you encounter any barriers, 
-                please contact us—we want to fix them.
+                That means keyboard navigation, screen reader support, captions and transcripts on video
+                lessons, and clear, predictable layouts. If something gets in your way, please tell us.
               </p>
               <p className="text-sm text-muted-foreground italic">
                 Accessibility is never "done." We're always learning and improving.
@@ -187,9 +183,9 @@ export default function About() {
 
       <CTABanner 
         title="Ready to work together?" 
-        subtitle="Partner with us to bring inclusive training to your organization, or reach out with questions."
-        primaryCTA={{ text: "Partner With Us", href: "/partners" }} 
-        secondaryCTA={{ text: "Contact Us", href: "/contact" }}
+        subtitle="Browse the course catalogue, or talk to us about training your team."
+        primaryCTA={{ text: "Browse courses", href: "/courses" }} 
+        secondaryCTA={{ text: "Talk to sales", href: "/contact?tab=sales" }}
       />
     </MarketingLayout>
   );

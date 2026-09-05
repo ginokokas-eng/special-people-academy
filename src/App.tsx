@@ -35,14 +35,9 @@ import TrainerPortal from "./pages/TrainerPortal";
 import Contact from "./pages/Contact";
 import Booking from "./pages/Booking";
 import Features from "./pages/Features";
-import Pricing from "./pages/Pricing";
 import Integrations from "./pages/Integrations";
 import Enterprise from "./pages/Enterprise";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
 import HelpCenter from "./pages/HelpCenter";
-import Webinars from "./pages/Webinars";
-import CaseStudies from "./pages/CaseStudies";
 import About from "./pages/About";
 import Careers from "./pages/Careers";
 import Partners from "./pages/Partners";
@@ -145,14 +140,16 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/booking" element={<Booking />} />
                 <Route path="/features" element={<Features />} />
-                <Route path="/pricing" element={<Pricing />} />
+                {/* Subscription pricing is retired: send buyers to sales. */}
+                <Route path="/pricing" element={<Navigate to="/contact?tab=sales" replace />} />
                 <Route path="/integrations" element={<Integrations />} />
                 <Route path="/enterprise" element={<Enterprise />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
+                {/* Awaiting real content — routes park on the help centre. */}
+                <Route path="/blog" element={<Navigate to="/help-center" replace />} />
+                <Route path="/blog/:slug" element={<Navigate to="/help-center" replace />} />
                 <Route path="/help-center" element={<HelpCenter />} />
-                <Route path="/webinars" element={<Webinars />} />
-                <Route path="/case-studies" element={<CaseStudies />} />
+                <Route path="/webinars" element={<Navigate to="/help-center" replace />} />
+                <Route path="/case-studies" element={<Navigate to="/help-center" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/partners" element={<Partners />} />

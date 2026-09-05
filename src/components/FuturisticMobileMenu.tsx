@@ -29,6 +29,9 @@ interface FuturisticMobileMenuProps {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+/** Site palette (same tokens as the desktop navbar). */
+const VIOLET = "hsl(262_83%_58%)";
+
 export const FuturisticMobileMenu = ({
   open,
   onClose,
@@ -98,7 +101,7 @@ export const FuturisticMobileMenu = ({
             aria-label="Close menu"
             onClick={onClose}
             tabIndex={-1}
-            className="absolute inset-0 w-full h-full bg-black/40 backdrop-blur-sm cursor-default focus:outline-none"
+            className="absolute inset-0 w-full h-full bg-[hsl(259_72%_14%/0.25)] backdrop-blur-sm cursor-default focus:outline-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.3 } }}
             exit={{ opacity: 0, transition: { duration: 0.25 } }}
@@ -106,7 +109,7 @@ export const FuturisticMobileMenu = ({
 
           {/* Panel — circular reveal from top-right (under hamburger) */}
           <motion.div
-            className="absolute inset-0 flex flex-col overflow-hidden text-white bg-[#08080F]"
+            className="absolute inset-0 flex flex-col overflow-hidden bg-white text-[hsl(259_72%_14%)]"
             initial={{ clipPath: "circle(0% at calc(100% - 36px) 36px)" }}
             animate={{
               clipPath: "circle(160% at calc(100% - 36px) 36px)",
@@ -117,93 +120,55 @@ export const FuturisticMobileMenu = ({
               transition: { duration: 0.5, ease: [0.85, 0, 0.15, 1] as const },
             }}
           >
-            {/* Ambient glows */}
+            {/* Soft violet wash — matches the marketing pages, no dark grid */}
             <div
               aria-hidden
-              className="absolute -top-1/3 -right-1/4 h-[80vh] w-[80vw] rounded-full pointer-events-none"
+              className="absolute -top-1/3 -right-1/4 h-[70vh] w-[80vw] rounded-full pointer-events-none"
               style={{
-                background:
-                  "radial-gradient(circle, hsl(262 80% 55% / 0.35) 0%, transparent 60%)",
-                filter: "blur(60px)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute -bottom-1/3 -left-1/4 h-[70vh] w-[80vw] rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, hsl(189 90% 50% / 0.18) 0%, transparent 60%)",
+                background: `radial-gradient(circle, ${VIOLET.replace(/_/g, " ")} 0%, transparent 62%)`,
+                opacity: 0.1,
                 filter: "blur(70px)",
               }}
             />
 
-            {/* Subtle grid */}
-            <div
-              aria-hidden
-              className="absolute inset-0 opacity-[0.08] pointer-events-none"
-              style={{
-                backgroundImage:
-                  "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
-                backgroundSize: "40px 40px",
-                maskImage:
-                  "radial-gradient(70% 50% at 50% 30%, black 30%, transparent 90%)",
-                WebkitMaskImage:
-                  "radial-gradient(70% 50% at 50% 30%, black 30%, transparent 90%)",
-              }}
-            />
-
-            {/* Top header bar inside menu (replaces the original sticky header visually) */}
+            {/* Top bar inside the menu */}
             <div className="relative h-[64px] shrink-0 flex items-center px-6">
               <motion.span
                 initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: 0.35, duration: 0.5, ease: EASE } }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.3, duration: 0.5, ease: EASE } }}
                 exit={{ opacity: 0, transition: { duration: 0.15 } }}
-                className="text-[10px] font-mono tracking-[0.3em] uppercase text-white/50"
+                className="font-heading text-[13px] font-bold tracking-[0.18em] uppercase text-[hsl(262_83%_58%)]"
               >
-                Navigation
+                Menu
               </motion.span>
             </div>
 
-            {/* Hairline divider */}
-            <motion.div
-              aria-hidden
-              className="h-px w-full origin-right"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, hsl(262 83% 70% / 0.5), hsl(189 94% 60% / 0.4), transparent)",
-              }}
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{ scaleX: 1, opacity: 1, transition: { delay: 0.4, duration: 0.6, ease: EASE } }}
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            />
+            <div aria-hidden className="h-px w-full bg-[#EEEAF8]" />
 
             {/* Content */}
-            <div className="relative flex-1 flex flex-col px-6 pt-10 pb-8 overflow-y-auto">
-              {/* Tagline */}
+            <div className="relative flex-1 flex flex-col px-6 pt-8 pb-8 overflow-y-auto">
               <motion.p
                 initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: 0.45, duration: 0.6, ease: EASE } }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.6, ease: EASE } }}
                 exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                className="text-[14px] leading-relaxed text-white/60 max-w-[20rem] font-light mb-10"
+                className="text-[14px] leading-relaxed text-[hsl(259_20%_38%)] max-w-[20rem] mb-8"
               >
                 {tagline}
               </motion.p>
 
-              {/* Menu items — large futuristic links */}
               <ul className="flex-1 -mx-1">
                 {items.map((item, idx) => {
                   const isPrimary = item.primary;
                   return (
                     <motion.li
                       key={item.label}
-                      initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+                      initial={{ opacity: 0, y: 18 }}
                       animate={{
                         opacity: 1,
                         y: 0,
-                        filter: "blur(0px)",
                         transition: {
-                          delay: 0.5 + idx * 0.07,
-                          duration: 0.65,
+                          delay: 0.42 + idx * 0.06,
+                          duration: 0.55,
                           ease: EASE,
                         },
                       }}
@@ -212,7 +177,7 @@ export const FuturisticMobileMenu = ({
                         y: -6,
                         transition: { duration: 0.15, ease: "easeIn" },
                       }}
-                      className="border-b border-white/[0.07] last:border-b-0"
+                      className="border-b border-[#EEEAF8] last:border-b-0"
                     >
                       {item.children ? (
                         <div>
@@ -222,21 +187,16 @@ export const FuturisticMobileMenu = ({
                             onClick={() =>
                               setOpenGroup((cur) => (cur === item.label ? null : item.label))
                             }
-                            className="group relative flex w-full items-center justify-between gap-4 py-5 px-1 text-left transition-all duration-300 ease-out active:scale-[0.985] focus-visible:outline-none focus-visible:bg-white/[0.04] focus-visible:rounded-lg"
+                            className="group relative flex w-full items-center justify-between gap-4 py-4 px-1 text-left transition-all duration-300 ease-out active:scale-[0.985] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)]"
                           >
-                            <span className="flex items-baseline gap-3 min-w-0">
-                              <span className="font-mono text-[10px] tracking-[0.2em] text-white/30">
-                                {String(idx + 1).padStart(2, "0")}
-                              </span>
-                              <span className="font-heading font-semibold leading-none text-[28px] text-white/90 truncate">
-                                {item.label}
-                              </span>
+                            <span className="font-heading font-bold leading-tight text-[24px] text-[hsl(259_72%_14%)] truncate min-w-0">
+                              {item.label}
                             </span>
                             <ChevronDown
                               aria-hidden
                               className={cn(
-                                "h-5 w-5 shrink-0 text-white/40 transition-transform duration-300",
-                                openGroup === item.label && "rotate-180 text-white/80"
+                                "h-5 w-5 shrink-0 text-[hsl(259_20%_45%)] transition-transform duration-300",
+                                openGroup === item.label && "rotate-180 text-[hsl(262_83%_58%)]"
                               )}
                             />
                           </button>
@@ -247,7 +207,7 @@ export const FuturisticMobileMenu = ({
                                 animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
                                 transition={{ duration: 0.3, ease: EASE }}
-                                className="overflow-hidden pb-3 pl-8"
+                                className="overflow-hidden pb-3 pl-3"
                               >
                                 {item.children.map((child) => (
                                   <li key={child.label}>
@@ -257,10 +217,13 @@ export const FuturisticMobileMenu = ({
                                         e.preventDefault();
                                         handleItemClick(child);
                                       }}
-                                      className="flex items-center justify-between gap-3 py-3.5 text-[16px] text-white/70 hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white"
+                                      className="flex items-center justify-between gap-3 rounded-lg py-3.5 px-2 text-[16px] text-[hsl(259_20%_38%)] transition-colors hover:bg-[hsl(262_83%_58%/0.06)] hover:text-[hsl(259_72%_14%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)]"
                                     >
                                       {child.label}
-                                      <ArrowUpRight aria-hidden className="h-4 w-4 text-white/25" />
+                                      <ArrowUpRight
+                                        aria-hidden
+                                        className="h-4 w-4 text-[hsl(262_83%_58%)]"
+                                      />
                                     </a>
                                   </li>
                                 ))}
@@ -269,49 +232,44 @@ export const FuturisticMobileMenu = ({
                           </AnimatePresence>
                         </div>
                       ) : (
-                      <a
-                        ref={idx === 0 ? firstLinkRef : undefined}
-                        href={item.href}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleItemClick(item);
-                        }}
-                        className={cn(
-                          "group relative flex items-center justify-between gap-4 py-5 px-1",
-                          "transition-all duration-300 ease-out active:scale-[0.985]",
-                          "focus-visible:outline-none focus-visible:bg-white/[0.04] focus-visible:rounded-lg"
-                        )}
-                      >
-                        <span className="flex items-baseline gap-3 min-w-0">
-                          <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 group-hover:text-[hsl(189_94%_70%)] transition-colors duration-300">
-                            {String(idx + 1).padStart(2, "0")}
-                          </span>
+                        <a
+                          ref={idx === 0 ? firstLinkRef : undefined}
+                          href={item.href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleItemClick(item);
+                          }}
+                          className={cn(
+                            "group relative flex items-center justify-between gap-4 py-4 px-1 rounded-lg",
+                            "transition-all duration-300 ease-out active:scale-[0.985]",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(262_83%_58%)]"
+                          )}
+                        >
                           <span
                             className={cn(
-                              "font-heading font-semibold leading-none transition-all duration-300 truncate",
+                              "font-heading font-bold leading-tight text-[24px] truncate min-w-0 transition-colors duration-300",
                               isPrimary
-                                ? "text-[28px] bg-gradient-to-r from-white via-[hsl(189_94%_85%)] to-[hsl(262_83%_85%)] bg-clip-text text-transparent"
-                                : "text-[28px] text-white/90 group-hover:text-white group-hover:translate-x-1"
+                                ? "text-[hsl(262_83%_58%)]"
+                                : "text-[hsl(259_72%_14%)]"
                             )}
                           >
                             {item.label}
                           </span>
-                        </span>
 
-                        {isPrimary ? (
-                          <span
-                            aria-hidden
-                            className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[hsl(262_83%_62%)] to-[hsl(262_83%_45%)] text-white shadow-[0_0_24px_-4px_hsl(262_83%_60%/0.85)] transition-transform duration-300 group-hover:scale-110"
-                          >
-                            <ArrowUpRight className="h-4 w-4" />
-                          </span>
-                        ) : (
-                          <ArrowUpRight
-                            aria-hidden
-                            className="h-5 w-5 shrink-0 text-white/30 transition-all duration-300 group-hover:text-[hsl(189_94%_75%)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                          />
-                        )}
-                      </a>
+                          {isPrimary ? (
+                            <span
+                              aria-hidden
+                              className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(262_83%_58%)] text-white transition-transform duration-300 group-hover:scale-105"
+                            >
+                              <ArrowUpRight className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <ArrowUpRight
+                              aria-hidden
+                              className="h-5 w-5 shrink-0 text-[hsl(259_20%_45%)] transition-all duration-300 group-hover:text-[hsl(262_83%_58%)]"
+                            />
+                          )}
+                        </a>
                       )}
                     </motion.li>
                   );
@@ -321,16 +279,15 @@ export const FuturisticMobileMenu = ({
               {/* Footer */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: 0.5 + items.length * 0.07 + 0.1, duration: 0.55, ease: EASE } }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { delay: 0.42 + items.length * 0.06 + 0.1, duration: 0.5, ease: EASE },
+                }}
                 exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                className="mt-12 pt-5 border-t border-white/[0.07] flex items-center justify-between gap-4"
+                className="mt-12 pt-5 border-t border-[#EEEAF8]"
               >
-                <p className="text-[12px] text-white/45 leading-relaxed">
-                  {footerText}
-                </p>
-                <span className="font-mono text-[9px] tracking-[0.25em] text-white/35 whitespace-nowrap">
-                  v · 2026
-                </span>
+                <p className="text-[12px] text-[hsl(259_20%_45%)] leading-relaxed">{footerText}</p>
               </motion.div>
             </div>
           </motion.div>

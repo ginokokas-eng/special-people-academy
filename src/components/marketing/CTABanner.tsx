@@ -18,10 +18,10 @@ interface CTABannerProps {
 }
 
 const defaultSteps = [
-  { title: "Quick call.", description: "15 minutes with a human. No scripted demo." },
-  { title: "Migrate in 48h.", description: "We import your records, SCORM & users." },
-  { title: "Go live.", description: "Your team is training the same week." },
-  { title: "You stay.", description: "94% annual retention. Our best salespeople are our customers." },
+  { title: "Quick call.", description: "A short conversation with a human. No scripted demo." },
+  { title: "We set you up.", description: "We create your organisation and load your licences." },
+  { title: "Allocate and go.", description: "Your admin invites staff and allocates their training passes." },
+  { title: "Stay on top of it.", description: "Completion, renewals and certificates in one place." },
 ];
 
 const splitTitle = (title: string) => {

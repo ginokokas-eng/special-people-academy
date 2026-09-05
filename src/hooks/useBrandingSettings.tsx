@@ -11,6 +11,10 @@ export interface BrandingSettings {
   faviconUrl: string;
   footerTextLeft: string;
   footerTextRight: string;
+  /** Shown on the Contact page. Empty values are hidden, never placeholdered. */
+  contactEmail: string;
+  contactPhone: string;
+  contactAddress: string;
   socialLinks: {
     linkedin: string;
     facebook: string;
@@ -28,6 +32,9 @@ const DEFAULT_SETTINGS: BrandingSettings = {
   faviconUrl: '',
   footerTextLeft: '© {year} Special People Training. All rights reserved.',
   footerTextRight: 'Made with ❤️ for every learner',
+  contactEmail: '',
+  contactPhone: '',
+  contactAddress: '',
   socialLinks: {
     linkedin: '',
     facebook: '',

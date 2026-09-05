@@ -11,154 +11,151 @@ import {
   Lock,
   FileCheck,
   GraduationCap,
-  Handshake,
   BookOpen,
   CalendarCheck,
-  School,
-  Network,
+  Home,
+  Stethoscope,
   Heart,
-  Briefcase,
   Layers,
   UserCog,
-  FileText,
-  CheckCircle
+  FileText
 } from "@/components/icons";
 
 const enterpriseNeeds = [
   {
     icon: Building2,
-    title: "Multi-Site Management",
-    description: "Manage learners, staff, and training programs across multiple locations from a single dashboard. Keep data organized by site while maintaining central oversight."
+    title: "One place for your whole service",
+    description: "Buy training passes for a course, allocate them to staff and see the whole team's position in one organisation portal — across a single home or several."
   },
   {
     icon: UserCog,
-    title: "Roles & Permissions",
-    description: "Control who sees and manages what with flexible role-based access. Assign site admins, trainers, caregivers, and observers with appropriate permissions."
+    title: "Admins who can act, not just look",
+    description: "Your organisation admins invite staff, allocate and reclaim seats, and read their team's records. Visibility stops at your own organisation."
   },
   {
     icon: Layers,
-    title: "Standardized Templates",
-    description: "Create and deploy consistent learning plans across your organization. Build templates once, then adapt them for individual learners while maintaining quality standards."
+    title: "Consistent, policy-led courses",
+    description: "Everyone completes the same course, with the same assessments and the same pass mark, so standards do not vary between shifts or sites."
   },
   {
     icon: BarChart3,
-    title: "Advanced Reporting",
-    description: "Generate detailed reports across all sites and programs. Track compliance, monitor progress trends, and export data for board reports and audits."
+    title: "Compliance you can hand over",
+    description: "See who is complete, in progress, due for renewal or overdue, and produce verifiable certificates for inspection."
   }
 ];
 
 const securityFeatures = [
   {
     icon: Lock,
-    title: "Role-Based Access Controls",
-    description: "Define precise permissions for different user types. Ensure staff only access the data and features relevant to their role."
+    title: "Scoped access",
+    description: "Learners see their own training. Organisation admins see their own staff. Nothing crosses between organisations."
   },
   {
     icon: FileCheck,
-    title: "Audit-Friendly Activity Tracking",
-    description: "Maintain a detailed log of key actions for compliance and accountability. Available as an add-on for organizations with regulatory requirements."
+    title: "Verifiable certificates",
+    description: "Every certificate carries a verification code that anyone can check, so evidence does not rely on emailed PDFs."
   },
   {
     icon: FileText,
-    title: "Data Export & Retention Controls",
-    description: "Set data retention policies that align with your compliance needs. Export data in standard formats at any time."
+    title: "Records you can export",
+    description: "Completion and renewal records can be exported for your own audit files and quality reporting."
   },
   {
     icon: Shield,
-    title: "Secure Access Practices",
-    description: "Designed with industry-standard security practices including encryption in transit and at rest, secure authentication, and regular security reviews."
+    title: "Secure by default",
+    description: "Encrypted in transit and at rest, with row-level access rules enforced by the platform rather than the interface."
   }
 ];
 
 const implementationSupport = [
   {
     icon: Users,
-    title: "Dedicated Onboarding",
-    description: "A dedicated implementation specialist guides your rollout, handling configuration, data setup, and testing."
+    title: "Set-up support",
+    description: "We create your organisation, load your licences and show your admin how to invite staff and allocate seats."
   },
   {
     icon: GraduationCap,
-    title: "Staff Training Sessions",
-    description: "Live training sessions for your administrators, trainers, and caregivers—tailored to their specific roles and workflows."
+    title: "Admin walkthrough",
+    description: "A guided session for the people who will run the training: invitations, seats, renewals and the compliance view."
   },
   {
     icon: BookOpen,
-    title: "Adoption Playbooks",
-    description: "Proven rollout guides and communication templates to drive adoption across your organization."
+    title: "Rollout guidance",
+    description: "Practical help deciding which courses are mandatory for which roles, and how to sequence them."
   },
   {
     icon: CalendarCheck,
-    title: "Ongoing Check-Ins",
-    description: "Regular success reviews to monitor adoption, address questions, and optimize your use of the platform."
+    title: "Ongoing reviews",
+    description: "Periodic reviews of uptake and renewals so nothing quietly falls out of date."
   }
 ];
 
 const useCases = [
   {
-    icon: School,
-    title: "School Districts",
-    problem: "Managing individualized learning across many schools with varying staff capacity.",
-    solution: "Central oversight with site-level management. Standardized templates, shared reporting, and consistent training quality across all schools."
-  },
-  {
-    icon: Network,
-    title: "Provider Networks",
-    problem: "Coordinating training and compliance across multiple care providers or service locations.",
-    solution: "Multi-site dashboards, role-based access for different provider staff, and consolidated reporting for network-wide compliance."
+    icon: Building2,
+    title: "Care homes",
+    problem: "Keeping mandatory training current across a rota, with new starters arriving all year.",
+    solution: "Allocate a pass the day someone starts, and see at a glance who is outstanding or coming up for renewal."
   },
   {
     icon: Heart,
-    title: "Non-Profits & Community Programs",
-    problem: "Limited resources, diverse learner needs, and the need for clear impact reporting.",
-    solution: "Affordable enterprise options, accessible content for diverse populations, and progress tracking that demonstrates program outcomes."
+    title: "Domiciliary care",
+    problem: "Staff are rarely in one building, so classroom-only training is hard to arrange.",
+    solution: "Short online lessons staff complete between visits, with practical sign-off booked only where competency must be observed."
   },
   {
-    icon: Briefcase,
-    title: "Workforce Readiness Programs",
-    problem: "Preparing individuals for employment with structured skill-building and progress documentation.",
-    solution: "Life skills and job readiness lessons, progress certificates, and reports that support transition planning and funding requirements."
+    icon: Home,
+    title: "Supported living",
+    problem: "Support needs vary by person, and staff need training matched to those needs.",
+    solution: "Choose the courses each team needs, including complex needs and specialist care topics, rather than a single fixed bundle."
+  },
+  {
+    icon: Stethoscope,
+    title: "NHS trusts",
+    problem: "Evidencing consistent CPD for large, mixed teams.",
+    solution: "Consistent courses, recorded assessment results and verifiable certificates for every completion."
   }
 ];
 
 const faqs = [
   {
-    question: "Can we use our own domain?",
-    answer: "Yes. Enterprise customers can access the platform through a custom subdomain (e.g., training.yourorganization.com). Full white-label options with custom branding are also available."
+    question: "How do staff get access?",
+    answer: "You buy training passes for a course, and your organisation admin allocates one to each member of staff. They receive an invitation by email, set their name and password, and start straight away."
   },
   {
-    question: "Do you support Single Sign-On (SSO)?",
-    answer: "Yes. We support SAML 2.0 and OIDC protocols, which work with most common identity providers including Microsoft Entra ID, Google Workspace, Okta, and others. Our team handles the technical configuration."
+    question: "What happens if someone leaves?",
+    answer: "Revoke their seat. It returns to your licence so you can allocate it to someone else. Certificates already issued stay valid."
   },
   {
-    question: "Can we segment learners by site or group?",
-    answer: "Absolutely. You can organize learners into sites, locations, classrooms, or custom groups. Each group can have its own administrators and staff while rolling up to central reporting."
+    question: "Can we see who has completed what?",
+    answer: "Yes. The organisation portal shows your people, their progress and their renewal dates. Your admins have read-only visibility of their own staff's records."
   },
   {
-    question: "What reporting is available?",
-    answer: "Enterprise includes advanced reporting with cross-site analytics, learner progress summaries, compliance tracking, and custom report builders. Reports can be scheduled for automatic delivery and exported in PDF or CSV formats."
+    question: "Do courses expire?",
+    answer: "Courses with a renewal period show an expiry date on the certificate and reappear as due for renewal in good time."
   },
   {
-    question: "Do you offer an SLA?",
-    answer: "Yes. Enterprise agreements include service level commitments covering uptime, support response times, and issue resolution. We'll discuss specific SLA terms during the sales process based on your requirements."
+    question: "How do practical courses work?",
+    answer: "Where competency must be observed, the learner completes the online learning and a trainer signs them off in person. Two certificates are issued: completion, and competency."
   },
   {
-    question: "Can we run a pilot before full rollout?",
-    answer: "Absolutely. We encourage pilots to ensure the platform meets your needs. We'll work with you to define pilot scope, success criteria, and a clear path to full deployment."
+    question: "How is it billed?",
+    answer: "Organisation licences are quoted directly. Tell us the courses and how many staff, and we will send a quote."
   }
 ];
 
 export default function Enterprise() {
   return (
     <MarketingLayout
-      title="Enterprise"
-      description="Enterprise-ready training management with advanced admin, reporting, and support—built for schools, providers, and multi-site programs."
+      title="For care providers"
+      description="CPD training for UK care providers: allocate courses to your staff, track completion and renewals, and evidence CQC readiness."
     >
       <PageHero
-        badge="Enterprise Solutions"
-        title="Enterprise-ready training for programs at scale"
-        subtitle="Manage multiple sites, teams, and learner groups with structured admin tools, reporting, and implementation support."
-        primaryCTA={{ text: "Talk to Enterprise", href: "/contact" }}
-        secondaryCTA={{ text: "Request a Demo", href: "/contact" }}
+        badge="For care providers"
+        title="CPD training for your whole care team"
+        subtitle="Buy training passes, allocate them to your staff, and see completion and renewals in one place — ready for inspection."
+        primaryCTA={{ text: "Talk to sales", href: "/contact?tab=sales" }}
+        secondaryCTA={{ text: "Browse courses", href: "/courses" }}
       />
 
       {/* What Enterprise Teams Need */}
@@ -166,10 +163,10 @@ export default function Enterprise() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              What Enterprise Teams Need—And How SPA Helps
+              What care providers need, and how we help
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Built for organizations managing training across multiple sites, teams, and learner populations.
+              Built for care homes, domiciliary care, supported living services and NHS teams.
             </p>
           </div>
 
@@ -199,10 +196,10 @@ export default function Enterprise() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Security & Administration
+              Security and administration
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Designed with organizational security and compliance needs in mind.
+              Built around the access rules a care provider needs.
             </p>
           </div>
 
@@ -224,7 +221,7 @@ export default function Enterprise() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-8">
-            We can provide security documentation and participate in your vendor assessment process.
+We are happy to answer information governance questions as part of your supplier checks.
           </p>
         </div>
       </section>
@@ -234,10 +231,10 @@ export default function Enterprise() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Implementation & Success
+              Getting started
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our team is with you from planning through rollout and beyond.
+              We help you set up, then stay in touch as your team works through the training.
             </p>
           </div>
 
@@ -263,10 +260,10 @@ export default function Enterprise() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Use Cases
+              Who it is for
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Organizations across sectors use SPA to deliver consistent, accessible training at scale.
+              The same courses, adapted to how different services work.
             </p>
           </div>
 
@@ -289,7 +286,7 @@ export default function Enterprise() {
                       <p className="text-sm text-muted-foreground">{useCase.problem}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-1">How SPA helps:</p>
+                      <p className="text-sm font-medium text-foreground mb-1">How we help:</p>
                       <p className="text-sm text-muted-foreground">{useCase.solution}</p>
                     </div>
                   </CardContent>
@@ -301,16 +298,16 @@ export default function Enterprise() {
       </section>
 
       <FAQSection
-        title="Enterprise FAQs"
-        subtitle="Common questions about enterprise deployments and capabilities."
+        title="Common questions"
+        subtitle="How passes, seats, renewals and sign-off work."
         faqs={faqs}
       />
 
       <CTABanner
-        title="Let's plan your rollout"
-        subtitle="Tell us about your organization and goals—we'll help you design a deployment that works."
-        primaryCTA={{ text: "Schedule a Call", href: "/contact" }}
-        secondaryCTA={{ text: "See Case Studies", href: "/case-studies" }}
+        title="Let's plan your training"
+        subtitle="Tell us about your service and the courses your staff need, and we'll put a quote together."
+        primaryCTA={{ text: "Talk to sales", href: "/contact?tab=sales" }}
+        secondaryCTA={{ text: "Browse courses", href: "/courses" }}
       />
     </MarketingLayout>
   );
