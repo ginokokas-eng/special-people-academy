@@ -249,14 +249,16 @@ export function CourseContent({
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Course content</CardTitle>
           <div className="text-sm text-muted-foreground">
-            {hasModules ? `${modules.length} modules • ` : ''}
-            {totalLessons} lessons • {formatDuration(totalDuration)}
-            {canAccessCourse && completedCount > 0 && (
+            {hasModules ? `${modules.length} ${modules.length === 1 ? 'module' : 'modules'} • ` : ''}
+            {lessonCountLabel(totalLessons)}
+            {totalDurationLabel ? ` • ${totalDurationLabel}` : ''}
+            {canAccessCourse && courseProgress.total > 0 && (
               <span className="text-success ml-2">
-                ({completedCount}/{totalLessons} complete)
+                ({courseProgress.completed}/{courseProgress.total} required lessons)
               </span>
             )}
           </div>
+
         </div>
         {requiresSubscription && (
           <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
