@@ -93,18 +93,25 @@ function ModuleSection({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const completed = lessons.filter((l) => l.completed).length;
+  // Same rule as the hub cards: required lessons only.
+  const prog = requiredProgress(lessons);
   const duration = totalDuration(lessons);
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="border-b">
       <CollapsibleTrigger className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground truncate">{title}</p>
+          <p className="text-sm font-semibold text-foreground truncate" title={title}>
+            {title}
+          </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {completed}/{lessons.length} · {duration || '—'}
+            {prog.total > 0
+              ? `${prog.completed}/${prog.total} required`
+              : `${lessons.length} ${lessons.length === 1 ? 'lesson' : 'lessons'}`}
+            {duration ? ` · ${duration}` : ''}
           </p>
         </div>
+
         <ChevronDown
           className={`h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
         />
