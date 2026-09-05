@@ -221,11 +221,15 @@ export default function OrgPortal() {
     }
   };
 
+  // Columns are the union of licence courses and any course that already shows
+  // in the compliance matrix, so internal/free access is never hidden.
   const licensedCourses = useMemo(() => {
     const map = new Map<string, string>();
     for (const l of licences) map.set(l.course_id, l.course_title);
+    for (const r of matrix) if (!map.has(r.course_id)) map.set(r.course_id, r.course_title);
     return Array.from(map, ([id, title]) => ({ id, title }));
-  }, [licences]);
+  }, [licences, matrix]);
+
 
   const matrixByLearner = useMemo(() => {
     const learners = new Map<
