@@ -56,6 +56,10 @@ export function useBlockResponse(blockId: string, lessonId: string, enabled: boo
       if (error) console.error('Error loading block response:', error);
       if (data) {
         attemptsRef.current = data.attempt_count ?? 0;
+        const prevHistory = (data.response as { history?: unknown } | null)?.history;
+        historyRef.current = Array.isArray(prevHistory)
+          ? (prevHistory as BlockResponseHistoryEntry[]).slice(-HISTORY_LIMIT)
+          : [];
         setExisting(data as BlockResponseRow);
       }
       setLoaded(true);
