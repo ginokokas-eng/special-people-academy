@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Loader2, Mail, CheckCircle2 } from '@/components/icons';
 import { useAuth } from '@/hooks/useAuth';
+import { useRedirectSettings } from '@/hooks/useRedirectSettings';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -30,6 +31,7 @@ interface EmailCodeSignInProps {
  */
 export function EmailCodeSignIn({ email, onEmailChange, onCancel }: EmailCodeSignInProps) {
   const { sendEmailCode } = useAuth();
+  const { loginRedirectUrl } = useRedirectSettings();
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -43,7 +45,7 @@ export function EmailCodeSignIn({ email, onEmailChange, onCancel }: EmailCodeSig
     }
 
     setBusy(true);
-    const { error } = await sendEmailCode(email);
+    const { error } = await sendEmailCode(email, loginRedirectUrl);
     setBusy(false);
 
     if (error) {
