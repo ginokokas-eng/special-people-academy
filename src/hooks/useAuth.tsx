@@ -190,12 +190,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    * Android app. shouldCreateUser is false so this can never be used to
    * provision accounts from the public sign-in form.
    */
-  const sendEmailCode = async (email: string) => {
+  const sendEmailCode = async (email: string, redirectPath = '/dashboard') => {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
         shouldCreateUser: false,
-        emailRedirectTo: `${window.location.origin}/`,
+        // Land on the learner home rather than the marketing homepage, which
+        // left magic-link users staring at "/#".
+        emailRedirectTo: `${window.location.origin}${redirectPath || '/dashboard'}`,
       },
     });
     return { error: error as Error | null };
