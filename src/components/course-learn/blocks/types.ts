@@ -342,6 +342,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   mcq: 'Knowledge check',
   drag_match: 'Matching activity',
   checklist: 'Practical checklist',
+  scenario: 'Scenario',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
@@ -357,6 +358,7 @@ export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   mcq: 'A single multiple-choice question with instant feedback.',
   drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
   checklist: 'Read-only practical steps learners can study before assessment.',
+  scenario: 'Branching decision story with consequences.',
 };
 
 
