@@ -50,7 +50,15 @@ const WebFooter = () => {
     ],
   };
 
-  const socialLinks = branding.socialLinks;
+  // Branding defaults ship with "https://…/YOUR_HANDLE" placeholders; treat any
+  // of those as absent so the footer doesn't link to a dead page.
+  const isReal = (value?: string | null) => !!value && !value.includes('YOUR_');
+  const socialLinks = Object.fromEntries(
+    Object.entries(branding.socialLinks ?? {}).map(([k, v]) => [
+      k,
+      isReal(v as string) ? v : undefined,
+    ])
+  ) as typeof branding.socialLinks;
   const year = new Date().getFullYear();
 
   return (
