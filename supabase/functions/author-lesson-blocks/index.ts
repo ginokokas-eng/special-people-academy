@@ -160,6 +160,40 @@ const checkpointsSchema = {
   required: ['checkpoints'],
 };
 
+/**
+ * Translation reply. Paths are sent as ENTRIES, not as a free-form object, so a
+ * strict schema can describe them. The client owns the path map, so the model
+ * only ever echoes back the paths it was given.
+ */
+const translationSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    blocks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          block_id: { type: 'string' },
+          texts: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: { path: { type: 'string' }, text: { type: 'string' } },
+              required: ['path', 'text'],
+            },
+          },
+        },
+        required: ['block_id', 'texts'],
+      },
+    },
+  },
+  required: ['blocks'],
+};
+
+
 /* -------------------------------- validators ------------------------------- */
 
 type Rec = Record<string, unknown>;
