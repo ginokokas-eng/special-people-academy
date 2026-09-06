@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { QuizPlayer } from './QuizPlayer';
+import { QuizPlayer, type AttemptQuestion, type SubmitResult } from './QuizPlayer';
 import { QUIZ_LOCKOUT_NEXT_STEP } from './quizCopy';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,28 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Play, Clock, Target, Award, RotateCcw, Lock, CheckCircle2, AlertTriangle } from '@/components/icons';
 import { toast } from 'sonner';
+import { attemptsRemaining as remainingFor, quizRpcErrorMessage } from '@/lib/quizAttempt';
 
 interface QuizContainerProps {
   lessonId: string;
   courseId: string;
   coursePassMark?: number;
   onQuizComplete?: (passed: boolean) => void;
-}
-
-interface Quiz {
-  id: string;
-  title: string;
-  passing_score: number;
-  attempts_allowed: number | null;
-}
-
-interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correct_answer: number;
-  order_index: number;
-  explanation?: string | null;
 }
 
 interface QuizAttempt {
@@ -41,17 +25,26 @@ interface QuizAttempt {
   attempted_at: string;
 }
 
+/** Live attempt session handed out by start_quiz_attempt. */
+interface AttemptSession {
+  session_id: string;
+  attempts_used: number;
+  attempts_allowed: number | null;
+  unlimited: boolean;
+  passing_score: number;
+}
+
 export function QuizContainer({ 
   lessonId, 
   courseId, 
   coursePassMark = 80,
   onQuizComplete 
 }: QuizContainerProps) {
-  const navigate = useNavigate();
   const { user } = useAuth();
-  
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+
+  const [quizTitle, setQuizTitle] = useState('');
+  const [session, setSession] = useState<AttemptSession | null>(null);
+  const [questions, setQuestions] = useState<AttemptQuestion[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [started, setStarted] = useState(false);
@@ -63,6 +56,9 @@ export function QuizContainer({
   const [isUngraded, setIsUngraded] = useState(false);
   const [infoCompleted, setInfoCompleted] = useState(false);
   const [marking, setMarking] = useState(false);
+  /** Set when the server refuses a new attempt because the limit is spent. */
+  const [lockedAllowed, setLockedAllowed] = useState<number | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
     fetchQuizData();
@@ -83,90 +79,127 @@ export function QuizContainer({
     }
   };
 
+  const loadInformationalProgress = async () => {
+    setIsInformational(true);
+    if (!user) return;
+    const { data: progress } = await supabase
+      .from('lesson_progress')
+      .select('completed')
+      .eq('lesson_id', lessonId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    setInfoCompleted(!!progress?.completed);
+  };
+
   const fetchQuizData = async () => {
     if (!lessonId) return;
+    setLoading(true);
 
     try {
-      // Fetch quiz (may not exist for informational knowledge-check lessons)
+      // Quiz shell only — questions and answers now come from the server RPCs.
       const { data: quizData } = await supabase
         .from('quizzes')
-        .select('*')
+        .select('id, title, passing_score, attempts_allowed, lesson_id')
         .eq('lesson_id', lessonId)
         .maybeSingle();
 
       // Informational lesson: no quiz row at all
       if (!quizData) {
-        setIsInformational(true);
-        if (user) {
-          const { data: progress } = await supabase
-            .from('lesson_progress')
-            .select('completed')
-            .eq('lesson_id', lessonId)
-            .eq('user_id', user.id)
-            .maybeSingle();
-          setInfoCompleted(!!progress?.completed);
-        }
+        await loadInformationalProgress();
         return;
       }
 
-      const ungraded = (quizData.passing_score ?? 0) === 0;
-      setIsUngraded(ungraded);
-      const loadedQuiz: Quiz = {
-        ...quizData,
-        passing_score: ungraded ? 0 : (quizData.passing_score || coursePassMark),
-        attempts_allowed: quizData.attempts_allowed ?? null,
-      };
-      setQuiz(loadedQuiz);
+      setQuizTitle(quizData.title);
 
-      // Fetch questions
-      const { data: questionsData, error: questionsError } = await supabase
-        .from('quiz_questions')
-        .select('*')
-        .eq('quiz_id', quizData.id)
-        .order('order_index');
-
-      if (questionsError) throw questionsError;
-
-      // No authored questions -> treat as informational check
-      if (!questionsData || questionsData.length === 0) {
-        setIsInformational(true);
-        if (user) {
-          const { data: progress } = await supabase
-            .from('lesson_progress')
-            .select('completed')
-            .eq('lesson_id', lessonId)
-            .eq('user_id', user.id)
-            .maybeSingle();
-          setInfoCompleted(!!progress?.completed);
-        }
-        return;
-      }
-
-      const parsedQuestions = questionsData.map(q => ({
-        ...q,
-        options: Array.isArray(q.options) ? q.options as string[] : JSON.parse(q.options as string)
-      }));
-      setQuestions(parsedQuestions);
-
-      // Fetch previous attempts if user is logged in
+      // Attempt history (best score, pass state) still read directly.
       if (user) {
         const { data: attemptsData } = await supabase
           .from('quiz_attempts')
-          .select('*')
+          .select('id, score, passed, attempted_at')
           .eq('quiz_id', quizData.id)
           .eq('user_id', user.id)
           .order('attempted_at', { ascending: false });
 
         if (attemptsData && attemptsData.length > 0) {
           setAttempts(attemptsData);
-          const best = Math.max(...attemptsData.map(a => a.score));
-          setBestScore(best);
-          setHasPassed(attemptsData.some(a => a.passed));
+          setBestScore(Math.max(...attemptsData.map((a) => a.score)));
+          setHasPassed(attemptsData.some((a) => a.passed));
+        } else {
+          setAttempts([]);
         }
       }
+
+      // Open (or resume) the server-side attempt session.
+      const { data: startRows, error: startError } = await supabase.rpc('start_quiz_attempt', {
+        _quiz_id: quizData.id,
+      });
+
+      if (startError) {
+        const msg = startError.message || '';
+        if (/quiz_has_no_questions/.test(msg)) {
+          await loadInformationalProgress();
+          return;
+        }
+        if (/attempt_limit_reached/.test(msg)) {
+          const allowed = quizData.attempts_allowed ?? null;
+          setLockedAllowed(allowed);
+          setIsUngraded((quizData.passing_score ?? 0) === 0);
+          setSession({
+            session_id: '',
+            attempts_used: attempts.length,
+            attempts_allowed: allowed,
+            unlimited: false,
+            passing_score: quizData.passing_score || coursePassMark,
+          });
+          return;
+        }
+        toast.error(quizRpcErrorMessage(msg));
+        setUnavailable(true);
+        return;
+      }
+
+      const start = Array.isArray(startRows) ? startRows[0] : startRows;
+      if (!start) {
+        setUnavailable(true);
+        return;
+      }
+
+      const ungraded = (start.passing_score ?? 0) === 0;
+      setIsUngraded(ungraded);
+      const live: AttemptSession = {
+        session_id: start.session_id,
+        attempts_used: start.attempts_used ?? 0,
+        attempts_allowed: start.attempts_allowed ?? null,
+        unlimited: !!start.unlimited,
+        passing_score: ungraded ? 0 : start.passing_score || coursePassMark,
+      };
+      setSession(live);
+
+      // Questions with options already shuffled, correct answers withheld.
+      const { data: paper, error: paperError } = await supabase.rpc('get_quiz_for_attempt', {
+        _session_id: live.session_id,
+      });
+      if (paperError) throw paperError;
+
+      const payload = (paper ?? {}) as {
+        title?: string;
+        questions?: { question_id: string; question_text: string; options: string[] }[];
+      };
+      if (payload.title) setQuizTitle(payload.title);
+      const served = (payload.questions || []).map((q) => ({
+        question_id: q.question_id,
+        question_text: q.question_text,
+        options: Array.isArray(q.options) ? q.options : [],
+      }));
+      if (served.length === 0) {
+        await loadInformationalProgress();
+        return;
+      }
+      setQuestions(served);
     } catch (error) {
       console.error('Error fetching quiz:', error);
       toast.error('Failed to load quiz');
+      setUnavailable(true);
     } finally {
       setLoading(false);
     }
@@ -198,64 +231,71 @@ export function QuizContainer({
     }
   };
 
-  const handleQuizComplete = async (passed: boolean, score: number, answers: Record<string, number>) => {
-    if (!user || !quiz) return;
+  /** Server-side check of a single answer (instant reveal preserved). */
+  const handleCheckAnswer = async (questionId: string, displayedIndex: number) => {
+    if (!session?.session_id) throw new Error('This quiz attempt has expired. Please start again.');
+    const { data, error } = await supabase.rpc('check_quiz_answer', {
+      _session_id: session.session_id,
+      _question_id: questionId,
+      _selected: displayedIndex,
+    });
+    if (error) throw new Error(quizRpcErrorMessage(error.message));
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) throw new Error('Could not check that answer.');
+    return {
+      is_correct: !!row.is_correct,
+      correct_displayed_index:
+        typeof row.correct_displayed_index === 'number' ? row.correct_displayed_index : null,
+      explanation: row.explanation ?? null,
+    };
+  };
 
+  /** Server-side grading. All scoring and lesson completion happens in the RPC. */
+  const handleSubmit = async (answers: Record<string, number>): Promise<SubmitResult | null> => {
+    if (!session?.session_id) {
+      toast.error('This quiz attempt has expired. Please start again.');
+      return null;
+    }
     try {
-      // Save attempt (backend trigger also enforces the attempt limit)
-      const { error } = await supabase
-        .from('quiz_attempts')
-        .insert({
-          quiz_id: quiz.id,
-          user_id: user.id,
-          score,
-          passed,
-          answers
-        });
-
+      const { data, error } = await supabase.rpc('submit_quiz_attempt', {
+        _session_id: session.session_id,
+        _answers: answers,
+      });
       if (error) {
-        // Attempt-limit violations are raised by the DB trigger
-        if ((error as any).code === '23514' || /attempt limit/i.test(error.message)) {
-          toast.error('You have used all your allowed attempts for this quiz.');
-        } else {
-          throw error;
-        }
+        toast.error(quizRpcErrorMessage(error.message));
         await fetchQuizData();
-        return;
+        return null;
+      }
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) {
+        toast.error('Failed to save quiz result');
+        return null;
       }
 
-      // Update best score
-      if (bestScore === null || score > bestScore) {
-        setBestScore(score);
-      }
+      const score = row.score ?? 0;
+      const passed = !!row.passed;
+      if (bestScore === null || score > bestScore) setBestScore(score);
 
       if (passed) {
         setHasPassed(true);
-
-        // Mark lesson as completed
-        await supabase
-          .from('lesson_progress')
-          .upsert({
-            lesson_id: lessonId,
-            user_id: user.id,
-            completed: true,
-            completed_at: new Date().toISOString()
-          }, {
-            onConflict: 'lesson_id,user_id'
-          });
-
         toast.success('Quiz passed! Lesson marked as complete.');
         await checkCourseCompletion();
       }
 
-      // Refresh attempts
+      // Refresh history/attempt counts for the intro screen.
       await fetchQuizData();
-
-      // Notify parent
       onQuizComplete?.(passed);
+
+      return {
+        score,
+        passed,
+        correct_count: row.correct_count ?? 0,
+        total: row.total ?? 0,
+      };
     } catch (error) {
       console.error('Error saving quiz attempt:', error);
       toast.error('Failed to save quiz result');
+      return null;
     }
   };
 
@@ -296,7 +336,9 @@ export function QuizContainer({
     );
   }
 
-  if (!quiz || questions.length === 0) {
+  const isLockedOut = lockedAllowed !== null && !hasPassed;
+
+  if (unavailable || (!session && questions.length === 0)) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="py-12 text-center">
@@ -306,22 +348,21 @@ export function QuizContainer({
     );
   }
 
-  // Unlimited attempts are stored as null, 0 or a sentinel of 99+.
-  const attemptsAllowed =
-    quiz.attempts_allowed && quiz.attempts_allowed > 0 && quiz.attempts_allowed < 99
-      ? quiz.attempts_allowed
+  const passingScore = session?.passing_score ?? coursePassMark;
+  const attemptsAllowed = isLockedOut
+    ? lockedAllowed
+    : session && !session.unlimited
+      ? session.attempts_allowed
       : null;
-  const attemptsUsed = attempts.length;
-  const attemptsRemaining = attemptsAllowed !== null ? Math.max(0, attemptsAllowed - attemptsUsed) : null;
-  const isLockedOut = attemptsRemaining === 0 && !hasPassed;
-
+  const attemptsUsed = session?.attempts_used ?? attempts.length;
+  const attemptsLeft = isLockedOut ? 0 : remainingFor(attemptsAllowed, attemptsUsed);
 
   // Show quiz intro/start screen
-  if (!started) {
+  if (!started || questions.length === 0) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">{quiz.title}</CardTitle>
+          <CardTitle className="text-2xl">{quizTitle}</CardTitle>
           <CardDescription>
             {isUngraded
               ? 'A quick self-check of your starting point — this is not graded and does not affect your final grade or certificate.'
@@ -334,15 +375,17 @@ export function QuizContainer({
             {!isUngraded && (
               <div className="p-4 rounded-lg bg-muted/30">
                 <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-semibold">{quiz.passing_score}%</div>
+                <div className="text-2xl font-semibold">{passingScore}%</div>
                 <div className="text-xs text-muted-foreground">Pass mark</div>
               </div>
             )}
-            <div className="p-4 rounded-lg bg-muted/30">
-              <Clock className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-semibold">{questions.length}</div>
-              <div className="text-xs text-muted-foreground">Questions</div>
-            </div>
+            {questions.length > 0 && (
+              <div className="p-4 rounded-lg bg-muted/30">
+                <Clock className="h-6 w-6 mx-auto mb-2 text-primary" />
+                <div className="text-2xl font-semibold">{questions.length}</div>
+                <div className="text-xs text-muted-foreground">Questions</div>
+              </div>
+            )}
             <div className="p-4 rounded-lg bg-muted/30">
               <RotateCcw className="h-6 w-6 mx-auto mb-2 text-primary" />
               <div className="text-2xl font-semibold">
@@ -357,7 +400,7 @@ export function QuizContainer({
           {/* Attempts remaining — only when attempts are limited */}
           {attemptsAllowed !== null && !hasPassed && (
             <div className="text-center text-sm text-muted-foreground">
-              {attemptsRemaining} of {attemptsAllowed} attempt{attemptsAllowed === 1 ? '' : 's'} remaining
+              {attemptsLeft} of {attemptsAllowed} attempt{attemptsAllowed === 1 ? '' : 's'} remaining
             </div>
           )}
 
@@ -413,7 +456,7 @@ export function QuizContainer({
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>No attempts remaining</AlertTitle>
               <AlertDescription>
-                You have used all {attemptsAllowed} allowed attempts without reaching the {quiz.passing_score}% pass mark.{' '}
+                You have used all {attemptsAllowed} allowed attempts without reaching the {passingScore}% pass mark.{' '}
                 {QUIZ_LOCKOUT_NEXT_STEP}
               </AlertDescription>
             </Alert>
@@ -425,7 +468,7 @@ export function QuizContainer({
             {isUngraded ? (
               <p>• This check is not graded — it won’t affect your final grade, certificate, or completion</p>
             ) : (
-              <p>• You must score {quiz.passing_score}% or higher to pass</p>
+              <p>• You must score {passingScore}% or higher to pass</p>
             )}
             <p>
               {isUngraded
@@ -438,18 +481,18 @@ export function QuizContainer({
         </CardContent>
         <div className="p-6 pt-0 flex flex-col items-center gap-3">
           {/* Final attempt is unmissable before starting — emphasis, not a dialog */}
-          {!isLockedOut && !hasPassed && attemptsRemaining === 1 && (
+          {!isLockedOut && !hasPassed && attemptsLeft === 1 && (
             <p className="text-sm font-semibold text-warning bg-warning/10 border border-warning/40 rounded-md px-3 py-2 text-center">
               This is your last attempt
             </p>
           )}
-          {isLockedOut ? (
+          {isLockedOut || questions.length === 0 ? (
             <Button size="lg" variant="outline" disabled>
               <Lock className="h-4 w-4 mr-2" />
               Attempts exhausted
             </Button>
           ) : (
-            <Button size="lg" onClick={() => setStarted(true)} disabled={hasPassed && attemptsRemaining === 0}>
+            <Button size="lg" onClick={() => setStarted(true)} disabled={hasPassed && attemptsLeft === 0}>
               <Play className="h-4 w-4 mr-2" />
               {attempts.length > 0 ? 'Retake Quiz' : 'Start Quiz'}
             </Button>
@@ -461,15 +504,14 @@ export function QuizContainer({
 
   return (
     <QuizPlayer
-      quizId={quiz.id}
-      quizTitle={quiz.title}
+      quizTitle={quizTitle}
       questions={questions}
-      passingScore={quiz.passing_score}
-      onComplete={handleQuizComplete}
+      passingScore={passingScore}
+      onCheckAnswer={handleCheckAnswer}
+      onSubmit={handleSubmit}
       onRetry={() => setStarted(true)}
       previousAttempts={attempts.length}
-      attemptsRemaining={attemptsRemaining}
+      attemptsRemaining={attemptsLeft}
     />
   );
 }
-
