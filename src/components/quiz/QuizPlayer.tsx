@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { QuizOption } from '@/components/native/QuizOption';
 import { haptics } from '@/hooks/useHaptics';
 import { Badge } from '@/components/ui/badge';
@@ -16,48 +15,59 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle, 
-  ChevronRight, 
+import {
+  CheckCircle2,
+  AlertCircle,
+  ChevronRight,
   RotateCcw,
   Trophy,
   Target,
-  Clock
+  Loader2,
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { buildAnswersPayload } from '@/lib/quizAttempt';
 
-
-interface QuizQuestion {
-  id: string;
-  question: string;
+/** A question as served by get_quiz_for_attempt — no correct answer present. */
+export interface AttemptQuestion {
+  question_id: string;
+  question_text: string;
+  /** Labels already permuted by the session's option_order. */
   options: string[];
-  correct_answer: number;
-  order_index: number;
-  explanation?: string | null;
+}
+
+export interface CheckAnswerResult {
+  is_correct: boolean;
+  correct_displayed_index: number | null;
+  explanation: string | null;
+}
+
+export interface SubmitResult {
+  score: number;
+  passed: boolean;
+  correct_count: number;
+  total: number;
 }
 
 interface QuizPlayerProps {
-  quizId: string;
   quizTitle: string;
-  questions: QuizQuestion[];
+  questions: AttemptQuestion[];
   passingScore: number;
-  onComplete: (passed: boolean, score: number, answers: Record<string, number>) => void;
+  /** Server-side check for one answer (displayed index in, verdict out). */
+  onCheckAnswer: (questionId: string, displayedIndex: number) => Promise<CheckAnswerResult>;
+  /** Server-side grading of the whole attempt. Returns null on failure. */
+  onSubmit: (answers: Record<string, number>) => Promise<SubmitResult | null>;
   onRetry: () => void;
   previousAttempts?: number;
   /** Attempts left including this one; 1 means this is the final attempt. */
   attemptsRemaining?: number | null;
 }
 
-type FeedbackState = 'none' | 'correct' | 'incorrect';
-
 export function QuizPlayer({
-  quizId,
   quizTitle,
   questions,
   passingScore,
-  onComplete,
+  onCheckAnswer,
+  onSubmit,
   onRetry,
   previousAttempts = 0,
   attemptsRemaining = null,
@@ -65,65 +75,61 @@ export function QuizPlayer({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [feedback, setFeedback] = useState<FeedbackState>('none');
-  const [showResults, setShowResults] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  /** Per-question server verdicts, keyed by question_id. */
+  const [verdicts, setVerdicts] = useState<Record<string, CheckAnswerResult>>({});
+  const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<SubmitResult | null>(null);
   const [unansweredOpen, setUnansweredOpen] = useState(false);
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
 
   const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const answeredCount = Object.keys(answers).length;
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   const isFinalAttempt = attemptsRemaining === 1;
-
-  // Calculate score
-  const calculateScore = () => {
-    let correct = 0;
-    questions.forEach((q) => {
-      if (answers[q.id] === q.correct_answer) {
-        correct++;
-      }
-    });
-    return Math.round((correct / questions.length) * 100);
-  };
+  const currentVerdict = currentQuestion ? verdicts[currentQuestion.question_id] : undefined;
+  const revealed = !!currentVerdict;
 
   const handleAnswerSelect = (optionIndex: number) => {
-    if (feedback !== 'none') return; // Already answered
+    if (revealed) return; // Already checked
     haptics.selection();
     setSelectedAnswer(optionIndex);
   };
 
-  const handleSubmitAnswer = () => {
-    if (selectedAnswer === null) return;
-
-    // Store answer
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: selectedAnswer,
-    }));
-
-    // Show feedback. Haptics stay sparse: a win always confirms; a miss only
-    // buzzes when there is no attempt left to fix it.
-    if (selectedAnswer === currentQuestion.correct_answer) {
-      haptics.success();
-      setFeedback('correct');
-    } else {
-      if (isFinalAttempt) haptics.warning();
-      setFeedback('incorrect');
+  const handleSubmitAnswer = async () => {
+    if (selectedAnswer === null || checking) return;
+    setChecking(true);
+    setCheckError(null);
+    try {
+      const verdict = await onCheckAnswer(currentQuestion.question_id, selectedAnswer);
+      setAnswers((prev) => ({ ...prev, [currentQuestion.question_id]: selectedAnswer }));
+      setVerdicts((prev) => ({ ...prev, [currentQuestion.question_id]: verdict }));
+      // Haptics stay sparse: a win always confirms; a miss only buzzes when
+      // there is no attempt left to fix it.
+      if (verdict.is_correct) haptics.success();
+      else if (isFinalAttempt) haptics.warning();
+    } catch (error) {
+      setCheckError(error instanceof Error ? error.message : 'Could not check that answer.');
+    } finally {
+      setChecking(false);
     }
   };
 
   /** Questions with no recorded answer, in authored order. */
   const unansweredIndexes = questions
-    .map((q, i) => (answers[q.id] === undefined ? i : -1))
+    .map((q, i) => (answers[q.question_id] === undefined ? i : -1))
     .filter((i) => i >= 0);
 
-  const submitAttempt = () => {
-    const finalScore = calculateScore();
-    const passed = finalScore >= passingScore;
-    setShowResults(true);
-    onComplete(passed, finalScore, answers);
+  const submitAttempt = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const outcome = await onSubmit(buildAnswersPayload(answers));
+      if (outcome) setResult(outcome);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleNextQuestion = () => {
@@ -138,11 +144,11 @@ export function QuizPlayer({
         setFinalConfirmOpen(true);
         return;
       }
-      submitAttempt();
+      void submitAttempt();
     } else {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedAnswer(null);
-      setFeedback('none');
+      setCheckError(null);
     }
   };
 
@@ -152,7 +158,7 @@ export function QuizPlayer({
     if (target === undefined) return;
     setCurrentQuestionIndex(target);
     setSelectedAnswer(null);
-    setFeedback('none');
+    setCheckError(null);
   };
 
   const submitAnyway = () => {
@@ -161,24 +167,22 @@ export function QuizPlayer({
       setFinalConfirmOpen(true);
       return;
     }
-    submitAttempt();
+    void submitAttempt();
   };
-
 
   const handleRetry = () => {
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setAnswers({});
-    setFeedback('none');
-    setShowResults(false);
+    setVerdicts({});
+    setCheckError(null);
+    setResult(null);
     onRetry();
   };
 
-  // Results screen
-  if (showResults) {
-    const score = calculateScore();
-    const passed = score >= passingScore;
-    const correctCount = questions.filter((q) => answers[q.id] === q.correct_answer).length;
+  // Results screen — every number comes from the server.
+  if (result) {
+    const { score, passed, correct_count: correctCount, total } = result;
 
     return (
       <Card className="max-w-2xl mx-auto">
@@ -212,18 +216,18 @@ export function QuizPlayer({
               {score}%
             </div>
             <p className="text-muted-foreground">
-              {correctCount} of {questions.length} questions correct
+              {correctCount} of {total} questions correct
             </p>
           </div>
 
           {/* Score breakdown */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-muted/30 text-center">
               <div className="text-2xl font-semibold text-success">{correctCount}</div>
               <div className="text-sm text-muted-foreground">Correct</div>
             </div>
             <div className="p-4 rounded-lg bg-muted/30 text-center">
-              <div className="text-2xl font-semibold text-destructive">{questions.length - correctCount}</div>
+              <div className="text-2xl font-semibold text-destructive">{total - correctCount}</div>
               <div className="text-sm text-muted-foreground">Incorrect</div>
             </div>
           </div>
@@ -274,6 +278,10 @@ export function QuizPlayer({
     );
   }
 
+  if (!currentQuestion) return null;
+
+  const isScenario = currentQuestion.question_text.startsWith('SCENARIO:');
+
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
@@ -286,7 +294,7 @@ export function QuizPlayer({
             Pass: {passingScore}%
           </Badge>
         </div>
-        {/* One segment per question: answered-correct green, current violet,
+        {/* One segment per question: checked-correct green, current violet,
             still ahead grey — position and score in a single glance. */}
         <div
           className="flex gap-1"
@@ -297,19 +305,17 @@ export function QuizPlayer({
           aria-label={`Question ${currentQuestionIndex + 1} of ${questions.length}`}
         >
           {questions.map((q, i) => {
-            const recorded = answers[q.id];
-            const isAnswered = recorded !== undefined;
-            const isRight = isAnswered && recorded === q.correct_answer;
+            const verdict = verdicts[q.question_id];
             return (
               <span
-                key={q.id}
+                key={q.question_id}
                 className={cn(
                   'h-1 flex-1 rounded-full transition-colors',
                   i === currentQuestionIndex
                     ? 'bg-primary'
-                    : isRight
+                    : verdict?.is_correct
                       ? 'bg-[hsl(var(--success))]'
-                      : isAnswered
+                      : verdict
                         ? 'bg-[hsl(var(--destructive))]'
                         : 'bg-muted',
                 )}
@@ -321,7 +327,7 @@ export function QuizPlayer({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Scenario indicator */}
-        {currentQuestion.question.startsWith('SCENARIO:') && (
+        {isScenario && (
           <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/30">
             <AlertCircle className="h-3 w-3 mr-1" />
             Scenario Question
@@ -331,15 +337,12 @@ export function QuizPlayer({
         {/* Question */}
         <div className={cn(
           "p-4 rounded-lg",
-          currentQuestion.question.startsWith('SCENARIO:') 
-            ? "bg-accent/5 border border-accent/20" 
-            : "bg-muted/30"
+          isScenario ? "bg-accent/5 border border-accent/20" : "bg-muted/30"
         )}>
           <p className="font-medium text-lg">
-            {currentQuestion.question.startsWith('SCENARIO:') 
-              ? currentQuestion.question.replace('SCENARIO:', '').trim()
-              : currentQuestion.question
-            }
+            {isScenario
+              ? currentQuestion.question_text.replace('SCENARIO:', '').trim()
+              : currentQuestion.question_text}
           </p>
         </div>
 
@@ -347,51 +350,60 @@ export function QuizPlayer({
         <div className="space-y-2.5">
           {currentQuestion.options.map((option, index) => {
             const isSelected = selectedAnswer === index;
-            const isCorrect = index === currentQuestion.correct_answer;
-            const state =
-              feedback === 'none'
-                ? isSelected
-                  ? 'selected'
-                  : 'idle'
-                : isCorrect
-                  ? 'correct'
-                  : isSelected
-                    ? 'incorrect'
-                    : 'idle';
+            const isCorrect = currentVerdict?.correct_displayed_index === index;
+            const state = !revealed
+              ? isSelected
+                ? 'selected'
+                : 'idle'
+              : isCorrect
+                ? 'correct'
+                : isSelected
+                  ? 'incorrect'
+                  : 'idle';
             return (
               <QuizOption
                 key={index}
                 letter={String.fromCharCode(65 + index)}
                 text={option}
                 state={state}
-                disabled={feedback !== 'none'}
+                disabled={revealed || checking}
                 onSelect={() => handleAnswerSelect(index)}
               />
             );
           })}
         </div>
 
-        {/* Feedback */}
-        {feedback !== 'none' && (
+        {/* Check failed */}
+        {checkError && !revealed && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{checkError}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Feedback — verdict and explanation come from the server */}
+        {currentVerdict && (
           <Alert className={cn(
-            feedback === 'correct' 
+            currentVerdict.is_correct
               ? "border-success/50 bg-success/10" 
               : "border-destructive/50 bg-destructive/10"
           )}>
-            {feedback === 'correct' ? (
+            {currentVerdict.is_correct ? (
               <CheckCircle2 className="h-4 w-4 text-success" />
             ) : (
               <AlertCircle className="h-4 w-4 text-destructive" />
             )}
             <AlertDescription className={cn(
-              feedback === 'correct' ? "text-success" : "text-destructive"
+              currentVerdict.is_correct ? "text-success" : "text-destructive"
             )}>
-              {feedback === 'correct' 
-                ? "Correct! Well done." 
-                : `Incorrect. The correct answer is: ${currentQuestion.options[currentQuestion.correct_answer]}`}
-              {currentQuestion.explanation && (
+              {currentVerdict.is_correct
+                ? "Correct! Well done."
+                : currentVerdict.correct_displayed_index !== null
+                  ? `Incorrect. The correct answer is: ${currentQuestion.options[currentVerdict.correct_displayed_index]}`
+                  : 'Incorrect.'}
+              {currentVerdict.explanation && (
                 <span className="block mt-2 text-foreground/80 font-normal">
-                  {currentQuestion.explanation}
+                  {currentVerdict.explanation}
                 </span>
               )}
             </AlertDescription>
@@ -407,21 +419,24 @@ export function QuizPlayer({
           )}
           pass mark {passingScore}% · {answeredCount} answered
         </p>
-        {feedback === 'none' ? (
+        {!revealed ? (
           <Button
             className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
             onClick={handleSubmitAnswer}
-            disabled={selectedAnswer === null}
+            disabled={selectedAnswer === null || checking}
           >
-            Check answer
+            {checking && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {checking ? 'Checking…' : 'Check answer'}
           </Button>
         ) : (
           <Button
             className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
             onClick={handleNextQuestion}
+            disabled={submitting}
           >
+            {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {isLastQuestion ? (isFinalAttempt ? 'Submit final attempt' : 'See Results') : 'Next Question'}
-            <ChevronRight className="h-4 w-4 ml-1" />
+            {!submitting && <ChevronRight className="h-4 w-4 ml-1" />}
           </Button>
         )}
       </CardFooter>
@@ -462,7 +477,7 @@ export function QuizPlayer({
             <AlertDialogAction
               onClick={() => {
                 setFinalConfirmOpen(false);
-                submitAttempt();
+                void submitAttempt();
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -474,4 +489,3 @@ export function QuizPlayer({
     </Card>
   );
 }
-
