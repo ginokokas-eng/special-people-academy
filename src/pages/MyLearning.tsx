@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { BookOpen, Clock, Play, CheckCircle2, Loader2 } from '@/components/icons';
 import { useIsNative } from '@/lib/native';
 import { enrolmentStatus } from '@/lib/progress';
+import { useContentUpdates } from '@/hooks/useContentUpdates';
 import { NativeLearn } from '@/components/native/NativeLearn';
 
 interface EnrolledCourse {
@@ -31,6 +32,7 @@ export default function MyLearning() {
   const native = useIsNative();
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(true);
+  const { updatedCourseIds } = useContentUpdates(!!user);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -185,7 +187,14 @@ export default function MyLearning() {
         )}
       </div>
       <CardHeader className="pb-2">
-        <p className="text-xs font-medium text-primary">{course.category}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-medium text-primary">{course.category}</p>
+          {updatedCourseIds.has(course.id) && (
+            <Badge variant="secondary" className="text-[11px]">
+              Updated since you completed
+            </Badge>
+          )}
+        </div>
         <CardTitle title={course.title} className="text-base line-clamp-2">{course.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col">
