@@ -462,7 +462,7 @@ export default function LessonContentEditor() {
             </span>
           )}
           <Button
-            onClick={handleSave}
+            onClick={openSaveDialog}
             disabled={
               saving || !dirty || checkpointsInvalid || scenariosInvalid || visibilityInvalid
             }
@@ -476,6 +476,71 @@ export default function LessonContentEditor() {
           </Button>
         </div>
       </div>
+
+      {coursePublished && (
+        <Alert>
+          <AlertTitle>You are editing a live course</AlertTitle>
+          <AlertDescription>
+            Learners see these changes as soon as you save.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save this lesson</DialogTitle>
+            <DialogDescription>
+              Tell us what kind of change this is, so learners who already finished the lesson can be
+              told when it matters.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="material-change"
+                checked={material}
+                onCheckedChange={(checked) => setMaterial(checked === true)}
+              />
+              <Label htmlFor="material-change" className="text-sm font-normal leading-snug">
+                This changes what learners must know
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Ticked automatically when you add, remove or edit a question, activity or assessed
+                  step. Leave it off for wording or picture tidy-ups.
+                </span>
+              </Label>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="change-note" className="text-sm">
+                Note (optional)
+              </Label>
+              <Input
+                id="change-note"
+                value={note}
+                maxLength={200}
+                placeholder="e.g. Updated the escalation question"
+                onChange={(event) => setNote(event.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                setSaveDialogOpen(false);
+                await handleSave();
+              }}
+              disabled={saving}
+            >
+              Save content
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
       {lesson && lesson.lesson_type !== 'blocks' && (
         <Card>
