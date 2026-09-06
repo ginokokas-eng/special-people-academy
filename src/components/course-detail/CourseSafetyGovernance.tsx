@@ -91,9 +91,9 @@ export function CourseSafetyGovernance({ category, deliveryType, courseTitle }: 
         {!isPBSCourse && isCareCourse && (
           <div className="p-4 rounded-lg bg-muted/50">
             <p className="text-sm text-muted-foreground">
-              This training supports your organisation's compliance with CQC regulations and 
-              Skills for Care guidance. Apply all learning within the context of individual 
-              care plans and your organisation's policies.
+              This training is mapped to CQC key questions and Skills for Care guidance, so it can
+              form part of the evidence your organisation keeps. Apply all learning within the
+              context of individual care plans and your organisation's policies.
             </p>
           </div>
         )}
