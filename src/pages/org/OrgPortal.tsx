@@ -9,6 +9,7 @@ import { BulkInviteForm } from '@/components/org/BulkInviteForm';
 import { PortalShell } from '@/components/org/PortalShell';
 import { OrgLessonInsights } from '@/components/org/OrgLessonInsights';
 import { OrgStandards } from '@/components/org/OrgStandards';
+import { OrgRetention } from '@/components/org/OrgRetention';
 import {
   ComplianceDot,
   EmptyState,
@@ -578,6 +579,7 @@ export default function OrgPortal() {
               { value: 'licences', label: 'Licences' },
               { value: 'certificates', label: 'Certificates' },
               { value: 'insights', label: 'Insights' },
+              { value: 'retention', label: 'Retention' },
               { value: 'standards', label: 'Standards' },
               ...(canAssess ? [{ value: 'assess', label: 'Marking' }] : []),
             ].map((tab) => (
@@ -1030,9 +1032,19 @@ export default function OrgPortal() {
             <OrgLessonInsights organisationId={organisation.id} licences={licences} />
           </TabsContent>
 
+          <TabsContent value="retention" className="settle-in mt-6">
+            <SectionCard
+              title="Retention"
+              description="How your team do on short recall checks after they finish a course."
+            >
+              <OrgRetention organisationId={organisation.id} />
+            </SectionCard>
+          </TabsContent>
+
           <TabsContent value="standards" className="settle-in mt-6">
             <OrgStandards organisationId={organisation.id} />
           </TabsContent>
+
         </Tabs>
       </div>
     </PortalShell>

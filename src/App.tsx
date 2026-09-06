@@ -26,6 +26,7 @@ import CourseDetail from "./pages/CourseDetail";
 import CourseLearn from "./pages/CourseLearn";
 import QuizPage from "./pages/QuizPage";
 import MyLearning from "./pages/MyLearning";
+import Refresher from "./pages/Refresher";
 import MyCourses from "./pages/MyCourses";
 import Certificates from "./pages/Certificates";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -105,6 +106,8 @@ const App = () => (
                 <Route path="/courses/:id/learn" element={<CourseLearn />} />
                 <Route path="/courses/:courseId/quiz" element={<QuizPage />} />
                 <Route path="/my-learning" element={<MyLearning />} />
+                <Route path="/refresher/:scheduleId" element={<Refresher />} />
+
                 <Route path="/my-courses" element={<MyCourses />} />
                 <Route path="/certificates" element={<Certificates />} />
                 <Route path="/verify/:code" element={<VerifyCertificate />} />

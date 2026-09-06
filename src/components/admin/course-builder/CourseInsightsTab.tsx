@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 import { LessonInsightsPanel } from './LessonInsightsView';
+import { RetentionPanel } from './RetentionPanel';
 import { EVIDENCE_DISCLAIMER, EVIDENCE_HEADING, groupByFramework } from '@/lib/standards';
 
 interface BlockLesson {
@@ -104,7 +105,10 @@ export function CourseInsightsTab({ courseId }: { courseId: string }) {
 
       {!!lessons.length && <LessonInsightsPanel lessonId={lessonId} />}
 
+      <RetentionPanel courseId={courseId} />
+
       <StandardsEvidencedCard courseId={courseId} />
+
     </div>
   );
 }

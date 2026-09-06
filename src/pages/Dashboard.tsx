@@ -13,6 +13,7 @@ import { LessonRow } from '@/components/ds/LessonRow';
 import { hueFor } from '@/components/ds/FigureMark';
 import { ArrowRight, BookOpen, Loader2 } from '@/components/icons';
 import { useContentUpdates } from '@/hooks/useContentUpdates';
+import { RefresherDueCards } from '@/components/learner/RefresherDueCards';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -237,6 +238,10 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-foreground">My Dashboard</h1>
           <p className="text-muted-foreground mt-1">Track your learning progress</p>
         </div>
+
+        <RefresherDueCards enabled={!!user} />
+
+
 
         {/* Hero band — compliance at a glance, and the shortest path to clearing it. */}
         {enrolledCourses.length > 0 && (

@@ -3006,6 +3006,91 @@ export type Database = {
           },
         ]
       }
+      refresher_attempts: {
+        Row: {
+          answers: Json
+          correct_count: number
+          id: string
+          schedule_id: string
+          score: number
+          submitted_at: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          correct_count: number
+          id?: string
+          schedule_id: string
+          score: number
+          submitted_at?: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          correct_count?: number
+          id?: string
+          schedule_id?: string
+          score?: number
+          submitted_at?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refresher_attempts_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "refresher_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refresher_schedules: {
+        Row: {
+          course_id: string
+          created_at: string
+          due_at: string
+          id: string
+          kind: string
+          materialised_at: string | null
+          questions: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          due_at: string
+          id?: string
+          kind: string
+          materialised_at?: string | null
+          questions?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          materialised_at?: string | null
+          questions?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refresher_schedules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       respiratory_competency_signoffs: {
         Row: {
           action_plan: string | null
@@ -3637,6 +3722,10 @@ export type Database = {
         }
         Returns: string
       }
+      draw_refresher_questions: {
+        Args: { _course: string; _limit?: number }
+        Returns: Json
+      }
       fulfil_purchase: {
         Args: {
           _amount_gbp: number
@@ -3679,6 +3768,17 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_course_retention: {
+        Args: { _course: string }
+        Returns: {
+          avg_score: number
+          done: number
+          kind: string
+          ready: number
+          scheduled: number
+          skipped: number
+        }[]
+      }
       get_course_standard_coverage: {
         Args: { _course: string }
         Returns: {
@@ -3688,6 +3788,18 @@ export type Database = {
           lesson_titles: string[]
           linked_at_course: boolean
           title: string
+        }[]
+      }
+      get_due_refreshers: {
+        Args: { _user?: string }
+        Returns: {
+          course_id: string
+          course_title: string
+          due_at: string
+          kind: string
+          question_count: number
+          schedule_id: string
+          status: string
         }[]
       }
       get_learner_standard_evidence: {
@@ -3816,6 +3928,19 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_org_retention: {
+        Args: { _org: string }
+        Returns: {
+          avg_score: number
+          course_id: string
+          course_title: string
+          done: number
+          kind: string
+          ready: number
+          scheduled: number
+          skipped: number
+        }[]
+      }
       get_org_standard_results: {
         Args: { _org: string }
         Returns: {
@@ -3942,6 +4067,7 @@ export type Database = {
           unlimited: boolean
         }[]
       }
+      start_refresher: { Args: { _schedule_id: string }; Returns: Json }
       submit_quiz_attempt: {
         Args: { _answers: Json; _session_id: string }
         Returns: {
@@ -3953,6 +4079,15 @@ export type Database = {
           score: number
           total: number
           unlimited: boolean
+        }[]
+      }
+      submit_refresher: {
+        Args: { _answers: Json; _schedule_id: string }
+        Returns: {
+          correct_count: number
+          results: Json
+          score: number
+          total: number
         }[]
       }
       sync_staff_role: {
