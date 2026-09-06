@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { X, Plus } from '@/components/icons';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { StandardPicker } from '@/components/admin/StandardPicker';
 
 interface Course {
   id: string;
