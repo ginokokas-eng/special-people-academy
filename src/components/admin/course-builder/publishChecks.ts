@@ -21,6 +21,8 @@ import {
 
 
 } from '@/components/course-learn/blocks/types';
+import { parsePoolConfig, poolIsFillable } from '@/lib/questionBank';
+
 
 export interface PublishCheck {
   id: string;
