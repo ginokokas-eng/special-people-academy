@@ -30,9 +30,13 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-/** Unique, human-readable slug within the copied scenario. */
+/**
+ * A fresh, unique, still-readable slug for a copied node. Slugs are author-facing
+ * keys, so the copy keeps the original wording with a `-copy` marker rather than
+ * a random string — and never reuses the source slug.
+ */
 function slugFor(base: string, used: Set<string>): string {
-  const root = (base || 'step').trim() || 'step';
+  const root = `${(base || 'step').trim() || 'step'}-copy`;
   let candidate = root;
   let n = 2;
   while (used.has(candidate)) candidate = `${root}-${n++}`;
