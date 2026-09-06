@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowDown, ArrowUp, Library, Plus, Trash2 } from '@/components/icons';
+import { checklistMode } from '@/components/course-learn/blocks/types';
 import type {
   ChecklistPayload,
   DragMatchPayload,
