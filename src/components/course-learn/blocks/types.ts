@@ -440,6 +440,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   drag_match: 'Matching activity',
   checklist: 'Practical checklist',
   scenario: 'Scenario',
+  reflection: 'Reflective answer',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
