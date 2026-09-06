@@ -499,17 +499,40 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
 
                         </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setQuestionForm({ question: '', question_type: 'multiple_choice', options: ['', '', '', ''], correct_answer: 0, explanation: '' });
-                            setQuestionDialog({ open: true, question: null, quizId: quiz.id });
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Question
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setQuestionForm({ question: '', question_type: 'multiple_choice', options: ['', '', '', ''], correct_answer: 0, explanation: '' });
+                              setQuestionDialog({ open: true, question: null, quizId: quiz.id });
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Question
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBankPicker({ open: true, quizId: quiz.id })}
+                          >
+                            <Library className="h-4 w-4 mr-2" />
+                            Add from bank
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setPoolForm({ tags: [], draw_count: 3, standard_code: '' });
+                              setPoolTagInput('');
+                              setPoolDialog({ open: true, quizId: quiz.id });
+                            }}
+                          >
+                            <Shuffle className="h-4 w-4 mr-2" />
+                            Pool question
+                          </Button>
+                        </div>
+
                       </div>
                     ) : (
                       <Button
