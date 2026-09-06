@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Play, Clock, Target, Award, RotateCcw, Lock, CheckCircle2, AlertTriangle } from '@/components/icons';
 import { toast } from 'sonner';
+import { postLmsMessage } from '@/lib/lmsBridge';
 import { attemptsRemaining as remainingFor, quizRpcErrorMessage } from '@/lib/quizAttempt';
 
 interface QuizContainerProps {
@@ -285,6 +286,15 @@ export function QuizContainer({
       // Refresh history/attempt counts for the intro screen (silent: the
       // results card must stay on screen).
       await fetchQuizData({ silent: true });
+      // Report the graded result to a hosting third-party LMS (no-op otherwise).
+      postLmsMessage({
+        type: 'score',
+        course_id: courseId,
+        lesson_id: lessonId,
+        percent: score,
+        score,
+        passed,
+      });
       onQuizComplete?.(passed);
 
       return {
