@@ -180,7 +180,7 @@ export default function CourseBuilder() {
                   <TableHead>Title</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Updated</TableHead>
+                  <TableHead className="whitespace-nowrap">Last Updated</TableHead>
                   <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
               </TableHeader>

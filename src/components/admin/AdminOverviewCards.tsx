@@ -24,14 +24,15 @@ export function AdminOverviewCards({
 }: AdminOverviewCardsProps) {
   const cards = [
     {
-      title: 'Total Learners',
+      // Counts every account, staff included — the Learners page counts learners.
+      title: 'Total accounts',
       value: totalLearners,
       icon: Users,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
     {
-      title: 'Active Enrollments',
+      title: 'Active Enrolments',
       value: activeEnrollments,
       icon: GraduationCap,
       color: 'text-accent',

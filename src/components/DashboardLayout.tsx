@@ -215,8 +215,16 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user?.email}</p>
+                      {/* The highest role held — org admins and staff were all
+                          labelled "Learner". */}
                       <p className="text-xs text-muted-foreground">
-                        {isAdmin ? 'Admin' : isTrainer ? 'Trainer' : 'Learner'}
+                        {showAdminLink
+                          ? isSuperAdmin || isAdmin || isOpsTrainingAdmin
+                            ? 'Staff'
+                            : 'Trainer'
+                          : isOrgAdmin
+                            ? 'Organisation admin'
+                            : 'Learner'}
                       </p>
                     </div>
                     <DropdownMenuSeparator />

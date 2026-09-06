@@ -55,3 +55,32 @@ export function computeRoleFlags(roles: readonly AppRole[] | readonly string[]):
     isLearner: true,
   };
 }
+
+/** The role requirement vocabulary used by route guards and portal navigation. */
+export type RequiredRole = 'admin' | 'trainer' | 'super_admin' | 'ops_training_admin' | 'learner';
+
+/**
+ * Single answer to "may this person open that page?".
+ *
+ * Both `ProtectedRoute` and the admin portal navigation call this, so a visible
+ * nav item can never lead to Access Denied.
+ */
+export function satisfiesRoles(flags: RoleFlags, requiredRoles: readonly RequiredRole[]): boolean {
+  if (requiredRoles.length === 0) return true;
+  return requiredRoles.some((role) => {
+    switch (role) {
+      case 'super_admin':
+        return flags.isSuperAdmin;
+      case 'admin':
+        return flags.isAdmin;
+      case 'ops_training_admin':
+        return flags.isOpsTrainingAdmin;
+      case 'trainer':
+        return flags.isTrainer;
+      case 'learner':
+        return true;
+      default:
+        return false;
+    }
+  });
+}

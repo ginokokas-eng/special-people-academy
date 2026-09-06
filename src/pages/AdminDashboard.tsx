@@ -117,7 +117,7 @@ export default function AdminDashboard() {
   // Table controls state
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('published');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [dataLoading, setDataLoading] = useState(true);
@@ -281,6 +281,16 @@ export default function AdminDashboard() {
     
     // Sort
     switch (sortBy) {
+      // Default: published courses first, most recently edited at the top, so
+      // untitled drafts never head a 100-row list.
+      case 'published':
+        result.sort((a, b) => {
+          if (a.is_published !== b.is_published) return a.is_published ? -1 : 1;
+          const at = new Date((a as { updated_at?: string }).updated_at ?? a.created_at).getTime();
+          const bt = new Date((b as { updated_at?: string }).updated_at ?? b.created_at).getTime();
+          return bt - at;
+        });
+        break;
       case 'newest':
         result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
@@ -827,6 +837,7 @@ export default function AdminDashboard() {
                   }}
                   filterPlaceholder="Category"
                   sortOptions={[
+                    { label: 'Published first', value: 'published' },
                     { label: 'Newest', value: 'newest' },
                     { label: 'Oldest', value: 'oldest' },
                     { label: 'Title A-Z', value: 'title' },
