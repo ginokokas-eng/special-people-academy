@@ -245,7 +245,11 @@ export default function LessonContentEditor() {
         if (error) throw error;
       }
 
+      // Records where bank questions are reused, now the block ids exist.
+      await syncBankUsages();
+
       toast.success('Lesson content saved');
+
       setDirty(false);
       dirtyRef.current = false;
       await load(true);
