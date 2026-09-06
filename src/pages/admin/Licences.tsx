@@ -206,7 +206,11 @@ export default function Licences() {
               </p>
             </div>
           </div>
-          <Button onClick={() => setIssueOpen(true)} disabled={!orgId}>
+          <Button
+            onClick={() => setIssueOpen(true)}
+            disabled={!orgId}
+            className="disabled:opacity-50"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Issue licence
           </Button>

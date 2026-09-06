@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Loader2, GraduationCap, Search, RefreshCw } from '@/components/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 interface Learner {
@@ -130,25 +131,24 @@ export default function Learners() {
           </Button>
         </div>
 
+        {/* A hard "0" while the directory loads read as real data. */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total learners</CardDescription>
-              <CardTitle className="text-3xl">{learners.length}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Synced from Fountain</CardDescription>
-              <CardTitle className="text-3xl">{fountainCount}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Direct sign-ups</CardDescription>
-              <CardTitle className="text-3xl">{learners.length - fountainCount}</CardTitle>
-            </CardHeader>
-          </Card>
+          {[
+            { label: 'Total learners', value: learners.length },
+            { label: 'Synced from Fountain', value: fountainCount },
+            { label: 'Direct sign-ups', value: learners.length - fountainCount },
+          ].map((stat) => (
+            <Card key={stat.label}>
+              <CardHeader className="pb-2">
+                <CardDescription>{stat.label}</CardDescription>
+                {loading ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : (
+                  <CardTitle className="text-3xl">{stat.value}</CardTitle>
+                )}
+              </CardHeader>
+            </Card>
+          ))}
         </div>
 
         <Card>
@@ -196,7 +196,7 @@ export default function Learners() {
                       <TableHead className="text-right">Completed</TableHead>
                       <TableHead className="text-right">Certificates</TableHead>
                       <TableHead>Joined</TableHead>
-                      <TableHead>Last sign-in</TableHead>
+                      <TableHead className="whitespace-nowrap">Last sign-in</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
