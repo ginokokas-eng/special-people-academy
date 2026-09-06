@@ -69,6 +69,8 @@ Deno.serve(async (req) => {
     if (resource === 'enroll') return await handleEnroll(admin, req);
     if (resource === 'progress') return await handleProgress(admin, req, url);
     if (resource === 'certificate') return await handleCertificate(admin, url);
+    if (resource === 'refreshers') return await handleRefreshers(admin, url, appOrigin(), json);
+
 
     return json(
       {
