@@ -228,6 +228,8 @@ export interface HotGraphicPayload extends LayoutAware {
 export interface McqOption {
   id: string;
   label: string;
+  /** Optional per-answer feedback, used by bank-sourced questions. */
+  feedback?: string;
 }
 
 export interface McqPayload extends LayoutAware {
@@ -235,7 +237,11 @@ export interface McqPayload extends LayoutAware {
   options: McqOption[];
   correct_id: string;
   explanation?: string;
+  /** Provenance when this block was copied from the shared question bank. */
+  bank_id?: string;
+  bank_version?: number;
 }
+
 
 
 /** Drag-and-drop matching. Grading is a pure comparison of item.target_id. */
