@@ -12,6 +12,7 @@ import { CertificateRing } from '@/components/ds/CertificateRing';
 import { LessonRow } from '@/components/ds/LessonRow';
 import { hueFor } from '@/components/ds/FigureMark';
 import { ArrowRight, BookOpen, Loader2 } from '@/components/icons';
+import { useContentUpdates } from '@/hooks/useContentUpdates';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -46,6 +47,7 @@ export default function Dashboard() {
   });
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(true);
+  const { updatedCourseIds } = useContentUpdates(!!user);
 
   useEffect(() => {
     if (!authLoading && !user) {
