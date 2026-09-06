@@ -1655,6 +1655,69 @@ export type Database = {
           },
         ]
       }
+      lesson_translations: {
+        Row: {
+          block_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          lang: string
+          lesson_id: string
+          model: string | null
+          overrides: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_hash: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          block_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lang: string
+          lesson_id: string
+          model?: string | null
+          overrides: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_hash: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lang?: string
+          lesson_id?: string
+          model?: string | null
+          overrides?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_hash?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_translations_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_translations_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_video_sources: {
         Row: {
           created_at: string
@@ -1704,6 +1767,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          available_langs: string[]
           content: string | null
           content_version: number
           course_id: string
@@ -1726,6 +1790,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          available_langs?: string[]
           content?: string | null
           content_version?: number
           course_id: string
@@ -1748,6 +1813,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          available_langs?: string[]
           content?: string | null
           content_version?: number
           course_id?: string
@@ -2638,6 +2704,7 @@ export type Database = {
           full_name: string | null
           id: string
           job_title: string | null
+          preferred_lang: string | null
           source_system: string | null
           updated_at: string
           user_id: string
@@ -2652,6 +2719,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           job_title?: string | null
+          preferred_lang?: string | null
           source_system?: string | null
           updated_at?: string
           user_id: string
@@ -2666,6 +2734,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           job_title?: string | null
+          preferred_lang?: string | null
           source_system?: string | null
           updated_at?: string
           user_id?: string
@@ -3845,6 +3914,10 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      refresh_lesson_available_langs: {
+        Args: { _lesson: string }
+        Returns: undefined
       }
       release_expired_invitation_seats:
         | { Args: never; Returns: number }
