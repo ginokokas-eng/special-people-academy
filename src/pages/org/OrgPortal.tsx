@@ -9,6 +9,7 @@ import { BulkInviteForm } from '@/components/org/BulkInviteForm';
 import { PortalShell } from '@/components/org/PortalShell';
 import { OrgLessonInsights } from '@/components/org/OrgLessonInsights';
 import { OrgStandards } from '@/components/org/OrgStandards';
+import { OrgRetention } from '@/components/org/OrgRetention';
 import {
   ComplianceDot,
   EmptyState,
