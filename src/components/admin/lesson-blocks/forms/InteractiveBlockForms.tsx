@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  blockPayloadFromBank,
+  isOutdated,
+  type BankOption,
+  type BankQuestion,
+} from '@/lib/questionBank';
+
 import { Input } from '@/components/ui/input';
 
 import { Label } from '@/components/ui/label';
