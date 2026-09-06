@@ -100,7 +100,22 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
         .eq('id', course.id);
 
       if (error) throw error;
-      
+
+      // Audit artefact only: a snapshot of the course as published. The learner
+      // renderer keeps reading the live lesson_blocks rows.
+      if (newStatus === 'published') {
+        const { data: version, error: versionError } = await supabase.rpc('publish_course_version', {
+          _course_id: course.id,
+        });
+        if (versionError) {
+          console.error('Error snapshotting course version:', versionError);
+          toast.error('Published, but the version snapshot could not be saved');
+        } else {
+          toast.success(`Version ${version} published`);
+        }
+        void loadVersions();
+      }
+
       onUpdate(updates);
       toast.success(`Course ${newStatus === 'published' ? 'published' : 'status updated'}`);
     } catch (error) {
@@ -110,6 +125,7 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
       setSaving(false);
     }
   };
+
 
   const handleUnpublish = async () => {
     if (!(await confirmDialog({ title: 'Unpublish course?', description: 'It will no longer be visible in the catalogue.', confirmLabel: 'Unpublish' }))) return;
