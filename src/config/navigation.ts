@@ -6,6 +6,8 @@ import {
   Trophy,
   PenTool,
   ClipboardList,
+  HelpCircle,
+
   Ticket,
   Users,
   Settings,
