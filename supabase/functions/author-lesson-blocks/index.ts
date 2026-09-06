@@ -470,7 +470,39 @@ Deno.serve(async (req) => {
       system += ` Suggest exactly ${count} in-video checkpoint questions, spread across the video. Each at_s MUST be copied exactly from one of the segment start times given, and the question must be answerable from what the learner has heard BEFORE that time.`;
       user = `Transcript segments:\n${serialised}`;
       validate = (d) => validateCheckpointsReply(d, starts);
+    } else if (mode === 'translate_blocks') {
+      const lang = String(input.lang ?? body.lang ?? '');
+      const langName = TRANSLATION_LANGS[lang];
+      if (!langName) return json({ error: 'That language is not available yet.' }, 400);
+      const list = Array.isArray(input.blocks) ? (input.blocks as Rec[]) : [];
+      // The CLIENT extracts the texts using translatablePaths, so this function
+      // never guesses which fields of a block hold readable content.
+      const payload: { block_id: string; block_type: string; texts: Rec }[] = [];
+      const wanted = new Map<string, Set<string>>();
+      for (const entry of list) {
+        const id = String(entry.block_id ?? '');
+        const texts = (entry.texts ?? {}) as Rec;
+        const paths = Object.keys(texts).filter((p) => String(texts[p] ?? '').trim());
+        if (!id || !paths.length) continue;
+        wanted.set(id, new Set(paths));
+        payload.push({
+          block_id: id,
+          block_type: String(entry.block_type ?? ''),
+          texts: Object.fromEntries(paths.map((p) => [p, String(texts[p])])),
+        });
+      }
+      if (!wanted.size) return json({ error: 'There is no text to translate here.' }, 400);
+      const serialised = JSON.stringify(payload);
+      if (serialised.length > MAX_TEXT_CHARS)
+        return json({ error: 'Too much text at once. Translate this lesson in parts.' }, 400);
+      inputChars = serialised.length;
+      schema = translationSchema;
+      schemaName = 'block_translations';
+      system = `You are a professional translator for UK social care training. Translate the given strings from British English into ${langName}. Plain, respectful register a care worker would use at work; do not paraphrase, summarise, add or remove content. Keep numbers, units, times, dates, medication names, brand names, proper nouns, job titles of named systems and abbreviations exactly as they are. Keep every placeholder, bullet marker such as "-", and line break in the same place. Never translate the paths, the block ids or any JSON key. Return every block and every path you were given, once each. Return ONLY JSON matching the schema.`;
+      user = `Target language: ${langName}\n\nBlocks to translate:\n${serialised}`;
+      validate = (d) => validateTranslationReply(d, wanted);
     } else {
+
       const blockType = String(input.block_type ?? '');
       const instruction = String(input.instruction ?? '').trim();
       if (!blockType) return json({ error: 'Missing block_type' }, 400);
