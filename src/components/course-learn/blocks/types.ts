@@ -273,7 +273,11 @@ export interface FlipCardsPayload extends LayoutAware {
 }
 
 
-/** Read-only practical checklist. Learners cannot tick it; no sign-off link. */
+/**
+ * Practical checklist. In `reference` mode (the default, and how every existing
+ * checklist behaves) it is read-only study material. In `assessed` mode an
+ * assessor ticks the steps off in person and signs the observation.
+ */
 export interface ChecklistStep {
   id: string;
   step_title: string;
@@ -281,11 +285,66 @@ export interface ChecklistStep {
   safety_note?: string;
 }
 
+export type ChecklistMode = 'reference' | 'assessed';
+
 export interface ChecklistPayload extends VisibilityAware {
   heading?: string;
   caption?: string;
+  /** Absent = 'reference', so existing blocks keep their behaviour. */
+  mode?: ChecklistMode;
   steps: ChecklistStep[];
 }
+
+/** Effective checklist mode. */
+export function checklistMode(payload?: BlockPayload | null): ChecklistMode {
+  return (payload as ChecklistPayload | undefined)?.mode === 'assessed'
+    ? 'assessed'
+    : 'reference';
+}
+
+/* -------------------------------- reflection ------------------------------- */
+
+/**
+ * A written reflective answer. The learner's words are saved to
+ * `lesson_block_responses`; an assessor's mark is a separate `block_marks` row,
+ * so a learner can never mark their own work.
+ */
+export interface ReflectionPayload extends VisibilityAware {
+  heading?: string;
+  prompt: string;
+  guidance?: string;
+  /** Minimum words before Submit is offered. 0 = no minimum. */
+  min_words?: number;
+  /** What the assessor looks for. Shown to learners as "what good looks like". */
+  criteria?: string[];
+}
+
+/** Learner-side stored shape for a reflection answer. */
+export interface ReflectionResponse {
+  kind: 'reflection';
+  version: 1;
+  text: string;
+  submitted_at?: string;
+}
+
+/** Word count used for the minimum-length gate. */
+export function countWords(text: string): number {
+  return (text || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** Author-facing problems with a reflection. Empty array = publishable. */
+export function validateReflection(payload?: ReflectionPayload | null): string[] {
+  const issues: string[] = [];
+  if (!payload) return issues;
+  if (!payload.prompt?.trim()) issues.push('Add the question learners answer.');
+  const min = payload.min_words ?? 0;
+  if (!Number.isFinite(min) || min < 0 || min > 500)
+    issues.push('A minimum word count must be between 0 and 500.');
+  if ((payload.criteria ?? []).some((c) => !c?.trim()))
+    issues.push('Every “what good looks like” line needs wording.');
+  return issues;
+}
+
 
 /* ----------------------------- branching scenario -------------------------- */
 
