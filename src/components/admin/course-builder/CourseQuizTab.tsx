@@ -277,6 +277,102 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
     }
   };
 
+  /** Live "how many bank questions match these tags" count for the pool form. */
+  useEffect(() => {
+    if (!poolDialog.open || poolForm.tags.length === 0) {
+      setPoolMatches(null);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from('question_bank')
+      .select('id', { count: 'exact', head: true })
+      .is('org_id', null)
+      .overlaps('tags', poolForm.tags)
+      .then(({ count }) => {
+        if (!cancelled) setPoolMatches(count ?? 0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [poolDialog.open, poolForm.tags]);
+
+  /** Counts for pool rows already saved, so authors see fail states in the list. */
+  useEffect(() => {
+    const pools = questions.filter((q) => q.question_type === 'pool' && q.question_payload);
+    if (!pools.length) return;
+    let cancelled = false;
+    (async () => {
+      const next: Record<string, number> = {};
+      for (const pool of pools) {
+        const { count } = await supabase
+          .from('question_bank')
+          .select('id', { count: 'exact', head: true })
+          .is('org_id', null)
+          .overlaps('tags', pool.question_payload!.pool_tags);
+        next[pool.id] = count ?? 0;
+      }
+      if (!cancelled) setPoolCounts(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [questions]);
+
+  const addFromBank = async (bankId: string) => {
+    if (!bankPicker.quizId) return;
+    const { error } = await supabase.rpc('copy_bank_question_to_quiz', {
+      _bank_id: bankId,
+      _quiz_id: bankPicker.quizId,
+    });
+    if (error) {
+      console.error('Error copying bank question:', error);
+      toast.error('Could not add that question');
+      return;
+    }
+    toast.success('Question added from the bank');
+    setBankPicker({ open: false, quizId: null });
+    fetchData();
+  };
+
+  const handleCreatePool = async () => {
+    if (!poolDialog.quizId) return;
+    if (!poolForm.tags.length) return toast.error('Add at least one tag');
+    if (!poolIsFillable(poolMatches ?? 0, poolForm.draw_count)) {
+      return toast.error('The bank does not have enough matching questions yet');
+    }
+
+    setSaving(true);
+    try {
+      const quizQuestions = questions.filter((q) => q.quiz_id === poolDialog.quizId);
+      const { error } = await supabase.from('quiz_questions').insert({
+        quiz_id: poolDialog.quizId,
+        question: poolQuestionLabel(poolForm.tags),
+        question_type: 'pool',
+        options: [],
+        correct_answer: 0,
+        order_index: quizQuestions.length,
+        question_payload: {
+          pool_tags: poolForm.tags,
+          draw_count: poolForm.draw_count,
+          ...(poolForm.standard_code.trim() ? { standard_code: poolForm.standard_code.trim() } : {}),
+        },
+      });
+      if (error) throw error;
+      toast.success('Pool question added');
+      setPoolDialog({ open: false, quizId: null });
+      setPoolForm({ tags: [], draw_count: 3, standard_code: '' });
+      setPoolTagInput('');
+      fetchData();
+    } catch (error) {
+      console.error('Error creating pool question:', error);
+      toast.error('Could not add the pool question');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   const openEditQuiz = (quiz: Quiz) => {
     setQuizForm({
       title: quiz.title,
