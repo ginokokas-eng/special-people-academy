@@ -197,6 +197,14 @@ export default function CourseLearn() {
   // the point of the hub. Deep links with ?lesson= are unaffected.
   const showHub = !activeLessonId || (!activeLesson && !deepLinkHidden);
 
+  // Hosted inside a third-party LMS (opened via /launch). We hide our own
+  // marketing chrome and report progress out over postMessage.
+  const [lmsMode] = useState(() => syncLmsModeFromUrl());
+  useEffect(() => {
+    if (!lmsMode || !courseId || !activeLesson) return;
+    return startLmsHeartbeat({ course_id: courseId, lesson_id: activeLesson.id });
+  }, [lmsMode, courseId, activeLesson?.id]);
+
   // Best score for the active quiz lesson, so a finished check reads honestly.
   const [quizBestScore, setQuizBestScore] = useState<number | null>(null);
   useEffect(() => {
@@ -1065,6 +1073,7 @@ export default function CourseLearn() {
             courseHome
           ) : (
           <div className={cn('mx-auto px-5 py-6 sm:px-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
+            {!lmsMode && (
             <div className="mb-3">
               <Button
                 variant="ghost"
@@ -1075,6 +1084,7 @@ export default function CourseLearn() {
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back to modules
               </Button>
             </div>
+            )}
             {activeLesson && (
               <header className="learner-header-band mb-5">
                 <img
