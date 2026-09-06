@@ -118,6 +118,8 @@ const App = () => (
                 <Route path="/admin-portal/learners" element={<ProtectedRoute requiredRoles={['admin']}><Learners /></ProtectedRoute>} />
                 <Route path="/admin-portal/organisations" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Organisations /></ProtectedRoute>} />
                 <Route path="/admin-portal/licences" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Licences /></ProtectedRoute>} />
+                <Route path="/admin-portal/question-bank" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><QuestionBank /></ProtectedRoute>} />
+
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />
