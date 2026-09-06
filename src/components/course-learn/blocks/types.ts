@@ -396,7 +396,8 @@ export type BlockPayload =
   | DragMatchPayload
   | FlipCardsPayload
   | ChecklistPayload
-  | ScenarioPayload;
+  | ScenarioPayload
+  | ReflectionPayload;
 
 
 
