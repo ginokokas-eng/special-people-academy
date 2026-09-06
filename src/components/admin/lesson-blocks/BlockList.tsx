@@ -1,8 +1,20 @@
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowDown, ArrowUp, Copy, Trash2 } from '@/components/icons';
+import { ArrowDown, ArrowUp, Copy, GripVertical, MoreVertical, Trash2 } from '@/components/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { BlockCommentsPopover } from './BlockCommentsPopover';
+import type { BlockComment } from '@/lib/blockComments';
 import {
   BLOCK_LABELS,
   allowsHalfWidth,
@@ -70,6 +82,14 @@ interface BlockListProps {
   lessonId?: string;
   /** Problems with conditional visibility, keyed by the block's client id. */
   visibilityIssues?: VisibilityIssue[];
+  /** New order after a drag, expressed as the reordered client ids. */
+  onReorder?: (clientIds: string[]) => void;
+  /** Send a block to another lesson. */
+  onTransfer?: (index: number, mode: 'copy' | 'move') => void;
+  /** Reviewer notes, keyed by the block's stable client id. */
+  comments?: Record<string, BlockComment[]>;
+  onAddComment?: (clientId: string, body: string) => Promise<void>;
+  onResolveComment?: (id: string, resolved: boolean) => Promise<void>;
 }
 
 /** Short preview of a block's own wording, to tell two MCQs apart in a list. */
