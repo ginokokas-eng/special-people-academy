@@ -286,14 +286,40 @@ export default function LessonContentEditor() {
     mutate((prev) => prev.filter((_, i) => i !== index));
   };
 
+  /**
+   * Opens the save dialog with the material checkbox pre-set from what actually
+   * changed: on when an assessed/interactive block moved, off for wording,
+   * callout or image-only edits.
+   */
+  const openSaveDialog = () => {
+    const removedBefore = savedBlocksRef.current.filter((b) => removedIds.includes(b.id ?? ''));
+    setMaterial(
+      materialChangeDefault(
+        savedBlocksRef.current,
+        blocks.concat(removedBefore.filter(() => false)) // "after" is the current list
+      ) ||
+        materialChangeDefault(savedBlocksRef.current, blocks)
+    );
+    setNote('');
+    setSaveDialogOpen(true);
+  };
+
   const handleSave = async () => {
     if (!lessonId) return;
     setSaving(true);
     try {
+      // Transaction-local context the history triggers read.
+      const { error: contextError } = await supabase.rpc('set_content_change_context', {
+        _material: material,
+        _note: note.trim() || null,
+      });
+      if (contextError) throw contextError;
+
       if (removedIds.length) {
         const { error } = await supabase.from('lesson_blocks').delete().in('id', removedIds);
         if (error) throw error;
       }
+
 
       // Order is the array position, rewritten on every save.
       const updates = blocks
