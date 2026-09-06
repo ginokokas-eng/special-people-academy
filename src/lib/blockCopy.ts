@@ -53,7 +53,7 @@ export function remintBlockPayload(
   payload: BlockPayload,
   newId: NewId = defaultNewId
 ): BlockPayload {
-  const next = clone(payload) as Record<string, unknown>;
+  const next = clone(payload) as unknown as Record<string, unknown>;
   delete next.visibility;
 
   switch (type) {
