@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, ShoppingCart } from "@/components/icons";
+import { Star, ShoppingCart, BookOpen } from "@/components/icons";
+import { categoryTintClass } from "@/lib/courseCover";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
 import { useIsNative } from "@/lib/native";
@@ -91,7 +92,7 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
       onClick={() => navigate(`/courses/${course.id}`)}
     >
       {/* Visual frame */}
-      <div className="relative rounded-2xl bg-[hsl(262_50%_97%)] border border-dashed border-[#D6CCF5] aspect-[16/10] overflow-hidden mb-5">
+      <div className="relative rounded-2xl bg-[hsl(262_50%_97%)] border border-[#EEEAF8] aspect-[16/10] overflow-hidden mb-5">
         {/* The category already appears as the eyebrow below — showing it twice
             read as a duplicate. */}
         {course.thumbnail_url ? (
@@ -101,12 +102,11 @@ export const EditorialCourseCard = ({ course, rating, reviews }: EditorialCourse
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center font-mono text-[11px] text-[hsl(259_20%_55%)] text-center px-6 leading-relaxed">
-            [ ILLUSTRATION
-            <br />
-            {course.category.toLowerCase()}, warm tones
-            <br />
-            16:10 ]
+          <div
+            className={`absolute inset-0 flex items-center justify-center ${categoryTintClass(course.category)}`}
+            aria-hidden="true"
+          >
+            <BookOpen className="h-12 w-12 text-primary/50" />
           </div>
         )}
 
