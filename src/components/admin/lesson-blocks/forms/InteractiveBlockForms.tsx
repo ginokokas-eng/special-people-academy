@@ -203,7 +203,7 @@ function BankActions({
         .from('question_bank')
         .insert({
           stem: payload.question.trim(),
-          options,
+          options: options as never,
           correct_id: payload.correct_id || options[0].id,
           explanation: payload.explanation?.trim() || null,
           created_by: (claims?.claims?.sub as string | undefined) ?? null,

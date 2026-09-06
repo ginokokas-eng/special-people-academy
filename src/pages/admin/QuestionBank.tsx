@@ -181,7 +181,7 @@ export default function QuestionBank() {
     try {
       const body = {
         stem: draft.stem.trim(),
-        options,
+        options: options as never,
         correct_id: draft.correct_id,
         explanation: draft.explanation.trim() || null,
         tags: draft.tags,
@@ -259,7 +259,7 @@ export default function QuestionBank() {
           .from('quiz_questions')
           .update({
             question: bank.stem,
-            options: optionLabels(bank.options),
+            options: optionLabels(bank.options) as never,
             correct_answer: index,
             explanation: bank.explanation,
           })
@@ -279,7 +279,7 @@ export default function QuestionBank() {
             payload: {
               ...payload,
               question: bank.stem,
-              options: bank.options,
+              options: bank.options as never,
               correct_id: bank.correct_id,
               explanation: bank.explanation ?? '',
               bank_id: bank.id,
