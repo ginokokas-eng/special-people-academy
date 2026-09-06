@@ -12,7 +12,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
 import { LessonInsightsPanel } from './LessonInsightsView';
+import { EVIDENCE_DISCLAIMER, EVIDENCE_HEADING, groupByFramework } from '@/lib/standards';
 
 interface BlockLesson {
   id: string;
