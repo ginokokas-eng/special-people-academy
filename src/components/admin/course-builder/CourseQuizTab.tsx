@@ -452,27 +452,51 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
                         </div>
 
                         <div className="space-y-2">
-                          {quizQuestions.map((question, index) => (
+                          {quizQuestions.map((question, index) => {
+                            const pool = question.question_type === 'pool' ? question.question_payload : null;
+                            const matching = poolCounts[question.id];
+                            const short = !!pool && matching !== undefined && !poolIsFillable(matching, pool.draw_count);
+                            return (
                             <div key={question.id} className="flex items-start justify-between p-3 border rounded-lg">
                               <div className="space-y-1">
                                 <p className="font-medium text-sm">{index + 1}. {question.question}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {question.options.map((opt, i) => (
-                                    <span
-                                      key={i}
-                                      className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-status-success-bg text-status-success-foreground' : 'bg-muted'}`}
-                                    >
-                                      {i === question.correct_answer && <CheckCircle className="h-3 w-3 inline mr-1" />}
-                                      {opt}
-                                    </span>
-                                  ))}
-                                </div>
+                                {pool ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="secondary" className="gap-1">
+                                      <Shuffle className="h-3 w-3" />
+                                      Draws {pool.draw_count} at random
+                                    </Badge>
+                                    {pool.pool_tags.map((t) => (
+                                      <Badge key={t} variant="outline">{t}</Badge>
+                                    ))}
+                                    {matching !== undefined && (
+                                      <span className={`text-xs ${short ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                        {matching} matching question{matching === 1 ? '' : 's'} in the bank
+                                        {short ? ' — not enough to draw from' : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-wrap gap-2">
+                                    {question.options.map((opt, i) => (
+                                      <span
+                                        key={i}
+                                        className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-status-success-bg text-status-success-foreground' : 'bg-muted'}`}
+                                      >
+                                        {i === question.correct_answer && <CheckCircle className="h-3 w-3 inline mr-1" />}
+                                        {opt}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(question.id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </div>
-                          ))}
+                            );
+                          })}
+
                         </div>
 
                         <Button
