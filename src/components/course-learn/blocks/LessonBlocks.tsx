@@ -28,6 +28,7 @@ import {
 
   BLOCK_LABELS,
   blockLayout,
+  blockTextValues,
   blockVisibility,
   isInteractive,
   VISIBILITY_WHEN_LABELS,
