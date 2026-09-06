@@ -161,6 +161,9 @@ export default function OrgPortal() {
     setLoading(false);
   }, [organisation]);
 
+  /** Only members explicitly flagged as assessors see the marking tab. */
+  const canAssess = !!user?.id && assessors[user.id] === true;
+
   const toggleAssessor = async (userId: string, next: boolean) => {
     if (!organisation) return;
     setSavingAssessor(userId);
