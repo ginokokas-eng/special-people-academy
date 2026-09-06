@@ -53,6 +53,7 @@ import type { BlockPayload, BlockType, LessonBlock } from '@/components/course-l
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
+import { postLmsMessage, startLmsHeartbeat, syncLmsModeFromUrl } from '@/lib/lmsBridge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
 import type {
@@ -468,13 +469,25 @@ export default function CourseLearn() {
           })
           .catch((e) => console.error('certificate issuance error', e));
       }
+      // Report to a hosting third-party LMS when we were opened through /launch.
+      // Percentage is over every lesson in the course, matching the sidebar.
+      const total = lessons.length;
+      const done = lessons.filter((l) => l.completed || l.id === lessonId).length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      postLmsMessage({
+        type: done >= total && total > 0 ? 'course_completed' : 'lesson_completed',
+        course_id: courseId ?? '',
+        lesson_id: lessonId,
+        percent,
+      });
+
       if (opts?.returnHome) {
         toast.success('Lesson complete');
         setHighlightLessonId(lessonId);
         setSearchParams({}, { replace: false });
       }
     },
-    [user, courseId, setSearchParams]
+    [user, courseId, lessons, setSearchParams]
   );
 
   // Returning from the quiz page after a passing submission: land on the course
