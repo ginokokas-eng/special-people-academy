@@ -637,13 +637,12 @@ export default function OrgPortal() {
                         <TableHead className={cn(thClass, 'hidden w-48 md:table-cell')}>Role</TableHead>
                         <TableHead className={cn(thClass, 'hidden w-36 sm:table-cell')}>Status</TableHead>
                         <TableHead className={cn(thClass, 'hidden w-32 lg:table-cell')}>Can assess</TableHead>
-                        <TableHead className={cn(thClass, 'w-32 text-right')}>Joined</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredPeople.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                          <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                             No one matches “{peopleFilter}”.
                           </TableCell>
                         </TableRow>

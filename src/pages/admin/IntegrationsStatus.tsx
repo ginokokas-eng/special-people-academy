@@ -241,9 +241,20 @@ export default function IntegrationsStatus() {
                   <CardDescription>Microsoft 365 calendar sync for practical sessions</CardDescription>
                 </div>
               </div>
-              <Badge variant="outline" className="text-primary border-primary">
-                Active
-              </Badge>
+              {/* Honest state: an "Active" chip next to "Last sync: Never" was wrong. */}
+              {stats.lastSuccessfulSync ? (
+                <Badge variant="outline" className="text-primary border-primary">
+                  Connected
+                </Badge>
+              ) : stats.total > 0 ? (
+                <Badge variant="outline" className="text-muted-foreground">
+                  Never synced
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  Not enabled
+                </Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -392,7 +403,7 @@ export default function IntegrationsStatus() {
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="font-medium">No calendar syncs yet</p>
-                <p className="text-sm">Sessions will sync when calendar sync is enabled</p>
+                <p className="text-sm">No sessions have synced to the Outlook calendar yet</p>
               </div>
             )}
 
