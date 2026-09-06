@@ -34,6 +34,7 @@ import {
   X,
 } from '@/components/icons';
 import { toast } from 'sonner';
+import { StandardPicker } from '@/components/admin/StandardPicker';
 import {
   bankDraftFromBlock,
   correctIdToIndex,
@@ -605,13 +606,31 @@ export default function QuestionBank() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bank-standard">Standard code</Label>
-                <Input
-                  id="bank-standard"
-                  value={draft.standard_code}
-                  placeholder="e.g. CS-1.2"
-                  onChange={(e) => setDraft({ ...draft, standard_code: e.target.value })}
-                />
+                {dialog.editing ? (
+                  <StandardPicker
+                    target={{ kind: 'bank', id: dialog.editing.id }}
+                    label="Standards evidenced"
+                    description="Saved straight away. The first Care Certificate standard is mirrored onto this question's code, which quiz pools filter on."
+                    onChange={(selected) => {
+                      if (!dialog.editing) return;
+                      const code =
+                        selected.find((s) => s.framework === 'care_certificate')?.code ?? '';
+                      if (code === draft.standard_code) return;
+                      setDraft((prev) => ({ ...prev, standard_code: code }));
+                      void supabase
+                        .from('question_bank')
+                        .update({ standard_code: code || null })
+                        .eq('id', dialog.editing.id);
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Label>Standards evidenced</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Save the question first, then reopen it to link standards.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>

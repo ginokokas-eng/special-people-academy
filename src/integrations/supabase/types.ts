@@ -3181,6 +3181,95 @@ export type Database = {
         }
         Relationships: []
       }
+      standard_links: {
+        Row: {
+          bank_id: string | null
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          lesson_id: string | null
+          standard_id: string
+        }
+        Insert: {
+          bank_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lesson_id?: string | null
+          standard_id: string
+        }
+        Update: {
+          bank_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lesson_id?: string | null
+          standard_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standard_links_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standard_links_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standard_links_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standard_links_standard_id_fkey"
+            columns: ["standard_id"]
+            isOneToOne: false
+            referencedRelation: "standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      standards: {
+        Row: {
+          code: string
+          created_at: string
+          framework: string
+          id: string
+          parent_code: string | null
+          sort: number
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          framework: string
+          id?: string
+          parent_code?: string | null
+          sort?: number
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          framework?: string
+          id?: string
+          parent_code?: string | null
+          sort?: number
+          title?: string
+        }
+        Relationships: []
+      }
       stripe_webhook_logs: {
         Row: {
           created_at: string
@@ -3362,6 +3451,31 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_course_standard_coverage: {
+        Args: { _course: string }
+        Returns: {
+          code: string
+          framework: string
+          lesson_count: number
+          lesson_titles: string[]
+          linked_at_course: boolean
+          title: string
+        }[]
+      }
+      get_learner_standard_evidence: {
+        Args: { _user?: string }
+        Returns: {
+          blocks_attempted: number
+          blocks_correct: number
+          code: string
+          framework: string
+          last_activity: string
+          lessons_completed: number
+          lessons_total: number
+          quiz_best_score: number
+          title: string
+        }[]
+      }
       get_lesson_block_learner_detail: {
         Args: { _lesson: string; _org?: string }
         Returns: {
@@ -3472,6 +3586,17 @@ export type Database = {
           org_role: string
           started_at: string
           user_id: string
+        }[]
+      }
+      get_org_standard_results: {
+        Args: { _org: string }
+        Returns: {
+          avg_correct_pct: number
+          code: string
+          framework: string
+          learners: number
+          learners_complete: number
+          title: string
         }[]
       }
       get_quiz_for_attempt: { Args: { _session_id: string }; Returns: Json }
