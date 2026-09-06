@@ -392,6 +392,61 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Published versions</CardTitle>
+          <CardDescription>
+            {versions.length > 0 && versions[0].published_at
+              ? `Version ${versions[0].version} published ${new Date(
+                  versions[0].published_at
+                ).toLocaleDateString('en-GB')}. A read-only record is kept each time this course goes live.`
+              : 'A read-only record is kept each time this course goes live.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {versions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No versions published yet.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {versions.map((v) => (
+                <li key={v.id} className="flex items-center gap-3 py-2">
+                  <Badge variant="secondary">v{v.version}</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {v.published_at
+                      ? new Date(v.published_at).toLocaleString('en-GB')
+                      : 'Unknown date'}
+                    {v.published_by ? ` · ${names[v.published_by] || 'Unknown'}` : ''}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => setOpenSnapshot(v)}
+                  >
+                    View snapshot
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!openSnapshot} onOpenChange={(open) => !open && setOpenSnapshot(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Version {openSnapshot?.version} snapshot</DialogTitle>
+            <DialogDescription>
+              Read-only record of the course exactly as it was published.
+            </DialogDescription>
+          </DialogHeader>
+          <pre className="max-h-[60vh] overflow-auto rounded-md bg-muted p-3 text-xs">
+            {openSnapshot ? JSON.stringify(openSnapshot.snapshot, null, 2) : ''}
+          </pre>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
+
