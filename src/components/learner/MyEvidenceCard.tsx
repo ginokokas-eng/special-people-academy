@@ -42,7 +42,7 @@ export function MyEvidenceCard({ enabled = true }: { enabled?: boolean }) {
       const { data, error } = await supabase.rpc('get_learner_standard_evidence', {});
       if (cancelled) return;
       if (error) console.error('Error loading standard evidence:', error);
-      setRows(((data ?? []) as unknown as EvidenceRow[]) ?? []);
+      setRows((data ?? []) as unknown as EvidenceRow[]);
       setLoading(false);
     })();
     return () => {

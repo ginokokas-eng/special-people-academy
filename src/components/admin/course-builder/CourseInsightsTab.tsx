@@ -132,7 +132,7 @@ function StandardsEvidencedCard({ courseId }: { courseId: string }) {
       });
       if (cancelled) return;
       if (error) console.error('Error loading standard coverage:', error);
-      setRows(((data ?? []) as unknown as CoverageRow[]) ?? []);
+      setRows((data ?? []) as unknown as CoverageRow[]);
       setLoading(false);
     })();
     return () => {

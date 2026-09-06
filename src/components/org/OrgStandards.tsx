@@ -47,7 +47,7 @@ export function OrgStandards({ organisationId }: { organisationId: string }) {
       });
       if (cancelled) return;
       if (error) console.error('Error loading standard results:', error);
-      setRows(((data ?? []) as unknown as StandardResult[]) ?? []);
+      setRows((data ?? []) as unknown as StandardResult[]);
       setLoading(false);
     })();
     return () => {
