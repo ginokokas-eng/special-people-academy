@@ -125,7 +125,9 @@ export default function CourseEditor() {
           thumbnail_url: course.thumbnail_url,
           prerequisite_course_id: course.prerequisite_course_id,
           prerequisite_required: course.prerequisite_required,
+          require_recompletion_on_change: course.require_recompletion_on_change,
           updated_at: new Date().toISOString(),
+
         })
         .eq('id', course.id);
 
