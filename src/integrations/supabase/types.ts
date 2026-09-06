@@ -585,6 +585,27 @@ export type Database = {
           },
         ]
       }
+      content_change_context: {
+        Row: {
+          actor: string
+          material: boolean
+          note: string | null
+          set_at: string
+        }
+        Insert: {
+          actor: string
+          material?: boolean
+          note?: string | null
+          set_at?: string
+        }
+        Update: {
+          actor?: string
+          material?: boolean
+          note?: string | null
+          set_at?: string
+        }
+        Relationships: []
+      }
       content_history: {
         Row: {
           action: string
