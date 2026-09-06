@@ -1,11 +1,15 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
+import { handleLaunch, handleLaunchStatus, resolveLaunchKey } from './launch.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-ariadne-secret',
+    'authorization, x-client-info, apikey, content-type, x-ariadne-secret, x-launch-key',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
+
+/** Public app origin used to build launch URLs. */
+const DEFAULT_APP_ORIGIN = 'https://grow-shine-campus.lovable.app';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -13,12 +17,24 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, 'content-type': 'application/json' },
   });
 
+/** Resources authenticated by an organisation launch key, not the sync secret. */
+const LAUNCH_RESOURCES = new Set(['launch', 'launch-status']);
+
+function appOrigin(): string {
+  const configured = Deno.env.get('ACADEMY_SITE_URL')?.trim();
+  if (configured) {
+    try {
+      const parsed = new URL(configured);
+      if (parsed.protocol === 'https:') return parsed.origin;
+    } catch {
+      /* fall through */
+    }
+  }
+  return DEFAULT_APP_ORIGIN;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-
-  const expected = Deno.env.get('ARIADNE_SYNC_SECRET');
-  const provided = req.headers.get('x-ariadne-secret');
-  if (!expected || provided !== expected) return json({ error: 'Unauthorized' }, 401);
 
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -27,6 +43,24 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const resource = url.searchParams.get('resource');
+
+  // --- Launch-key authenticated resources (third-party LMS launcher) ---
+  if (resource && LAUNCH_RESOURCES.has(resource)) {
+    const key = await resolveLaunchKey(admin, req.headers.get('x-launch-key'));
+    if (key === 'revoked') return json({ error: 'key_revoked' }, 403);
+    if (!key) return json({ error: 'unauthorized' }, 401);
+    try {
+      if (resource === 'launch') return await handleLaunch(admin, req, key, appOrigin(), json);
+      return await handleLaunchStatus(admin, req, key, json);
+    } catch (e) {
+      console.error('lms-api launch error', { resource, message: (e as Error).message });
+      return json({ error: 'launch_failed' }, 500);
+    }
+  }
+
+  const expected = Deno.env.get('ARIADNE_SYNC_SECRET');
+  const provided = req.headers.get('x-ariadne-secret');
+  if (!expected || provided !== expected) return json({ error: 'Unauthorized' }, 401);
 
   try {
     if (resource === 'catalog') return await handleCatalog(admin, url);
@@ -48,11 +82,16 @@ Deno.serve(async (req) => {
             'POST ?resource=progress  body: { fountain_applicant_ids?: string[], emails?: string[] }  or  GET ?resource=progress&fountain_applicant_ids=a,b',
           certificate:
             'GET ?resource=certificate&course_id=UUID&(user_id=UUID|fountain_applicant_id=STR)',
+          launch:
+            'POST ?resource=launch  header: x-launch-key  body: { course_id, learner_email, learner_name?, external_id? }',
+          'launch-status':
+            'POST ?resource=launch-status  header: x-launch-key  body: { course_id, learner_email? | external_id? }',
         },
       },
       400,
     );
   } catch (e) {
+
     console.error('ariadne-api error', { resource, message: (e as Error).message, stack: (e as Error).stack });
     return json({ error: (e as Error).message }, 500);
   }
