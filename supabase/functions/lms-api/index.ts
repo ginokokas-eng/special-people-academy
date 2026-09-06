@@ -85,6 +85,8 @@ Deno.serve(async (req) => {
             'POST ?resource=progress  body: { fountain_applicant_ids?: string[], emails?: string[] }  or  GET ?resource=progress&fountain_applicant_ids=a,b',
           certificate:
             'GET ?resource=certificate&course_id=UUID&(user_id=UUID|fountain_applicant_id=STR)',
+          refreshers:
+            'GET ?resource=refreshers&(email=STR|fountain_applicant_id=STR|external_id=STR|ariadne_user_id=STR) -> { due: [{schedule_id, course_title, kind, due_at, deep_link}], next_due_at }',
           launch:
             'POST ?resource=launch  header: x-launch-key  body: { course_id, learner_email, learner_name?, external_id? }',
           'launch-status':
