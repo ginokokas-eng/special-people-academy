@@ -663,7 +663,8 @@ export function LessonBlocks({
     const passages = blockTextValues(block.block_type, block.payload, { skipAnswers: true });
     const body = (
       <ActivityShell
-        blockType={gating ? block.block_type : ('text' as LessonBlock['block_type'])}
+        blockType={block.block_type}
+        plain={!gating}
         done={!!deckState[block.id]}
         passages={passages}
       >

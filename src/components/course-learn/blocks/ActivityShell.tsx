@@ -47,15 +47,18 @@ export function ActivityShell({
   blockType,
   done,
   passages,
+  plain,
   children,
 }: {
   blockType: LessonBlock['block_type'];
   done: boolean;
+  /** Force the quiet treatment: the block records nothing, so no accent or chip. */
+  plain?: boolean;
   /** Visible text for read-aloud; answers and feedback already excluded. */
   passages?: string[];
   children: ReactNode;
 }) {
-  const meta = ACTIVITY_META[blockType];
+  const meta = plain ? undefined : ACTIVITY_META[blockType];
   if (!meta) {
     return (
       <>
