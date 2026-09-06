@@ -14,6 +14,7 @@ import { enrolmentStatus } from '@/lib/progress';
 import { useContentUpdates } from '@/hooks/useContentUpdates';
 import { NativeLearn } from '@/components/native/NativeLearn';
 import { MyEvidenceCard } from '@/components/learner/MyEvidenceCard';
+import { RefresherDueCards } from '@/components/learner/RefresherDueCards';
 
 interface EnrolledCourse {
   id: string;
