@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 
 import SsoCallback from "./pages/SsoCallback";
+import Launch from "./pages/Launch";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
 
                 <Route path="/sso" element={<SsoCallback />} />
+                <Route path="/launch" element={<Launch />} />
                 <Route path="/native-welcome" element={<NativeWelcome />} />
 
                 <Route path="/sign-in" element={<Auth />} />

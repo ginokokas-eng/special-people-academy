@@ -1925,6 +1925,73 @@ export type Database = {
           },
         ]
       }
+      lms_launch_tokens: {
+        Row: {
+          consumed_at: string | null
+          consumed_by: string | null
+          course_id: string
+          created_at: string
+          expires_at: string
+          external_id: string | null
+          id: string
+          launch_key_id: string | null
+          learner_email: string
+          learner_name: string | null
+          organisation_id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          consumed_by?: string | null
+          course_id: string
+          created_at?: string
+          expires_at: string
+          external_id?: string | null
+          id?: string
+          launch_key_id?: string | null
+          learner_email: string
+          learner_name?: string | null
+          organisation_id: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          consumed_by?: string | null
+          course_id?: string
+          created_at?: string
+          expires_at?: string
+          external_id?: string | null
+          id?: string
+          launch_key_id?: string | null
+          learner_email?: string
+          learner_name?: string | null
+          organisation_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_launch_tokens_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_launch_tokens_launch_key_id_fkey"
+            columns: ["launch_key_id"]
+            isOneToOne: false
+            referencedRelation: "org_launch_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_launch_tokens_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_competency_signoffs: {
         Row: {
           action_plan: string | null
@@ -2148,6 +2215,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      org_launch_keys: {
+        Row: {
+          allowed_frame_origins: string[]
+          created_at: string
+          created_by: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          label: string | null
+          last_used_at: string | null
+          organisation_id: string
+          revoked_at: string | null
+        }
+        Insert: {
+          allowed_frame_origins?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          label?: string | null
+          last_used_at?: string | null
+          organisation_id: string
+          revoked_at?: string | null
+        }
+        Update: {
+          allowed_frame_origins?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          label?: string | null
+          last_used_at?: string | null
+          organisation_id?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_launch_keys_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       org_orders: {
         Row: {
@@ -3413,6 +3527,10 @@ export type Database = {
           _licence_id: string
           _user_id?: string
         }
+        Returns: string
+      }
+      assign_seat_for_launch: {
+        Args: { _licence_id: string; _user_id: string }
         Returns: string
       }
       can_access_course: {

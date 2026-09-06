@@ -53,6 +53,7 @@ import type { BlockPayload, BlockType, LessonBlock } from '@/components/course-l
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
+import { postLmsMessage, startLmsHeartbeat, syncLmsModeFromUrl } from '@/lib/lmsBridge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
 import type {
@@ -195,6 +196,14 @@ export default function CourseLearn() {
   // deliberately do NOT auto-fill the first lesson: choosing where to start is
   // the point of the hub. Deep links with ?lesson= are unaffected.
   const showHub = !activeLessonId || (!activeLesson && !deepLinkHidden);
+
+  // Hosted inside a third-party LMS (opened via /launch). We hide our own
+  // marketing chrome and report progress out over postMessage.
+  const [lmsMode] = useState(() => syncLmsModeFromUrl());
+  useEffect(() => {
+    if (!lmsMode || !courseId || !activeLesson) return;
+    return startLmsHeartbeat({ course_id: courseId, lesson_id: activeLesson.id });
+  }, [lmsMode, courseId, activeLesson?.id]);
 
   // Best score for the active quiz lesson, so a finished check reads honestly.
   const [quizBestScore, setQuizBestScore] = useState<number | null>(null);
@@ -468,13 +477,25 @@ export default function CourseLearn() {
           })
           .catch((e) => console.error('certificate issuance error', e));
       }
+      // Report to a hosting third-party LMS when we were opened through /launch.
+      // Percentage is over every lesson in the course, matching the sidebar.
+      const total = lessons.length;
+      const done = lessons.filter((l) => l.completed || l.id === lessonId).length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      postLmsMessage({
+        type: done >= total && total > 0 ? 'course_completed' : 'lesson_completed',
+        course_id: courseId ?? '',
+        lesson_id: lessonId,
+        percent,
+      });
+
       if (opts?.returnHome) {
         toast.success('Lesson complete');
         setHighlightLessonId(lessonId);
         setSearchParams({}, { replace: false });
       }
     },
-    [user, courseId, setSearchParams]
+    [user, courseId, lessons, setSearchParams]
   );
 
   // Returning from the quiz page after a passing submission: land on the course
@@ -1052,6 +1073,7 @@ export default function CourseLearn() {
             courseHome
           ) : (
           <div className={cn('mx-auto px-5 py-6 sm:px-6 lg:px-8', theatre ? 'max-w-[1500px]' : 'max-w-5xl')}>
+            {!lmsMode && (
             <div className="mb-3">
               <Button
                 variant="ghost"
@@ -1062,6 +1084,7 @@ export default function CourseLearn() {
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back to modules
               </Button>
             </div>
+            )}
             {activeLesson && (
               <header className="learner-header-band mb-5">
                 <img

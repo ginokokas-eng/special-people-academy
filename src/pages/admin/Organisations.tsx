@@ -22,6 +22,8 @@ import {
 import { Loader2, Building2, Plus, Users, Search } from '@/components/icons';
 import { toast } from 'sonner';
 
+import { OrgLauncherDialog } from '@/components/admin/OrgLauncherDialog';
+
 interface Organisation {
   id: string;
   name: string;
@@ -79,6 +81,7 @@ export default function Organisations() {
   const [editing, setEditing] = useState<Organisation | null>(null);
   const [editForm, setEditForm] = useState({ name: '', contact_email: '', is_active: true });
 
+  const [launcherOrg, setLauncherOrg] = useState<Organisation | null>(null);
   const [membersOf, setMembersOf] = useState<Organisation | null>(null);
   const [members, setMembers] = useState<OrgPerson[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
@@ -296,6 +299,9 @@ export default function Organisations() {
                         <Users className="mr-1 h-3 w-3" />
                         Members
                       </Button>
+                      <Button size="sm" variant="outline" onClick={() => setLauncherOrg(org)}>
+                        Launcher
+                      </Button>
                       <Button size="sm" variant="outline" onClick={() => openEdit(org)}>
                         Edit
                       </Button>
@@ -307,6 +313,12 @@ export default function Organisations() {
           </CardContent>
         </Card>
       </div>
+
+      <OrgLauncherDialog
+        organisationId={launcherOrg?.id ?? null}
+        organisationName={launcherOrg?.name ?? ''}
+        onClose={() => setLauncherOrg(null)}
+      />
 
       {/* Create */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
