@@ -16,6 +16,11 @@ import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
+import {
+  BlockTransferDialog,
+  type BlockTransferRequest,
+} from '@/components/admin/lesson-blocks/BlockTransferDialog';
+import { openCount, orphanCommentIds, type BlockComment } from '@/lib/blockComments';
 import { blockPayloadFromBank, type BankQuestion } from '@/lib/questionBank';
 import { materialChangeDefault } from '@/lib/contentHistory';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -66,6 +71,9 @@ export default function LessonContentEditor() {
   const [templateDismissed, setTemplateDismissed] = useState(false);
   const [bankPickerOpen, setBankPickerOpen] = useState(false);
   const [coursePublished, setCoursePublished] = useState(false);
+  const [transfer, setTransfer] = useState<BlockTransferRequest | null>(null);
+  /** Reviewer notes for this lesson, grouped by the block's stable client id. */
+  const [comments, setComments] = useState<BlockComment[]>([]);
 
   // Save-time change context (Part H): what the author declares about this save.
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -85,16 +93,23 @@ export default function LessonContentEditor() {
     if (!force && dirtyRef.current) return;
     setLoading(true);
     try {
-      const [lessonRes, blocksRes] = await Promise.all([
+      const [lessonRes, blocksRes, commentsRes] = await Promise.all([
         supabase.from('lessons').select('title, lesson_type, trickle_enabled').eq('id', lessonId).maybeSingle(),
         supabase
           .from('lesson_blocks')
           .select('*')
           .eq('lesson_id', lessonId)
           .order('order_index'),
+        supabase
+          .from('block_comments')
+          .select('*')
+          .eq('lesson_id', lessonId)
+          .order('created_at'),
       ]);
       if (lessonRes.error) throw lessonRes.error;
       if (blocksRes.error) throw blocksRes.error;
+      if (commentsRes.error) console.error('Error loading reviewer notes:', commentsRes.error);
+      setComments((commentsRes.data ?? []) as BlockComment[]);
       setLesson(lessonRes.data ?? null);
       const loaded: BlockDraft[] = (blocksRes.data || []).map((row) => ({
         id: row.id,
@@ -230,6 +245,58 @@ export default function LessonContentEditor() {
       };
       return [...prev.slice(0, index + 1), copy, ...prev.slice(index + 1)];
     });
+
+  /** Applies a drag reorder. Saving rewrites order_index from array position. */
+  const reorderBlocks = (clientIds: string[]) =>
+    mutate((prev) => {
+      const byId = new Map(prev.map((b) => [b.client_id, b]));
+      const next = clientIds.map((id) => byId.get(id)).filter(Boolean) as BlockDraft[];
+      return next.length === prev.length ? next : prev;
+    });
+
+  /** Reviewer notes are saved immediately — they are not lesson content. */
+  const addComment = async (clientId: string, body: string) => {
+    if (!lessonId) return;
+    const { data: session } = await supabase.auth.getSession();
+    const author = session.session?.user.id;
+    if (!author) return;
+    const { data, error } = await supabase
+      .from('block_comments')
+      .insert({ lesson_id: lessonId, block_client_id: clientId, author, body })
+      .select('*')
+      .single();
+    if (error) {
+      console.error('Error adding reviewer note:', error);
+      toast.error('Could not add that note');
+      return;
+    }
+    setComments((prev) => [...prev, data as BlockComment]);
+  };
+
+  const resolveComment = async (id: string, resolved: boolean) => {
+    const { data: session } = await supabase.auth.getSession();
+    const { data, error } = await supabase
+      .from('block_comments')
+      .update({
+        resolved_at: resolved ? new Date().toISOString() : null,
+        resolved_by: resolved ? (session.session?.user.id ?? null) : null,
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) {
+      console.error('Error updating reviewer note:', error);
+      toast.error('Could not update that note');
+      return;
+    }
+    setComments((prev) => prev.map((c) => (c.id === id ? (data as BlockComment) : c)));
+  };
+
+  const commentsByBlock = comments.reduce<Record<string, BlockComment[]>>((acc, comment) => {
+    (acc[comment.block_client_id] ??= []).push(comment);
+    return acc;
+  }, {});
+  const openComments = openCount(comments);
   /**
    * Keeps question_bank_usages in step with the saved blocks, so the bank can
    * show where each question is reused and which copies are outdated.
@@ -355,6 +422,16 @@ export default function LessonContentEditor() {
       // Records where bank questions are reused, now the block ids exist.
       await syncBankUsages();
 
+      // Notes on blocks that no longer exist would hang around forever.
+      const orphans = orphanCommentIds(comments, blocks.map((b) => b.client_id));
+      if (orphans.length) {
+        const { error: orphanError } = await supabase
+          .from('block_comments')
+          .delete()
+          .in('id', orphans);
+        if (orphanError) console.error('Error clearing notes for deleted blocks:', orphanError);
+      }
+
       toast.success('Lesson content saved');
 
       setDirty(false);
@@ -425,6 +502,11 @@ export default function LessonContentEditor() {
         </div>
         <div className="flex items-center gap-2">
           {dirty && <Badge variant="outline">Unsaved changes</Badge>}
+          {openComments > 0 && (
+            <Badge variant="outline" className="border-primary/40 text-primary">
+              {openComments} open {openComments === 1 ? 'note' : 'notes'}
+            </Badge>
+          )}
           <CopilotPanel
             lessonId={lessonId}
             courseId={courseId}
@@ -599,6 +681,17 @@ export default function LessonContentEditor() {
             visibilityIssues={visibilityIssues}
             courseId={courseId}
             lessonId={lessonId}
+            onReorder={reorderBlocks}
+            onTransfer={(index, mode) => setTransfer({ index, block: blocks[index], mode })}
+            comments={commentsByBlock}
+            onAddComment={addComment}
+            onResolveComment={resolveComment}
+          />
+          <BlockTransferDialog
+            request={transfer}
+            onOpenChange={(open) => !open && setTransfer(null)}
+            currentLessonId={lessonId}
+            onMoved={removeBlock}
           />
           <Card>
             <CardHeader>

@@ -1,8 +1,19 @@
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowDown, ArrowUp, Copy, Trash2 } from '@/components/icons';
+import { ArrowDown, ArrowUp, Copy, GripVertical, MoreVertical, Trash2 } from '@/components/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { BlockCommentsPopover } from './BlockCommentsPopover';
+import type { BlockComment } from '@/lib/blockComments';
 import {
   BLOCK_LABELS,
   allowsHalfWidth,
@@ -40,6 +51,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import {
   AccordionBlockForm,
   CalloutBlockForm,
@@ -70,6 +82,14 @@ interface BlockListProps {
   lessonId?: string;
   /** Problems with conditional visibility, keyed by the block's client id. */
   visibilityIssues?: VisibilityIssue[];
+  /** New order after a drag, expressed as the reordered client ids. */
+  onReorder?: (clientIds: string[]) => void;
+  /** Send a block to another lesson. */
+  onTransfer?: (index: number, mode: 'copy' | 'move') => void;
+  /** Reviewer notes, keyed by the block's stable client id. */
+  comments?: Record<string, BlockComment[]>;
+  onAddComment?: (clientId: string, body: string) => Promise<void>;
+  onResolveComment?: (id: string, resolved: boolean) => Promise<void>;
 }
 
 /** Short preview of a block's own wording, to tell two MCQs apart in a list. */
@@ -99,7 +119,31 @@ export function BlockList({
   courseId,
   lessonId,
   visibilityIssues = [],
+  onReorder,
+  onTransfer,
+  comments = {},
+  onAddComment,
+  onResolveComment,
 }: BlockListProps) {
+  // Pointer drag for the mouse, arrow buttons for the keyboard; the sortable
+  // keyboard sensor keeps the handle usable too.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !onReorder) return;
+    const from = blocks.findIndex((b) => b.client_id === active.id);
+    const to = blocks.findIndex((b) => b.client_id === over.id);
+    if (from < 0 || to < 0) return;
+    const next = [...blocks];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onReorder(next.map((b) => b.client_id));
+  };
+
   if (!blocks.length) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -109,6 +153,30 @@ export function BlockList({
   }
 
   return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      accessibility={{
+        announcements: {
+          onDragStart: ({ active }) => `Picked up ${labelFor(blocks, active.id as string)}.`,
+          onDragOver: ({ active, over }) =>
+            over
+              ? `${labelFor(blocks, active.id as string)} is over ${labelFor(blocks, over.id as string)}.`
+              : `${labelFor(blocks, active.id as string)} is no longer over a block.`,
+          onDragEnd: ({ active, over }) =>
+            over
+              ? `${labelFor(blocks, active.id as string)} was dropped onto ${labelFor(blocks, over.id as string)}.`
+              : `${labelFor(blocks, active.id as string)} was dropped.`,
+          onDragCancel: ({ active }) =>
+            `Dragging cancelled. ${labelFor(blocks, active.id as string)} stayed where it was.`,
+        },
+      }}
+    >
+      <SortableContext
+        items={blocks.map((b) => b.client_id)}
+        strategy={verticalListSortingStrategy}
+      >
     <div className="space-y-3">
       {blocks.map((block, index) => {
         const idPrefix = `block-${index}`;
@@ -123,7 +191,7 @@ export function BlockList({
         const pairedWithNext = isHalf && !pairedWithPrev && nextIsHalf;
 
         return (
-          <div key={block.client_id} className="rounded-lg border bg-card p-4">
+          <SortableBlockCard key={block.client_id} id={block.client_id} label={`${index + 1}. ${BLOCK_LABELS[block.block_type]}`}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
@@ -175,6 +243,36 @@ export function BlockList({
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
+                {onAddComment && onResolveComment && (
+                  <BlockCommentsPopover
+                    blockLabel={`block ${index + 1}, ${BLOCK_LABELS[block.block_type]}`}
+                    comments={comments[block.client_id] ?? []}
+                    onAdd={(body) => onAddComment(block.client_id, body)}
+                    onResolve={onResolveComment}
+                  />
+                )}
+                {onTransfer && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`More actions for block ${index + 1}`}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => onTransfer(index, 'copy')}>
+                        Copy to lesson…
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => onTransfer(index, 'move')}>
+                        Move to lesson…
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
 
@@ -401,9 +499,63 @@ export function BlockList({
               </div>
             )}
 
-          </div>
+          </SortableBlockCard>
         );
       })}
+    </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+
+/** Screen-reader wording for drag announcements — block labels, never ids. */
+function labelFor(blocks: BlockDraft[], clientId: string): string {
+  const index = blocks.findIndex((b) => b.client_id === clientId);
+  if (index < 0) return 'a block';
+  return `block ${index + 1}, ${BLOCK_LABELS[blocks[index].block_type]}`;
+}
+
+/**
+ * One draggable block card. The whole card stays clickable for editing: only the
+ * grab handle starts a drag, so form fields keep working. Movement is not
+ * animated for people who ask for reduced motion.
+ */
+function SortableBlockCard({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition: reduceMotion ? undefined : transition,
+      }}
+      className={cn('relative rounded-lg border bg-card p-4', isDragging && 'z-10 shadow-lg')}
+    >
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        aria-label={`Drag to reorder ${label}`}
+        className="absolute -left-1 top-4 cursor-grab rounded p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+      >
+        <GripVertical className="h-4 w-4" aria-hidden="true" />
+      </button>
+      {children}
     </div>
   );
 }

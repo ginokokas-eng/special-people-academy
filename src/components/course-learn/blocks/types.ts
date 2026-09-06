@@ -1082,3 +1082,101 @@ export function visibleBlockIds(
   }
   return visible;
 }
+
+/* --------------------- human-readable text paths (K5 / L) ------------------- */
+
+/**
+ * Per block type, the JSON paths of the fields a human reads. `[]` marks an
+ * array hop, so `options[].label` means "the label of every option".
+ *
+ * One map, two consumers: read-aloud uses it today to speak a block, and
+ * translation will reuse it to know exactly which strings to send and where to
+ * put the answers back. Nothing else in a payload is human-readable text.
+ */
+export const translatablePaths: Record<BlockType, readonly string[]> = {
+  text: ['heading', 'text'],
+  callout: ['title', 'text'],
+  card_deck: ['heading', 'instruction', 'cards[].front', 'cards[].back'],
+  flip_cards: ['heading', 'instruction', 'cards[].front', 'cards[].back'],
+  accordion: ['heading', 'items[].title', 'items[].body'],
+  image: ['alt', 'caption'],
+  video: [
+    'title',
+    'caption',
+    'checkpoints[].question',
+    'checkpoints[].options[].label',
+    'checkpoints[].explanation',
+  ],
+  carousel: ['heading', 'instruction', 'items[].title', 'items[].text', 'items[].alt'],
+  hot_graphic: ['heading', 'instruction', 'alt', 'hotspots[].title', 'hotspots[].text'],
+  mcq: ['question', 'options[].label', 'options[].feedback', 'explanation'],
+  drag_match: [
+    'prompt',
+    'targets[].label',
+    'items[].label',
+    'feedback.correct',
+    'feedback.incorrect',
+  ],
+  checklist: ['heading', 'caption', 'steps[].step_title', 'steps[].instruction', 'steps[].safety_note'],
+  scenario: [
+    'debrief',
+    'nodes[].title',
+    'nodes[].body',
+    'nodes[].choices[].label',
+    'nodes[].choices[].feedback',
+  ],
+  reflection: ['heading', 'prompt', 'guidance', 'criteria[]'],
+};
+
+/**
+ * Paths that would give an answer away before the learner has answered. Excluded
+ * from read-aloud; translation still needs them, so they live separately.
+ */
+export const answerRevealingPaths: Partial<Record<BlockType, readonly string[]>> = {
+  mcq: ['options[].feedback', 'explanation'],
+  video: ['checkpoints[].explanation'],
+  drag_match: ['feedback.correct', 'feedback.incorrect'],
+  scenario: ['nodes[].choices[].feedback'],
+};
+
+/** Reads one path out of a payload, flattening array hops. */
+function valuesAtPath(value: unknown, segments: string[]): string[] {
+  if (value == null) return [];
+  if (!segments.length) return typeof value === 'string' ? [value] : [];
+  const [head, ...rest] = segments;
+  if (head === '[]') {
+    if (!Array.isArray(value)) return [];
+    return value.flatMap((entry) => valuesAtPath(entry, rest));
+  }
+  if (typeof value !== 'object') return [];
+  return valuesAtPath((value as Record<string, unknown>)[head], rest);
+}
+
+function splitPath(path: string): string[] {
+  return path
+    .split('.')
+    .flatMap((part) => (part.endsWith('[]') ? [part.slice(0, -2), '[]'] : [part]));
+}
+
+/** Every human-readable string in a block, in reading order. */
+export function blockTextValues(
+  type: BlockType,
+  payload: BlockPayload,
+  options: { skipAnswers?: boolean } = {}
+): string[] {
+  const skip = options.skipAnswers ? new Set(answerRevealingPaths[type] ?? []) : new Set<string>();
+  const out: string[] = [];
+  for (const path of translatablePaths[type] ?? []) {
+    if (skip.has(path)) continue;
+    for (const value of valuesAtPath(payload, splitPath(path))) {
+      const trimmed = value?.trim();
+      if (trimmed) out.push(trimmed);
+    }
+  }
+  return out;
+}
+
+/** One speakable passage for a block — answers and feedback left out. */
+export function blockSpokenText(type: BlockType, payload: BlockPayload): string {
+  return blockTextValues(type, payload, { skipAnswers: true }).join('. ');
+}

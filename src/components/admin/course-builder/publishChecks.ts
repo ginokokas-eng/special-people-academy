@@ -429,5 +429,37 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     severity: 'warning',
   });
 
+  /* ------------------------ g. open reviewer notes ----------------------- */
+  // Advisory only: an unanswered note is a sign a review is still in progress,
+  // not a fault in the course.
+  if (lessonIds.length) {
+    const { data: openNotes, error: notesError } = await supabase
+      .from('block_comments')
+      .select('lesson_id')
+      .is('resolved_at', null)
+      .in('lesson_id', lessonIds);
+    if (notesError) {
+      console.error('Error reading reviewer notes:', notesError);
+    } else {
+      const perLesson = new Map<string, number>();
+      for (const note of openNotes ?? []) {
+        const id = note.lesson_id as string;
+        perLesson.set(id, (perLesson.get(id) ?? 0) + 1);
+      }
+      const titles = [...perLesson.entries()].map(([id, count]) => {
+        const lesson = lessons.find((l) => l.id === id);
+        return `${lesson?.title ?? 'a lesson'} (${count})`;
+      });
+      checks.push({
+        id: 'open-reviewer-notes',
+        label: 'Reviewer notes are all answered',
+        passed: titles.length === 0,
+        detail: `Notes are still open on: ${names(titles)}. Answer or resolve them so nothing gets lost.`,
+        tab: 'Content',
+        severity: 'warning',
+      });
+    }
+  }
+
   return checks;
 }

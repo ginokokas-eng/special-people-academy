@@ -28,6 +28,7 @@ import {
 
   BLOCK_LABELS,
   blockLayout,
+  blockTextValues,
   blockVisibility,
   isInteractive,
   VISIBILITY_WHEN_LABELS,
@@ -659,12 +660,17 @@ export function LessonBlocks({
    */
   const renderBlock = (block: LessonBlock) => {
     const gating = block.contributes_to_completion && isInteractive(block.block_type, block.payload);
-    const body = gating ? (
-      <ActivityShell blockType={block.block_type} done={!!deckState[block.id]}>
+    // Read-aloud reads only what is already on screen — never answer feedback.
+    const passages = blockTextValues(block.block_type, block.payload, { skipAnswers: true });
+    const body = (
+      <ActivityShell
+        blockType={block.block_type}
+        plain={!gating}
+        done={!!deckState[block.id]}
+        passages={passages}
+      >
         {renderBlockBody(block)}
       </ActivityShell>
-    ) : (
-      renderBlockBody(block)
     );
 
     const vis = blockVisibility(block.payload);
@@ -696,13 +702,26 @@ export function LessonBlocks({
   };
 
 
+  // Read-aloud for the whole lesson: only what is on screen now — blocks still
+  // behind a trickle veil, and any answer feedback, are left out.
+  const readAloudBlocks = (veilFromRow >= 0 ? rows.slice(0, veilFromRow) : rows).flat();
+  const lessonPassages = readAloudBlocks.flatMap((block) =>
+    blockTextValues(block.block_type, block.payload, { skipAnswers: true })
+  );
+
   return (
     // Reading measure: ~68-72ch of body copy, centred. Wide activities are
     // allowed to reach the card edges but never full-bleed (see WIDE_TYPES).
     <div className="lesson-content mx-auto w-full max-w-[47rem] space-y-4">
       {/* Deep-scroll orientation: hidden on lessons with no gating activities
           and in the editor preview so authoring visuals stay unchanged. */}
-      {!preview && <LessonProgressStrip done={gateCounts.done} total={gateCounts.total} />}
+      {!preview && (
+        <LessonProgressStrip
+          done={gateCounts.done}
+          total={gateCounts.total}
+          readAloud={lessonPassages}
+        />
+      )}
       {!preview && visibleBlocks.length > 5 && <BackToTop />}
       {preview && trickleEnabled && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl bg-primary/[0.07] p-3">
