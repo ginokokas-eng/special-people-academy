@@ -40,6 +40,8 @@ interface Course {
   thumbnail_url: string | null;
   prerequisite_course_id: string | null;
   prerequisite_required: boolean;
+  require_recompletion_on_change: boolean;
+
 }
 
 interface CourseOverviewTabProps {
