@@ -303,6 +303,45 @@ function validateCheckpointsReply(data: unknown, starts: number[]): string[] {
   return errs;
 }
 
+/**
+ * The reply must cover the blocks and paths that were ASKED FOR — nothing else.
+ * Unknown block ids or paths are a schema failure, not something to guess at.
+ */
+function validateTranslationReply(data: unknown, wanted: Map<string, Set<string>>): string[] {
+  if (!data || typeof data !== 'object') return ['reply is not an object'];
+  const blocks = (data as Rec).blocks;
+  if (!Array.isArray(blocks) || !blocks.length) return ['reply.blocks must be a non-empty array'];
+  const errs: string[] = [];
+  const seen = new Set<string>();
+  for (const entry of blocks as Rec[]) {
+    const id = String(entry.block_id ?? '');
+    const paths = wanted.get(id);
+    if (!paths) {
+      errs.push(`block_id "${id}" was not in the request`);
+      continue;
+    }
+    seen.add(id);
+    const texts = Array.isArray(entry.texts) ? (entry.texts as Rec[]) : [];
+    const got = new Set<string>();
+    for (const t of texts) {
+      const path = String(t.path ?? '');
+      if (!paths.has(path)) {
+        errs.push(`block "${id}" returned unknown path "${path}"`);
+        continue;
+      }
+      if (!String(t.text ?? '').trim()) errs.push(`block "${id}" path "${path}" is empty`);
+      got.add(path);
+    }
+    for (const path of paths) {
+      if (!got.has(path)) errs.push(`block "${id}" is missing path "${path}"`);
+    }
+  }
+  for (const id of wanted.keys()) if (!seen.has(id)) errs.push(`block "${id}" is missing`);
+  return errs;
+}
+
+
+
 /* --------------------------------- prompts -------------------------------- */
 
 const HOUSE_STYLE =
