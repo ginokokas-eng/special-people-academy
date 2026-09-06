@@ -91,9 +91,9 @@ export function QuizContainer({
     setInfoCompleted(!!progress?.completed);
   };
 
-  const fetchQuizData = async () => {
+  const fetchQuizData = async (opts?: { silent?: boolean }) => {
     if (!lessonId) return;
-    setLoading(true);
+    if (!opts?.silent) setLoading(true);
 
     try {
       // Quiz shell only — questions and answers now come from the server RPCs.
@@ -263,7 +263,7 @@ export function QuizContainer({
       });
       if (error) {
         toast.error(quizRpcErrorMessage(error.message));
-        await fetchQuizData();
+        await fetchQuizData({ silent: true });
         return null;
       }
       const row = Array.isArray(data) ? data[0] : data;
@@ -282,8 +282,9 @@ export function QuizContainer({
         await checkCourseCompletion();
       }
 
-      // Refresh history/attempt counts for the intro screen.
-      await fetchQuizData();
+      // Refresh history/attempt counts for the intro screen (silent: the
+      // results card must stay on screen).
+      await fetchQuizData({ silent: true });
       onQuizComplete?.(passed);
 
       return {
