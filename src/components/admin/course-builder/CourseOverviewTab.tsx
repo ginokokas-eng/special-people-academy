@@ -248,6 +248,24 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               />
             </div>
 
+            <div className="flex items-start justify-between gap-4 pt-2 border-t border-border">
+              <Label htmlFor="recompletion" className="font-normal leading-snug">
+                Require learners to re-complete when content changes
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  When on, a lesson marked as changing what learners must know counts as unfinished
+                  again for anyone who already completed it. When off, they just see an “updated”
+                  note.
+                </span>
+              </Label>
+              <Switch
+                id="recompletion"
+                checked={course.require_recompletion_on_change}
+                onCheckedChange={(checked) => onUpdate({ require_recompletion_on_change: checked })}
+              />
+            </div>
+
+
+
             <div className="space-y-3 pt-2 border-t border-border">
               <Label>Prerequisite Course</Label>
               <Select
