@@ -1030,9 +1030,19 @@ export default function OrgPortal() {
             <OrgLessonInsights organisationId={organisation.id} licences={licences} />
           </TabsContent>
 
+          <TabsContent value="retention" className="settle-in mt-6">
+            <SectionCard
+              title="Retention"
+              description="How your team do on short recall checks after they finish a course."
+            >
+              <OrgRetention organisationId={organisation.id} />
+            </SectionCard>
+          </TabsContent>
+
           <TabsContent value="standards" className="settle-in mt-6">
             <OrgStandards organisationId={organisation.id} />
           </TabsContent>
+
         </Tabs>
       </div>
     </PortalShell>
