@@ -53,6 +53,79 @@ export type Database = {
         }
         Relationships: []
       }
+      block_marks: {
+        Row: {
+          assessor_id: string
+          assessor_name: string
+          block_id: string
+          comment: string | null
+          course_id: string
+          created_at: string
+          criteria: Json
+          id: string
+          kind: string
+          lesson_id: string
+          outcome: string
+          signed_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assessor_id: string
+          assessor_name: string
+          block_id: string
+          comment?: string | null
+          course_id: string
+          created_at?: string
+          criteria?: Json
+          id?: string
+          kind: string
+          lesson_id: string
+          outcome: string
+          signed_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assessor_id?: string
+          assessor_name?: string
+          block_id?: string
+          comment?: string | null
+          course_id?: string
+          created_at?: string
+          criteria?: Json
+          id?: string
+          kind?: string
+          lesson_id?: string
+          outcome?: string
+          signed_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "block_marks_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "block_marks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "block_marks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bls_competency_signoffs: {
         Row: {
           action_plan: string | null
@@ -2034,6 +2107,7 @@ export type Database = {
       }
       organisation_members: {
         Row: {
+          can_assess: boolean
           created_at: string
           ended_at: string | null
           id: string
@@ -2044,6 +2118,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          can_assess?: boolean
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -2054,6 +2129,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          can_assess?: boolean
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -3103,6 +3179,10 @@ export type Database = {
         Args: { _course: string; _user: string }
         Returns: boolean
       }
+      can_assess_learner: {
+        Args: { _assessor: string; _learner: string }
+        Returns: boolean
+      }
       check_quiz_answer: {
         Args: { _question_id: string; _selected: number; _session_id: string }
         Returns: {
@@ -3171,6 +3251,28 @@ export type Database = {
           is_correct: boolean
           state: string
           updated_at: string
+          user_id: string
+        }[]
+      }
+      get_marking_queue: {
+        Args: { _org?: string }
+        Returns: {
+          block_id: string
+          block_type: string
+          course_id: string
+          course_title: string
+          email: string
+          full_name: string
+          lesson_id: string
+          lesson_title: string
+          mark_comment: string
+          mark_id: string
+          mark_outcome: string
+          mark_signed_at: string
+          marked: boolean
+          payload: Json
+          response: Json
+          submitted_at: string
           user_id: string
         }[]
       }
@@ -3301,10 +3403,37 @@ export type Database = {
         }[]
       }
       quiz_attempts_unlimited: { Args: { _allowed: number }; Returns: boolean }
+      record_observation: {
+        Args: {
+          _assessor_name: string
+          _block_id: string
+          _comment?: string
+          _criteria: Json
+          _user_id: string
+        }
+        Returns: {
+          mark_id: string
+          outcome: string
+        }[]
+      }
+      record_reflection_mark: {
+        Args: {
+          _assessor_name: string
+          _block_id: string
+          _comment?: string
+          _outcome: string
+          _user_id: string
+        }
+        Returns: string
+      }
       release_expired_invitation_seats:
         | { Args: never; Returns: number }
         | { Args: { _org: string }; Returns: number }
       revoke_seat: { Args: { _seat_id: string }; Returns: boolean }
+      set_member_can_assess: {
+        Args: { _can: boolean; _org: string; _user: string }
+        Returns: boolean
+      }
       start_quiz_attempt: {
         Args: { _quiz_id: string }
         Returns: {
