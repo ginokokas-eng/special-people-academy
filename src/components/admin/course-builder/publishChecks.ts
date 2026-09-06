@@ -461,5 +461,55 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     }
   }
 
+  /* ------------------- h. drafted but unreviewed translations ------------ */
+  // Advisory only: learners only ever see reviewed translations, so a draft
+  // left unreviewed is wasted work rather than a fault.
+  if (lessonIds.length) {
+    const { data: translations, error: translationError } = await supabase
+      .from('lesson_translations')
+      .select('lesson_id, lang, reviewed_at')
+      .in('lesson_id', lessonIds);
+    if (translationError) {
+      console.error('Error reading lesson translations:', translationError);
+    } else {
+      const drafted = new Map<string, Set<string>>();
+      const reviewed = new Set<string>();
+      for (const row of translations ?? []) {
+        const key = `${row.lesson_id}:${row.lang}`;
+        if (row.reviewed_at) reviewed.add(key);
+        else {
+          const set = drafted.get(row.lang as string) ?? new Set<string>();
+          set.add(row.lesson_id as string);
+          drafted.set(row.lang as string, set);
+        }
+      }
+      const stranded: string[] = [];
+      for (const [lang, lessonSet] of drafted) {
+        const english = languageByCode(lang)?.english ?? lang;
+        for (const lessonId of lessonSet) {
+          const anyReviewed = (translations ?? []).some(
+            (r) => r.lesson_id === lessonId && r.lang === lang && r.reviewed_at,
+          );
+          if (!anyReviewed && !reviewed.has(`${lessonId}:${lang}`)) {
+            const lesson = lessons.find((l) => l.id === lessonId);
+            stranded.push(`${lesson?.title ?? 'a lesson'} (${english})`);
+          }
+        }
+      }
+      checks.push({
+        id: 'translations-unreviewed',
+        label: 'Translations are reviewed',
+        passed: stranded.length === 0,
+        detail:
+          drafted.size === 1
+            ? `${languageByCode([...drafted.keys()][0])?.english ?? [...drafted.keys()][0]} translation drafted but not reviewed — learners will not see it. Affected: ${names(stranded)}.`
+            : `Translations are drafted but not reviewed — learners will not see them. Affected: ${names(stranded)}.`,
+        tab: 'Content',
+        severity: 'warning',
+      });
+    }
+  }
+
   return checks;
+
 }
