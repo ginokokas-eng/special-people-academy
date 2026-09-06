@@ -26,6 +26,7 @@ import CourseDetail from "./pages/CourseDetail";
 import CourseLearn from "./pages/CourseLearn";
 import QuizPage from "./pages/QuizPage";
 import MyLearning from "./pages/MyLearning";
+import Refresher from "./pages/Refresher";
 import MyCourses from "./pages/MyCourses";
 import Certificates from "./pages/Certificates";
 import VerifyCertificate from "./pages/VerifyCertificate";
