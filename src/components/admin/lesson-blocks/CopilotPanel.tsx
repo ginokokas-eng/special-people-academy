@@ -77,6 +77,7 @@ export function CopilotPanel({
   const [drafts, setDrafts] = useState<DraftItem[]>([]);
 
   const [sourceText, setSourceText] = useState('');
+  const [importing, setImporting] = useState(false);
   const [questionCount, setQuestionCount] = useState('3');
   const [improveIndex, setImproveIndex] = useState('0');
   const [instruction, setInstruction] = useState('simplify');
@@ -131,6 +132,44 @@ export function CopilotPanel({
       return null;
     } finally {
       setBusy(false);
+    }
+  };
+
+  /**
+   * Reads the words out of a .docx in the browser. Mammoth is only downloaded
+   * when someone actually imports a document, so the editor stays light.
+   */
+  const importDocx = async (file: File) => {
+    setImporting(true);
+    setError(null);
+    try {
+      const mammoth = await import('mammoth/mammoth.browser');
+      const buffer = await file.arrayBuffer();
+      const result = await (mammoth as { extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> })
+        .extractRawText({ arrayBuffer: buffer });
+      const text = (result.value || '')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line, index, all) => line || all[index - 1])
+        .join('\n')
+        .trim();
+      if (!text) {
+        setError('That document had no text we could read.');
+        return;
+      }
+      if (text.length > 40000) {
+        setSourceText(text.slice(0, 40000));
+        setError(
+          'That document is longer than 40,000 characters, so only the first part was brought in. Check the end of the text before drafting.'
+        );
+        return;
+      }
+      setSourceText(text);
+    } catch (err) {
+      console.error('Error reading Word document:', err);
+      setError('We could not read that document. Save it as .docx and try again.');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -249,9 +288,30 @@ export function CopilotPanel({
                 onChange={(e) => setSourceText(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                {sourceText.length.toLocaleString()} of 40,000 characters. Paste text only for now —
-                documents are not read yet.
+                {sourceText.length.toLocaleString()} of 40,000 characters. Paste the text in, or bring
+                it in from a Word document.
               </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" asChild disabled={importing}>
+                <label className="cursor-pointer">
+                  {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Import from Word
+                  <input
+                    type="file"
+                    accept=".docx"
+                    className="sr-only"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = '';
+                      if (file) void importDocx(file);
+                    }}
+                  />
+                </label>
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                .docx only. Pictures and layout are not brought across — just the words.
+              </span>
             </div>
             <Button onClick={draftFromText} disabled={busy || sourceText.trim().length < 200}>
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
