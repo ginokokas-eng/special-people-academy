@@ -27,8 +27,18 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Plus, Trash2, Edit, Loader2, HelpCircle, CheckCircle } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2, Edit, Loader2, HelpCircle, CheckCircle, Library, Shuffle, X } from '@/components/icons';
 import { toast } from 'sonner';
+import { BankPicker } from '@/components/admin/question-bank/BankPicker';
+import {
+  parsePoolConfig,
+  parseTagInput,
+  poolIsFillable,
+  poolQuestionLabel,
+  type PoolConfig,
+} from '@/lib/questionBank';
+
 
 interface Quiz {
   id: string;
@@ -47,7 +57,9 @@ interface Question {
   correct_answer: number;
   explanation: string | null;
   order_index: number;
+  question_payload: PoolConfig | null;
 }
+
 
 interface Lesson {
   id: string;
@@ -77,6 +89,18 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
     correct_answer: 0,
     explanation: '',
   });
+
+  const [bankPicker, setBankPicker] = useState<{ open: boolean; quizId: string | null }>({ open: false, quizId: null });
+  const [poolDialog, setPoolDialog] = useState<{ open: boolean; quizId: string | null }>({ open: false, quizId: null });
+  const [poolForm, setPoolForm] = useState<{ tags: string[]; draw_count: number; standard_code: string }>({
+    tags: [],
+    draw_count: 3,
+    standard_code: '',
+  });
+  const [poolTagInput, setPoolTagInput] = useState('');
+  const [poolMatches, setPoolMatches] = useState<number | null>(null);
+  const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
+
 
   useEffect(() => {
     fetchData();
@@ -120,7 +144,9 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           setQuestions((questionsData || []).map(q => ({
             ...q,
             options: Array.isArray(q.options) ? q.options as string[] : [],
+            question_payload: parsePoolConfig((q as { question_payload?: unknown }).question_payload),
           })));
+
         }
       }
     } catch (error) {
@@ -251,6 +277,102 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
     }
   };
 
+  /** Live "how many bank questions match these tags" count for the pool form. */
+  useEffect(() => {
+    if (!poolDialog.open || poolForm.tags.length === 0) {
+      setPoolMatches(null);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from('question_bank')
+      .select('id', { count: 'exact', head: true })
+      .is('org_id', null)
+      .overlaps('tags', poolForm.tags)
+      .then(({ count }) => {
+        if (!cancelled) setPoolMatches(count ?? 0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [poolDialog.open, poolForm.tags]);
+
+  /** Counts for pool rows already saved, so authors see fail states in the list. */
+  useEffect(() => {
+    const pools = questions.filter((q) => q.question_type === 'pool' && q.question_payload);
+    if (!pools.length) return;
+    let cancelled = false;
+    (async () => {
+      const next: Record<string, number> = {};
+      for (const pool of pools) {
+        const { count } = await supabase
+          .from('question_bank')
+          .select('id', { count: 'exact', head: true })
+          .is('org_id', null)
+          .overlaps('tags', pool.question_payload!.pool_tags);
+        next[pool.id] = count ?? 0;
+      }
+      if (!cancelled) setPoolCounts(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [questions]);
+
+  const addFromBank = async (bankId: string) => {
+    if (!bankPicker.quizId) return;
+    const { error } = await supabase.rpc('copy_bank_question_to_quiz', {
+      _bank_id: bankId,
+      _quiz_id: bankPicker.quizId,
+    });
+    if (error) {
+      console.error('Error copying bank question:', error);
+      toast.error('Could not add that question');
+      return;
+    }
+    toast.success('Question added from the bank');
+    setBankPicker({ open: false, quizId: null });
+    fetchData();
+  };
+
+  const handleCreatePool = async () => {
+    if (!poolDialog.quizId) return;
+    if (!poolForm.tags.length) return toast.error('Add at least one tag');
+    if (!poolIsFillable(poolMatches ?? 0, poolForm.draw_count)) {
+      return toast.error('The bank does not have enough matching questions yet');
+    }
+
+    setSaving(true);
+    try {
+      const quizQuestions = questions.filter((q) => q.quiz_id === poolDialog.quizId);
+      const { error } = await supabase.from('quiz_questions').insert({
+        quiz_id: poolDialog.quizId,
+        question: poolQuestionLabel(poolForm.tags),
+        question_type: 'pool',
+        options: [],
+        correct_answer: 0,
+        order_index: quizQuestions.length,
+        question_payload: {
+          pool_tags: poolForm.tags,
+          draw_count: poolForm.draw_count,
+          ...(poolForm.standard_code.trim() ? { standard_code: poolForm.standard_code.trim() } : {}),
+        },
+      });
+      if (error) throw error;
+      toast.success('Pool question added');
+      setPoolDialog({ open: false, quizId: null });
+      setPoolForm({ tags: [], draw_count: 3, standard_code: '' });
+      setPoolTagInput('');
+      fetchData();
+    } catch (error) {
+      console.error('Error creating pool question:', error);
+      toast.error('Could not add the pool question');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   const openEditQuiz = (quiz: Quiz) => {
     setQuizForm({
       title: quiz.title,
@@ -330,40 +452,87 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
                         </div>
 
                         <div className="space-y-2">
-                          {quizQuestions.map((question, index) => (
+                          {quizQuestions.map((question, index) => {
+                            const pool = question.question_type === 'pool' ? question.question_payload : null;
+                            const matching = poolCounts[question.id];
+                            const short = !!pool && matching !== undefined && !poolIsFillable(matching, pool.draw_count);
+                            return (
                             <div key={question.id} className="flex items-start justify-between p-3 border rounded-lg">
                               <div className="space-y-1">
                                 <p className="font-medium text-sm">{index + 1}. {question.question}</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {question.options.map((opt, i) => (
-                                    <span
-                                      key={i}
-                                      className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-status-success-bg text-status-success-foreground' : 'bg-muted'}`}
-                                    >
-                                      {i === question.correct_answer && <CheckCircle className="h-3 w-3 inline mr-1" />}
-                                      {opt}
-                                    </span>
-                                  ))}
-                                </div>
+                                {pool ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="secondary" className="gap-1">
+                                      <Shuffle className="h-3 w-3" />
+                                      Draws {pool.draw_count} at random
+                                    </Badge>
+                                    {pool.pool_tags.map((t) => (
+                                      <Badge key={t} variant="outline">{t}</Badge>
+                                    ))}
+                                    {matching !== undefined && (
+                                      <span className={`text-xs ${short ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                        {matching} matching question{matching === 1 ? '' : 's'} in the bank
+                                        {short ? ' — not enough to draw from' : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-wrap gap-2">
+                                    {question.options.map((opt, i) => (
+                                      <span
+                                        key={i}
+                                        className={`text-xs px-2 py-1 rounded ${i === question.correct_answer ? 'bg-status-success-bg text-status-success-foreground' : 'bg-muted'}`}
+                                      >
+                                        {i === question.correct_answer && <CheckCircle className="h-3 w-3 inline mr-1" />}
+                                        {opt}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(question.id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </div>
-                          ))}
+                            );
+                          })}
+
                         </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setQuestionForm({ question: '', question_type: 'multiple_choice', options: ['', '', '', ''], correct_answer: 0, explanation: '' });
-                            setQuestionDialog({ open: true, question: null, quizId: quiz.id });
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Question
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setQuestionForm({ question: '', question_type: 'multiple_choice', options: ['', '', '', ''], correct_answer: 0, explanation: '' });
+                              setQuestionDialog({ open: true, question: null, quizId: quiz.id });
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Question
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBankPicker({ open: true, quizId: quiz.id })}
+                          >
+                            <Library className="h-4 w-4 mr-2" />
+                            Add from bank
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setPoolForm({ tags: [], draw_count: 3, standard_code: '' });
+                              setPoolTagInput('');
+                              setPoolDialog({ open: true, quizId: quiz.id });
+                            }}
+                          >
+                            <Shuffle className="h-4 w-4 mr-2" />
+                            Pool question
+                          </Button>
+                        </div>
+
                       </div>
                     ) : (
                       <Button
@@ -484,6 +653,106 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add a question copied from the shared bank */}
+      <BankPicker
+        open={bankPicker.open}
+        onOpenChange={(open) => setBankPicker({ open, quizId: open ? bankPicker.quizId : null })}
+        onPick={(bank) => addFromBank(bank.id)}
+      />
+
+      {/* Pool question: draws random bank questions for each attempt */}
+      <Dialog open={poolDialog.open} onOpenChange={(open) => setPoolDialog({ open, quizId: open ? poolDialog.quizId : null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pool question</DialogTitle>
+            <DialogDescription>
+              Each learner gets a different random set from the question bank, chosen by tag.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pool-tags">Tags</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {poolForm.tags.map((t) => (
+                  <Badge key={t} variant="secondary" className="gap-1">
+                    {t}
+                    <button
+                      type="button"
+                      aria-label={`Remove tag ${t}`}
+                      onClick={() => setPoolForm({ ...poolForm, tags: poolForm.tags.filter((x) => x !== t) })}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <Input
+                id="pool-tags"
+                value={poolTagInput}
+                placeholder="Type a tag and press Enter"
+                onChange={(e) => setPoolTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter' && e.key !== ',') return;
+                  e.preventDefault();
+                  const added = parseTagInput(poolTagInput);
+                  if (!added.length) return;
+                  setPoolForm({ ...poolForm, tags: parseTagInput([...poolForm.tags, ...added].join(',')) });
+                  setPoolTagInput('');
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pool-draw">How many to draw</Label>
+                <Input
+                  id="pool-draw"
+                  type="number"
+                  min={1}
+                  value={poolForm.draw_count}
+                  onChange={(e) => setPoolForm({ ...poolForm, draw_count: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pool-standard">Standard code (optional)</Label>
+                <Input
+                  id="pool-standard"
+                  value={poolForm.standard_code}
+                  onChange={(e) => setPoolForm({ ...poolForm, standard_code: e.target.value })}
+                />
+              </div>
+            </div>
+            {poolForm.tags.length > 0 && (
+              <p
+                className={`text-sm ${
+                  poolMatches !== null && !poolIsFillable(poolMatches, poolForm.draw_count)
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {poolMatches === null
+                  ? 'Counting matching questions…'
+                  : `${poolMatches} matching question${poolMatches === 1 ? '' : 's'} in the bank${
+                      poolIsFillable(poolMatches, poolForm.draw_count)
+                        ? ''
+                        : ` — you need at least ${poolForm.draw_count}`
+                    }`}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPoolDialog({ open: false, quizId: null })}>Cancel</Button>
+            <Button
+              onClick={handleCreatePool}
+              disabled={saving || !poolIsFillable(poolMatches ?? 0, poolForm.draw_count)}
+            >
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Add pool question
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }

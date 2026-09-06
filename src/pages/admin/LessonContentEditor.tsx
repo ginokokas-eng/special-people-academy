@@ -15,6 +15,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
+import { BankPicker } from '@/components/admin/question-bank/BankPicker';
+import { blockPayloadFromBank, type BankQuestion } from '@/lib/questionBank';
+
 
 import {
   defaultContributesToCompletion,
@@ -48,6 +51,8 @@ export default function LessonContentEditor() {
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
+  const [bankPickerOpen, setBankPickerOpen] = useState(false);
+
 
 
   // Guards against re-initialising block state (auth/token-refresh renders must
@@ -117,6 +122,25 @@ export default function LessonContentEditor() {
       },
     ]);
 
+  /** Adds an MCQ block that is a COPY of a bank question, keeping provenance. */
+  const addFromBank = (bank: BankQuestion) => {
+    mutate((prev) => [
+      ...prev,
+      {
+        id: null,
+        client_id: crypto.randomUUID(),
+        block_type: 'mcq' as BlockType,
+        payload: {
+          ...(defaultPayload('mcq') as BlockPayload),
+          ...blockPayloadFromBank(bank),
+        } as BlockPayload,
+        contributes_to_completion: defaultContributesToCompletion('mcq'),
+      },
+    ]);
+    setBankPickerOpen(false);
+    toast.success('Question copied in — save the lesson to keep it');
+  };
+
   /** Appends AI drafts the author explicitly accepted. Unsaved until Save. */
   const addBlocks = (accepted: { block_type: BlockType; payload: BlockPayload }[]) =>
     mutate((prev) => [
@@ -168,6 +192,55 @@ export default function LessonContentEditor() {
       };
       return [...prev.slice(0, index + 1), copy, ...prev.slice(index + 1)];
     });
+  /**
+   * Keeps question_bank_usages in step with the saved blocks, so the bank can
+   * show where each question is reused and which copies are outdated.
+   */
+  const syncBankUsages = async () => {
+    const sourced = blocks
+      .map((b) => ({
+        blockId: (b.id ?? b.client_id) as string,
+        payload: b.payload as { bank_id?: string; bank_version?: number },
+      }))
+      .filter((b) => !!b.payload.bank_id);
+    if (!sourced.length) return;
+
+    const { data: existing, error } = await supabase
+      .from('question_bank_usages')
+      .select('id, lesson_block_id, bank_id, bank_version')
+      .in('lesson_block_id', sourced.map((s) => s.blockId));
+    if (error) {
+      console.error('Error reading bank usages:', error);
+      return;
+    }
+
+    const byBlock = new Map(
+      ((existing || []) as { id: string; lesson_block_id: string | null; bank_version: number }[]).map(
+        (row) => [row.lesson_block_id as string, row],
+      ),
+    );
+
+    const inserts = sourced
+      .filter((s) => !byBlock.has(s.blockId))
+      .map((s) => ({
+        bank_id: s.payload.bank_id as string,
+        bank_version: s.payload.bank_version ?? 1,
+        lesson_block_id: s.blockId,
+      }));
+    if (inserts.length) {
+      const { error: insertError } = await supabase.from('question_bank_usages').insert(inserts);
+      if (insertError) console.error('Error recording bank usage:', insertError);
+    }
+
+    for (const s of sourced) {
+      const row = byBlock.get(s.blockId);
+      if (!row) continue;
+      const version = s.payload.bank_version ?? 1;
+      if (row.bank_version === version) continue;
+      await supabase.from('question_bank_usages').update({ bank_version: version }).eq('id', row.id);
+    }
+  };
+
 
   const removeBlock = (index: number) => {
     const target = blocks[index];
@@ -221,7 +294,11 @@ export default function LessonContentEditor() {
         if (error) throw error;
       }
 
+      // Records where bank questions are reused, now the block ids exist.
+      await syncBankUsages();
+
       toast.success('Lesson content saved');
+
       setDirty(false);
       dirtyRef.current = false;
       await load(true);
@@ -406,7 +483,13 @@ export default function LessonContentEditor() {
               <CardDescription>Blocks appear in the order listed above.</CardDescription>
             </CardHeader>
             <CardContent>
-              <BlockPalette onAdd={addBlock} />
+              <BlockPalette onAdd={addBlock} onPickFromBank={() => setBankPickerOpen(true)} />
+              <BankPicker
+                open={bankPickerOpen}
+                onOpenChange={setBankPickerOpen}
+                onPick={addFromBank}
+              />
+
             </CardContent>
           </Card>
         </div>

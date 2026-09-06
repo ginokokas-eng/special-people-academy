@@ -62,6 +62,8 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ScormPlayer from "./pages/ScormPlayer";
 import Organisations from "./pages/admin/Organisations";
 import Licences from "./pages/admin/Licences";
+import QuestionBank from "./pages/admin/QuestionBank";
+
 import OrgPortal from "./pages/org/OrgPortal";
 import InviteAccept from "./pages/InviteAccept";
 import Renewals from "./pages/Renewals";
@@ -116,6 +118,8 @@ const App = () => (
                 <Route path="/admin-portal/learners" element={<ProtectedRoute requiredRoles={['admin']}><Learners /></ProtectedRoute>} />
                 <Route path="/admin-portal/organisations" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Organisations /></ProtectedRoute>} />
                 <Route path="/admin-portal/licences" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><Licences /></ProtectedRoute>} />
+                <Route path="/admin-portal/question-bank" element={<ProtectedRoute requiredRoles={['ops_training_admin']}><QuestionBank /></ProtectedRoute>} />
+
                 <Route path="/admin-portal/integrations" element={<ProtectedRoute requiredRoles={['super_admin']}><IntegrationsStatus /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings" element={<ProtectedRoute requiredRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
                 <Route path="/admin-portal/settings/security" element={<ProtectedRoute requiredRoles={['admin']}><SecuritySettings /></ProtectedRoute>} />

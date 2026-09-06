@@ -1,4 +1,15 @@
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  blockPayloadFromBank,
+  isOutdated,
+  type BankOption,
+  type BankQuestion,
+} from '@/lib/questionBank';
+
 import { Input } from '@/components/ui/input';
+
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -10,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowDown, ArrowUp, Plus, Trash2 } from '@/components/icons';
+import { ArrowDown, ArrowUp, Library, Plus, Trash2 } from '@/components/icons';
 import type {
   ChecklistPayload,
   DragMatchPayload,
@@ -133,6 +144,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
           />
         </div>
       </div>
+      <BankActions payload={payload} onChange={onChange} />
       <p className="text-xs text-muted-foreground">
         This is a practice check inside the lesson. It doesn’t affect quiz scores, quiz attempts or
         certificates.
@@ -140,6 +152,113 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
     </div>
   );
 }
+
+/** "Save to question bank" for an MCQ block, plus its outdated-copy notice. */
+function BankActions({
+  payload,
+  onChange,
+}: {
+  payload: McqPayload;
+  onChange: (payload: McqPayload) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [latest, setLatest] = useState<BankQuestion | null>(null);
+
+  // When this block came from the bank, check whether the bank has moved on.
+  useEffect(() => {
+    if (!payload.bank_id) {
+      setLatest(null);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from('question_bank')
+      .select('*')
+      .eq('id', payload.bank_id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const row = data as Record<string, unknown>;
+        setLatest({
+          ...(row as unknown as BankQuestion),
+          options: (Array.isArray(row.options) ? row.options : []) as BankOption[],
+          tags: (Array.isArray(row.tags) ? row.tags : []) as string[],
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [payload.bank_id]);
+
+  const saveToBank = async () => {
+    const options = (payload.options ?? []).filter((o) => o.label?.trim());
+    if (!payload.question?.trim() || options.length < 2) {
+      toast.error('Add the question and at least two answers first');
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data: claims } = await supabase.auth.getClaims();
+      const { data, error } = await supabase
+        .from('question_bank')
+        .insert({
+          stem: payload.question.trim(),
+          options: options as never,
+          correct_id: payload.correct_id || options[0].id,
+          explanation: payload.explanation?.trim() || null,
+          created_by: (claims?.claims?.sub as string | undefined) ?? null,
+        })
+        .select('id, version')
+        .single();
+      if (error) throw error;
+      onChange({ ...payload, bank_id: data.id, bank_version: data.version });
+      toast.success('Saved to the question bank');
+    } catch (error) {
+      console.error('Error saving to question bank:', error);
+      toast.error('Could not save this question to the bank');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const stale = isOutdated(payload.bank_version, latest?.version);
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {payload.bank_id ? (
+        <>
+          <span className="text-xs text-muted-foreground">
+            Copied from the question bank (v{payload.bank_version ?? 1}).
+          </span>
+          {stale && latest && (
+            <>
+              <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning-foreground">
+                Outdated — the bank has a newer version
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onChange({ ...payload, ...blockPayloadFromBank(latest) });
+                  toast.success('Copy updated — save the lesson to keep it');
+                }}
+              >
+                Update copy
+              </Button>
+            </>
+          )}
+        </>
+      ) : (
+        <Button type="button" variant="outline" size="sm" onClick={saveToBank} disabled={saving}>
+          <Library className="mr-2 h-4 w-4" /> Save to question bank
+        </Button>
+      )}
+    </div>
+  );
+}
+
+
 
 /* ------------------------------- drag_match -------------------------------- */
 
