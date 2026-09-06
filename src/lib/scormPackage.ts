@@ -235,9 +235,9 @@ WHAT YOUR LEARNING SYSTEM RECORDS
   API (resource=launch-status).
 
 IMPORTANT — KEEP THIS PACKAGE PRIVATE
-This package contains a launch key for ${options.organisationName}. Anyone who
-has this file can start learners against your licence. If it is shared outside
-your learning system, ask us to revoke the key and download a new package.
+This package contains this organisation's launch key. Anyone with the package
+can start learners against your licence. If it leaks, revoke the key here and
+issue a new package.
 `;
 }
 

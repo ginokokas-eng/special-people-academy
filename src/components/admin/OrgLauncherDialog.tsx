@@ -283,10 +283,16 @@ export function OrgLauncherDialog({ organisationId, organisationName, onClose }:
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-foreground/80">
+                  This package contains this organisation's launch key. Anyone with the package can
+                  start learners against your licence. If it leaks, revoke the key here and issue a
+                  new package.
+                </p>
                 <Button onClick={() => void download()} disabled={busy || !courseId}>
                   <Download className="mr-2 h-4 w-4" />
                   Download package
                 </Button>
+
               </section>
             )}
 
