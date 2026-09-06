@@ -101,9 +101,40 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
   const questionsRes = quizzes.length
     ? await supabase
         .from('quiz_questions')
-        .select('quiz_id')
+        .select('quiz_id, question_type, question_payload')
         .in('quiz_id', quizzes.map((q) => q.id))
     : ({ data: [] } as { data: { quiz_id: string }[] });
+
+  // Pool questions draw from the shared bank at attempt time, so publishing is
+  // only safe when the bank still holds enough matching questions.
+  const poolRows = ((questionsRes.data || []) as {
+    quiz_id: string;
+    question_type?: string | null;
+    question_payload?: unknown;
+  }[])
+    .filter((r) => r.question_type === 'pool')
+    .map((r) => ({ quiz_id: r.quiz_id, pool: parsePoolConfig(r.question_payload) }));
+
+  const underfilledPools: string[] = [];
+  for (const row of poolRows) {
+    const quizLessonId = quizzes.find((q) => q.id === row.quiz_id)?.lesson_id;
+    const lessonTitle = quizLessons.find((l) => l.id === quizLessonId)?.title ?? 'Assessment';
+    if (!row.pool) {
+      underfilledPools.push(`${lessonTitle} (pool is not set up)`);
+      continue;
+    }
+    const { count } = await supabase
+      .from('question_bank')
+      .select('id', { count: 'exact', head: true })
+      .is('org_id', null)
+      .overlaps('tags', row.pool.pool_tags);
+    if (!poolIsFillable(count ?? 0, row.pool.draw_count)) {
+      underfilledPools.push(
+        `${lessonTitle} — pool "${row.pool.pool_tags.join(', ')}" needs ${row.pool.draw_count}, bank has ${count ?? 0}`
+      );
+    }
+  }
+
 
   const blockCount = new Set((blocksRes.data || []).map((r) => r.lesson_id));
   const sourceLessons = new Set(
