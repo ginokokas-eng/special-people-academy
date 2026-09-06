@@ -53,6 +53,47 @@ export type Database = {
         }
         Relationships: []
       }
+      block_comments: {
+        Row: {
+          author: string
+          block_client_id: string
+          body: string
+          created_at: string
+          id: string
+          lesson_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          author: string
+          block_client_id: string
+          body: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          author?: string
+          block_client_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "block_comments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       block_marks: {
         Row: {
           assessor_id: string
