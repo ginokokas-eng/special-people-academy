@@ -47,7 +47,9 @@ interface Question {
   correct_answer: number;
   explanation: string | null;
   order_index: number;
+  question_payload: PoolConfig | null;
 }
+
 
 interface Lesson {
   id: string;
