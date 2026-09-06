@@ -507,18 +507,19 @@ export default function TrainerPortal() {
             )}
           </div>
         </div>
+
+        {/* Marking queue: reflective answers and assessed practical checklists */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Marking</h2>
+            <p className="text-muted-foreground mt-1">
+              Written reflections and practical checklists waiting for you.
+            </p>
+          </div>
+          <MarkingQueue />
+        </div>
       </div>
 
-      {/* Marking queue: reflective answers and assessed practical checklists */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Marking</h2>
-          <p className="text-muted-foreground mt-1">
-            Written reflections and practical checklists waiting for you.
-          </p>
-        </div>
-        <MarkingQueue />
-      </div>
 
       {/* Attendance Dialog */}
       <Dialog open={attendanceDialogOpen} onOpenChange={setAttendanceDialogOpen}>
