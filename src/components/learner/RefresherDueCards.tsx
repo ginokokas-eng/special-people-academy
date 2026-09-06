@@ -40,7 +40,7 @@ export function useDueRefreshers(enabled: boolean) {
       const { data, error } = await supabase.rpc('get_due_refreshers');
       if (cancelled) return;
       if (error) console.error('Error loading refreshers:', error);
-      setRows(((data ?? []) as unknown as DueRefresher[]) ?? []);
+      setRows((data ?? []) as unknown as DueRefresher[]);
       setLoading(false);
     })();
     return () => {
