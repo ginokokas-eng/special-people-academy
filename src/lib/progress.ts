@@ -20,22 +20,32 @@ export function requiredLessons<T extends RequiredProgressLesson>(lessons: T[]):
   return lessons.filter((l) => !!l.is_required);
 }
 
-/** Completed / total / percent over required lessons only. */
+/**
+ * Completed / total / percent over required lessons only.
+ *
+ * `needsRecompletion` holds lesson ids whose content changed since the learner
+ * completed them AND whose course has "require re-completion on change" turned
+ * on. Those lessons count as NOT complete. When the course setting is off the
+ * flag is informational and must not be passed here.
+ */
 export function requiredProgress<T extends RequiredProgressLesson>(
   lessons: T[],
-  completedIds?: Set<string>
+  completedIds?: Set<string>,
+  needsRecompletion?: Set<string>
 ): { completed: number; total: number; percent: number } {
   const required = requiredLessons(lessons);
   const total = required.length;
-  const completed = required.filter((l) =>
-    completedIds ? completedIds.has(l.id) : !!l.completed
-  ).length;
+  const completed = required.filter((l) => {
+    const done = completedIds ? completedIds.has(l.id) : !!l.completed;
+    return done && !needsRecompletion?.has(l.id);
+  }).length;
   return {
     completed,
     total,
     percent: total > 0 ? Math.round((completed / total) * 100) : 0,
   };
 }
+
 
 /** Percent from raw counts, guarding divide-by-zero. */
 export function progressPercent(completed: number, total: number): number {
