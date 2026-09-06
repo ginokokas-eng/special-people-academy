@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowDown, ArrowUp, Plus, Trash2 } from '@/components/icons';
+import { ArrowDown, ArrowUp, Library, Plus, Trash2 } from '@/components/icons';
 import type {
   ChecklistPayload,
   DragMatchPayload,
