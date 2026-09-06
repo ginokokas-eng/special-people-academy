@@ -483,7 +483,13 @@ export default function LessonContentEditor() {
               <CardDescription>Blocks appear in the order listed above.</CardDescription>
             </CardHeader>
             <CardContent>
-              <BlockPalette onAdd={addBlock} />
+              <BlockPalette onAdd={addBlock} onPickFromBank={() => setBankPickerOpen(true)} />
+              <BankPicker
+                open={bankPickerOpen}
+                onOpenChange={setBankPickerOpen}
+                onPick={addFromBank}
+              />
+
             </CardContent>
           </Card>
         </div>
