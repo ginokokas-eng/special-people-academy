@@ -238,6 +238,10 @@ export default function Dashboard() {
           <p className="text-muted-foreground mt-1">Track your learning progress</p>
         </div>
 
+        <RefresherDueCards enabled={!!user} />
+
+
+
         {/* Hero band — compliance at a glance, and the shortest path to clearing it. */}
         {enrolledCourses.length > 0 && (
           <section className="learner-card sp-hero-band relative overflow-hidden rounded-[22px] px-6 py-8 sm:px-10 sm:pb-[34px] sm:pt-[38px]">
