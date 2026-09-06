@@ -2331,6 +2331,51 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempt_sessions: {
+        Row: {
+          created_at: string
+          drawn: Json
+          expires_at: string
+          id: string
+          quiz_id: string
+          submitted_attempt_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drawn: Json
+          expires_at: string
+          id?: string
+          quiz_id: string
+          submitted_attempt_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drawn?: Json
+          expires_at?: string
+          id?: string
+          quiz_id?: string
+          submitted_attempt_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempt_sessions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempt_sessions_submitted_attempt_id_fkey"
+            columns: ["submitted_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_attempts: {
         Row: {
           answers: Json | null
@@ -2955,6 +3000,14 @@ export type Database = {
         Args: { _course: string; _user: string }
         Returns: boolean
       }
+      check_quiz_answer: {
+        Args: { _question_id: string; _selected: number; _session_id: string }
+        Returns: {
+          correct_displayed_index: number
+          explanation: string
+          is_correct: boolean
+        }[]
+      }
       create_licence: {
         Args: {
           _amount_gbp?: number
@@ -3064,6 +3117,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_quiz_for_attempt: { Args: { _session_id: string }; Returns: Json }
+      get_quiz_question_counts: {
+        Args: { _course_id: string }
+        Returns: {
+          lesson_id: string
+          question_count: number
+          quiz_id: string
+        }[]
+      }
       has_active_licence_seat: {
         Args: { _course: string; _user: string }
         Returns: boolean
@@ -3118,10 +3180,35 @@ export type Database = {
           position: number
         }[]
       }
+      quiz_attempts_unlimited: { Args: { _allowed: number }; Returns: boolean }
       release_expired_invitation_seats:
         | { Args: never; Returns: number }
         | { Args: { _org: string }; Returns: number }
       revoke_seat: { Args: { _seat_id: string }; Returns: boolean }
+      start_quiz_attempt: {
+        Args: { _quiz_id: string }
+        Returns: {
+          attempts_allowed: number
+          attempts_used: number
+          expires_at: string
+          passing_score: number
+          session_id: string
+          unlimited: boolean
+        }[]
+      }
+      submit_quiz_attempt: {
+        Args: { _answers: Json; _session_id: string }
+        Returns: {
+          attempt_id: string
+          attempts_allowed: number
+          attempts_used: number
+          correct_count: number
+          passed: boolean
+          score: number
+          total: number
+          unlimited: boolean
+        }[]
+      }
       sync_staff_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

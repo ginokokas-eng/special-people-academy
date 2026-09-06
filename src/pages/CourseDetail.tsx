@@ -269,23 +269,12 @@ export default function CourseDetail() {
         .map((l: any) => l.id);
       const questionCountByLesson = new Map<string, number>();
       if (quizLessonIdsForCount.length > 0) {
-        const { data: quizzesForCount } = await supabase
-          .from('quizzes')
-          .select('id, lesson_id')
-          .in('lesson_id', quizLessonIdsForCount);
-        const quizIdToLesson = new Map<string, string>(
-          (quizzesForCount || []).map((q: any) => [q.id as string, q.lesson_id as string])
-        );
-        if ((quizzesForCount || []).length > 0) {
-          const { data: qqRows } = await supabase
-            .from('quiz_questions')
-            .select('quiz_id')
-            .in('quiz_id', (quizzesForCount || []).map((q: any) => q.id));
-          (qqRows || []).forEach((row: any) => {
-            const lessonId = quizIdToLesson.get(row.quiz_id);
-            if (lessonId) questionCountByLesson.set(lessonId, (questionCountByLesson.get(lessonId) || 0) + 1);
-          });
-        }
+        const { data: countRows } = await supabase.rpc('get_quiz_question_counts', {
+          _course_id: courseData.id,
+        });
+        (countRows || []).forEach((row: any) => {
+          if (row.lesson_id) questionCountByLesson.set(row.lesson_id as string, row.question_count || 0);
+        });
       }
       const withQuestionCount = (l: any) => ({
         ...l,
