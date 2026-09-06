@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.95.0';
 import { handleLaunch, handleLaunchStatus, resolveLaunchKey } from './launch.ts';
+import { handleRefreshers } from './refreshers.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
