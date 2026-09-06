@@ -117,6 +117,25 @@ export default function LessonContentEditor() {
       },
     ]);
 
+  /** Adds an MCQ block that is a COPY of a bank question, keeping provenance. */
+  const addFromBank = (bank: BankQuestion) => {
+    mutate((prev) => [
+      ...prev,
+      {
+        id: null,
+        client_id: crypto.randomUUID(),
+        block_type: 'mcq' as BlockType,
+        payload: {
+          ...(defaultPayload('mcq') as BlockPayload),
+          ...blockPayloadFromBank(bank),
+        } as BlockPayload,
+        contributes_to_completion: defaultContributesToCompletion('mcq'),
+      },
+    ]);
+    setBankPickerOpen(false);
+    toast.success('Question copied in — save the lesson to keep it');
+  };
+
   /** Appends AI drafts the author explicitly accepted. Unsaved until Save. */
   const addBlocks = (accepted: { block_type: BlockType; payload: BlockPayload }[]) =>
     mutate((prev) => [
