@@ -45,14 +45,28 @@ const ACTIVITY_META: Partial<
 export function ActivityShell({
   blockType,
   done,
+  passages,
   children,
 }: {
   blockType: LessonBlock['block_type'];
   done: boolean;
+  /** Visible text for read-aloud; answers and feedback already excluded. */
+  passages?: string[];
   children: ReactNode;
 }) {
   const meta = ACTIVITY_META[blockType];
-  if (!meta) return <>{children}</>;
+  if (!meta) {
+    return (
+      <>
+        {passages?.length ? (
+          <div className="mb-2 flex justify-end">
+            <ListenButton passages={passages} className="text-muted-foreground" />
+          </div>
+        ) : null}
+        {children}
+      </>
+    );
+  }
   const { label, Icon } = meta;
 
   return (
@@ -70,6 +84,9 @@ export function ActivityShell({
           {label}
         </p>
         {done && <span className="sr-only">completed</span>}
+        {!!passages?.length && (
+          <ListenButton passages={passages} className="ml-auto text-muted-foreground" />
+        )}
       </div>
       {children}
     </section>
