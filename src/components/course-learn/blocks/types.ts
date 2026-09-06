@@ -535,8 +535,17 @@ export function defaultPayload(type: BlockType): BlockPayload {
       return {
         heading: '',
         caption: 'Your assessor completes the real sign-off in person.',
+        mode: 'reference',
         steps: [{ id: crypto.randomUUID(), step_title: '', instruction: '', safety_note: '' }],
       } satisfies ChecklistPayload;
+    case 'reflection':
+      return {
+        heading: '',
+        prompt: '',
+        guidance: 'Write in your own words. Two or three short paragraphs is plenty.',
+        min_words: 30,
+        criteria: [],
+      } satisfies ReflectionPayload;
     case 'scenario':
       return defaultScenarioPayload();
   }
