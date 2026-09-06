@@ -13,6 +13,7 @@ import { LessonRow } from '@/components/ds/LessonRow';
 import { hueFor } from '@/components/ds/FigureMark';
 import { ArrowRight, BookOpen, Loader2 } from '@/components/icons';
 import { useContentUpdates } from '@/hooks/useContentUpdates';
+import { RefresherDueCards } from '@/components/learner/RefresherDueCards';
 
 interface DashboardStats {
   enrolledCourses: number;
