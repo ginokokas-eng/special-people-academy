@@ -402,6 +402,7 @@ export default function Dashboard() {
                     progress={course.progress}
                     hue={hueFor(index)}
                     done={course.completed}
+                    updated={updatedCourseIds.has(course.id)}
                     onClick={() => navigate(`/courses/${course.id}/learn`)}
                   />
                 ))}
