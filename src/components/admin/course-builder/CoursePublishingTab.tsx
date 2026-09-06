@@ -13,9 +13,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { CheckCircle, AlertTriangle, Clock, Eye, Send, Globe, Loader2, Lock, RefreshCw } from '@/components/icons';
 import { toast } from 'sonner';
 import { evaluatePublishChecks, type PublishCheck } from './publishChecks';
+
+interface CourseVersion {
+  id: string;
+  version: number;
+  published_at: string | null;
+  published_by: string | null;
+  snapshot: unknown;
+}
+
 
 interface Course {
   id: string;
