@@ -2331,6 +2331,103 @@ export type Database = {
         }
         Relationships: []
       }
+      question_bank: {
+        Row: {
+          correct_id: string
+          created_at: string
+          created_by: string | null
+          difficulty: string | null
+          explanation: string | null
+          id: string
+          options: Json
+          org_id: string | null
+          standard_code: string | null
+          stem: string
+          tags: string[]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          correct_id: string
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options: Json
+          org_id?: string | null
+          standard_code?: string | null
+          stem: string
+          tags?: string[]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          correct_id?: string
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string
+          options?: Json
+          org_id?: string | null
+          standard_code?: string | null
+          stem?: string
+          tags?: string[]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      question_bank_usages: {
+        Row: {
+          bank_id: string
+          bank_version: number
+          created_at: string
+          id: string
+          lesson_block_id: string | null
+          quiz_question_id: string | null
+        }
+        Insert: {
+          bank_id: string
+          bank_version: number
+          created_at?: string
+          id?: string
+          lesson_block_id?: string | null
+          quiz_question_id?: string | null
+        }
+        Update: {
+          bank_id?: string
+          bank_version?: number
+          created_at?: string
+          id?: string
+          lesson_block_id?: string | null
+          quiz_question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_bank_usages_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_bank_usages_lesson_block_id_fkey"
+            columns: ["lesson_block_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_bank_usages_quiz_question_id_fkey"
+            columns: ["quiz_question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_attempt_sessions: {
         Row: {
           created_at: string
@@ -2382,6 +2479,7 @@ export type Database = {
           attempted_at: string
           id: string
           passed: boolean
+          question_snapshot: Json | null
           quiz_id: string
           score: number
           user_id: string
@@ -2391,6 +2489,7 @@ export type Database = {
           attempted_at?: string
           id?: string
           passed: boolean
+          question_snapshot?: Json | null
           quiz_id: string
           score: number
           user_id: string
@@ -2400,6 +2499,7 @@ export type Database = {
           attempted_at?: string
           id?: string
           passed?: boolean
+          question_snapshot?: Json | null
           quiz_id?: string
           score?: number
           user_id?: string
@@ -2423,6 +2523,7 @@ export type Database = {
           options: Json
           order_index: number
           question: string
+          question_payload: Json | null
           question_type: string | null
           quiz_id: string
         }
@@ -2434,6 +2535,7 @@ export type Database = {
           options?: Json
           order_index?: number
           question: string
+          question_payload?: Json | null
           question_type?: string | null
           quiz_id: string
         }
@@ -2445,6 +2547,7 @@ export type Database = {
           options?: Json
           order_index?: number
           question?: string
+          question_payload?: Json | null
           question_type?: string | null
           quiz_id?: string
         }
@@ -3008,6 +3111,10 @@ export type Database = {
           is_correct: boolean
         }[]
       }
+      copy_bank_question_to_quiz: {
+        Args: { _bank_id: string; _quiz_id: string }
+        Returns: string
+      }
       create_licence: {
         Args: {
           _amount_gbp?: number
@@ -3033,6 +3140,19 @@ export type Database = {
           _user: string
         }
         Returns: string
+      }
+      get_bank_usage_summary: {
+        Args: { _bank_id: string }
+        Returns: {
+          bank_version: number
+          course_title: string
+          kind: string
+          lesson_block_id: string
+          outdated: boolean
+          quiz_question_id: string
+          title: string
+          usage_id: string
+        }[]
       }
       get_course_competency_assessors: {
         Args: { _course_id: string }
