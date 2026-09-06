@@ -295,7 +295,7 @@ export default function StaffManagement() {
                   <Badge className={roleColors.ops_training_admin}>Ops/Training Admin</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Manage courses, practical sessions, enrollments, attendance, certificates, and compliance reports. Cannot edit pricing or security settings.
+                  Manage courses, practical sessions, enrolments, attendance, certificates, and compliance reports. Cannot edit pricing or security settings.
                 </p>
               </div>
             </div>

@@ -117,7 +117,7 @@ export default function AdminDashboard() {
   // Table controls state
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('published');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [dataLoading, setDataLoading] = useState(true);
