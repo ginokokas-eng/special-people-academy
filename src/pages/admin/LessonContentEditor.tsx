@@ -292,17 +292,11 @@ export default function LessonContentEditor() {
    * callout or image-only edits.
    */
   const openSaveDialog = () => {
-    const removedBefore = savedBlocksRef.current.filter((b) => removedIds.includes(b.id ?? ''));
-    setMaterial(
-      materialChangeDefault(
-        savedBlocksRef.current,
-        blocks.concat(removedBefore.filter(() => false)) // "after" is the current list
-      ) ||
-        materialChangeDefault(savedBlocksRef.current, blocks)
-    );
+    setMaterial(materialChangeDefault(savedBlocksRef.current, blocks));
     setNote('');
     setSaveDialogOpen(true);
   };
+
 
   const handleSave = async () => {
     if (!lessonId) return;
