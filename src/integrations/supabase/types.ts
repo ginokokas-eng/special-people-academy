@@ -585,6 +585,72 @@ export type Database = {
           },
         ]
       }
+      content_change_context: {
+        Row: {
+          actor: string
+          material: boolean
+          note: string | null
+          set_at: string
+        }
+        Insert: {
+          actor: string
+          material?: boolean
+          note?: string | null
+          set_at?: string
+        }
+        Update: {
+          actor?: string
+          material?: boolean
+          note?: string | null
+          set_at?: string
+        }
+        Relationships: []
+      }
+      content_history: {
+        Row: {
+          action: string
+          actor: string | null
+          after: Json | null
+          at: string
+          before: Json | null
+          course_id: string | null
+          id: string
+          lesson_id: string | null
+          material: boolean
+          note: string | null
+          row_id: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          after?: Json | null
+          at?: string
+          before?: Json | null
+          course_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          material?: boolean
+          note?: string | null
+          row_id: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          after?: Json | null
+          at?: string
+          before?: Json | null
+          course_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          material?: boolean
+          note?: string | null
+          row_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       course_offerings: {
         Row: {
           active: boolean | null
@@ -840,6 +906,41 @@ export type Database = {
           },
         ]
       }
+      course_versions: {
+        Row: {
+          course_id: string
+          id: string
+          published_at: string
+          published_by: string | null
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          published_at?: string
+          published_by?: string | null
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          published_at?: string
+          published_by?: string | null
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_versions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           assessment_details: string | null
@@ -886,6 +987,7 @@ export type Database = {
           regulated_cert_available: boolean | null
           regulated_cert_fee: number | null
           renewal_months: number | null
+          require_recompletion_on_change: boolean
           requirements: Json | null
           requires_practical_signoff: boolean | null
           scope_notes: string | null
@@ -944,6 +1046,7 @@ export type Database = {
           regulated_cert_available?: boolean | null
           regulated_cert_fee?: number | null
           renewal_months?: number | null
+          require_recompletion_on_change?: boolean
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
@@ -1002,6 +1105,7 @@ export type Database = {
           regulated_cert_available?: boolean | null
           regulated_cert_fee?: number | null
           renewal_months?: number | null
+          require_recompletion_on_change?: boolean
           requirements?: Json | null
           requires_practical_signoff?: boolean | null
           scope_notes?: string | null
@@ -1356,6 +1460,7 @@ export type Database = {
         Row: {
           completed: boolean | null
           completed_at: string | null
+          content_version: number | null
           created_at: string
           id: string
           lesson_id: string
@@ -1364,6 +1469,7 @@ export type Database = {
         Insert: {
           completed?: boolean | null
           completed_at?: string | null
+          content_version?: number | null
           created_at?: string
           id?: string
           lesson_id: string
@@ -1372,6 +1478,7 @@ export type Database = {
         Update: {
           completed?: boolean | null
           completed_at?: string | null
+          content_version?: number | null
           created_at?: string
           id?: string
           lesson_id?: string
@@ -1557,6 +1664,7 @@ export type Database = {
       lessons: {
         Row: {
           content: string | null
+          content_version: number
           course_id: string
           created_at: string
           description: string | null
@@ -1578,6 +1686,7 @@ export type Database = {
         }
         Insert: {
           content?: string | null
+          content_version?: number
           course_id: string
           created_at?: string
           description?: string | null
@@ -1599,6 +1708,7 @@ export type Database = {
         }
         Update: {
           content?: string | null
+          content_version?: number
           course_id?: string
           created_at?: string
           description?: string | null
@@ -3234,6 +3344,18 @@ export type Database = {
           usage_id: string
         }[]
       }
+      get_changed_since_completion: {
+        Args: { _user?: string }
+        Returns: {
+          completed_version: number
+          course_id: string
+          course_title: string
+          current_version: number
+          lesson_id: string
+          lesson_title: string
+          require_recompletion: boolean
+        }[]
+      }
       get_course_competency_assessors: {
         Args: { _course_id: string }
         Returns: {
@@ -3293,6 +3415,18 @@ export type Database = {
           verification_code: string
         }[]
       }
+      get_org_changed_since_completion: {
+        Args: { _org: string }
+        Returns: {
+          completed_version: number
+          course_id: string
+          current_version: number
+          lesson_id: string
+          lesson_title: string
+          require_recompletion: boolean
+          user_id: string
+        }[]
+      }
       get_org_compliance_matrix: {
         Args: { _org: string }
         Returns: {
@@ -3309,6 +3443,7 @@ export type Database = {
           required_total: number
           seat_status: string
           status: string
+          updated_since_completion: boolean
           user_id: string
         }[]
       }
@@ -3402,6 +3537,7 @@ export type Database = {
           position: number
         }[]
       }
+      publish_course_version: { Args: { _course_id: string }; Returns: number }
       quiz_attempts_unlimited: { Args: { _allowed: number }; Returns: boolean }
       record_observation: {
         Args: {
@@ -3430,6 +3566,10 @@ export type Database = {
         | { Args: never; Returns: number }
         | { Args: { _org: string }; Returns: number }
       revoke_seat: { Args: { _seat_id: string }; Returns: boolean }
+      set_content_change_context: {
+        Args: { _material: boolean; _note?: string }
+        Returns: undefined
+      }
       set_member_can_assess: {
         Args: { _can: boolean; _org: string; _user: string }
         Returns: boolean

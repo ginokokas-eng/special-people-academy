@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
+import { useContentUpdates } from '@/hooks/useContentUpdates';
 import { requiredProgress } from '@/lib/progress';
 import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
 import { useLockedQuizLessons } from '@/components/quiz/useLockedQuizLessons';
@@ -152,7 +153,13 @@ export function CourseHome({
   onBackToCourse,
   onOpenCertificate,
 }: Props) {
-  const completedIds = new Set(lessons.filter((l) => l.completed).map((l) => l.id));
+  // Lessons whose content moved on since completion. Only counts against the
+  // learner when the course itself requires re-completion (Part H).
+  const { recompletionLessonIds } = useContentUpdates();
+  const rawCompletedIds = new Set(lessons.filter((l) => l.completed).map((l) => l.id));
+  const completedIds = new Set(
+    [...rawCompletedIds].filter((id) => !recompletionLessonIds.has(id))
+  );
   // Locked-out graded quizzes must never be a silent dead end on the hub.
   const lockedQuizLessonIds = useLockedQuizLessons(
     lessons.filter((l) => l.lesson_type === 'quiz').map((l) => l.id)

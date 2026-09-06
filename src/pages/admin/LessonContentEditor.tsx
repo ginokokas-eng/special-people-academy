@@ -17,6 +17,19 @@ import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { blockPayloadFromBank, type BankQuestion } from '@/lib/questionBank';
+import { materialChangeDefault } from '@/lib/contentHistory';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 
 
 import {
@@ -52,14 +65,20 @@ export default function LessonContentEditor() {
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
   const [bankPickerOpen, setBankPickerOpen] = useState(false);
+  const [coursePublished, setCoursePublished] = useState(false);
 
-
+  // Save-time change context (Part H): what the author declares about this save.
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [material, setMaterial] = useState(false);
+  const [note, setNote] = useState('');
 
   // Guards against re-initialising block state (auth/token-refresh renders must
   // never wipe unsaved work).
   const initialisedLessonIdRef = useRef<string | null>(null);
   const dirtyRef = useRef(false);
   dirtyRef.current = dirty;
+  /** Last saved (or loaded) blocks — the "before" side of the material check. */
+  const savedBlocksRef = useRef<BlockDraft[]>([]);
 
   const load = useCallback(async (force = false) => {
     if (!lessonId) return;
@@ -77,15 +96,16 @@ export default function LessonContentEditor() {
       if (lessonRes.error) throw lessonRes.error;
       if (blocksRes.error) throw blocksRes.error;
       setLesson(lessonRes.data ?? null);
-      setBlocks(
-        (blocksRes.data || []).map((row) => ({
-          id: row.id,
-          client_id: row.id,
-          block_type: row.block_type as BlockType,
-          payload: (row.payload ?? {}) as unknown as BlockPayload,
-          contributes_to_completion: row.contributes_to_completion,
-        }))
-      );
+      const loaded: BlockDraft[] = (blocksRes.data || []).map((row) => ({
+        id: row.id,
+        client_id: row.id,
+        block_type: row.block_type as BlockType,
+        payload: (row.payload ?? {}) as unknown as BlockPayload,
+        contributes_to_completion: row.contributes_to_completion,
+      }));
+      setBlocks(loaded);
+      savedBlocksRef.current = JSON.parse(JSON.stringify(loaded)) as BlockDraft[];
+
       setRemovedIds([]);
       setDirty(false);
     } catch (error) {
@@ -103,7 +123,25 @@ export default function LessonContentEditor() {
     load(true);
   }, [lessonId, load]);
 
+  // Editing a live course is a different act — authors get told, every time.
+  useEffect(() => {
+    if (!courseId) return;
+    let cancelled = false;
+    void supabase
+      .from('courses')
+      .select('is_published')
+      .eq('id', courseId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setCoursePublished(!!data?.is_published);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId]);
+
   useUnsavedChangesGuard(dirty);
+
 
   const mutate = (updater: (prev: BlockDraft[]) => BlockDraft[]) => {
     setBlocks(updater);
@@ -248,14 +286,34 @@ export default function LessonContentEditor() {
     mutate((prev) => prev.filter((_, i) => i !== index));
   };
 
+  /**
+   * Opens the save dialog with the material checkbox pre-set from what actually
+   * changed: on when an assessed/interactive block moved, off for wording,
+   * callout or image-only edits.
+   */
+  const openSaveDialog = () => {
+    setMaterial(materialChangeDefault(savedBlocksRef.current, blocks));
+    setNote('');
+    setSaveDialogOpen(true);
+  };
+
+
   const handleSave = async () => {
     if (!lessonId) return;
     setSaving(true);
     try {
+      // Transaction-local context the history triggers read.
+      const { error: contextError } = await supabase.rpc('set_content_change_context', {
+        _material: material,
+        _note: note.trim() || null,
+      });
+      if (contextError) throw contextError;
+
       if (removedIds.length) {
         const { error } = await supabase.from('lesson_blocks').delete().in('id', removedIds);
         if (error) throw error;
       }
+
 
       // Order is the array position, rewritten on every save.
       const updates = blocks
@@ -404,7 +462,7 @@ export default function LessonContentEditor() {
             </span>
           )}
           <Button
-            onClick={handleSave}
+            onClick={openSaveDialog}
             disabled={
               saving || !dirty || checkpointsInvalid || scenariosInvalid || visibilityInvalid
             }
@@ -418,6 +476,71 @@ export default function LessonContentEditor() {
           </Button>
         </div>
       </div>
+
+      {coursePublished && (
+        <Alert>
+          <AlertTitle>You are editing a live course</AlertTitle>
+          <AlertDescription>
+            Learners see these changes as soon as you save.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save this lesson</DialogTitle>
+            <DialogDescription>
+              Tell us what kind of change this is, so learners who already finished the lesson can be
+              told when it matters.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="material-change"
+                checked={material}
+                onCheckedChange={(checked) => setMaterial(checked === true)}
+              />
+              <Label htmlFor="material-change" className="text-sm font-normal leading-snug">
+                This changes what learners must know
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Ticked automatically when you add, remove or edit a question, activity or assessed
+                  step. Leave it off for wording or picture tidy-ups.
+                </span>
+              </Label>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="change-note" className="text-sm">
+                Note (optional)
+              </Label>
+              <Input
+                id="change-note"
+                value={note}
+                maxLength={200}
+                placeholder="e.g. Updated the escalation question"
+                onChange={(event) => setNote(event.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                setSaveDialogOpen(false);
+                await handleSave();
+              }}
+              disabled={saving}
+            >
+              Save content
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
       {lesson && lesson.lesson_type !== 'blocks' && (
         <Card>

@@ -89,6 +89,7 @@ interface MatrixRow {
   required_total: number;
   required_completed: number;
   cpd_hours_total: number | null;
+  updated_since_completion?: boolean | null;
 }
 
 const fmtDate = (value: string | null) =>
@@ -866,7 +867,11 @@ export default function OrgPortal() {
                                       : 'in_progress';
                                 return (
                                   <TableCell key={c.id}>
-                                    <MatrixStatus state={state} percent={row?.percent} />
+                                    <MatrixStatus
+                                      state={state}
+                                      percent={row?.percent}
+                                      updated={!!row?.updated_since_completion}
+                                    />
                                   </TableCell>
                                 );
                               })}

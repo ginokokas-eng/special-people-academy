@@ -23,6 +23,7 @@ export const LessonRow = ({
   hue = 'violet',
   icon = 'plan',
   done = false,
+  updated = false,
   onClick,
 }: {
   category: string;
@@ -31,6 +32,8 @@ export const LessonRow = ({
   hue?: FigureHue;
   icon?: string;
   done?: boolean;
+  /** Content changed since this learner completed it (Part H flag). */
+  updated?: boolean;
   onClick?: () => void;
 }) => {
   const colour = done ? 'hsl(var(--success))' : HUE_VARS[hue];
@@ -51,6 +54,11 @@ export const LessonRow = ({
             `truncate` with no title attribute made the rest of the string unreachable
             on every device rather than just awkward on small ones. */}
         <p title={title} className="line-clamp-2 font-heading text-[15px] font-semibold leading-snug text-foreground">{title}</p>
+        {updated && (
+          <p className="mt-1 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+            Updated since you completed
+          </p>
+        )}
         <Progress value={done ? 100 : progress} className="mt-2 h-1" />
       </div>
       <span className="text-xs tabular-nums text-muted-foreground">{done ? 'Done' : `${progress}%`}</span>

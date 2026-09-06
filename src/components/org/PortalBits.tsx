@@ -125,12 +125,29 @@ export function InitialsAvatar({ name, email, className }: { name?: string | nul
 export type MatrixState = 'completed' | 'in_progress' | 'not_started';
 
 /** Compact status for a compliance-matrix cell. */
-export function MatrixStatus({ state, percent }: { state: MatrixState; percent?: number }) {
+export function MatrixStatus({
+  state,
+  percent,
+  updated = false,
+}: {
+  state: MatrixState;
+  percent?: number;
+  /** Lesson content changed since this learner completed it (Part H). */
+  updated?: boolean;
+}) {
+  const updatedNote = updated ? (
+    <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+      Updated
+    </span>
+  ) : null;
   if (state === 'completed') {
     return (
-      <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success-ink))]">
-        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-        Completed
+      <span className="inline-flex flex-col">
+        <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[hsl(var(--success)/0.12)] px-2.5 text-xs font-medium text-[hsl(var(--success-ink))]">
+          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+          Completed
+        </span>
+        {updatedNote}
       </span>
     );
   }
@@ -139,6 +156,7 @@ export function MatrixStatus({ state, percent }: { state: MatrixState; percent?:
       <span className="inline-flex min-w-[96px] flex-col gap-1">
         <span className="text-xs font-medium text-primary tabular-nums">{percent ?? 0}% complete</span>
         <Progress value={percent ?? 0} className="h-1 w-24" aria-hidden="true" />
+        {updatedNote}
       </span>
     );
   }

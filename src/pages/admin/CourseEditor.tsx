@@ -16,6 +16,7 @@ import { CourseQuizTab } from '@/components/admin/course-builder/CourseQuizTab';
 import { CoursePublishingTab } from '@/components/admin/course-builder/CoursePublishingTab';
 import { ScormPackageManager } from '@/components/admin/ScormPackageManager';
 import { CourseInsightsTab } from '@/components/admin/course-builder/CourseInsightsTab';
+import { CourseHistoryTab } from '@/components/admin/course-builder/CourseHistoryTab';
 
 interface Course {
   id: string;
@@ -43,7 +44,9 @@ interface Course {
   thumbnail_url: string | null;
   prerequisite_course_id: string | null;
   prerequisite_required: boolean;
+  require_recompletion_on_change: boolean;
 }
+
 
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
@@ -123,7 +126,9 @@ export default function CourseEditor() {
           thumbnail_url: course.thumbnail_url,
           prerequisite_course_id: course.prerequisite_course_id,
           prerequisite_required: course.prerequisite_required,
+          require_recompletion_on_change: course.require_recompletion_on_change,
           updated_at: new Date().toISOString(),
+
         })
         .eq('id', course.id);
 
@@ -186,7 +191,7 @@ export default function CourseEditor() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="modules">Modules & Lessons</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
@@ -195,6 +200,7 @@ export default function CourseEditor() {
             <TabsTrigger value="scorm">SCORM</TabsTrigger>
             <TabsTrigger value="publishing">Publishing</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -232,6 +238,10 @@ export default function CourseEditor() {
 
           <TabsContent value="insights">
             <CourseInsightsTab courseId={course.id} />
+          </TabsContent>
+
+          <TabsContent value="history">
+            <CourseHistoryTab courseId={course.id} />
           </TabsContent>
         </Tabs>
       </div>
