@@ -691,9 +691,6 @@ export default function OrgPortal() {
                               />
                             )}
                           </TableCell>
-                          <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
-                            {fmtDate(p.started_at)}
-                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
