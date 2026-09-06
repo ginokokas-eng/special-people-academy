@@ -378,7 +378,7 @@ export function BlockList({
               );
             })()}
 
-            {isInteractive(block.block_type) && (
+            {isInteractive(block.block_type, block.payload) && (
               <div className="mt-3 flex items-center gap-2 border-t pt-3">
                 <Switch
                   id={`${idPrefix}-contributes`}
