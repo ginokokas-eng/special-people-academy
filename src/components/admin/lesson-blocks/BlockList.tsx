@@ -48,6 +48,7 @@ import {
 } from './forms/BlockForms';
 import { CarouselBlockForm, HotGraphicBlockForm } from './forms/RichBlockForms';
 import { ScenarioForm } from './forms/ScenarioForm';
+import { ReflectionForm } from './forms/ReflectionForm';
 import {
   ChecklistBlockForm,
   DragMatchBlockForm,
@@ -272,6 +273,13 @@ export function BlockList({
             {block.block_type === 'checklist' && (
               <ChecklistBlockForm
                 payload={block.payload as ChecklistPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
+            {block.block_type === 'reflection' && (
+              <ReflectionForm
+                payload={block.payload as ReflectionPayload}
                 onChange={setPayload}
                 idPrefix={idPrefix}
               />
