@@ -13,6 +13,7 @@ import { useIsNative } from '@/lib/native';
 import { enrolmentStatus } from '@/lib/progress';
 import { useContentUpdates } from '@/hooks/useContentUpdates';
 import { NativeLearn } from '@/components/native/NativeLearn';
+import { MyEvidenceCard } from '@/components/learner/MyEvidenceCard';
 
 interface EnrolledCourse {
   id: string;
@@ -234,6 +235,8 @@ export default function MyLearning() {
           <h1 className="text-3xl font-bold text-foreground">My Learning</h1>
           <p className="text-muted-foreground mt-1">Track your enrolled courses and progress</p>
         </div>
+
+        <MyEvidenceCard enabled={!!user} />
 
         {courses.length === 0 ? (
           <Card>

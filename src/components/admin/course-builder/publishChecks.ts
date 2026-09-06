@@ -34,6 +34,8 @@ export interface PublishCheck {
   detail?: string;
   /** Which Course Builder tab fixes it. */
   tab: string;
+  /** 'warning' checks are advisory and never block publishing. */
+  severity?: 'error' | 'warning';
 }
 
 interface LessonRow {
@@ -404,6 +406,28 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
       tab: 'Overview',
     });
   }
+
+  /* ------------------------- f. standards coverage ----------------------- */
+  const lessonIds = lessons.map((l) => l.id);
+  const [courseLinks, lessonLinks] = await Promise.all([
+    supabase.from('standard_links').select('id', { count: 'exact', head: true }).eq('course_id', courseId),
+    lessonIds.length
+      ? supabase
+          .from('standard_links')
+          .select('id', { count: 'exact', head: true })
+          .in('lesson_id', lessonIds)
+      : Promise.resolve({ count: 0 } as { count: number }),
+  ]);
+  const linkedStandards = (courseLinks.count ?? 0) + (lessonLinks.count ?? 0);
+  checks.push({
+    id: 'standards',
+    label: 'Standards are linked to this course',
+    passed: linkedStandards > 0,
+    detail:
+      'Reports cannot show the areas this training evidences until you link at least one standard, on the course or on a lesson.',
+    tab: 'Overview',
+    severity: 'warning',
+  });
 
   return checks;
 }

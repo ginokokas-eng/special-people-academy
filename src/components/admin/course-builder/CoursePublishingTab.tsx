@@ -66,7 +66,8 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
   const canPublishClinical = isSuperAdmin || isMarina;
   const permittedToPublish = isClinicalCourse ? canPublishClinical : true;
 
-  const failing = checks.filter((c) => !c.passed);
+  // Advisory warnings are shown but never block the publish transition.
+  const failing = checks.filter((c) => !c.passed && c.severity !== 'warning');
   const readyToPublish = !checking && failing.length === 0;
   // Publishing is blocked while any check fails. Draft/review moves stay open.
   const canPublish = permittedToPublish && readyToPublish;
@@ -365,7 +366,11 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
                     <CheckCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                   ) : (
                     <AlertTriangle
-                      className="h-5 w-5 shrink-0 text-destructive"
+                      className={
+                        check.severity === 'warning'
+                          ? 'h-5 w-5 shrink-0 text-muted-foreground'
+                          : 'h-5 w-5 shrink-0 text-destructive'
+                      }
                       aria-hidden="true"
                     />
                   )}
@@ -381,6 +386,7 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
                     </p>
                     {!check.passed && (
                       <p className="text-sm text-muted-foreground">
+                        {check.severity === 'warning' ? 'Recommended: ' : ''}
                         {check.detail} Fix this in the “{check.tab}” tab.
                       </p>
                     )}
