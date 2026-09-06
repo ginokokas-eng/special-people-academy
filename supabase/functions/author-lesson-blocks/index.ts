@@ -547,9 +547,21 @@ Deno.serve(async (req) => {
         if (!errors.length) {
           const out = JSON.stringify(result.data);
           await logRun('ok', out.length);
+          // Translation replies come back as path/text entries; hand the client
+          // the { path: translated } map it will store as overrides.
+          if (mode === 'translate_blocks') {
+            const blocks = ((result.data as Rec).blocks as Rec[]).map((entry) => ({
+              block_id: String(entry.block_id),
+              texts: Object.fromEntries(
+                (entry.texts as Rec[]).map((t) => [String(t.path), String(t.text)])
+              ),
+            }));
+            return json({ blocks }, 200);
+          }
           return json(result.data as Rec, 200);
         }
         lastErrors = errors;
+
       }
       userMessage = `${user}\n\nYour previous reply was rejected for these reasons. Fix them all and return valid JSON only:\n- ${lastErrors.slice(0, 8).join('\n- ')}`;
     }
