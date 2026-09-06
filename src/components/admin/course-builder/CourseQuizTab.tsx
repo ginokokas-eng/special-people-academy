@@ -653,6 +653,106 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add a question copied from the shared bank */}
+      <BankPicker
+        open={bankPicker.open}
+        onOpenChange={(open) => setBankPicker({ open, quizId: open ? bankPicker.quizId : null })}
+        onPick={(bank) => addFromBank(bank.id)}
+      />
+
+      {/* Pool question: draws random bank questions for each attempt */}
+      <Dialog open={poolDialog.open} onOpenChange={(open) => setPoolDialog({ open, quizId: open ? poolDialog.quizId : null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pool question</DialogTitle>
+            <DialogDescription>
+              Each learner gets a different random set from the question bank, chosen by tag.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pool-tags">Tags</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {poolForm.tags.map((t) => (
+                  <Badge key={t} variant="secondary" className="gap-1">
+                    {t}
+                    <button
+                      type="button"
+                      aria-label={`Remove tag ${t}`}
+                      onClick={() => setPoolForm({ ...poolForm, tags: poolForm.tags.filter((x) => x !== t) })}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <Input
+                id="pool-tags"
+                value={poolTagInput}
+                placeholder="Type a tag and press Enter"
+                onChange={(e) => setPoolTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter' && e.key !== ',') return;
+                  e.preventDefault();
+                  const added = parseTagInput(poolTagInput);
+                  if (!added.length) return;
+                  setPoolForm({ ...poolForm, tags: parseTagInput([...poolForm.tags, ...added].join(',')) });
+                  setPoolTagInput('');
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pool-draw">How many to draw</Label>
+                <Input
+                  id="pool-draw"
+                  type="number"
+                  min={1}
+                  value={poolForm.draw_count}
+                  onChange={(e) => setPoolForm({ ...poolForm, draw_count: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pool-standard">Standard code (optional)</Label>
+                <Input
+                  id="pool-standard"
+                  value={poolForm.standard_code}
+                  onChange={(e) => setPoolForm({ ...poolForm, standard_code: e.target.value })}
+                />
+              </div>
+            </div>
+            {poolForm.tags.length > 0 && (
+              <p
+                className={`text-sm ${
+                  poolMatches !== null && !poolIsFillable(poolMatches, poolForm.draw_count)
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {poolMatches === null
+                  ? 'Counting matching questions…'
+                  : `${poolMatches} matching question${poolMatches === 1 ? '' : 's'} in the bank${
+                      poolIsFillable(poolMatches, poolForm.draw_count)
+                        ? ''
+                        : ` — you need at least ${poolForm.draw_count}`
+                    }`}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPoolDialog({ open: false, quizId: null })}>Cancel</Button>
+            <Button
+              onClick={handleCreatePool}
+              disabled={saving || !poolIsFillable(poolMatches ?? 0, poolForm.draw_count)}
+            >
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Add pool question
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
