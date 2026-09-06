@@ -578,6 +578,7 @@ export default function OrgPortal() {
               { value: 'licences', label: 'Licences' },
               { value: 'certificates', label: 'Certificates' },
               { value: 'insights', label: 'Insights' },
+              { value: 'retention', label: 'Retention' },
               { value: 'standards', label: 'Standards' },
               ...(canAssess ? [{ value: 'assess', label: 'Marking' }] : []),
             ].map((tab) => (
