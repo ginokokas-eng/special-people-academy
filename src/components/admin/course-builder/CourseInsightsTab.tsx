@@ -101,8 +101,97 @@ export function CourseInsightsTab({ courseId }: { courseId: string }) {
       </Card>
 
       {!!lessons.length && <LessonInsightsPanel lessonId={lessonId} />}
+
+      <StandardsEvidencedCard courseId={courseId} />
     </div>
   );
 }
+
+interface CoverageRow {
+  framework: string;
+  code: string;
+  title: string;
+  linked_at_course: boolean;
+  lesson_count: number;
+  lesson_titles: string[];
+}
+
+/** Read-only coverage view: which standards this course (or its lessons) evidences. */
+function StandardsEvidencedCard({ courseId }: { courseId: string }) {
+  const [rows, setRows] = useState<CoverageRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase.rpc('get_course_standard_coverage', {
+        _course: courseId,
+      });
+      if (cancelled) return;
+      if (error) console.error('Error loading standard coverage:', error);
+      setRows(((data ?? []) as unknown as CoverageRow[]) ?? []);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId]);
+
+  const groups = groupByFramework(rows);
+
+  return (
+    <Card className="min-w-0">
+      <CardHeader>
+        <CardTitle>Standards evidenced</CardTitle>
+        <CardDescription>
+          {EVIDENCE_HEADING}. {EVIDENCE_DISCLAIMER}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="min-w-0">
+        {loading ? (
+          <div className="flex h-16 items-center">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
+          </div>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No standards linked yet — add them on the Overview tab or per lesson.
+          </p>
+        ) : (
+          <div className="space-y-5">
+            {groups.map((group) => (
+              <div key={group.framework} className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {group.label}
+                </p>
+                <ul className="space-y-2">
+                  {group.rows.map((row) => (
+                    <li
+                      key={`${row.framework}-${row.code}`}
+                      className="rounded-md border border-border px-3 py-2"
+                    >
+                      <p className="text-sm text-foreground">
+                        <span className="text-muted-foreground">{row.code}</span> {row.title}
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {row.linked_at_course && <Badge variant="secondary">Whole course</Badge>}
+                        {(row.lesson_titles ?? []).map((title) => (
+                          <Badge key={title} variant="outline">
+                            {title}
+                          </Badge>
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export default CourseInsightsTab;
