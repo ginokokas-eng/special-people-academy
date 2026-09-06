@@ -43,7 +43,7 @@ export function CourseSafetyGovernance({ category, deliveryType, courseTitle }: 
             </Badge>
             <Badge variant="outline" className="bg-accent/10 text-accent border-accent/30">
               <FileText className="h-3 w-3 mr-1" />
-              CQC compliant
+              Mapped to CQC key questions
             </Badge>
           </div>
         </div>
