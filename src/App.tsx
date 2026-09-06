@@ -62,6 +62,8 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ScormPlayer from "./pages/ScormPlayer";
 import Organisations from "./pages/admin/Organisations";
 import Licences from "./pages/admin/Licences";
+import QuestionBank from "./pages/admin/QuestionBank";
+
 import OrgPortal from "./pages/org/OrgPortal";
 import InviteAccept from "./pages/InviteAccept";
 import Renewals from "./pages/Renewals";
