@@ -366,6 +366,24 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
 
       <Card className="lg:col-span-2">
         <CardHeader>
+          <CardTitle>Standards evidenced</CardTitle>
+          <CardDescription>
+            Areas this course evidences. Add lesson-level links on the Modules &amp; Lessons tab for
+            finer detail.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StandardPicker
+            target={{ kind: 'course', id: course.id }}
+            label="Care Certificate and CQC key questions"
+            description="Saved as soon as you add or remove one."
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="lg:col-span-2">
+
+        <CardHeader>
           <CardTitle>Learning Outcomes</CardTitle>
           <CardDescription>What learners will achieve</CardDescription>
         </CardHeader>
