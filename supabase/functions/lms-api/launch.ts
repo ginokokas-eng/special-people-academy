@@ -259,23 +259,25 @@ export async function handleLaunchStatus(
     .maybeSingle();
   if (!membership) return json({ error: 'learner_not_in_organisation' }, 403);
 
-  const [{ data: enrollment }, { data: lessons }, { data: quizzes }] = await Promise.all([
+  const [{ data: enrollment }, { data: lessons }] = await Promise.all([
     admin
       .from('enrollments')
       .select('enrolled_at, completed_at')
       .eq('user_id', userId)
       .eq('course_id', courseId)
       .maybeSingle(),
-    admin.from('lessons').select('id').eq('course_id', courseId).eq('is_required', true),
-    admin.from('quizzes').select('id').eq('course_id', courseId),
+    admin.from('lessons').select('id, is_required').eq('course_id', courseId),
   ]);
 
-  const lessonIds = (lessons ?? []).map((l) => l.id);
+  // Progress is measured over required lessons only — the same basis as the
+  // certificate gate and every learner-facing percentage.
+  const allLessonIds = (lessons ?? []).map((l) => l.id);
+  const lessonIds = (lessons ?? []).filter((l) => l.is_required === true).map((l) => l.id);
   let completedCount = 0;
   if (lessonIds.length) {
     const { count } = await admin
       .from('lesson_progress')
-      .select('id', { count: 'exact', head: true })
+      .select('lesson_id', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('completed', true)
       .in('lesson_id', lessonIds);
@@ -283,6 +285,9 @@ export async function handleLaunchStatus(
   }
 
   let score: number | null = null;
+  const { data: quizzes } = allLessonIds.length
+    ? await admin.from('quizzes').select('id').in('lesson_id', allLessonIds)
+    : { data: [] as Array<{ id: string }> };
   const quizIds = (quizzes ?? []).map((q) => q.id);
   if (quizIds.length) {
     const { data: attempts } = await admin
