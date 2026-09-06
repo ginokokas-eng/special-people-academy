@@ -90,6 +90,18 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
     explanation: '',
   });
 
+  const [bankPicker, setBankPicker] = useState<{ open: boolean; quizId: string | null }>({ open: false, quizId: null });
+  const [poolDialog, setPoolDialog] = useState<{ open: boolean; quizId: string | null }>({ open: false, quizId: null });
+  const [poolForm, setPoolForm] = useState<{ tags: string[]; draw_count: number; standard_code: string }>({
+    tags: [],
+    draw_count: 3,
+    standard_code: '',
+  });
+  const [poolTagInput, setPoolTagInput] = useState('');
+  const [poolMatches, setPoolMatches] = useState<number | null>(null);
+  const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
+
+
   useEffect(() => {
     fetchData();
   }, [courseId]);
