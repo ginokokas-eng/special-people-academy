@@ -192,3 +192,26 @@ export function deriveAvailableLangs(
     .map(([lang]) => lang)
     .sort();
 }
+
+/* ------------------------------ learner choice ----------------------------- */
+
+/** Where the learner's chosen lesson language is remembered on this device. */
+export const LANG_STORAGE_KEY = 'learner_lesson_lang';
+
+/** The learner's chosen language code, or null for English. */
+export function storedLang(): string | null {
+  if (typeof window === 'undefined') return null;
+  const value = window.localStorage.getItem(LANG_STORAGE_KEY);
+  return value && languageByCode(value) ? value : null;
+}
+
+export function setStoredLang(code: string | null) {
+  if (typeof window === 'undefined') return;
+  if (code) window.localStorage.setItem(LANG_STORAGE_KEY, code);
+  else window.localStorage.removeItem(LANG_STORAGE_KEY);
+}
+
+/** Voice tag for read-aloud: the chosen language, else British English. */
+export function speechLangTag(): string {
+  return languageByCode(storedLang())?.voice ?? 'en-GB';
+}
