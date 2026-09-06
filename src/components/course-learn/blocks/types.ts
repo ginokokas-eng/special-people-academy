@@ -606,8 +606,14 @@ export function defaultScenarioPayload(): ScenarioPayload {
   };
 }
 
-/** Blocks that need a learner interaction before the lesson can be completed. */
-export function isInteractive(type: BlockType): boolean {
+/**
+ * Blocks that need a learner interaction before the lesson can be completed.
+ * Payload-aware: a practical checklist only asks something of the learner when
+ * it is in `assessed` mode (they confirm they are ready to be observed).
+ */
+export function isInteractive(type: BlockType, payload?: BlockPayload): boolean {
+  if (type === 'reflection') return true;
+  if (type === 'checklist') return checklistMode(payload) === 'assessed';
   return (
     type === 'card_deck' ||
     type === 'flip_cards' ||
@@ -624,8 +630,8 @@ export function isInteractive(type: BlockType): boolean {
 /**
  * Whether the completion switch starts ON for a newly added block.
  * Card decks, knowledge checks, matching activities, story carousels, labelled
- * images and scenarios default ON; video, accordion, flip cards and the
- * practical checklist default OFF.
+ * images, scenarios and reflective answers default ON; video, accordion, flip
+ * cards and the practical checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
   return (
@@ -634,17 +640,21 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
     type === 'drag_match' ||
     type === 'carousel' ||
     type === 'hot_graphic' ||
-    type === 'scenario'
+    type === 'scenario' ||
+    type === 'reflection'
   );
 }
 
 
 /**
  * Blocks whose learner answers are persisted to lesson_block_responses.
- * Payload-aware: a video block only persists once it carries checkpoints.
+ * Payload-aware: a video block only persists once it carries checkpoints, and a
+ * checklist only when it is assessed.
  */
 export function persistsResponse(type: BlockType, payload?: BlockPayload): boolean {
   if (type === 'mcq' || type === 'drag_match' || type === 'scenario') return true;
+  if (type === 'reflection') return true;
+  if (type === 'checklist') return checklistMode(payload) === 'assessed';
   if (type === 'video') return videoCheckpoints(payload as VideoPayload | undefined).length > 0;
   return false;
 }
