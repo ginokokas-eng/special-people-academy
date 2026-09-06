@@ -17,6 +17,19 @@ import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { blockPayloadFromBank, type BankQuestion } from '@/lib/questionBank';
+import { materialChangeDefault } from '@/lib/contentHistory';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 
 
 import {
