@@ -15,8 +15,17 @@ const MAX_TEXT_CHARS = 40_000;
 const MAX_INSTRUCTION_CHARS = 300;
 const DAILY_RUN_CEILING = 60;
 
-type Mode = 'draft_lesson' | 'knowledge_check' | 'suggest_checkpoints' | 'improve_block';
-const MODES: Mode[] = ['draft_lesson', 'knowledge_check', 'suggest_checkpoints', 'improve_block'];
+type Mode = 'draft_lesson' | 'knowledge_check' | 'suggest_checkpoints' | 'improve_block' | 'translate_blocks';
+const MODES: Mode[] = [
+  'draft_lesson',
+  'knowledge_check',
+  'suggest_checkpoints',
+  'improve_block',
+  'translate_blocks',
+];
+
+/** v1 ships Romanian only. Adding a language is a constant change here. */
+const TRANSLATION_LANGS: Record<string, string> = { ro: 'Romanian (Română)' };
 
 const DRAFT_BLOCK_TYPES = ['text', 'callout', 'flip_cards', 'accordion', 'mcq', 'scenario'] as const;
 
