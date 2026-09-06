@@ -237,7 +237,10 @@ export default function MyLearning() {
           <p className="text-muted-foreground mt-1">Track your enrolled courses and progress</p>
         </div>
 
+        <RefresherDueCards enabled={!!user} />
+
         <MyEvidenceCard enabled={!!user} />
+
 
         {courses.length === 0 ? (
           <Card>
