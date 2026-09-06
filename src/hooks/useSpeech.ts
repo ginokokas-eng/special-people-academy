@@ -28,14 +28,19 @@ function synth(): SpeechSynthesis | null {
   return window.speechSynthesis ?? null;
 }
 
-function pickVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+function pickVoice(voices: SpeechSynthesisVoice[], tag: string): SpeechSynthesisVoice | null {
   if (!voices.length) return null;
+  const wanted = tag.toLowerCase();
+  const base = wanted.split('-')[0];
   return (
+    voices.find((v) => v.lang?.toLowerCase().replace('_', '-') === wanted) ??
+    voices.find((v) => v.lang?.toLowerCase().startsWith(base)) ??
     voices.find((v) => v.lang?.toLowerCase() === 'en-gb') ??
     voices.find((v) => v.lang?.toLowerCase().startsWith('en')) ??
     null
   );
 }
+
 
 export function useSpeech(): SpeechController {
   const supported = !!synth();
