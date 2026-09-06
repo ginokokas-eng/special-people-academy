@@ -311,6 +311,15 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     tab: 'Quiz Builder',
   });
 
+  checks.push({
+    id: 'quiz-pools',
+    label: 'Random question pools can be filled',
+    passed: underfilledPools.length === 0,
+    detail: `Add more matching questions to the question bank, or lower how many are drawn: ${names(underfilledPools)}.`,
+    tab: 'Quiz Builder',
+  });
+
+
   const noPackage = scormLessons.filter((l) => !l.scorm_package_id).map((l) => l.title);
   checks.push({
     id: 'scorm',
