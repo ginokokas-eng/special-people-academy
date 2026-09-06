@@ -123,7 +123,25 @@ export default function LessonContentEditor() {
     load(true);
   }, [lessonId, load]);
 
+  // Editing a live course is a different act — authors get told, every time.
+  useEffect(() => {
+    if (!courseId) return;
+    let cancelled = false;
+    void supabase
+      .from('courses')
+      .select('is_published')
+      .eq('id', courseId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setCoursePublished(!!data?.is_published);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId]);
+
   useUnsavedChangesGuard(dirty);
+
 
   const mutate = (updater: (prev: BlockDraft[]) => BlockDraft[]) => {
     setBlocks(updater);
