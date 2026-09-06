@@ -455,8 +455,9 @@ export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   hot_graphic: 'An image with labelled points learners tap to explore.',
   mcq: 'A single multiple-choice question with instant feedback.',
   drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
-  checklist: 'Read-only practical steps learners can study before assessment.',
+  checklist: 'Practical steps to study, or steps an assessor ticks off in person.',
   scenario: 'Branching decision story with consequences.',
+  reflection: 'Learners write an answer in their own words for an assessor to read.',
 };
 
 
