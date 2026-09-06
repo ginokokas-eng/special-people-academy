@@ -105,7 +105,10 @@ export function CourseInsightsTab({ courseId }: { courseId: string }) {
 
       {!!lessons.length && <LessonInsightsPanel lessonId={lessonId} />}
 
+      <RetentionPanel courseId={courseId} />
+
       <StandardsEvidencedCard courseId={courseId} />
+
     </div>
   );
 }
