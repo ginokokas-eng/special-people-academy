@@ -5,7 +5,8 @@
  * lesson content: it returns id-free drafts that the author accepts (or edits,
  * or rejects) in the editor, and only the editor's own Save writes blocks.
  *
- * Modes: draft_lesson · knowledge_check · suggest_checkpoints · improve_block.
+ * Modes: draft_lesson · knowledge_check · suggest_checkpoints · improve_block ·
+ * translate_blocks (staff draft only — learners never see draft translations).
  * Every run is logged to ai_authoring_runs (user_id only — no learner PII).
  */
 import { callGatewayJson, GATEWAY_MODEL } from '../_shared/ai-gateway.ts';
