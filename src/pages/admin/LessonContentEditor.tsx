@@ -192,6 +192,55 @@ export default function LessonContentEditor() {
       };
       return [...prev.slice(0, index + 1), copy, ...prev.slice(index + 1)];
     });
+  /**
+   * Keeps question_bank_usages in step with the saved blocks, so the bank can
+   * show where each question is reused and which copies are outdated.
+   */
+  const syncBankUsages = async () => {
+    const sourced = blocks
+      .map((b) => ({
+        blockId: (b.id ?? b.client_id) as string,
+        payload: b.payload as { bank_id?: string; bank_version?: number },
+      }))
+      .filter((b) => !!b.payload.bank_id);
+    if (!sourced.length) return;
+
+    const { data: existing, error } = await supabase
+      .from('question_bank_usages')
+      .select('id, lesson_block_id, bank_id, bank_version')
+      .in('lesson_block_id', sourced.map((s) => s.blockId));
+    if (error) {
+      console.error('Error reading bank usages:', error);
+      return;
+    }
+
+    const byBlock = new Map(
+      ((existing || []) as { id: string; lesson_block_id: string | null; bank_version: number }[]).map(
+        (row) => [row.lesson_block_id as string, row],
+      ),
+    );
+
+    const inserts = sourced
+      .filter((s) => !byBlock.has(s.blockId))
+      .map((s) => ({
+        bank_id: s.payload.bank_id as string,
+        bank_version: s.payload.bank_version ?? 1,
+        lesson_block_id: s.blockId,
+      }));
+    if (inserts.length) {
+      const { error: insertError } = await supabase.from('question_bank_usages').insert(inserts);
+      if (insertError) console.error('Error recording bank usage:', insertError);
+    }
+
+    for (const s of sourced) {
+      const row = byBlock.get(s.blockId);
+      if (!row) continue;
+      const version = s.payload.bank_version ?? 1;
+      if (row.bank_version === version) continue;
+      await supabase.from('question_bank_usages').update({ bank_version: version }).eq('id', row.id);
+    }
+  };
+
 
   const removeBlock = (index: number) => {
     const target = blocks[index];
