@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRedirectSettings } from '@/hooks/useRedirectSettings';
@@ -26,7 +26,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChevronLeft } from '@/components/icons';
-import { adminNavItems, adminDropdownItems, type NavItem } from '@/config/navigation';
+import { adminNavItems, adminDropdownItems } from '@/config/navigation';
+import { satisfiesRoles } from '@/lib/roles';
+import { initialsFor } from '@/lib/initials';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PortalLayoutProps {
   children: ReactNode;
@@ -61,37 +64,42 @@ export const PortalLayout = ({ children, title, backHref, backLabel }: PortalLay
     navigate(logoutRedirectUrl);
   };
 
-  const userInitials = user?.email?.slice(0, 2).toUpperCase() || 'U';
+  // Same initials everywhere: saved profile name, then the sign-up name, then
+  // the email — identical to DashboardLayout and /profile.
+  const [profileName, setProfileName] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.id) {
+      setProfileName(null);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!cancelled) setProfileName(data?.full_name ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
-  // Filter nav items based on roles. These MUST match the requiredRoles on the
-  // corresponding routes in App.tsx:
-  //  - dashboard / settings        -> admin-level (isAdmin)
-  //  - course builder              -> ops/training management (isOpsTrainingAdmin)
-  //  - training portal             -> trainer-level (isTrainer)
-  //  - staff management            -> admin-level (isAdmin), restricted from ops/trainer
-  //  - integrations                -> super_admin only (restricted)
-  const getVisibleNavItems = (): NavItem[] => {
-    return adminNavItems.filter(item => {
-      switch (item.href) {
-        case '/admin-portal/dashboard':
-          return isAdmin;
-        case '/admin-portal/courses':
-          return isOpsTrainingAdmin;
-        case '/admin-portal/trainer':
-          return isTrainer;
-        case '/admin-portal/staff-management':
-          return isAdmin;
-        case '/admin-portal/integrations':
-          return isSuperAdmin;
-        case '/admin-portal/settings':
-          return isAdmin;
-        default:
-          return isAdmin;
-      }
-    });
-  };
+  const userInitials = initialsFor(
+    profileName,
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name,
+    user?.email
+  );
 
-  const visibleNavItems = getVisibleNavItems();
+  // Navigation is filtered with the SAME check the route guards use
+  // (satisfiesRoles + the requiredRoles declared on each nav item), so a
+  // visible item can never land on Access Denied.
+  const roleFlags = { isSuperAdmin, isAdmin, isOpsTrainingAdmin, isTrainer, isLearner: true };
+  const visibleNavItems = adminNavItems.filter((item) =>
+    satisfiesRoles(roleFlags, item.requiredRoles ?? ['admin'])
+  );
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
