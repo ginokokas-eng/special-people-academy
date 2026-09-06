@@ -132,7 +132,9 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           setQuestions((questionsData || []).map(q => ({
             ...q,
             options: Array.isArray(q.options) ? q.options as string[] : [],
+            question_payload: parsePoolConfig((q as { question_payload?: unknown }).question_payload),
           })));
+
         }
       }
     } catch (error) {
