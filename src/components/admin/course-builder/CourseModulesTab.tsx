@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 import { confirmDialog } from '@/components/ui/confirm-dialog';
+import { StandardPicker } from '@/components/admin/StandardPicker';
 
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -686,6 +687,15 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                     No package attached yet — learners won't see any content until you select one.
                   </p>
                 )}
+              </div>
+            )}
+            {lessonDialog.lesson && (
+              <div className="space-y-2 rounded-lg border p-3">
+                <StandardPicker
+                  target={{ kind: 'lesson', id: lessonDialog.lesson.id }}
+                  label="Standards evidenced"
+                  description="Saved straight away, separately from the lesson details below."
+                />
               </div>
             )}
             <div className="space-y-2 rounded-lg border p-3">
