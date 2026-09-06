@@ -279,12 +279,12 @@ export default function QuestionBank() {
             payload: {
               ...payload,
               question: bank.stem,
-              options: bank.options as never,
+              options: bank.options,
               correct_id: bank.correct_id,
               explanation: bank.explanation ?? '',
               bank_id: bank.id,
               bank_version: bank.version,
-            },
+            } as never,
           })
           .eq('id', usage.lesson_block_id);
         if (error) throw error;
