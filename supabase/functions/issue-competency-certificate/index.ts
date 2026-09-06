@@ -51,19 +51,15 @@ Deno.serve(async (req) => {
 
     const callerId = claimsData.claims.sub as string;
 
-    // Verify caller has sign-off permission
+    // Verify caller may sign off: either platform staff with the sign-off flag,
+    // or an active member of the learner's organisation flagged as an assessor.
     const { data: callerStaff } = await supabaseAdmin
       .from('staff_profiles')
       .select('id, can_sign_off_competency')
       .eq('user_id', callerId)
       .maybeSingle();
 
-    if (!callerStaff?.can_sign_off_competency) {
-      return new Response(JSON.stringify({ error: 'Not authorized to issue competency certificates' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    let mayAssess = callerStaff?.can_sign_off_competency === true;
 
     // Parse request body
     let body: { user_id?: unknown; course_id?: unknown };
@@ -88,6 +84,21 @@ Deno.serve(async (req) => {
     if (!course_id || typeof course_id !== 'string' || !isValidUUID(course_id)) {
       return new Response(JSON.stringify({ error: 'Invalid course_id' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!mayAssess) {
+      const { data: canAssess } = await supabaseAdmin.rpc('can_assess_learner', {
+        _assessor: callerId,
+        _learner: user_id,
+      });
+      mayAssess = canAssess === true;
+    }
+
+    if (!mayAssess) {
+      return new Response(JSON.stringify({ error: 'Not authorized to issue competency certificates' }), {
+        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

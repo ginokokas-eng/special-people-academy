@@ -9,6 +9,8 @@ import {
   Image as ImageIcon,
   ArrowLeftRight,
   GitBranch,
+  PenTool,
+  ClipboardList,
   Rows3,
   RefreshCw,
 } from '@/components/icons';
@@ -36,6 +38,8 @@ const ACTIVITY_META: Partial<
   mcq: { label: 'Knowledge check', Icon: HelpCircle },
   drag_match: { label: 'Matching activity', Icon: ArrowLeftRight },
   scenario: { label: 'Scenario', Icon: GitBranch },
+  reflection: { label: 'Reflective answer', Icon: PenTool },
+  checklist: { label: 'Assessed practical checklist', Icon: ClipboardList },
 };
 
 export function ActivityShell({

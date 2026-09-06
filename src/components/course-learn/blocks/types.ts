@@ -20,6 +20,7 @@ export const BLOCK_TYPES = [
   'drag_match',
   'checklist',
   'scenario',
+  'reflection',
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
@@ -272,7 +273,11 @@ export interface FlipCardsPayload extends LayoutAware {
 }
 
 
-/** Read-only practical checklist. Learners cannot tick it; no sign-off link. */
+/**
+ * Practical checklist. In `reference` mode (the default, and how every existing
+ * checklist behaves) it is read-only study material. In `assessed` mode an
+ * assessor ticks the steps off in person and signs the observation.
+ */
 export interface ChecklistStep {
   id: string;
   step_title: string;
@@ -280,11 +285,66 @@ export interface ChecklistStep {
   safety_note?: string;
 }
 
+export type ChecklistMode = 'reference' | 'assessed';
+
 export interface ChecklistPayload extends VisibilityAware {
   heading?: string;
   caption?: string;
+  /** Absent = 'reference', so existing blocks keep their behaviour. */
+  mode?: ChecklistMode;
   steps: ChecklistStep[];
 }
+
+/** Effective checklist mode. */
+export function checklistMode(payload?: BlockPayload | null): ChecklistMode {
+  return (payload as ChecklistPayload | undefined)?.mode === 'assessed'
+    ? 'assessed'
+    : 'reference';
+}
+
+/* -------------------------------- reflection ------------------------------- */
+
+/**
+ * A written reflective answer. The learner's words are saved to
+ * `lesson_block_responses`; an assessor's mark is a separate `block_marks` row,
+ * so a learner can never mark their own work.
+ */
+export interface ReflectionPayload extends VisibilityAware {
+  heading?: string;
+  prompt: string;
+  guidance?: string;
+  /** Minimum words before Submit is offered. 0 = no minimum. */
+  min_words?: number;
+  /** What the assessor looks for. Shown to learners as "what good looks like". */
+  criteria?: string[];
+}
+
+/** Learner-side stored shape for a reflection answer. */
+export interface ReflectionResponse {
+  kind: 'reflection';
+  version: 1;
+  text: string;
+  submitted_at?: string;
+}
+
+/** Word count used for the minimum-length gate. */
+export function countWords(text: string): number {
+  return (text || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** Author-facing problems with a reflection. Empty array = publishable. */
+export function validateReflection(payload?: ReflectionPayload | null): string[] {
+  const issues: string[] = [];
+  if (!payload) return issues;
+  if (!payload.prompt?.trim()) issues.push('Add the question learners answer.');
+  const min = payload.min_words ?? 0;
+  if (!Number.isFinite(min) || min < 0 || min > 500)
+    issues.push('A minimum word count must be between 0 and 500.');
+  if ((payload.criteria ?? []).some((c) => !c?.trim()))
+    issues.push('Every “what good looks like” line needs wording.');
+  return issues;
+}
+
 
 /* ----------------------------- branching scenario -------------------------- */
 
@@ -336,7 +396,8 @@ export type BlockPayload =
   | DragMatchPayload
   | FlipCardsPayload
   | ChecklistPayload
-  | ScenarioPayload;
+  | ScenarioPayload
+  | ReflectionPayload;
 
 
 
@@ -379,6 +440,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   drag_match: 'Matching activity',
   checklist: 'Practical checklist',
   scenario: 'Scenario',
+  reflection: 'Reflective answer',
 };
 
 export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
@@ -393,8 +455,9 @@ export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
   hot_graphic: 'An image with labelled points learners tap to explore.',
   mcq: 'A single multiple-choice question with instant feedback.',
   drag_match: 'Learners match items to the right group. Drag, tap or keyboard.',
-  checklist: 'Read-only practical steps learners can study before assessment.',
+  checklist: 'Practical steps to study, or steps an assessor ticks off in person.',
   scenario: 'Branching decision story with consequences.',
+  reflection: 'Learners write an answer in their own words for an assessor to read.',
 };
 
 
@@ -472,8 +535,17 @@ export function defaultPayload(type: BlockType): BlockPayload {
       return {
         heading: '',
         caption: 'Your assessor completes the real sign-off in person.',
+        mode: 'reference',
         steps: [{ id: crypto.randomUUID(), step_title: '', instruction: '', safety_note: '' }],
       } satisfies ChecklistPayload;
+    case 'reflection':
+      return {
+        heading: '',
+        prompt: '',
+        guidance: 'Write in your own words. Two or three short paragraphs is plenty.',
+        min_words: 30,
+        criteria: [],
+      } satisfies ReflectionPayload;
     case 'scenario':
       return defaultScenarioPayload();
   }
@@ -534,8 +606,14 @@ export function defaultScenarioPayload(): ScenarioPayload {
   };
 }
 
-/** Blocks that need a learner interaction before the lesson can be completed. */
-export function isInteractive(type: BlockType): boolean {
+/**
+ * Blocks that need a learner interaction before the lesson can be completed.
+ * Payload-aware: a practical checklist only asks something of the learner when
+ * it is in `assessed` mode (they confirm they are ready to be observed).
+ */
+export function isInteractive(type: BlockType, payload?: BlockPayload): boolean {
+  if (type === 'reflection') return true;
+  if (type === 'checklist') return checklistMode(payload) === 'assessed';
   return (
     type === 'card_deck' ||
     type === 'flip_cards' ||
@@ -552,8 +630,8 @@ export function isInteractive(type: BlockType): boolean {
 /**
  * Whether the completion switch starts ON for a newly added block.
  * Card decks, knowledge checks, matching activities, story carousels, labelled
- * images and scenarios default ON; video, accordion, flip cards and the
- * practical checklist default OFF.
+ * images, scenarios and reflective answers default ON; video, accordion, flip
+ * cards and the practical checklist default OFF.
  */
 export function defaultContributesToCompletion(type: BlockType): boolean {
   return (
@@ -562,17 +640,21 @@ export function defaultContributesToCompletion(type: BlockType): boolean {
     type === 'drag_match' ||
     type === 'carousel' ||
     type === 'hot_graphic' ||
-    type === 'scenario'
+    type === 'scenario' ||
+    type === 'reflection'
   );
 }
 
 
 /**
  * Blocks whose learner answers are persisted to lesson_block_responses.
- * Payload-aware: a video block only persists once it carries checkpoints.
+ * Payload-aware: a video block only persists once it carries checkpoints, and a
+ * checklist only when it is assessed.
  */
 export function persistsResponse(type: BlockType, payload?: BlockPayload): boolean {
   if (type === 'mcq' || type === 'drag_match' || type === 'scenario') return true;
+  if (type === 'reflection') return true;
+  if (type === 'checklist') return checklistMode(payload) === 'assessed';
   if (type === 'video') return videoCheckpoints(payload as VideoPayload | undefined).length > 0;
   return false;
 }

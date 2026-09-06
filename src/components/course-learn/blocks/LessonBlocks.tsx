@@ -20,6 +20,7 @@ import { BlockChecklist } from './BlockChecklist';
 import { BlockCarousel } from './BlockCarousel';
 import { BlockHotGraphic } from './BlockHotGraphic';
 import { BlockScenario } from './BlockScenario';
+import { BlockReflection } from './BlockReflection';
 import { SignedImage } from './SignedImage';
 import { ActivityShell } from './ActivityShell';
 
@@ -43,6 +44,7 @@ import {
   type ImagePayload,
   type LessonBlock,
   type McqPayload,
+  type ReflectionPayload,
   type ScenarioPayload,
   type TextPayload,
   type VisibilityWhen,
@@ -340,6 +342,8 @@ const GATE_LABELS: Partial<Record<LessonBlock['block_type'], string>> = {
   mcq: 'knowledge check',
   drag_match: 'matching activity',
   scenario: 'scenario',
+  reflection: 'reflective answer',
+  checklist: 'practical checklist',
 };
 
 /**
@@ -414,7 +418,7 @@ export function LessonBlocks({
   }, [preview, blocks, visibleIds]);
 
   const interactiveRequired = visibleBlocks.filter(
-    (b) => b.contributes_to_completion && isInteractive(b.block_type)
+    (b) => b.contributes_to_completion && isInteractive(b.block_type, b.payload)
   );
   const allSatisfied = interactiveRequired.every((b) => deckState[b.id]);
   const pendingTypes = new Set(
@@ -443,6 +447,8 @@ export function LessonBlocks({
   if (pendingTypes.has('mcq')) reasons.push('answer the knowledge check');
   if (pendingTypes.has('drag_match')) reasons.push('complete the matching activity');
   if (pendingTypes.has('scenario')) reasons.push('work through the scenario to an ending');
+  if (pendingTypes.has('reflection')) reasons.push('write and send your reflection');
+  if (pendingTypes.has('checklist')) reasons.push('tell your assessor you’re ready');
   const disabledReason = reasons.length
     ? `Please ${reasons.join(', ')} above to finish this lesson.`
     : '';
@@ -477,7 +483,7 @@ export function LessonBlocks({
     if (!trickleEnabled || completed || revealAll) return -1;
     for (let r = 0; r < rows.length; r += 1) {
       const gate = rows[r].find(
-        (b) => b.contributes_to_completion && isInteractive(b.block_type) && !deckState[b.id]
+        (b) => b.contributes_to_completion && isInteractive(b.block_type, b.payload) && !deckState[b.id]
       );
       if (gate) return r + 1;
     }
@@ -511,7 +517,7 @@ export function LessonBlocks({
     if (veilFromRow < 1) return null;
     return (
       rows[veilFromRow - 1].find(
-        (b) => b.contributes_to_completion && isInteractive(b.block_type) && !deckState[b.id]
+        (b) => b.contributes_to_completion && isInteractive(b.block_type, b.payload) && !deckState[b.id]
       ) ?? null
     );
   }, [veilFromRow, rows, deckState]);
@@ -526,7 +532,7 @@ export function LessonBlocks({
     const reachable = rows
       .slice(0, lastRow)
       .flat()
-      .filter((b) => b.contributes_to_completion && isInteractive(b.block_type));
+      .filter((b) => b.contributes_to_completion && isInteractive(b.block_type, b.payload));
     return {
       total: reachable.length,
       done: reachable.filter((b) => deckState[b.id]).length,
@@ -627,7 +633,22 @@ export function LessonBlocks({
         />
       )}
       {block.block_type === 'checklist' && (
-        <BlockChecklist payload={block.payload as ChecklistPayload} />
+        <BlockChecklist
+          payload={block.payload as ChecklistPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          preview={preview}
+          onReady={(done) => setSignal(block.id, done)}
+        />
+      )}
+      {block.block_type === 'reflection' && (
+        <BlockReflection
+          payload={block.payload as ReflectionPayload}
+          blockId={block.id}
+          lessonId={block.lesson_id}
+          preview={preview}
+          onSubmitted={(done) => setSignal(block.id, done)}
+        />
       )}
     </>
   );
@@ -637,7 +658,7 @@ export function LessonBlocks({
    * accent + chip shell. Read-only blocks stay quiet.
    */
   const renderBlock = (block: LessonBlock) => {
-    const gating = block.contributes_to_completion && isInteractive(block.block_type);
+    const gating = block.contributes_to_completion && isInteractive(block.block_type, block.payload);
     const body = gating ? (
       <ActivityShell blockType={block.block_type} done={!!deckState[block.id]}>
         {renderBlockBody(block)}
@@ -716,7 +737,7 @@ export function LessonBlocks({
           const accentBlocks = row.filter(
             (b) =>
               b.contributes_to_completion &&
-              isInteractive(b.block_type) &&
+              isInteractive(b.block_type, b.payload) &&
               b.block_type !== 'carousel'
           );
           const accentDone = accentBlocks.every((b) => !!deckState[b.id]);

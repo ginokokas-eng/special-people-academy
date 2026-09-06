@@ -26,7 +26,9 @@ import {
   type ImagePayload,
   type LayoutAware,
   type McqPayload,
+  type ReflectionPayload,
   type ScenarioPayload,
+
   type TextPayload,
   type VisibilityAware,
   type VideoPayload,
@@ -48,6 +50,7 @@ import {
 } from './forms/BlockForms';
 import { CarouselBlockForm, HotGraphicBlockForm } from './forms/RichBlockForms';
 import { ScenarioForm } from './forms/ScenarioForm';
+import { ReflectionForm } from './forms/ReflectionForm';
 import {
   ChecklistBlockForm,
   DragMatchBlockForm,
@@ -276,6 +279,13 @@ export function BlockList({
                 idPrefix={idPrefix}
               />
             )}
+            {block.block_type === 'reflection' && (
+              <ReflectionForm
+                payload={block.payload as ReflectionPayload}
+                onChange={setPayload}
+                idPrefix={idPrefix}
+              />
+            )}
 
             {allowsHalfWidth(block.block_type) && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
@@ -378,7 +388,7 @@ export function BlockList({
               );
             })()}
 
-            {isInteractive(block.block_type) && (
+            {isInteractive(block.block_type, block.payload) && (
               <div className="mt-3 flex items-center gap-2 border-t pt-3">
                 <Switch
                   id={`${idPrefix}-contributes`}

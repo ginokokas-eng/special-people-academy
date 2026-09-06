@@ -20,6 +20,8 @@ import {
   type MatrixState,
 } from '@/components/org/PortalBits';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { MarkingQueue } from '@/components/marking/MarkingQueue';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -121,6 +123,9 @@ export default function OrgPortal() {
   const [peopleFilter, setPeopleFilter] = useState('');
   const [matrixFilter, setMatrixFilter] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  /** user_id -> can this member assess practical work and reflections? */
+  const [assessors, setAssessors] = useState<Record<string, boolean>>({});
+  const [savingAssessor, setSavingAssessor] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!organisation) return;
@@ -138,12 +143,43 @@ export default function OrgPortal() {
       supabase.rpc('get_org_certificates', { _org: organisation.id }),
     ]);
 
+    const { data: memberRows } = await supabase
+      .from('organisation_members')
+      .select('user_id, can_assess')
+      .eq('organisation_id', organisation.id)
+      .is('ended_at', null);
+    setAssessors(
+      Object.fromEntries(
+        (memberRows ?? []).map((m) => [m.user_id as string, m.can_assess === true])
+      )
+    );
+
     setPeople((peopleRes.data ?? []) as OrgPerson[]);
     setInvitations((inviteRes.data ?? []) as PendingInvitation[]);
     setMatrix((matrixRes.data ?? []) as unknown as MatrixRow[]);
     setCertificates((certRes.data ?? []) as unknown as OrgCertificate[]);
     setLoading(false);
   }, [organisation]);
+
+  /** Only members explicitly flagged as assessors see the marking tab. */
+  const canAssess = !!user?.id && assessors[user.id] === true;
+
+  const toggleAssessor = async (userId: string, next: boolean) => {
+    if (!organisation) return;
+    setSavingAssessor(userId);
+    const { error } = await supabase.rpc('set_member_can_assess', {
+      _org: organisation.id,
+      _user: userId,
+      _can: next,
+    });
+    setSavingAssessor(null);
+    if (error) {
+      toast.error(error.message || 'Could not change that.');
+      return;
+    }
+    setAssessors((prev) => ({ ...prev, [userId]: next }));
+    toast.success(next ? 'They can now assess.' : 'They can no longer assess.');
+  };
 
   useEffect(() => {
     if (authLoading || orgLoading) return;
@@ -540,6 +576,7 @@ export default function OrgPortal() {
               { value: 'licences', label: 'Licences' },
               { value: 'certificates', label: 'Certificates' },
               { value: 'insights', label: 'Insights' },
+              ...(canAssess ? [{ value: 'assess', label: 'Marking' }] : []),
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -594,13 +631,14 @@ export default function OrgPortal() {
                         <TableHead className={thClass}>Name</TableHead>
                         <TableHead className={cn(thClass, 'hidden w-48 md:table-cell')}>Role</TableHead>
                         <TableHead className={cn(thClass, 'hidden w-36 sm:table-cell')}>Status</TableHead>
+                        <TableHead className={cn(thClass, 'hidden w-32 lg:table-cell')}>Can assess</TableHead>
                         <TableHead className={cn(thClass, 'w-32 text-right')}>Joined</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredPeople.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
+                          <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
                             No one matches “{peopleFilter}”.
                           </TableCell>
                         </TableRow>
@@ -635,6 +673,18 @@ export default function OrgPortal() {
                                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" aria-hidden="true" />
                                 Active
                               </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            {p.ended_at ? (
+                              <span className="text-sm text-muted-foreground">—</span>
+                            ) : (
+                              <Switch
+                                checked={assessors[p.user_id] === true}
+                                disabled={savingAssessor === p.user_id}
+                                aria-label={`Let ${p.full_name ?? p.email ?? 'this person'} assess practical work`}
+                                onCheckedChange={(v) => void toggleAssessor(p.user_id, v)}
+                              />
                             )}
                           </TableCell>
                           <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
@@ -960,6 +1010,15 @@ export default function OrgPortal() {
           </TabsContent>
 
           {/* ---------------- Insights ---------------- */}
+          <TabsContent value="assess" className="settle-in mt-6">
+            <SectionCard
+              title="Work waiting to be marked"
+              description="Written reflections and practical checklists from your team."
+            >
+              <MarkingQueue organisationId={organisation.id} />
+            </SectionCard>
+          </TabsContent>
+
           <TabsContent value="insights" className="settle-in mt-6">
             <OrgLessonInsights organisationId={organisation.id} licences={licences} />
           </TabsContent>

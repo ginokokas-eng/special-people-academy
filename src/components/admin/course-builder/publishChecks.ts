@@ -14,6 +14,8 @@ import {
   type HotGraphicPayload,
   type VideoPayload,
   validateScenario,
+  validateReflection,
+  type ReflectionPayload,
   validateVisibility,
   type BlockPayload,
   type BlockType,
@@ -279,6 +281,22 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     label: 'Conditional blocks point at a real activity',
     passed: badVisibility.length === 0,
     detail: `A block set to “show only if…” must follow the activity it waits on, and that activity must be one learners take part in. Please check: ${names(badVisibility)}.`,
+    tab: 'Modules & Lessons → Edit content',
+  });
+
+  // Reflective answers need a question before anyone can answer them.
+  const badReflectionLessons = new Set<string>();
+  for (const row of blockRows) {
+    if (row.block_type !== 'reflection') continue;
+    if (validateReflection((row.payload || {}) as ReflectionPayload).length > 0)
+      badReflectionLessons.add(row.lesson_id);
+  }
+  const badReflections = [...badReflectionLessons].map(lessonTitle);
+  checks.push({
+    id: 'reflection',
+    label: 'Reflective answers are ready',
+    passed: badReflections.length === 0,
+    detail: `A reflective answer needs the question learners write about, and a sensible minimum word count. Please check: ${names(badReflections)}.`,
     tab: 'Modules & Lessons → Edit content',
   });
 

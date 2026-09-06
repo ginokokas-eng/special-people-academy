@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowDown, ArrowUp, Library, Plus, Trash2 } from '@/components/icons';
+import { checklistMode } from '@/components/course-learn/blocks/types';
 import type {
   ChecklistPayload,
   DragMatchPayload,
@@ -611,6 +612,32 @@ export function ChecklistBlockForm({ payload, onChange, idPrefix }: FormProps<Ch
           />
         </div>
       </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-mode`}>How is this checklist used?</Label>
+        <Select
+          value={checklistMode(payload)}
+          onValueChange={(value) =>
+            onChange({ ...payload, mode: value as 'reference' | 'assessed' })
+          }
+        >
+          <SelectTrigger id={`${idPrefix}-mode`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="reference">Something to read and study</SelectItem>
+            <SelectItem value="assessed">
+              An assessor ticks these off with the learner in person
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Assessed checklists let the learner say they are ready, and the assessor signs the
+          observation afterwards.
+        </p>
+      </div>
+
+
 
       <div className="space-y-3">
         {steps.map((step, i) => (
