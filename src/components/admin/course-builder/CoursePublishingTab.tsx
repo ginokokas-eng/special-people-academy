@@ -41,6 +41,9 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
   const [saving, setSaving] = useState(false);
   const [checks, setChecks] = useState<PublishCheck[]>([]);
   const [checking, setChecking] = useState(true);
+  const [versions, setVersions] = useState<CourseVersion[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [openSnapshot, setOpenSnapshot] = useState<CourseVersion | null>(null);
 
   const isClinicalCourse = CLINICAL_CATEGORIES.includes(course.category);
   const isMarina = userEmail.toLowerCase() === 'marina@specialpeople.org.uk';
@@ -65,9 +68,41 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
     }
   }, [course.id]);
 
+  /** Published snapshots, newest first (staff-only audit trail). */
+  const loadVersions = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('course_versions')
+      .select('id, version, published_at, published_by, snapshot')
+      .eq('course_id', course.id)
+      .order('version', { ascending: false });
+    if (error) {
+      console.error('Error loading course versions:', error);
+      return;
+    }
+    const rows = (data || []) as unknown as CourseVersion[];
+    setVersions(rows);
+    const ids = [...new Set(rows.map((r) => r.published_by).filter(Boolean))] as string[];
+    if (ids.length) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', ids);
+      setNames(
+        Object.fromEntries(
+          (profiles || []).map((p) => [p.user_id as string, (p.full_name as string) || 'Unknown'])
+        )
+      );
+    }
+  }, [course.id]);
+
   useEffect(() => {
     void runChecks();
   }, [runChecks]);
+
+  useEffect(() => {
+    void loadVersions();
+  }, [loadVersions]);
+
 
 
   const handleStatusChange = async (newStatus: string) => {
