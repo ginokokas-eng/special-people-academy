@@ -7,6 +7,7 @@ import {
   PenTool,
   ClipboardList,
   HelpCircle,
+  ClipboardCheck,
 
   Ticket,
   Users,
@@ -35,6 +36,7 @@ export const adminNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin-portal/dashboard', icon: LayoutDashboard },
   { label: 'Courses', href: '/admin-portal/courses', icon: PenTool },
   { label: 'Question bank', href: '/admin-portal/question-bank', icon: HelpCircle },
+  { label: 'Standards', href: '/admin-portal/standards', icon: ClipboardCheck },
 
   { label: 'Training', href: '/admin-portal/trainer', icon: ClipboardList },
   { label: 'Learners', href: '/admin-portal/learners', icon: GraduationCap },

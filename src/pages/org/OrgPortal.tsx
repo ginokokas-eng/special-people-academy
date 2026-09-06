@@ -8,6 +8,7 @@ import { useOrgLicences, type OrgLicence } from '@/components/org/useOrgLicences
 import { BulkInviteForm } from '@/components/org/BulkInviteForm';
 import { PortalShell } from '@/components/org/PortalShell';
 import { OrgLessonInsights } from '@/components/org/OrgLessonInsights';
+import { OrgStandards } from '@/components/org/OrgStandards';
 import {
   ComplianceDot,
   EmptyState,
@@ -577,6 +578,7 @@ export default function OrgPortal() {
               { value: 'licences', label: 'Licences' },
               { value: 'certificates', label: 'Certificates' },
               { value: 'insights', label: 'Insights' },
+              { value: 'standards', label: 'Standards' },
               ...(canAssess ? [{ value: 'assess', label: 'Marking' }] : []),
             ].map((tab) => (
               <TabsTrigger
@@ -1026,6 +1028,10 @@ export default function OrgPortal() {
 
           <TabsContent value="insights" className="settle-in mt-6">
             <OrgLessonInsights organisationId={organisation.id} licences={licences} />
+          </TabsContent>
+
+          <TabsContent value="standards" className="settle-in mt-6">
+            <OrgStandards organisationId={organisation.id} />
           </TabsContent>
         </Tabs>
       </div>
