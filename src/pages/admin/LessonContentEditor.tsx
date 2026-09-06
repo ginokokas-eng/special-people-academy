@@ -65,14 +65,20 @@ export default function LessonContentEditor() {
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
   const [bankPickerOpen, setBankPickerOpen] = useState(false);
+  const [coursePublished, setCoursePublished] = useState(false);
 
-
+  // Save-time change context (Part H): what the author declares about this save.
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [material, setMaterial] = useState(false);
+  const [note, setNote] = useState('');
 
   // Guards against re-initialising block state (auth/token-refresh renders must
   // never wipe unsaved work).
   const initialisedLessonIdRef = useRef<string | null>(null);
   const dirtyRef = useRef(false);
   dirtyRef.current = dirty;
+  /** Last saved (or loaded) blocks — the "before" side of the material check. */
+  const savedBlocksRef = useRef<BlockDraft[]>([]);
 
   const load = useCallback(async (force = false) => {
     if (!lessonId) return;
@@ -90,15 +96,16 @@ export default function LessonContentEditor() {
       if (lessonRes.error) throw lessonRes.error;
       if (blocksRes.error) throw blocksRes.error;
       setLesson(lessonRes.data ?? null);
-      setBlocks(
-        (blocksRes.data || []).map((row) => ({
-          id: row.id,
-          client_id: row.id,
-          block_type: row.block_type as BlockType,
-          payload: (row.payload ?? {}) as unknown as BlockPayload,
-          contributes_to_completion: row.contributes_to_completion,
-        }))
-      );
+      const loaded: BlockDraft[] = (blocksRes.data || []).map((row) => ({
+        id: row.id,
+        client_id: row.id,
+        block_type: row.block_type as BlockType,
+        payload: (row.payload ?? {}) as unknown as BlockPayload,
+        contributes_to_completion: row.contributes_to_completion,
+      }));
+      setBlocks(loaded);
+      savedBlocksRef.current = JSON.parse(JSON.stringify(loaded)) as BlockDraft[];
+
       setRemovedIds([]);
       setDirty(false);
     } catch (error) {
