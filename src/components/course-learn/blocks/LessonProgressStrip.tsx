@@ -1,11 +1,17 @@
 import { CheckCircle2 } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { ListenButton } from './ListenButton';
 
 interface Props {
   /** Required activities the learner has already satisfied. */
   done: number;
   /** Required activities currently available to the learner (trickle-aware). */
   total: number;
+  /**
+   * Visible text of the lesson's blocks, in reading order, for read-aloud.
+   * Hidden when the browser cannot speak.
+   */
+  readAloud?: string[];
 }
 
 /**
@@ -17,7 +23,7 @@ interface Props {
  * scroll container, so `sticky top-0` never overlaps them). The fill animates
  * only under `motion-safe`.
  */
-export function LessonProgressStrip({ done, total }: Props) {
+export function LessonProgressStrip({ done, total, readAloud }: Props) {
   if (total <= 0) return null;
   const percent = Math.round((Math.min(done, total) / total) * 100);
   const complete = done >= total;
@@ -62,6 +68,13 @@ export function LessonProgressStrip({ done, total }: Props) {
             </>
           )}
         </p>
+        {!!readAloud?.length && (
+          <ListenButton
+            passages={readAloud}
+            label="Read this lesson"
+            className="shrink-0 text-muted-foreground"
+          />
+        )}
       </div>
     </div>
   );
