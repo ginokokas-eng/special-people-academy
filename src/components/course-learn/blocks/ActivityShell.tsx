@@ -15,6 +15,7 @@ import {
   RefreshCw,
 } from '@/components/icons';
 import type { LessonBlock } from './types';
+import { ListenButton } from './ListenButton';
 
 /**
  * P8 "read vs do" visual grammar.
