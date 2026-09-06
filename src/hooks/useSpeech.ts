@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { speechLangTag } from '@/lib/translation';
 
 /**
  * Read-aloud, using the browser's own speech synthesis.
@@ -28,14 +29,19 @@ function synth(): SpeechSynthesis | null {
   return window.speechSynthesis ?? null;
 }
 
-function pickVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+function pickVoice(voices: SpeechSynthesisVoice[], tag: string): SpeechSynthesisVoice | null {
   if (!voices.length) return null;
+  const wanted = tag.toLowerCase();
+  const base = wanted.split('-')[0];
   return (
+    voices.find((v) => v.lang?.toLowerCase().replace('_', '-') === wanted) ??
+    voices.find((v) => v.lang?.toLowerCase().startsWith(base)) ??
     voices.find((v) => v.lang?.toLowerCase() === 'en-gb') ??
     voices.find((v) => v.lang?.toLowerCase().startsWith('en')) ??
     null
   );
 }
+
 
 export function useSpeech(): SpeechController {
   const supported = !!synth();
@@ -48,7 +54,7 @@ export function useSpeech(): SpeechController {
     const s = synth();
     if (!s) return;
     const load = () => {
-      voiceRef.current = pickVoice(s.getVoices());
+      voiceRef.current = pickVoice(s.getVoices(), speechLangTag());
     };
     load();
     s.addEventListener?.('voiceschanged', load);
@@ -75,9 +81,12 @@ export function useSpeech(): SpeechController {
       s.cancel();
       setPaused(false);
       setSpeaking(true);
+      // Re-picked at speak time so a language toggle takes effect immediately.
+      const tag = speechLangTag();
+      voiceRef.current = pickVoice(s.getVoices(), tag);
       usable.forEach((text, index) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = voiceRef.current?.lang || 'en-GB';
+        utterance.lang = voiceRef.current?.lang || tag;
         if (voiceRef.current) utterance.voice = voiceRef.current;
         utterance.rate = 1;
         if (index === usable.length - 1) {

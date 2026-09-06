@@ -5,7 +5,8 @@
  * lesson content: it returns id-free drafts that the author accepts (or edits,
  * or rejects) in the editor, and only the editor's own Save writes blocks.
  *
- * Modes: draft_lesson · knowledge_check · suggest_checkpoints · improve_block.
+ * Modes: draft_lesson · knowledge_check · suggest_checkpoints · improve_block ·
+ * translate_blocks (staff draft only — learners never see draft translations).
  * Every run is logged to ai_authoring_runs (user_id only — no learner PII).
  */
 import { callGatewayJson, GATEWAY_MODEL } from '../_shared/ai-gateway.ts';
@@ -15,8 +16,17 @@ const MAX_TEXT_CHARS = 40_000;
 const MAX_INSTRUCTION_CHARS = 300;
 const DAILY_RUN_CEILING = 60;
 
-type Mode = 'draft_lesson' | 'knowledge_check' | 'suggest_checkpoints' | 'improve_block';
-const MODES: Mode[] = ['draft_lesson', 'knowledge_check', 'suggest_checkpoints', 'improve_block'];
+type Mode = 'draft_lesson' | 'knowledge_check' | 'suggest_checkpoints' | 'improve_block' | 'translate_blocks';
+const MODES: Mode[] = [
+  'draft_lesson',
+  'knowledge_check',
+  'suggest_checkpoints',
+  'improve_block',
+  'translate_blocks',
+];
+
+/** v1 ships Romanian only. Adding a language is a constant change here. */
+const TRANSLATION_LANGS: Record<string, string> = { ro: 'Romanian (Română)' };
 
 const DRAFT_BLOCK_TYPES = ['text', 'callout', 'flip_cards', 'accordion', 'mcq', 'scenario'] as const;
 
@@ -151,6 +161,40 @@ const checkpointsSchema = {
   required: ['checkpoints'],
 };
 
+/**
+ * Translation reply. Paths are sent as ENTRIES, not as a free-form object, so a
+ * strict schema can describe them. The client owns the path map, so the model
+ * only ever echoes back the paths it was given.
+ */
+const translationSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    blocks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          block_id: { type: 'string' },
+          texts: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              properties: { path: { type: 'string' }, text: { type: 'string' } },
+              required: ['path', 'text'],
+            },
+          },
+        },
+        required: ['block_id', 'texts'],
+      },
+    },
+  },
+  required: ['blocks'],
+};
+
+
 /* -------------------------------- validators ------------------------------- */
 
 type Rec = Record<string, unknown>;
@@ -259,6 +303,45 @@ function validateCheckpointsReply(data: unknown, starts: number[]): string[] {
   });
   return errs;
 }
+
+/**
+ * The reply must cover the blocks and paths that were ASKED FOR — nothing else.
+ * Unknown block ids or paths are a schema failure, not something to guess at.
+ */
+function validateTranslationReply(data: unknown, wanted: Map<string, Set<string>>): string[] {
+  if (!data || typeof data !== 'object') return ['reply is not an object'];
+  const blocks = (data as Rec).blocks;
+  if (!Array.isArray(blocks) || !blocks.length) return ['reply.blocks must be a non-empty array'];
+  const errs: string[] = [];
+  const seen = new Set<string>();
+  for (const entry of blocks as Rec[]) {
+    const id = String(entry.block_id ?? '');
+    const paths = wanted.get(id);
+    if (!paths) {
+      errs.push(`block_id "${id}" was not in the request`);
+      continue;
+    }
+    seen.add(id);
+    const texts = Array.isArray(entry.texts) ? (entry.texts as Rec[]) : [];
+    const got = new Set<string>();
+    for (const t of texts) {
+      const path = String(t.path ?? '');
+      if (!paths.has(path)) {
+        errs.push(`block "${id}" returned unknown path "${path}"`);
+        continue;
+      }
+      if (!String(t.text ?? '').trim()) errs.push(`block "${id}" path "${path}" is empty`);
+      got.add(path);
+    }
+    for (const path of paths) {
+      if (!got.has(path)) errs.push(`block "${id}" is missing path "${path}"`);
+    }
+  }
+  for (const id of wanted.keys()) if (!seen.has(id)) errs.push(`block "${id}" is missing`);
+  return errs;
+}
+
+
 
 /* --------------------------------- prompts -------------------------------- */
 
@@ -388,7 +471,39 @@ Deno.serve(async (req) => {
       system += ` Suggest exactly ${count} in-video checkpoint questions, spread across the video. Each at_s MUST be copied exactly from one of the segment start times given, and the question must be answerable from what the learner has heard BEFORE that time.`;
       user = `Transcript segments:\n${serialised}`;
       validate = (d) => validateCheckpointsReply(d, starts);
+    } else if (mode === 'translate_blocks') {
+      const lang = String(input.lang ?? body.lang ?? '');
+      const langName = TRANSLATION_LANGS[lang];
+      if (!langName) return json({ error: 'That language is not available yet.' }, 400);
+      const list = Array.isArray(input.blocks) ? (input.blocks as Rec[]) : [];
+      // The CLIENT extracts the texts using translatablePaths, so this function
+      // never guesses which fields of a block hold readable content.
+      const payload: { block_id: string; block_type: string; texts: Rec }[] = [];
+      const wanted = new Map<string, Set<string>>();
+      for (const entry of list) {
+        const id = String(entry.block_id ?? '');
+        const texts = (entry.texts ?? {}) as Rec;
+        const paths = Object.keys(texts).filter((p) => String(texts[p] ?? '').trim());
+        if (!id || !paths.length) continue;
+        wanted.set(id, new Set(paths));
+        payload.push({
+          block_id: id,
+          block_type: String(entry.block_type ?? ''),
+          texts: Object.fromEntries(paths.map((p) => [p, String(texts[p])])),
+        });
+      }
+      if (!wanted.size) return json({ error: 'There is no text to translate here.' }, 400);
+      const serialised = JSON.stringify(payload);
+      if (serialised.length > MAX_TEXT_CHARS)
+        return json({ error: 'Too much text at once. Translate this lesson in parts.' }, 400);
+      inputChars = serialised.length;
+      schema = translationSchema;
+      schemaName = 'block_translations';
+      system = `You are a professional translator for UK social care training. Translate the given strings from British English into ${langName}. Plain, respectful register a care worker would use at work; do not paraphrase, summarise, add or remove content. Keep numbers, units, times, dates, medication names, brand names, proper nouns, job titles of named systems and abbreviations exactly as they are. Keep every placeholder, bullet marker such as "-", and line break in the same place. Never translate the paths, the block ids or any JSON key. Return every block and every path you were given, once each. Return ONLY JSON matching the schema.`;
+      user = `Target language: ${langName}\n\nBlocks to translate:\n${serialised}`;
+      validate = (d) => validateTranslationReply(d, wanted);
     } else {
+
       const blockType = String(input.block_type ?? '');
       const instruction = String(input.instruction ?? '').trim();
       if (!blockType) return json({ error: 'Missing block_type' }, 400);
@@ -433,9 +548,21 @@ Deno.serve(async (req) => {
         if (!errors.length) {
           const out = JSON.stringify(result.data);
           await logRun('ok', out.length);
+          // Translation replies come back as path/text entries; hand the client
+          // the { path: translated } map it will store as overrides.
+          if (mode === 'translate_blocks') {
+            const blocks = ((result.data as Rec).blocks as Rec[]).map((entry) => ({
+              block_id: String(entry.block_id),
+              texts: Object.fromEntries(
+                (entry.texts as Rec[]).map((t) => [String(t.path), String(t.text)])
+              ),
+            }));
+            return json({ blocks }, 200);
+          }
           return json(result.data as Rec, 200);
         }
         lastErrors = errors;
+
       }
       userMessage = `${user}\n\nYour previous reply was rejected for these reasons. Fix them all and return valid JSON only:\n- ${lastErrors.slice(0, 8).join('\n- ')}`;
     }

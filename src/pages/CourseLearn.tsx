@@ -53,6 +53,14 @@ import type { BlockPayload, BlockType, LessonBlock } from '@/components/course-l
 import { ContentInfoDialog } from '@/components/course-learn/ContentInfoDialog';
 import { ReportProblemDialog } from '@/components/course-learn/ReportProblemDialog';
 import { useLearnerPrefs } from '@/components/course-learn/useLearnerPrefs';
+import {
+  TRANSLATION_LANGUAGES,
+  languageByCode,
+  mergeTranslation,
+  setStoredLang,
+  storedLang,
+} from '@/lib/translation';
+import { translatablePaths } from '@/components/course-learn/blocks/types';
 import { postLmsMessage, startLmsHeartbeat, syncLmsModeFromUrl } from '@/lib/lmsBridge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { lessonTypeLabel } from '@/components/course-learn/lessonMeta';
@@ -119,6 +127,10 @@ export default function CourseLearn() {
   const scormFrameWrapRef = useRef<HTMLDivElement>(null);
   const scormIframeRef = useRef<HTMLIFrameElement>(null);
   const [scormFullscreen, setScormFullscreen] = useState(false);
+  /** Chosen lesson language (null = English). Device choice, profile fallback. */
+  const [lang, setLang] = useState<string | null>(() => storedLang());
+  /** Reviewed translations for the active lesson: block id -> path overrides. */
+  const [translations, setTranslations] = useState<Record<string, Record<string, string>>>({});
 
   const courseId = course?.id ?? null;
   const theatre = prefs.theatre;
@@ -234,6 +246,43 @@ export default function CourseLearn() {
 
 
 
+
+  /** Languages this lesson is fully translated and reviewed in. */
+  const lessonLangs = useMemo(() => {
+    const list = (activeLesson as { available_langs?: string[] } | undefined)?.available_langs ?? [];
+    return list.filter((code) => !!languageByCode(code));
+  }, [activeLesson]);
+
+  /**
+   * Render-time overlay. Only the paths in `translatablePaths` are swapped, so
+   * block ids, correct answers, gates, completion and analytics are untouched.
+   */
+  const translatedBlocks = useMemo(() => {
+    if (!lang || !Object.keys(translations).length) return lessonBlocks;
+    return lessonBlocks.map((block) => {
+      const overrides = translations[block.id];
+      if (!overrides) return block;
+      return {
+        ...block,
+        payload: mergeTranslation(
+          block.payload,
+          overrides,
+          translatablePaths[block.block_type] ?? []
+        ),
+      };
+    });
+  }, [lang, translations, lessonBlocks]);
+
+  const chooseLang = useCallback(
+    (code: string | null) => {
+      setLang(code);
+      setStoredLang(code);
+      if (user) {
+        void supabase.from('profiles').update({ preferred_lang: code }).eq('id', user.id);
+      }
+    },
+    [user]
+  );
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
   const canSeek = isVideoLesson;
@@ -390,6 +439,56 @@ export default function CourseLearn() {
       cancelled = true;
     };
   }, [activeLesson?.id]);
+
+  // Fall back to the learner's saved language preference on first load.
+  useEffect(() => {
+    if (!user || storedLang()) return;
+    let cancelled = false;
+    void supabase
+      .from('profiles')
+      .select('preferred_lang')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const preferred = (data as { preferred_lang?: string | null } | null)?.preferred_lang ?? null;
+        if (!cancelled && preferred && languageByCode(preferred)) setLang(preferred);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // Reviewed translations for the active block lesson. RLS only ever returns
+  // reviewed rows, so a draft can never reach a learner.
+  useEffect(() => {
+    let cancelled = false;
+    if (!activeLesson?.id || activeLesson.lesson_type !== 'blocks' || !lang) {
+      setTranslations({});
+      return;
+    }
+    (async () => {
+      const { data, error } = await supabase
+        .from('lesson_translations')
+        .select('block_id, overrides')
+        .eq('lesson_id', activeLesson.id)
+        .eq('lang', lang)
+        .eq('status', 'reviewed');
+      if (cancelled) return;
+      if (error) {
+        console.error('Error loading lesson translations:', error);
+        setTranslations({});
+        return;
+      }
+      const next: Record<string, Record<string, string>> = {};
+      for (const row of data ?? []) {
+        next[row.block_id] = (row.overrides ?? {}) as Record<string, string>;
+      }
+      setTranslations(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLesson?.id, activeLesson?.lesson_type, lang]);
 
   // Load block content for the active lesson (only 'blocks' lessons have any).
   useEffect(() => {
@@ -900,13 +999,38 @@ export default function CourseLearn() {
 
     if (activeLesson.lesson_type === 'blocks') {
       return (
+        <div className="space-y-3">
+          {lessonLangs.length > 0 && (
+            <div className="mx-auto flex w-full max-w-[47rem] flex-wrap items-center gap-2 px-1">
+              <span className="text-sm text-muted-foreground">Read this lesson in:</span>
+              <Button
+                type="button"
+                size="sm"
+                variant={lang ? 'outline' : 'secondary'}
+                onClick={() => chooseLang(null)}
+              >
+                English
+              </Button>
+              {lessonLangs.map((code) => (
+                <Button
+                  key={code}
+                  type="button"
+                  size="sm"
+                  variant={lang === code ? 'secondary' : 'outline'}
+                  onClick={() => chooseLang(code)}
+                >
+                  {languageByCode(code)?.label ?? code}
+                </Button>
+              ))}
+            </div>
+          )}
         <LessonBlocks
-          blocks={lessonBlocks}
+          blocks={translatedBlocks}
           completed={!!activeLesson.completed}
           trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
           onComplete={() => markComplete(activeLesson.id, { returnHome: true })}
         />
-
+        </div>
       );
     }
 

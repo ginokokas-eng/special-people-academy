@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { languageByCode } from '@/lib/translation';
 import { ArrowRight, CheckCircle2, Award, Play } from '@/components/icons';
 import { useContentUpdates } from '@/hooks/useContentUpdates';
 import { requiredProgress } from '@/lib/progress';
@@ -410,6 +411,17 @@ export function CourseHome({
                       {lockedQuizLessonIds.has(lesson.id) && (
                         <p className="rounded-md bg-warning/10 px-2.5 py-2 text-xs text-warning">
                           No attempts remaining. {QUIZ_LOCKOUT_NEXT_STEP}
+                        </p>
+                      )}
+
+                      {(((lesson as { available_langs?: string[] }).available_langs ?? [])
+                        .map((code) => languageByCode(code)?.label)
+                        .filter(Boolean) as string[]).length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          Also available in{' '}
+                          {(((lesson as { available_langs?: string[] }).available_langs ?? [])
+                            .map((code) => languageByCode(code)?.label)
+                            .filter(Boolean) as string[]).join(', ')}
                         </p>
                       )}
 
