@@ -659,12 +659,16 @@ export function LessonBlocks({
    */
   const renderBlock = (block: LessonBlock) => {
     const gating = block.contributes_to_completion && isInteractive(block.block_type, block.payload);
-    const body = gating ? (
-      <ActivityShell blockType={block.block_type} done={!!deckState[block.id]}>
+    // Read-aloud reads only what is already on screen — never answer feedback.
+    const passages = blockTextValues(block.block_type, block.payload, { skipAnswers: true });
+    const body = (
+      <ActivityShell
+        blockType={gating ? block.block_type : ('text' as LessonBlock['block_type'])}
+        done={!!deckState[block.id]}
+        passages={passages}
+      >
         {renderBlockBody(block)}
       </ActivityShell>
-    ) : (
-      renderBlockBody(block)
     );
 
     const vis = blockVisibility(block.payload);
