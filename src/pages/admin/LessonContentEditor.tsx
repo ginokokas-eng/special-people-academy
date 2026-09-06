@@ -51,6 +51,8 @@ export default function LessonContentEditor() {
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
+  const [bankPickerOpen, setBankPickerOpen] = useState(false);
+
 
 
   // Guards against re-initialising block state (auth/token-refresh renders must
