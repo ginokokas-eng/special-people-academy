@@ -26,7 +26,9 @@ import {
   type ImagePayload,
   type LayoutAware,
   type McqPayload,
+  type ReflectionPayload,
   type ScenarioPayload,
+
   type TextPayload,
   type VisibilityAware,
   type VideoPayload,
