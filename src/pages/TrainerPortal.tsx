@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MarkingQueue } from '@/components/marking/MarkingQueue';
 import {
   Table,
   TableBody,
@@ -506,6 +507,17 @@ export default function TrainerPortal() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Marking queue: reflective answers and assessed practical checklists */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Marking</h2>
+          <p className="text-muted-foreground mt-1">
+            Written reflections and practical checklists waiting for you.
+          </p>
+        </div>
+        <MarkingQueue />
       </div>
 
       {/* Attendance Dialog */}
