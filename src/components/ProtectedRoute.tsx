@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from '@/components/icons';
 
-type RequiredRole = 'admin' | 'trainer' | 'super_admin' | 'ops_training_admin' | 'learner';
+import { satisfiesRoles, type RequiredRole } from '@/lib/roles';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -33,26 +33,11 @@ export function ProtectedRoute({
   const { user, loading, rolesLoading, isAdmin, isTrainer, isSuperAdmin, isOpsTrainingAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const checkHasRequiredRole = () => {
-    if (requiredRoles.length === 0) return true;
-    
-    return requiredRoles.some(role => {
-      switch (role) {
-        case 'super_admin':
-          return isSuperAdmin;
-        case 'admin':
-          return isAdmin;
-        case 'ops_training_admin':
-          return isOpsTrainingAdmin;
-        case 'trainer':
-          return isTrainer;
-        case 'learner':
-          return true;
-        default:
-          return false;
-      }
-    });
-  };
+  const checkHasRequiredRole = () =>
+    satisfiesRoles(
+      { isSuperAdmin, isAdmin, isOpsTrainingAdmin, isTrainer, isLearner: true },
+      requiredRoles,
+    );
 
   useEffect(() => {
     // Wait for both auth and roles to be fully loaded
