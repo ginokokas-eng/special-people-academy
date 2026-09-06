@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
+import { TranslationsPanel } from '@/components/admin/lesson-blocks/TranslationsPanel';
 import {
   BlockTransferDialog,
   type BlockTransferRequest,
@@ -708,6 +709,8 @@ export default function LessonContentEditor() {
 
             </CardContent>
           </Card>
+
+          <TranslationsPanel lessonId={lessonId} />
         </div>
 
         <div className="space-y-3 lg:sticky lg:top-6 lg:self-start">
