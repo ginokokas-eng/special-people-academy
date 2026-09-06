@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from '@/components/icons';
-import { PortalCard } from '@/components/org/PortalBits';
+import { SectionCard } from '@/components/org/PortalBits';
 import {
   Table,
   TableBody,
@@ -58,7 +58,7 @@ export function OrgStandards({ organisationId }: { organisationId: string }) {
   const groups = groupByFramework(rows);
 
   return (
-    <PortalCard
+    <SectionCard
       title="Areas this training evidences (Care Certificate and CQC key questions)"
       description={EVIDENCE_DISCLAIMER}
     >
@@ -104,7 +104,7 @@ export function OrgStandards({ organisationId }: { organisationId: string }) {
           ))}
         </div>
       )}
-    </PortalCard>
+    </SectionCard>
   );
 }
 
