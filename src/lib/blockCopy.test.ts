@@ -3,7 +3,7 @@ import { collectPayloadIds, remintBlockPayload } from './blockCopy';
 import {
   BLOCK_TYPES,
   defaultPayload,
-  newScenarioPayload,
+  defaultScenarioPayload,
   translatablePaths,
   blockSpokenText,
   type McqPayload,
@@ -26,7 +26,7 @@ describe('remintBlockPayload', () => {
   });
 
   it('re-mints scenario node ids, slugs and choice targets', () => {
-    const source = newScenarioPayload();
+    const source = defaultScenarioPayload();
     const copy = remintBlockPayload('scenario', source) as ScenarioPayload;
     const sourceIds = new Set(collectPayloadIds(source));
     const copyIds = collectPayloadIds(copy);
@@ -47,7 +47,7 @@ describe('remintBlockPayload', () => {
   it('shares no id with the source for any block type, and drops visibility', () => {
     for (const type of BLOCK_TYPES) {
       const source = {
-        ...(type === 'scenario' ? newScenarioPayload() : defaultPayload(type)),
+        ...(type === 'scenario' ? defaultScenarioPayload() : defaultPayload(type)),
         visibility: { when: 'if_correct', block_id: 'source-block' },
       } as BlockPayload;
       const copy = remintBlockPayload(type, source);
