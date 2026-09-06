@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Plus } from '@/components/icons';
+import { Library, Plus } from '@/components/icons';
 import {
   BLOCK_DESCRIPTIONS,
   BLOCK_LABELS,
