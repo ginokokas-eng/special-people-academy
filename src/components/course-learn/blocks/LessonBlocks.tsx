@@ -9,7 +9,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { MediaController } from '@/components/course-learn/types';
 import { BlockVideo } from './BlockVideo';
+
 import { RevealOnScroll } from './RevealOnScroll';
 import { LessonProgressStrip } from './LessonProgressStrip';
 import { BackToTop } from './BackToTop';
