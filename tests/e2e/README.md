@@ -79,7 +79,14 @@ Specs run in file order with one worker because they share one authored course:
 `e2e_delete_course(_course_id uuid)` is `SECURITY DEFINER` and refuses anything
 that is not (a) called by an ops training admin and (b) a course whose title
 starts with `E2E `. It returns per-table delete counts. If a run dies mid-way,
-call it directly with the leftover course id.
+call it for each leftover course:
+
+```sql
+select c.title, public.e2e_delete_course(c.id)
+from public.courses c
+where c.title like 'E2E %';
+```
+
 
 ## Fixtures
 
