@@ -589,6 +589,8 @@ export function LessonBlocks({
           preview={preview}
           onWatched={(done) => setSignal(block.id, done)}
           onOutcome={(value) => setOutcome(block.id, value)}
+          mediaControllerRef={mediaControllerRef}
+
         />
       )}
       {block.block_type === 'carousel' && (
