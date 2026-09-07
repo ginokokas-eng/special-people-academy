@@ -266,7 +266,7 @@ function altTargets(block: LintBlockInput): AltTarget[] {
       {
         path: 'alt',
         alt: payload.alt,
-        source: payload.image?.path ?? payload.image?.url ?? payload.url,
+        source: payload.media?.file_name ?? payload.media?.path ?? payload.media?.url ?? payload.url,
         what: 'this image',
       },
     ];
@@ -276,7 +276,7 @@ function altTargets(block: LintBlockInput): AltTarget[] {
       {
         path: 'alt',
         alt: payload.alt,
-        source: payload.image?.path ?? payload.image?.url,
+        source: payload.image?.file_name ?? payload.image?.path ?? payload.image?.url,
         what: 'the labelled image',
       },
     ];
@@ -288,7 +288,7 @@ function altTargets(block: LintBlockInput): AltTarget[] {
       .map((item: any, index: number) => ({
         path: `items[${index}].alt`,
         alt: item.alt,
-        source: item.media?.path ?? item.media?.url,
+        source: item.media?.file_name ?? item.media?.path ?? item.media?.url,
         what: `slide ${index + 1}`,
       }));
   }
