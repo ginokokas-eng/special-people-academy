@@ -170,6 +170,29 @@ const checkpointsSchema = {
   required: ['checkpoints'],
 };
 
+/** Transcript chapters: a start copied from a segment, plus a short title. */
+const chaptersSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    chapters: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          start: { type: 'number' },
+          title: { type: 'string' },
+        },
+        required: ['start', 'title'],
+      },
+    },
+  },
+  required: ['chapters'],
+};
+
+
+
 /**
  * Translation reply. Paths are sent as ENTRIES, not as a free-form object, so a
  * strict schema can describe them. The client owns the path map, so the model
