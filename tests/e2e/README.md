@@ -72,7 +72,9 @@ Specs run in file order with one worker because they share one authored course:
 | `05-insights` | Lesson Insights shows the learner's answers |
 | `06-question-bank-roundtrip` | MCQ → bank → picker → back into the lesson |
 | `08-video-checkpoints` | optional: uploaded video + checkpoint gate (`E2E_VIDEO=1`) |
-| `99-teardown` | deletes the run's course via `e2e_delete_course` |
+| `10-clone-course` | Duplicate makes a draft copy; counts and remapped rules match |
+| `99-teardown` | deletes the run's course (and any clone) via `e2e_delete_course` |
+
 
 ## Teardown
 
