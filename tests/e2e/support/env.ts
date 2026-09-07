@@ -27,7 +27,7 @@ function parseEnvFile(file: string): Record<string, string> {
   return out;
 }
 
-export const repoRoot = path.resolve(__dirname, '../../..');
+export const repoRoot = process.cwd();
 
 const fileEnv = {
   ...parseEnvFile(path.join(repoRoot, '.env')),
