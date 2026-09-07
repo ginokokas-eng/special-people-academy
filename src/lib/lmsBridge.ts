@@ -192,6 +192,13 @@ export function breakOutOfUnexpectedFrame(): boolean {
   if (typeof window === 'undefined') return false;
   try {
     if (window.top === window.self) return false;
+    // A same-origin parent is never a hijack: the lesson editor embeds the
+    // learner preview route in an iframe on the same origin.
+    try {
+      if (window.top && window.top.location.origin === window.location.origin) return false;
+    } catch {
+      // Cross-origin top: reading its location throws; fall through to the checks below.
+    }
     const path = window.location.pathname;
     if (path.startsWith('/launch')) return false;
     if (isLmsMode()) return false;
