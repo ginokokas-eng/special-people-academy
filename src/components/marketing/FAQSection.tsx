@@ -47,7 +47,7 @@ export const FAQSection = ({
           )}
         </div>
 
-        <div className="max-w-3xl">
+        <div className="mx-auto max-w-3xl">
           <Accordion type="single" collapsible className="space-y-3">
             {faqs.map((faq, index) => (
               <AccordionItem

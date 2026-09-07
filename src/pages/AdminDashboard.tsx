@@ -985,7 +985,7 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Department</TableHead>
-                      <TableHead>Enrollments</TableHead>
+                      <TableHead>Enrolments</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>

@@ -77,7 +77,7 @@ const apiFeatures = [
   {
     icon: Code,
     title: "REST API",
-    description: "Programmatically access learner data, manage enrollments, and sync information with your existing systems through our documented API.",
+    description: "Programmatically access learner data, manage enrolments, and sync information with your existing systems through our documented API.",
     badge: "Enterprise"
   },
   {
@@ -129,7 +129,7 @@ const faqs = [
   },
   {
     question: "Do you have an API?",
-    answer: "Yes. Our REST API is available on Enterprise plans and provides programmatic access to learner data, progress tracking, and enrollment management. We provide comprehensive documentation and support during implementation."
+    answer: "Yes. Our REST API is available on Enterprise plans and provides programmatic access to learner data, progress tracking, and enrolment management. We provide comprehensive documentation and support during implementation."
   },
   {
     question: "How long does integration setup take?",

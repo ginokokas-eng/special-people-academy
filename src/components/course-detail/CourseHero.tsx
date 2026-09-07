@@ -26,6 +26,8 @@ interface CourseHeroProps {
   isInternal: boolean;
   hasCertificate: boolean;
   durationMinutes: number;
+  /** Optional wording for the time figure, e.g. "3h total · 2h 37m online · plus practical session". */
+  durationLabel?: string;
   lastUpdated?: string;
   language: string;
   thumbnailUrl?: string;
@@ -55,6 +57,7 @@ export function CourseHero({
   isInternal,
   hasCertificate,
   durationMinutes,
+  durationLabel,
   lastUpdated,
   language,
   thumbnailUrl,
@@ -200,9 +203,9 @@ export function CourseHero({
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-primary-foreground/70">
               {durationMinutes > 0 && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5" title="Total time">
                   <Clock className="h-4 w-4" />
-                  {formatDuration(durationMinutes)}
+                  {durationLabel || `${formatDuration(durationMinutes)} total`}
                 </span>
               )}
 

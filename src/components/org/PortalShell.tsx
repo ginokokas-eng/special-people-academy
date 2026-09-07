@@ -72,7 +72,7 @@ export function PortalShell({ orgName, actions, children }: PortalShellProps) {
                   <span className="block truncate text-xs text-muted-foreground">{user?.email}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate('/my-learning')}>
+                <DropdownMenuItem onSelect={() => navigate('/my-courses')}>
                   <GraduationCap className="mr-2 h-4 w-4" />
                   Back to my learning
                 </DropdownMenuItem>

@@ -300,9 +300,10 @@ const WebNavbar = () => {
                     className="w-56 rounded-xl border-[#E8E4F7] bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(76,29,149,0.25)]"
                   >
                     <DropdownMenuItem asChild>
-                      <Link to="/my-learning" className="flex items-center gap-2 cursor-pointer">
-                        <BookOpen className="h-4 w-4" /> My Learning
+                      <Link to="/my-courses" className="flex items-center gap-2 cursor-pointer">
+                        <BookOpen className="h-4 w-4" /> My Courses
                       </Link>
+
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/certificates" className="flex items-center gap-2 cursor-pointer">
@@ -413,7 +414,7 @@ const WebNavbar = () => {
             { label: 'Contact', href: '/contact' },
             ...(user
               ? [
-                  { label: 'My Learning', href: '/my-learning' },
+                  { label: 'My Courses', href: '/my-courses' },
                   { label: 'Sign Out', href: '#', onClick: handleSignOut, primary: true },
                 ]
               : [

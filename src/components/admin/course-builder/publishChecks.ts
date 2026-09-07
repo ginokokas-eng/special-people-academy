@@ -334,6 +334,22 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
     tab: 'Quiz Builder',
   });
 
+  // Advisory twin of the check above: quiz lessons with no quiz at all are
+  // hidden from learners, which is easy to miss when a course is already
+  // published. Never blocks — it only names the lessons.
+  checks.push({
+    id: 'quiz-empty-lessons',
+    label:
+      noQuestions.length > 0
+        ? `${noQuestions.length} quiz ${noQuestions.length === 1 ? 'lesson has' : 'lessons have'} no questions`
+        : 'Every quiz lesson has questions',
+    passed: noQuestions.length === 0,
+    detail: `Learners never see these until questions are added: ${noQuestions.join(', ')}.`,
+    tab: 'Quiz Builder',
+    severity: 'warning',
+  });
+
+
   checks.push({
     id: 'quiz-pools',
     label: 'Random question pools can be filled',

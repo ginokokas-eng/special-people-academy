@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,6 +50,9 @@ interface Course {
 
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // The Modules tab links here (?tab=quiz) when a quiz lesson has no questions.
+  const activeTab = searchParams.get('tab') || 'overview';
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin, isSuperAdmin, isOpsTrainingAdmin, loading: rolesLoading } = useRoles();
@@ -190,7 +193,7 @@ export default function CourseEditor() {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="modules">Modules & Lessons</TabsTrigger>
