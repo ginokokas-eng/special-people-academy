@@ -286,11 +286,24 @@ export default function CourseLearn() {
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
   /**
-   * Block lessons may hold a video block, which registers itself on `mediaRef`.
-   * Seeking is only offered once a player is actually there, so timestamps never
-   * look clickable on a text-only lesson.
+   * A block lesson may hold a video block, which registers itself on `mediaRef`
+   * once mounted. Poll for it so transcript timestamps only become clickable
+   * when there is really a player to drive.
    */
-  const canSeek = isVideoLesson || (!!mediaRef.current && lessonBlocks.length > 0);
+  const [blockMediaReady, setBlockMediaReady] = useState(false);
+  useEffect(() => {
+    setBlockMediaReady(false);
+    if (isVideoLesson || !lessonBlocks.length) return;
+    const id = setInterval(() => {
+      if (mediaRef.current) {
+        setBlockMediaReady(true);
+        clearInterval(id);
+      }
+    }, 400);
+    return () => clearInterval(id);
+  }, [activeLesson?.id, isVideoLesson, lessonBlocks.length]);
+  const canSeek = isVideoLesson || blockMediaReady;
+
 
   const activeModuleName = useMemo(
     () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
