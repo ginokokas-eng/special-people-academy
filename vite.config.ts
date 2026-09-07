@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => ({
   test: {
     // `tests/sso` holds Deno tests (they import from https: URLs) — vitest
     // must never pick them up.
-    exclude: ["**/node_modules/**", "**/dist/**", "tests/sso/**"],
+    // tests/e2e is Playwright (browser suite), tests/sso is Deno — neither is Vitest.
+    exclude: ["**/node_modules/**", "**/dist/**", "tests/sso/**", "tests/e2e/**"],
+
   },
   resolve: {
     alias: {
