@@ -9,6 +9,7 @@ import { requiredProgress } from '@/lib/progress';
 import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
 import { useLockedQuizLessons } from '@/components/quiz/useLockedQuizLessons';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
 import { SignedImage } from './blocks/SignedImage';
 import type { MediaRef } from './blocks/types';
