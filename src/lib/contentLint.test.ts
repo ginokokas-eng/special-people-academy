@@ -179,7 +179,7 @@ describe('duration-mismatch', () => {
   const body = 'Check the label before every feed and record what you gave. '.repeat(30); // ~300 words
 
   it('flags a lesson set far shorter than the wording', () => {
-    const result = lintLesson([block('text', { text: body })], { durationMinutes: 1 });
+    const result = lintLesson([block('text', { text: body })], { durationSeconds: 30 });
     expect(result.issues.some((i) => i.code === 'duration-mismatch')).toBe(true);
   });
 
