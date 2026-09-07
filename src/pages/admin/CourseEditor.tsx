@@ -67,9 +67,13 @@ export default function CourseEditor() {
   const [cloneSource, setCloneSource] = useState<CloneSource | null>(null);
   /** Title of the course this one was copied from, when it is a copy. */
   const [clonedFromTitle, setClonedFromTitle] = useState<string | null>(null);
-  // The dialog lands here with ?cloned=1 straight after a copy is made.
+  // The dialog lands here with ?cloned=1&media=ok|partial|failed after a copy.
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const justCloned = searchParams.get('cloned') === '1' && !bannerDismissed;
+  /** True while any file in this course still points at the original course. */
+  const [mediaStale, setMediaStale] = useState(searchParams.get('media') !== 'ok');
+  const [retryingMedia, setRetryingMedia] = useState(false);
+
 
 
   useEffect(() => {
