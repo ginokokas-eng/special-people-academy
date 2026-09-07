@@ -23,6 +23,11 @@ import {
 } from '@/components/ui/table';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Copy, Loader2 } from '@/components/icons';
 import { toast } from 'sonner';
+import {
+  CloneCourseDialog,
+  type CloneSource,
+} from '@/components/admin/course-builder/CloneCourseDialog';
+
 
 interface Course {
   id: string;
@@ -40,6 +45,8 @@ export default function CourseBuilder() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [cloneSource, setCloneSource] = useState<CloneSource | null>(null);
+
 
   useEffect(() => {
     if (!rolesLoading && !isSuperAdmin && !isOpsTrainingAdmin) {
@@ -90,27 +97,11 @@ export default function CourseBuilder() {
     }
   };
 
-  const handleDuplicate = async (course: Course) => {
-    try {
-      const { data, error } = await supabase
-        .from('courses')
-        .insert({
-          title: `${course.title} (Copy)`,
-          category: course.category,
-          status: 'draft',
-          is_published: false,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      toast.success('Course duplicated');
-      fetchCourses();
-    } catch (error) {
-      console.error('Error duplicating course:', error);
-      toast.error('Failed to duplicate course');
-    }
+  /** Opens the duplicate dialog; the copy itself is made by the clone_course RPC. */
+  const handleDuplicate = (course: Course) => {
+    setCloneSource({ id: course.id, title: course.title });
   };
+
 
   const getStatusBadge = (status: string, isPublished: boolean) => {
     if (isPublished) {
