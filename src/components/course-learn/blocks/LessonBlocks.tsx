@@ -379,7 +379,9 @@ export function LessonBlocks({
   onComplete,
   preview,
   trickleEnabled,
+  mediaControllerRef,
 }: LessonBlocksProps) {
+
   const [deckState, setDeckState] = useState<Record<string, boolean>>({});
   /** Right/wrong per assessed block. null = attempted-but-not-assessed/unknown. */
   const [blockOutcome, setBlockOutcome] = useState<Record<string, boolean | null>>({});
