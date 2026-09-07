@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface Props {
   children: ReactNode;
@@ -15,20 +16,13 @@ interface Props {
 const STAGGER_MS = 60;
 const MAX_STAGGER_MS = 240;
 
-function prefersReducedMotion() {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-  );
-}
-
 /**
  * Reveals a lesson block as it enters the viewport — once per block, opacity and
  * transform only, so nothing reflows. Fully inert under prefers-reduced-motion.
  * Purely presentational: it never touches completion signals.
  */
 export function RevealOnScroll({ children, index = 0, opacityOnly }: Props) {
-  const reduced = useRef(prefersReducedMotion()).current;
+  const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(reduced);
   const [settled, setSettled] = useState(reduced);

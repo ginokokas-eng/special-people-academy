@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from '@/components/icons';
 import { SignedImage } from './SignedImage';
 import { parseBlockText, type CarouselPayload } from './types';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface Props {
   payload: CarouselPayload;
@@ -19,13 +20,6 @@ const DECELERATION = 0.998;
 const RUBBER = 0.55;
 /** Minimum |velocity| (px/s) that counts as a flick. */
 const FLICK_V = 320;
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-  );
-}
 
 /** projected landing offset for a release velocity (px/s). */
 function project(velocity: number) {
@@ -51,7 +45,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
   const [viewed, setViewed] = useState<Set<string>>(
     () => new Set(items[0]?.id ? [items[0].id] : [])
   );
-  const reduced = useRef(prefersReducedMotion()).current;
+  const reduced = useReducedMotion();
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);

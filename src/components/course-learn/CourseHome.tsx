@@ -9,6 +9,7 @@ import { requiredProgress } from '@/lib/progress';
 import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
 import { useLockedQuizLessons } from '@/components/quiz/useLockedQuizLessons';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { lessonTypeIcon, lessonMetaLabel } from './lessonMeta';
 import { SignedImage } from './blocks/SignedImage';
 import type { MediaRef } from './blocks/types';
@@ -166,6 +167,7 @@ export function CourseHome({
     lessons.filter((l) => l.lesson_type === 'quiz').map((l) => l.id)
   );
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const reduced = useReducedMotion();
 
   const grouped: HubModule[] = modules
     .map((m) => ({
@@ -189,9 +191,8 @@ export function CourseHome({
     if (!highlightLessonId) return;
     const el = cardRefs.current[highlightLessonId];
     if (!el) return;
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
-  }, [highlightLessonId]);
+  }, [highlightLessonId, reduced]);
 
   const statusOf = (lesson: LearnLesson): LessonStatus => {
     if (completedIds.has(lesson.id)) return 'completed';

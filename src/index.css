@@ -1073,3 +1073,16 @@ html.native .native-shell .page-heading + * {
 .quiz-option[data-state='incorrect'] {
   box-shadow: var(--shadow-learner-lg);
 }
+
+/* Staff preview frame: an author can see the reduced-motion experience without
+   changing their own OS setting. Set only on the preview iframe's document, so
+   nothing changes for learners. Stills Tailwind motion-safe: utilities, the
+   trickle veil, flip-card and video-control fades alike. */
+[data-motion="reduce"] *,
+[data-motion="reduce"] *::before,
+[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

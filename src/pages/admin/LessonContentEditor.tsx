@@ -18,6 +18,10 @@ import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { TranslationsPanel } from '@/components/admin/lesson-blocks/TranslationsPanel';
 import {
+  PreviewDeviceFrame,
+  type TranslationStatusSummary,
+} from '@/components/admin/lesson-blocks/PreviewDeviceFrame';
+import {
   BlockTransferDialog,
   type BlockTransferRequest,
 } from '@/components/admin/lesson-blocks/BlockTransferDialog';
@@ -495,6 +499,32 @@ export default function LessonContentEditor() {
 
   const lintCounts = lintByBlock(lint.issues);
 
+  // Which languages this lesson has translation rows for, and how far along they
+  // are — shown in the preview toolbar's language picker. Read-only.
+  const [translationStatus, setTranslationStatus] = useState<TranslationStatusSummary>({});
+  useEffect(() => {
+    let cancelled = false;
+    if (!lessonId) return;
+    (async () => {
+      const { data } = await supabase
+        .from('lesson_translations')
+        .select('lang, status')
+        .eq('lesson_id', lessonId);
+      if (cancelled || !data) return;
+      const next: TranslationStatusSummary = {};
+      for (const row of data) {
+        const status = row.status === 'reviewed' ? 'reviewed' : 'draft';
+        // Any draft row keeps the language marked as draft.
+        if (next[row.lang] === 'draft') continue;
+        next[row.lang] = status;
+      }
+      setTranslationStatus(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [lessonId]);
+
   const previewBlocks: LessonBlock[] = blocks.map((b, index) => ({
     id: b.client_id,
     lesson_id: lessonId ?? '',
@@ -755,10 +785,12 @@ export default function LessonContentEditor() {
             <Eye className="h-4 w-4" />
             Learner preview
           </div>
-          <LessonBlocks
+          <PreviewDeviceFrame
+            courseId={courseId}
+            lessonId={lessonId}
             blocks={previewBlocks}
-            preview
             trickleEnabled={lesson?.trickle_enabled ?? false}
+            translationStatus={translationStatus}
           />
         </div>
       </div>
