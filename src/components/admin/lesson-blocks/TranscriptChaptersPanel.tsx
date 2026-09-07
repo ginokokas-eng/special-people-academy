@@ -146,6 +146,7 @@ export function TranscriptChaptersPanel({ lessonId, refreshKey }: Props) {
           size="sm"
           variant="outline"
           onClick={suggest}
+          data-testid="transcript-chapters-suggest"
           disabled={!hasTimings || suggesting || loading}
         >
           {suggesting ? (
@@ -230,11 +231,18 @@ export function TranscriptChaptersPanel({ lessonId, refreshKey }: Props) {
               type="button"
               size="sm"
               variant="outline"
+              data-testid="transcript-chapters-add"
               onClick={() => setDraft((prev) => [...prev, { time: '0:00', title: '' }])}
             >
               <Plus className="mr-1.5 h-4 w-4" /> Add a section
             </Button>
-            <Button type="button" size="sm" onClick={save} disabled={saving || !dirty}>
+            <Button
+              type="button"
+              size="sm"
+              data-testid="transcript-chapters-save"
+              onClick={save}
+              disabled={saving || !dirty}
+            >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save sections
             </Button>
