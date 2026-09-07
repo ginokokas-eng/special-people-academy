@@ -125,6 +125,8 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
   const [moduleForm, setModuleForm] = useState({ title: '', description: '' });
   const [lessonForm, setLessonForm] = useState<LessonForm>({ title: '', description: '', lesson_type: 'video', duration_minutes: 0, duration_seconds: null, scorm_package_id: '', is_required: true });
   const [scormPackages, setScormPackages] = useState<{ id: string; title: string }[]>([]);
+  /** Quiz lessons with no quiz row, or a quiz with no questions — invisible to learners. */
+  const [emptyQuizLessons, setEmptyQuizLessons] = useState<Set<string>>(new Set());
   /** Learners already enrolled — changing which lessons are required moves their progress bar. */
   const [enrollmentCount, setEnrollmentCount] = useState(0);
 
@@ -132,6 +134,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
     fetchData();
     fetchScormPackages();
     fetchEnrollmentCount();
+    fetchQuizCoverage();
   }, [courseId]);
 
   const fetchEnrollmentCount = async () => {
@@ -140,6 +143,30 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
       .select('id', { count: 'exact', head: true })
       .eq('course_id', courseId);
     setEnrollmentCount(count || 0);
+  };
+
+  const fetchQuizCoverage = async () => {
+    const { data: quizLessons } = await supabase
+      .from('lessons')
+      .select('id')
+      .eq('course_id', courseId)
+      .eq('lesson_type', 'quiz');
+    const lessonIds = (quizLessons || []).map((l) => l.id);
+    if (!lessonIds.length) {
+      setEmptyQuizLessons(new Set());
+      return;
+    }
+    const { data: quizzes } = await supabase
+      .from('quizzes')
+      .select('id, lesson_id')
+      .in('lesson_id', lessonIds);
+    const rows = quizzes || [];
+    const { data: questions } = rows.length
+      ? await supabase.from('quiz_questions').select('quiz_id').in('quiz_id', rows.map((q) => q.id))
+      : { data: [] as { quiz_id: string }[] };
+    const withQuestions = new Set((questions || []).map((q) => q.quiz_id));
+    const covered = new Set(rows.filter((q) => withQuestions.has(q.id)).map((q) => q.lesson_id));
+    setEmptyQuizLessons(new Set(lessonIds.filter((id) => !covered.has(id))));
   };
 
   const fetchScormPackages = async () => {
@@ -492,6 +519,14 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                                 )}
                               </div>
                               <div className="flex gap-2">
+                                {lesson.lesson_type === 'quiz' && emptyQuizLessons.has(lesson.id) && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/admin-portal/courses/${courseId}?tab=quiz`}>
+                                      <AlertTriangle className="h-4 w-4 mr-1 text-warning" />
+                                      No questions yet
+                                    </Link>
+                                  </Button>
+                                )}
                                 {lesson.lesson_type === 'blocks' && (
                                   <Button variant="outline" size="sm" asChild>
                                     <Link to={`/admin-portal/courses/${courseId}/lessons/${lesson.id}/content`}>
