@@ -207,10 +207,14 @@ export default function CourseBuilder() {
                               <Eye className="h-4 w-4 mr-2" />
                               Preview
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicate(course)}>
+                            <DropdownMenuItem
+                              data-testid={`course-duplicate-${course.id}`}
+                              onClick={() => handleDuplicate(course)}
+                            >
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
+
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
