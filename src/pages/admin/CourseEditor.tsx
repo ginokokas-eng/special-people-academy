@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Loader2, Save } from '@/components/icons';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Copy, Eye, Loader2, Save, X } from '@/components/icons';
 import { toast } from 'sonner';
 import { CourseOverviewTab } from '@/components/admin/course-builder/CourseOverviewTab';
 import { CourseModulesTab } from '@/components/admin/course-builder/CourseModulesTab';
@@ -17,6 +18,8 @@ import { CoursePublishingTab } from '@/components/admin/course-builder/CoursePub
 import { ScormPackageManager } from '@/components/admin/ScormPackageManager';
 import { CourseInsightsTab } from '@/components/admin/course-builder/CourseInsightsTab';
 import { CourseHistoryTab } from '@/components/admin/course-builder/CourseHistoryTab';
+import { CloneCourseDialog, type CloneSource } from '@/components/admin/course-builder/CloneCourseDialog';
+
 
 interface Course {
   id: string;
@@ -45,7 +48,9 @@ interface Course {
   prerequisite_course_id: string | null;
   prerequisite_required: boolean;
   require_recompletion_on_change: boolean;
+  cloned_from_course_id: string | null;
 }
+
 
 
 export default function CourseEditor() {
@@ -59,6 +64,13 @@ export default function CourseEditor() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [cloneSource, setCloneSource] = useState<CloneSource | null>(null);
+  /** Title of the course this one was copied from, when it is a copy. */
+  const [clonedFromTitle, setClonedFromTitle] = useState<string | null>(null);
+  // The dialog lands here with ?cloned=1 straight after a copy is made.
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const justCloned = searchParams.get('cloned') === '1' && !bannerDismissed;
+
 
   useEffect(() => {
     if (!rolesLoading && !isSuperAdmin && !isOpsTrainingAdmin) {
@@ -89,6 +101,18 @@ export default function CourseEditor() {
         requirements: Array.isArray(data.requirements) ? (data.requirements as string[]) : [],
         available_delivery_types: Array.isArray(data.available_delivery_types) ? data.available_delivery_types : [],
       });
+
+      if (data.cloned_from_course_id) {
+        const { data: sourceRow } = await supabase
+          .from('courses')
+          .select('title')
+          .eq('id', data.cloned_from_course_id)
+          .maybeSingle();
+        setClonedFromTitle(sourceRow?.title ?? null);
+      } else {
+        setClonedFromTitle(null);
+      }
+
     } catch (error) {
       console.error('Error fetching course:', error);
       toast.error('Failed to load course');
@@ -182,6 +206,14 @@ export default function CourseEditor() {
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
+            <Button
+              variant="outline"
+              data-testid="course-duplicate"
+              onClick={() => setCloneSource({ id: course.id, title: course.title })}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Duplicate course
+            </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -192,6 +224,27 @@ export default function CourseEditor() {
             </Button>
           </div>
         </div>
+
+        {justCloned && (
+          <Alert data-testid="clone-banner">
+            <AlertDescription className="flex items-start justify-between gap-4">
+              <span>
+                Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
+                Uploaded videos and images still point at the original course's files until the
+                media copy finishes.
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Dismiss this message"
+                onClick={() => setBannerDismissed(true)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
 
         <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-9">
@@ -206,9 +259,21 @@ export default function CourseEditor() {
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="space-y-3">
+            {course.cloned_from_course_id && (
+              <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
+                Cloned from{' '}
+                <Link
+                  to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
+                  className="underline underline-offset-2"
+                >
+                  {clonedFromTitle ?? 'the original course'}
+                </Link>
+              </p>
+            )}
             <CourseOverviewTab course={course} onUpdate={updateCourse} />
           </TabsContent>
+
 
           <TabsContent value="modules">
             <CourseModulesTab courseId={course.id} />
@@ -248,6 +313,9 @@ export default function CourseEditor() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <CloneCourseDialog source={cloneSource} onOpenChange={() => setCloneSource(null)} />
     </PortalLayout>
   );
 }
+

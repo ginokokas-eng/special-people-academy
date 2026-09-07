@@ -66,7 +66,10 @@ export interface RunRecord {
   lessonAId?: string;
   lessonBId?: string;
   mcqBlockId?: string;
+  /** Draft copy made by 10-clone-course.spec.ts; teardown deletes it first. */
+  cloneCourseId?: string;
 }
+
 
 export function saveRun(run: RunRecord): void {
   fs.mkdirSync(authDir, { recursive: true });

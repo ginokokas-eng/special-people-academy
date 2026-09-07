@@ -989,6 +989,7 @@ export type Database = {
           category: string
           certificate_details: string | null
           certificate_expiry_months: number | null
+          cloned_from_course_id: string | null
           completion_deadline_days: number | null
           cpd_certified: boolean | null
           cpd_eligible: boolean | null
@@ -1048,6 +1049,7 @@ export type Database = {
           category: string
           certificate_details?: string | null
           certificate_expiry_months?: number | null
+          cloned_from_course_id?: string | null
           completion_deadline_days?: number | null
           cpd_certified?: boolean | null
           cpd_eligible?: boolean | null
@@ -1107,6 +1109,7 @@ export type Database = {
           category?: string
           certificate_details?: string | null
           certificate_expiry_months?: number | null
+          cloned_from_course_id?: string | null
           completion_deadline_days?: number | null
           cpd_certified?: boolean | null
           cpd_eligible?: boolean | null
@@ -1161,6 +1164,13 @@ export type Database = {
           warning_days?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "courses_cloned_from_course_id_fkey"
+            columns: ["cloned_from_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "courses_instructor_id_fkey"
             columns: ["instructor_id"]
@@ -3705,6 +3715,14 @@ export type Database = {
           explanation: string
           is_correct: boolean
         }[]
+      }
+      clone_course: {
+        Args: {
+          _copy_translations?: boolean
+          _course_id: string
+          _new_title?: string
+        }
+        Returns: Json
       }
       copy_bank_question_to_quiz: {
         Args: { _bank_id: string; _quiz_id: string }
