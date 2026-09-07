@@ -226,6 +226,9 @@ export default function CourseBuilder() {
           </CardContent>
         </Card>
       </div>
+
+      <CloneCourseDialog source={cloneSource} onOpenChange={() => setCloneSource(null)} />
     </PortalLayout>
   );
 }
+
