@@ -221,6 +221,7 @@ export function HotGraphicBlockForm({
         courseId={courseId}
         lessonId={lessonId}
         urlTestId={`block-form-hot_graphic-url-${idPrefix}`}
+        fileTestId={`block-form-hot_graphic-file-${idPrefix}`}
       />
 
       <div className="space-y-1.5">
@@ -253,6 +254,7 @@ export function HotGraphicBlockForm({
 
           <div
             ref={imageWrapRef}
+            data-testid={`block-form-hot_graphic-canvas-${idPrefix}`}
             className={cn(
               'relative overflow-hidden rounded-lg border bg-card',
               placing && 'cursor-crosshair ring-2 ring-primary'

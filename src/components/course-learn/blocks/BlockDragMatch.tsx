@@ -123,7 +123,14 @@ function TargetZone({
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="font-display text-sm text-foreground">{label || 'Group'}</p>
         {active && (
-          <Button type="button" size="sm" variant="outline" className="pressable" onClick={onActivate}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            data-testid={`dragmatch-place-${index}`}
+            className="pressable"
+            onClick={onActivate}
+          >
             Place here
           </Button>
         )}
@@ -184,7 +191,13 @@ export function BlockDragMatch({
     onOutcome?.(solved ? true : checked ? false : null);
   }, [solved, checked, onOutcome]);
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+  // A pointer must travel before dnd-kit claims the gesture as a drag; without this a
+  // plain tap became a zero-distance drag that ended with no target, so tap-to-place
+  // (the accessible, mobile-friendly path) never selected the token.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const place = useCallback(
     (itemId: string, targetId: string) => {

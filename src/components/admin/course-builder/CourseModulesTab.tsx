@@ -633,7 +633,7 @@ export function CourseModulesTab({ courseId }: CourseModulesTabProps) {
                   });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger id="lesson-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

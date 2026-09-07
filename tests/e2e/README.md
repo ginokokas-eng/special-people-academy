@@ -4,17 +4,20 @@ Click-tests the real app: staff author a lesson containing every block type,
 publish the course, a learner plays it and takes the graded quiz, staff mark the
 reflection and read Lesson Insights, then the run's data is deleted.
 
-Runs against a dev server (`npm run dev`, port 8080) and the **live Supabase
-project** — it creates and then deletes real rows, so only run it with the two
-dedicated accounts below.
+Runs against a dev server and the **live Supabase project** — it creates and then
+deletes real rows, so only run it with the two dedicated accounts below.
 
 ## One-time setup (operator)
 
-1. Create two long-lived accounts through the app's sign-up form (or let
-   `global.setup.ts` create them on first run — it signs up automatically if the
-   password sign-in fails, and fails loudly if email confirmation is required):
+1. Create two long-lived accounts:
    - `e2e-staff@…`
    - `e2e-learner@…`
+
+   **Email confirmation is ON for this project**, so `global.setup.ts` cannot
+   create usable accounts on its own — sign each one up once and confirm its
+   email (click the link in the inbox) before the first run. `global.setup.ts`
+   fails loudly with this instruction if a password sign-in returns no session.
+
 2. Grant the staff account its roles once, with SQL. Course/module/lesson writes
    are gated on the **`admin`** role, the admin routes on `ops_training_admin`,
    and the marking queue on `trainer` — all three are needed:
@@ -36,13 +39,26 @@ dedicated accounts below.
 
 ## Running
 
+The dev server usually already occupies 8080, so run the suite against its own
+port and point the suite at it:
+
+```bash
+npm run dev -- --port 8089 --strictPort      # terminal 1
+E2E_BASE_URL=http://localhost:8089 npm run test:e2e   # terminal 2
+```
+
+With no `E2E_BASE_URL`, the config boots `npm run dev` on 8080 itself.
+
 ```bash
 npm run test:e2e            # whole suite (boots npm run dev unless E2E_BASE_URL is set)
 npm run test:e2e:setup      # just sign in and refresh tests/e2e/.auth/*.json
 npm run test:e2e:ui         # interactive
-E2E_BASE_URL=https://… npm run test:e2e
 E2E_VIDEO=1 npm run test:e2e -- 08-video-checkpoints
 ```
+
+Individual actions (clicks, fills) time out after **15 s**
+(`use.actionTimeout`), tests after 90 s, expectations after 15 s.
+
 
 Specs run in file order with one worker because they share one authored course:
 
@@ -63,7 +79,14 @@ Specs run in file order with one worker because they share one authored course:
 `e2e_delete_course(_course_id uuid)` is `SECURITY DEFINER` and refuses anything
 that is not (a) called by an ops training admin and (b) a course whose title
 starts with `E2E `. It returns per-table delete counts. If a run dies mid-way,
-call it directly with the leftover course id.
+call it for each leftover course:
+
+```sql
+select c.title, public.e2e_delete_course(c.id)
+from public.courses c
+where c.title like 'E2E %';
+```
+
 
 ## Fixtures
 

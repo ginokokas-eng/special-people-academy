@@ -13,8 +13,8 @@ import { authDir, learnerStatePath, requireEnv, staffStatePath } from './support
 async function signIn(page: Page, email: string, password: string): Promise<boolean> {
   await page.goto('/auth');
   await page.getByRole('tab', { name: 'Sign In' }).click();
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('textbox', { name: 'Email', exact: true }).fill(email);
+  await page.getByRole('textbox', { name: 'Password', exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 
   // Either we leave /auth (success) or an error stays on the page.
@@ -28,9 +28,9 @@ async function signIn(page: Page, email: string, password: string): Promise<bool
 async function signUp(page: Page, email: string, password: string): Promise<boolean> {
   await page.goto('/auth');
   await page.getByRole('tab', { name: 'Sign Up' }).click();
-  await page.getByLabel('Full Name').fill('E2E Test User');
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('textbox', { name: 'Full Name' }).fill('E2E Test User');
+  await page.getByRole('textbox', { name: 'Email', exact: true }).fill(email);
+  await page.getByRole('textbox', { name: 'Password', exact: true }).fill(password);
   await page.getByRole('button', { name: 'Create Account' }).click();
 
   return page

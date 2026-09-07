@@ -231,7 +231,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
                 <Label htmlFor={`${idPrefix}-title-${node.id}`}>Heading (optional)</Label>
                 <Input
                   id={`${idPrefix}-title-${node.id}`}
-                  data-testid={`block-form-scenario-node-${idPrefix}-${nodeIndex}`}
+                  data-testid={`block-form-scenario-title-${idPrefix}-${nodeIndex}`}
                   value={node.title ?? ''}
                   onChange={(e) => updateNode(node.id, { title: e.target.value })}
                 />
@@ -396,7 +396,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
             value={payload.start_id || ''}
             onValueChange={(value) => onChange({ ...payload, start_id: value })}
           >
-            <SelectTrigger data-testid={`block-form-scenario-title-${idPrefix}`}>
+            <SelectTrigger data-testid={`block-form-scenario-start-${idPrefix}`}>
               <SelectValue placeholder="Choose the first step" />
             </SelectTrigger>
             <SelectContent>
