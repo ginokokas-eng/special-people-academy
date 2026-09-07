@@ -98,7 +98,7 @@ export function BlockVideo({
     return () => {
       bridge.current = null;
     };
-  }, [mediaControllerRef]);
+  }, [mediaControllerRef, playerReady]);
 
   const isStorage = payload.source !== 'url' && !!payload.path;
   const externalUrl = (payload.url || '').trim();
