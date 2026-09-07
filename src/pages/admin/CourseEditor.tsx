@@ -324,15 +324,18 @@ export default function CourseEditor() {
 
           <TabsContent value="overview" className="space-y-3">
             {course.cloned_from_course_id && (
-              <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
-                Cloned from{' '}
-                <Link
-                  to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
-                  className="underline underline-offset-2"
-                >
-                  {clonedFromTitle ?? 'the original course'}
-                </Link>
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
+                  Cloned from{' '}
+                  <Link
+                    to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
+                    className="underline underline-offset-2"
+                  >
+                    {clonedFromTitle ?? 'the original course'}
+                  </Link>
+                </p>
+                {mediaStale && retryButton}
+              </div>
             )}
             <CourseOverviewTab course={course} onUpdate={updateCourse} />
           </TabsContent>
