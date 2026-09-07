@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { speechLangTag } from '@/lib/translation';
+import { usePreviewVoice } from '@/components/course-learn/PreviewLanguageContext';
 
 /**
  * Read-aloud, using the browser's own speech synthesis.
@@ -43,8 +44,11 @@ function pickVoice(voices: SpeechSynthesisVoice[], tag: string): SpeechSynthesis
 }
 
 
-export function useSpeech(): SpeechController {
+export function useSpeech(langOverride?: string): SpeechController {
   const supported = !!synth();
+  // Staff preview frames pick the voice from the previewed language.
+  const previewVoice = usePreviewVoice();
+  const voiceTag = langOverride ?? previewVoice ?? null;
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
@@ -54,12 +58,12 @@ export function useSpeech(): SpeechController {
     const s = synth();
     if (!s) return;
     const load = () => {
-      voiceRef.current = pickVoice(s.getVoices(), speechLangTag());
+      voiceRef.current = pickVoice(s.getVoices(), voiceTag ?? speechLangTag());
     };
     load();
     s.addEventListener?.('voiceschanged', load);
     return () => s.removeEventListener?.('voiceschanged', load);
-  }, []);
+  }, [voiceTag]);
 
   const stop = useCallback(() => {
     const s = synth();
@@ -82,7 +86,7 @@ export function useSpeech(): SpeechController {
       setPaused(false);
       setSpeaking(true);
       // Re-picked at speak time so a language toggle takes effect immediately.
-      const tag = speechLangTag();
+      const tag = voiceTag ?? speechLangTag();
       voiceRef.current = pickVoice(s.getVoices(), tag);
       usable.forEach((text, index) => {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -102,7 +106,7 @@ export function useSpeech(): SpeechController {
         s.speak(utterance);
       });
     },
-    []
+    [voiceTag]
   );
 
   const speak = useCallback((text: string) => speakQueue([text]), [speakQueue]);

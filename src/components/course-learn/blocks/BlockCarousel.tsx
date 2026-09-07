@@ -20,13 +20,6 @@ const RUBBER = 0.55;
 /** Minimum |velocity| (px/s) that counts as a flick. */
 const FLICK_V = 320;
 
-function prefersReducedMotion() {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-  );
-}
-
 /** projected landing offset for a release velocity (px/s). */
 function project(velocity: number) {
   return (velocity / 1000) * (DECELERATION / (1 - DECELERATION));
