@@ -337,6 +337,58 @@ function validateCheckpointsReply(data: unknown, starts: number[]): string[] {
 }
 
 /**
+ * Chapter starts must be copied verbatim from the transcript segment starts —
+ * a made-up time would drop the learner mid-sentence. Titles are short, in
+ * sentence case, unnumbered and unique.
+ */
+function validateChaptersReply(data: unknown, starts: number[]): string[] {
+  if (!data || typeof data !== 'object') return ['reply is not an object'];
+  const list = (data as Rec).chapters;
+  if (!Array.isArray(list) || list.length < 2)
+    return ['reply.chapters must be an array of at least 2 chapters'];
+  const errs: string[] = [];
+  const first = Math.min(...starts);
+  const seenTitles = new Set<string>();
+  const seenStarts: number[] = [];
+  list.forEach((c, i) => {
+    const r = (c ?? {}) as Rec;
+    const at = `chapters[${i}]`;
+    const start = Number(r.start);
+    if (!Number.isFinite(start) || start < 0) errs.push(`${at}.start must be a number of seconds`);
+    else if (!starts.some((s) => Math.abs(s - start) < 0.01))
+      errs.push(`${at}.start must be exactly one of the segment start times`);
+    else if (seenStarts.some((s) => Math.abs(s - start) < 0.01))
+      errs.push(`${at}.start repeats an earlier chapter start`);
+    else seenStarts.push(start);
+    if (i === 0 && Number.isFinite(start) && Math.abs(start - first) > 0.01)
+      errs.push(`chapters[0].start must be the first segment start (${first})`);
+
+    const title = String(r.title ?? '').trim();
+    if (!title) errs.push(`${at}.title must not be empty`);
+    else {
+      const words = title.split(/\s+/);
+      if (words.length < 2 || words.length > 6) errs.push(`${at}.title must be 2 to 6 words`);
+      if (/[.]$/.test(title)) errs.push(`${at}.title must not end with a full stop`);
+      if (/^(chapter|section|part|step)\s*\d+/i.test(title) || /^\d+[.)]/.test(title))
+        errs.push(`${at}.title must not be numbered`);
+      const key = title.toLowerCase();
+      if (seenTitles.has(key)) errs.push(`${at}.title repeats an earlier title`);
+      seenTitles.add(key);
+    }
+  });
+  // Chapters must come back in playing order.
+  for (let i = 1; i < seenStarts.length; i += 1) {
+    if (seenStarts[i] < seenStarts[i - 1]) {
+      errs.push('chapters must be sorted by start');
+      break;
+    }
+  }
+  return errs;
+}
+
+
+
+/**
  * The reply must cover the blocks and paths that were ASKED FOR — nothing else.
  * Unknown block ids or paths are a schema failure, not something to guess at.
  */
