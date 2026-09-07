@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PortalLayout } from '@/components/layouts/PortalLayout';
 import { useRoles } from '@/hooks/useRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Loader2, Save } from '@/components/icons';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Copy, Eye, Loader2, Save, X } from '@/components/icons';
 import { toast } from 'sonner';
 import { CourseOverviewTab } from '@/components/admin/course-builder/CourseOverviewTab';
 import { CourseModulesTab } from '@/components/admin/course-builder/CourseModulesTab';
@@ -17,6 +18,8 @@ import { CoursePublishingTab } from '@/components/admin/course-builder/CoursePub
 import { ScormPackageManager } from '@/components/admin/ScormPackageManager';
 import { CourseInsightsTab } from '@/components/admin/course-builder/CourseInsightsTab';
 import { CourseHistoryTab } from '@/components/admin/course-builder/CourseHistoryTab';
+import { CloneCourseDialog, type CloneSource } from '@/components/admin/course-builder/CloneCourseDialog';
+
 
 interface Course {
   id: string;
