@@ -24,6 +24,8 @@ import {
 import { openCount, orphanCommentIds, type BlockComment } from '@/lib/blockComments';
 import { blockPayloadFromBank, type BankQuestion } from '@/lib/questionBank';
 import { materialChangeDefault } from '@/lib/contentHistory';
+import { lintLesson, lintByBlock, type LintResult } from '@/lib/contentLint';
+import { ContentQualityPanel } from '@/components/admin/lesson-blocks/ContentQualityPanel';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -66,7 +68,17 @@ export default function LessonContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [lesson, setLesson] = useState<{ title: string; lesson_type: string; trickle_enabled: boolean } | null>(null);
+  const [lesson, setLesson] = useState<{
+    title: string;
+    lesson_type: string;
+    trickle_enabled: boolean;
+    duration_minutes?: number | null;
+  } | null>(null);
+  /** Advisory readability/accessibility result, recomputed off the keystroke path. */
+  const [lint, setLint] = useState<LintResult>({
+    issues: [],
+    stats: { words: 0, sentences: 0, readingAge: 0, longestSentence: 0 },
+  });
   const [blocks, setBlocks] = useState<BlockDraft[]>([]);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [templateDismissed, setTemplateDismissed] = useState(false);
@@ -95,7 +107,11 @@ export default function LessonContentEditor() {
     setLoading(true);
     try {
       const [lessonRes, blocksRes, commentsRes] = await Promise.all([
-        supabase.from('lessons').select('title, lesson_type, trickle_enabled').eq('id', lessonId).maybeSingle(),
+        supabase
+          .from('lessons')
+          .select('title, lesson_type, trickle_enabled, duration_minutes')
+          .eq('id', lessonId)
+          .maybeSingle(),
         supabase
           .from('lesson_blocks')
           .select('*')
@@ -464,6 +480,21 @@ export default function LessonContentEditor() {
   );
   const visibilityInvalid = visibilityIssues.length > 0;
 
+  // Debounced so typing stays smooth; the linter itself is pure and cheap.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setLint(
+        lintLesson(
+          blocks.map((b) => ({ block_type: b.block_type, payload: b.payload })),
+          { durationMinutes: lesson?.duration_minutes ?? null }
+        )
+      );
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [blocks, lesson?.duration_minutes]);
+
+  const lintCounts = lintByBlock(lint.issues);
+
   const previewBlocks: LessonBlock[] = blocks.map((b, index) => ({
     id: b.client_id,
     lesson_id: lessonId ?? '',
@@ -675,6 +706,8 @@ export default function LessonContentEditor() {
 
           {!blocks.length && !templateDismissed && <TemplatePicker onPick={applyTemplate} />}
 
+          {blocks.length > 0 && <ContentQualityPanel result={lint} />}
+
           <BlockList
 
             blocks={blocks}
@@ -683,6 +716,7 @@ export default function LessonContentEditor() {
             onDuplicate={duplicateBlock}
             onRemove={removeBlock}
             visibilityIssues={visibilityIssues}
+            lintByBlock={lintCounts}
             courseId={courseId}
             lessonId={lessonId}
             onReorder={reorderBlocks}
