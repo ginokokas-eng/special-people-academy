@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       }
       const message = error.message ?? String(error);
       // A re-run finds the destination already there: keep going and rewrite.
-      if (/exист|exists|duplicate|resource already/i.test(message)) {
+      if (/exists|duplicate|resource already/i.test(message)) {
         skipped += 1;
         done.set(oldPath, newPath);
         continue;
