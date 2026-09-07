@@ -178,7 +178,9 @@ export function VideoPlayer({
         const d = videoRef.current?.duration ?? 0;
         return Number.isFinite(d) ? d : 0;
       },
+      getSeekCeiling: () => ceilingRef.current,
     };
+
     return () => {
       controllerRef.current = null;
     };
