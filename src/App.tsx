@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { HelmetProvider } from "react-helmet-async";
@@ -25,7 +25,6 @@ import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import CourseLearn from "./pages/CourseLearn";
 import QuizPage from "./pages/QuizPage";
-import MyLearning from "./pages/MyLearning";
 import Refresher from "./pages/Refresher";
 import MyCourses from "./pages/MyCourses";
 import Certificates from "./pages/Certificates";
@@ -71,6 +70,12 @@ import OrgPortal from "./pages/org/OrgPortal";
 import InviteAccept from "./pages/InviteAccept";
 import Renewals from "./pages/Renewals";
 
+/** Legacy learner route: keep any ?tab= selection when redirecting. */
+const MyLearningRedirect = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/my-courses${search}`} replace />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -105,7 +110,8 @@ const App = () => (
                 <Route path="/courses/:id" element={<CourseDetail />} />
                 <Route path="/courses/:id/learn" element={<CourseLearn />} />
                 <Route path="/courses/:courseId/quiz" element={<QuizPage />} />
-                <Route path="/my-learning" element={<MyLearning />} />
+                {/* One place for a learner's courses: /my-learning now lands on /my-courses. */}
+                <Route path="/my-learning" element={<MyLearningRedirect />} />
                 <Route path="/refresher/:scheduleId" element={<Refresher />} />
 
                 <Route path="/my-courses" element={<MyCourses />} />
