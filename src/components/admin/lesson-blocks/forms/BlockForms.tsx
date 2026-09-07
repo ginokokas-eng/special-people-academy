@@ -477,13 +477,18 @@ export function VideoBlockForm({
             onFile={handleFile}
           />
           {payload.path && (
-            <TranscriptReviewPanel
-              lessonId={lessonId}
-              autoFile={transcribeFile}
-              onAutoFileConsumed={() => setTranscribeFile(null)}
-              videoTitle={payload.title}
-            />
+            <>
+              <TranscriptReviewPanel
+                lessonId={lessonId}
+                autoFile={transcribeFile}
+                onAutoFileConsumed={() => setTranscribeFile(null)}
+                videoTitle={payload.title}
+                onSaved={() => setTranscriptVersion((v) => v + 1)}
+              />
+              <TranscriptChaptersPanel lessonId={lessonId} refreshKey={transcriptVersion} />
+            </>
           )}
+
         </div>
 
       ) : (
