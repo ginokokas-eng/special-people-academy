@@ -392,6 +392,7 @@ export default function QuestionBank() {
                 {filtered.map((row) => (
                   <div
                     key={row.id}
+                    data-testid={`bank-row-${row.id}`}
                     className="flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3"
                   >
                     <div className="min-w-0 flex-1 space-y-1">
@@ -408,7 +409,7 @@ export default function QuestionBank() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openUsages(row)}>
+                      <Button variant="ghost" size="sm" data-testid={`bank-usage-count-${row.id}`} onClick={() => openUsages(row)}>
                         Used in {usageCounts[row.id] || 0} place
                         {(usageCounts[row.id] || 0) === 1 ? '' : 's'}
                       </Button>

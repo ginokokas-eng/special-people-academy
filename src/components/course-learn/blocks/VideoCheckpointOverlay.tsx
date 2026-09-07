@@ -69,6 +69,7 @@ export function VideoCheckpointOverlay({
           onExited();
         }
       }}
+      data-testid="video-checkpoint"
       className={cn(
         'adaptive-surface absolute inset-0 z-30 flex items-center justify-center overflow-y-auto bg-background/95 p-4 will-change-[transform,opacity,filter]',
         exiting ? 'material-out pointer-events-none' : 'material-in'
@@ -84,12 +85,13 @@ export function VideoCheckpointOverlay({
         </p>
 
         <div className="space-y-2.5" role="group" aria-label="Answer options">
-          {options.map((opt) => {
+          {options.map((opt, i) => {
             const chosen = selectedId === opt.id;
             return (
               <button
                 key={opt.id}
                 type="button"
+                data-testid={`checkpoint-option-${i}`}
                 onClick={() => onSelect(opt.id)}
                 aria-pressed={chosen}
                 disabled={answeredCorrectly && !chosen}

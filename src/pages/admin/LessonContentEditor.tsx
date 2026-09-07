@@ -616,6 +616,7 @@ export default function LessonContentEditor() {
                 await handleSave();
               }}
               disabled={saving}
+              data-testid="save-content"
             >
               Save content
             </Button>

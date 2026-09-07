@@ -3726,6 +3726,7 @@ export type Database = {
         Args: { _course: string; _limit?: number }
         Returns: Json
       }
+      e2e_delete_course: { Args: { _course_id: string }; Returns: Json }
       fulfil_purchase: {
         Args: {
           _amount_gbp: number

@@ -41,6 +41,7 @@ export function ReflectionForm({ payload, onChange, idPrefix }: Props) {
         <Label htmlFor={`${idPrefix}-prompt`}>What are learners asked to write about?</Label>
         <Textarea
           id={`${idPrefix}-prompt`}
+          data-testid={`block-form-reflection-prompt-${idPrefix}`}
           rows={3}
           value={payload.prompt ?? ''}
           placeholder="Describe a time you noticed a change in someone you support. What did you do, and who did you tell?"
@@ -62,6 +63,7 @@ export function ReflectionForm({ payload, onChange, idPrefix }: Props) {
           <Label htmlFor={`${idPrefix}-min-words`}>Fewest words before they can send</Label>
           <Input
             id={`${idPrefix}-min-words`}
+            data-testid={`block-form-reflection-min_words-${idPrefix}`}
             type="number"
             min={0}
             max={500}
@@ -84,6 +86,7 @@ export function ReflectionForm({ payload, onChange, idPrefix }: Props) {
             <Input
               value={c}
               aria-label={`Point ${i + 1}`}
+              data-testid={`block-form-reflection-criteria-${idPrefix}-${i}`}
               placeholder="Mentions who they escalated to"
               onChange={(e) => setCriterion(i, e.target.value)}
             />

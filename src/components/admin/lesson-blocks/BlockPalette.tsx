@@ -22,6 +22,7 @@ export function BlockPalette({ onAdd, onPickFromBank }: BlockPaletteProps) {
           key={type}
           type="button"
           onClick={() => onAdd(type)}
+          data-testid={`block-palette-${type}`}
           aria-label={`Add ${BLOCK_LABELS[type]} block`}
           className="rounded-lg border bg-card p-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -39,6 +40,7 @@ export function BlockPalette({ onAdd, onPickFromBank }: BlockPaletteProps) {
         <button
           type="button"
           onClick={onPickFromBank}
+          data-testid="block-palette-from-bank"
           aria-label="Add a question from the question bank"
           className="rounded-lg border bg-card p-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

@@ -176,7 +176,7 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
               </TableHeader>
               <TableBody>
                 {filteredDetail.map((row) => (
-                  <TableRow key={`${row.user_id}-${row.block_id}`}>
+                  <TableRow key={`${row.user_id}-${row.block_id}`} data-testid="insights-learner-row">
                     <TableCell className="font-medium">{learnerName(row)}</TableCell>
                     <TableCell className="text-muted-foreground">{row.email ?? '—'}</TableCell>
                     <TableCell>{blockLabel(row.block_type)}</TableCell>
@@ -208,7 +208,7 @@ export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?:
   const payload = block?.payload;
 
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0" data-testid={`insights-block-card-${stat.block_type}`}>
       <CardContent className="min-w-0 space-y-4 p-5">
         <div className="min-w-0 space-y-1">
           <Badge variant="secondary">{blockLabel(stat.block_type)}</Badge>

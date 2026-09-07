@@ -113,7 +113,7 @@ export function MarkingQueue({ organisationId }: { organisationId?: string }) {
       ) : (
         <div className="space-y-3">
           {visible.map((row) => (
-            <Card key={`${row.block_id}-${row.user_id}`}>
+            <Card key={`${row.block_id}-${row.user_id}`} data-testid={`marking-row-${row.block_id}-${row.user_id}`}>
               <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -141,7 +141,7 @@ export function MarkingQueue({ organisationId }: { organisationId?: string }) {
                       Needs marking
                     </Badge>
                   )}
-                  <Button size="sm" onClick={() => setOpen(row)}>
+                  <Button size="sm" data-testid="marking-open" onClick={() => setOpen(row)}>
                     {row.block_type === 'reflection' ? 'Read and mark' : 'Record observation'}
                   </Button>
                 </div>
@@ -305,7 +305,7 @@ function MarkDialog({
           <div className="flex flex-wrap gap-2">
             {isReflection ? (
               <>
-                <Button disabled={saving} onClick={() => void save('met')}>
+                <Button disabled={saving} data-testid="marking-outcome-met" onClick={() => void save('met')}>
                   Mark as met
                 </Button>
                 <Button variant="outline" disabled={saving} onClick={() => void save('not_yet')}>
@@ -313,7 +313,7 @@ function MarkDialog({
                 </Button>
               </>
             ) : (
-              <Button disabled={saving} onClick={() => void save()}>
+              <Button disabled={saving} data-testid="marking-save" onClick={() => void save()}>
                 Save observation
               </Button>
             )}

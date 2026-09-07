@@ -454,7 +454,7 @@ export function BlockList({
                         setVisibility({ block_id, when: when as VisibilityWhen });
                       }}
                     >
-                      <SelectTrigger id={`${idPrefix}-visibility`} className="h-8 w-auto min-w-[18rem] text-xs">
+                      <SelectTrigger id={`${idPrefix}-visibility`} data-testid={`block-form-visibility-when-${idPrefix}`} className="h-8 w-auto min-w-[18rem] text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

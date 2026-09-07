@@ -48,6 +48,7 @@ export function TextBlockForm({ payload, onChange, idPrefix }: FormProps<TextPay
         <Label htmlFor={`${idPrefix}-heading`}>Heading (optional)</Label>
         <Input
           id={`${idPrefix}-heading`}
+          data-testid={`block-form-text-heading-${idPrefix}`}
           value={payload.heading ?? ''}
           placeholder="e.g. Before you start"
           onChange={(e) => onChange({ ...payload, heading: e.target.value })}
@@ -57,6 +58,7 @@ export function TextBlockForm({ payload, onChange, idPrefix }: FormProps<TextPay
         <Label htmlFor={`${idPrefix}-text`}>Text</Label>
         <Textarea
           id={`${idPrefix}-text`}
+          data-testid={`block-form-text-text-${idPrefix}`}
           rows={6}
           value={payload.text ?? ''}
           placeholder={'Write a paragraph.\n\nLeave a blank line for a new paragraph.\n- Start a line with a dash for a bullet'}
@@ -80,7 +82,7 @@ export function CalloutBlockForm({ payload, onChange, idPrefix }: FormProps<Call
             value={payload.variant}
             onValueChange={(v) => onChange({ ...payload, variant: v as CalloutPayload['variant'] })}
           >
-            <SelectTrigger id={`${idPrefix}-variant`}>
+            <SelectTrigger id={`${idPrefix}-variant`} data-testid={`block-form-callout-variant-${idPrefix}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -95,6 +97,7 @@ export function CalloutBlockForm({ payload, onChange, idPrefix }: FormProps<Call
           <Label htmlFor={`${idPrefix}-title`}>Title (optional)</Label>
           <Input
             id={`${idPrefix}-title`}
+            data-testid={`block-form-callout-title-${idPrefix}`}
             value={payload.title ?? ''}
             placeholder="Defaults to the style name"
             onChange={(e) => onChange({ ...payload, title: e.target.value })}
@@ -105,6 +108,7 @@ export function CalloutBlockForm({ payload, onChange, idPrefix }: FormProps<Call
         <Label htmlFor={`${idPrefix}-text`}>Text</Label>
         <Textarea
           id={`${idPrefix}-text`}
+          data-testid={`block-form-callout-text-${idPrefix}`}
           rows={4}
           value={payload.text ?? ''}
           onChange={(e) => onChange({ ...payload, text: e.target.value })}
@@ -163,6 +167,7 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
                 <Label htmlFor={`${idPrefix}-front-${card.id}`}>Front (prompt)</Label>
                 <Input
                   id={`${idPrefix}-front-${card.id}`}
+                  data-testid={`block-form-card_deck-front-${idPrefix}-${i}`}
                   value={card.front}
                   onChange={(e) => updateCard(card.id, { front: e.target.value })}
                 />
@@ -171,6 +176,7 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
                 <Label htmlFor={`${idPrefix}-back-${card.id}`}>Back (reveal)</Label>
                 <Textarea
                   id={`${idPrefix}-back-${card.id}`}
+                  data-testid={`block-form-card_deck-back-${idPrefix}-${i}`}
                   rows={2}
                   value={card.back}
                   onChange={(e) => updateCard(card.id, { back: e.target.value })}
@@ -191,6 +197,7 @@ export function CardDeckBlockForm({ payload, onChange, idPrefix }: FormProps<Car
             cards: [...cards, { id: crypto.randomUUID(), front: '', back: '' }],
           })
         }
+        data-testid={`block-form-card_deck-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add card
       </Button>
@@ -225,6 +232,7 @@ export function ImageBlockForm({
         <Label htmlFor={`${idPrefix}-alt`}>Alt text (describes the image)</Label>
         <Input
           id={`${idPrefix}-alt`}
+          data-testid={`block-form-image-alt-${idPrefix}`}
           value={payload.alt ?? ''}
           placeholder="e.g. Nurse checking a feeding tube position"
           onChange={(e) => onChange({ ...payload, alt: e.target.value })}
@@ -316,6 +324,7 @@ export function AccordionBlockForm({ payload, onChange, idPrefix }: FormProps<Ac
                 <Label htmlFor={`${idPrefix}-title-${item.id}`}>Section title</Label>
                 <Input
                   id={`${idPrefix}-title-${item.id}`}
+                  data-testid={`block-form-accordion-title-${idPrefix}-${i}`}
                   value={item.title}
                   onChange={(e) => updateItem(item.id, { title: e.target.value })}
                 />
@@ -324,6 +333,7 @@ export function AccordionBlockForm({ payload, onChange, idPrefix }: FormProps<Ac
                 <Label htmlFor={`${idPrefix}-body-${item.id}`}>Section text</Label>
                 <Textarea
                   id={`${idPrefix}-body-${item.id}`}
+                  data-testid={`block-form-accordion-body-${idPrefix}-${i}`}
                   rows={4}
                   value={item.body}
                   onChange={(e) => updateItem(item.id, { body: e.target.value })}
@@ -347,6 +357,7 @@ export function AccordionBlockForm({ payload, onChange, idPrefix }: FormProps<Ac
             items: [...items, { id: crypto.randomUUID(), title: '', body: '' }],
           })
         }
+        data-testid={`block-form-accordion-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add section
       </Button>
@@ -429,6 +440,7 @@ export function VideoBlockForm({
           type="button"
           size="sm"
           variant={source === 'storage' ? 'default' : 'outline'}
+          data-testid={`block-form-video-source-${idPrefix}`}
           onClick={() => {
             if (source !== 'storage') onChange({ ...payload, source: 'storage' });
             inputRef.current?.click();
@@ -450,6 +462,7 @@ export function VideoBlockForm({
         <div className="space-y-2">
           <FileDropZone
             inputId={`${idPrefix}-file`}
+            inputTestId={`block-form-video-file-${idPrefix}`}
             inputRef={inputRef}
             accept={VIDEO_ACCEPT}
             label="Video file"
@@ -477,6 +490,7 @@ export function VideoBlockForm({
           <Label htmlFor={`${idPrefix}-video-url`}>Video link</Label>
           <Input
             id={`${idPrefix}-video-url`}
+            data-testid={`block-form-video-url-${idPrefix}`}
             value={payload.url ?? ''}
             placeholder="https://youtu.be/… or https://…/video.mp4"
             onChange={(e) => onChange({ ...payload, source: 'url', url: e.target.value })}
@@ -493,6 +507,7 @@ export function VideoBlockForm({
           <Label htmlFor={`${idPrefix}-video-title`}>Title (optional)</Label>
           <Input
             id={`${idPrefix}-video-title`}
+            data-testid={`block-form-video-title-${idPrefix}`}
             value={payload.title ?? ''}
             onChange={(e) => onChange({ ...payload, title: e.target.value })}
           />

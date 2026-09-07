@@ -137,6 +137,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
 
   /* --------------------------------- render -------------------------------- */
   const renderNode = (node: ScenarioNode) => {
+    const nodeIndex = nodes.findIndex((n) => n.id === node.id);
     const open = openId === node.id;
     const nodeIssues = issuesByNode.get(node.id) ?? [];
     const media: MediaRef | null = node.image_path
@@ -230,6 +231,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
                 <Label htmlFor={`${idPrefix}-title-${node.id}`}>Heading (optional)</Label>
                 <Input
                   id={`${idPrefix}-title-${node.id}`}
+                  data-testid={`block-form-scenario-node-${idPrefix}-${nodeIndex}`}
                   value={node.title ?? ''}
                   onChange={(e) => updateNode(node.id, { title: e.target.value })}
                 />
@@ -286,6 +288,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
                     <div className="flex items-center gap-2">
                       <Input
                         value={choice.label}
+                        data-testid={`block-form-scenario-choice-${idPrefix}-${nodeIndex}-${ci}`}
                         placeholder={`Choice ${ci + 1}`}
                         onChange={(e) =>
                           setChoices(
@@ -393,7 +396,7 @@ export function ScenarioForm({ payload, onChange, idPrefix, courseId, lessonId }
             value={payload.start_id || ''}
             onValueChange={(value) => onChange({ ...payload, start_id: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger data-testid={`block-form-scenario-title-${idPrefix}`}>
               <SelectValue placeholder="Choose the first step" />
             </SelectTrigger>
             <SelectContent>

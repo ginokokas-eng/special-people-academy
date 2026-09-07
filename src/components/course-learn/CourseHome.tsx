@@ -321,6 +321,7 @@ export function CourseHome({
                     }}
                     role="button"
                     tabIndex={0}
+                    data-testid={`hub-lesson-${lesson.id}`}
                     data-wash={media ? undefined : wash}
                     data-complete={status === 'completed' ? 'true' : undefined}
                     aria-label={`${lesson.title} — ${
@@ -433,16 +434,16 @@ export function CourseHome({
 
                       <div className="mt-auto flex items-center justify-between gap-2">
                         {status === 'completed' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
+                          <span data-testid={`hub-lesson-status-${lesson.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-success">
                             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Completed
                           </span>
                         ) : status === 'continue' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                          <span data-testid={`hub-lesson-status-${lesson.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                             Continue
                             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                           </span>
                         ) : (
-                          <span className="text-xs font-medium text-muted-foreground">
+                          <span data-testid={`hub-lesson-status-${lesson.id}`} className="text-xs font-medium text-muted-foreground">
                             Not started
                           </span>
                         )}

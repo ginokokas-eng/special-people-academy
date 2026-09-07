@@ -470,6 +470,7 @@ export function VideoPlayer({
           ref={videoRef}
           key={activeSrc}
           src={activeSrc}
+          data-testid="learner-video"
           className={cn(
             'h-full w-full bg-card object-contain transition-opacity duration-500',
             loaded ? 'opacity-100' : 'opacity-0'
