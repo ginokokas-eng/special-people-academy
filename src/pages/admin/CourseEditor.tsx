@@ -128,6 +128,59 @@ export default function CourseEditor() {
     }
   };
 
+  /**
+   * Does any uploaded file in this copy still sit in the original course's
+   * folder? Files there are refused for this course's learners, so staff are
+   * offered a retry until nothing points at the original any more.
+   */
+  const checkMedia = async (courseId: string, sourceId: string) => {
+    const { data: lessons } = await supabase.from('lessons').select('id').eq('course_id', courseId);
+    const lessonIds = (lessons ?? []).map((l) => l.id);
+    if (!lessonIds.length) {
+      setMediaStale(false);
+      return;
+    }
+    const [{ data: blocks }, { data: sources }] = await Promise.all([
+      supabase.from('lesson_blocks').select('payload').in('lesson_id', lessonIds),
+      supabase.from('lesson_video_sources').select('source_url').in('lesson_id', lessonIds),
+    ]);
+    const stale =
+      (blocks ?? []).some((b) => JSON.stringify(b.payload ?? {}).includes(`${sourceId}/`)) ||
+      (sources ?? []).some((s) => String(s.source_url ?? '').startsWith(`${sourceId}/`));
+    setMediaStale(stale);
+  };
+
+  const retryMedia = async () => {
+    if (!course?.cloned_from_course_id) return;
+    setRetryingMedia(true);
+    try {
+      const { error } = await supabase.functions.invoke('clone-course-media', {
+        body: { course_id: course.id },
+      });
+      if (error) throw error;
+      await checkMedia(course.id, course.cloned_from_course_id);
+      toast.success('Files copied');
+    } catch (err) {
+      console.error('Retrying the media copy failed:', err);
+      toast.error('The files could not be copied. Please try again.');
+    } finally {
+      setRetryingMedia(false);
+    }
+  };
+
+  const retryButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      data-testid="clone-media-retry"
+      onClick={retryMedia}
+      disabled={retryingMedia}
+    >
+      {retryingMedia && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+      Retry media copy
+    </Button>
+  );
+
   const handleSave = async () => {
     if (!course) return;
 
