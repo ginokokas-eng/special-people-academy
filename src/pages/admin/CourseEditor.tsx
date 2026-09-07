@@ -64,6 +64,13 @@ export default function CourseEditor() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [cloneSource, setCloneSource] = useState<CloneSource | null>(null);
+  /** Title of the course this one was copied from, when it is a copy. */
+  const [clonedFromTitle, setClonedFromTitle] = useState<string | null>(null);
+  // The dialog lands here with ?cloned=1 straight after a copy is made.
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const justCloned = searchParams.get('cloned') === '1' && !bannerDismissed;
+
 
   useEffect(() => {
     if (!rolesLoading && !isSuperAdmin && !isOpsTrainingAdmin) {
