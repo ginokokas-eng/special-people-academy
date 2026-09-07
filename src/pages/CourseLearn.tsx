@@ -439,7 +439,10 @@ export default function CourseLearn() {
       const [{ data: tData }, { data: vData }] = await Promise.all([
         sb
           .from('lesson_transcripts')
-          .select('id, lesson_id, language_code, language_label, transcript_text, vtt_url, segments')
+          .select(
+            'id, lesson_id, language_code, language_label, transcript_text, vtt_url, segments, chapters'
+          )
+
           .eq('lesson_id', activeLesson.id)
           .order('language_code')
           .limit(1),
