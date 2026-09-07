@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 /**
  * Small back-to-top affordance for long lessons. It watches the nearest
@@ -12,6 +13,7 @@ export function BackToTop({ threshold = 900 }: { threshold?: number }) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLElement | Window | null>(null);
   const [visible, setVisible] = useState(false);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     // Find the scrolling ancestor; fall back to the window.
@@ -37,9 +39,7 @@ export function BackToTop({ threshold = 900 }: { threshold?: number }) {
 
   const toTop = () => {
     const scroller = scrollerRef.current;
-    const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 'auto'
-      : 'smooth';
+    const behavior: ScrollBehavior = reduced ? 'auto' : 'smooth';
     if (!scroller || scroller === window) window.scrollTo({ top: 0, behavior });
     else (scroller as HTMLElement).scrollTo({ top: 0, behavior });
   };

@@ -189,9 +189,8 @@ export function CourseHome({
     if (!highlightLessonId) return;
     const el = cardRefs.current[highlightLessonId];
     if (!el) return;
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
-  }, [highlightLessonId]);
+  }, [highlightLessonId, reduced]);
 
   const statusOf = (lesson: LearnLesson): LessonStatus => {
     if (completedIds.has(lesson.id)) return 'completed';
