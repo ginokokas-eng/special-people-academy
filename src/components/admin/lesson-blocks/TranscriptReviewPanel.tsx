@@ -178,6 +178,8 @@ export function TranscriptReviewPanel({
       setTruncated(null);
       setMode('replace');
       setStatus('idle');
+      onSaved?.();
+
     } catch (err) {
       console.error('Saving transcript failed:', err);
       setError('The transcript could not be saved. Please try again.');
