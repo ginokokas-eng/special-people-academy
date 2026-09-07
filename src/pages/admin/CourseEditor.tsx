@@ -287,10 +287,14 @@ export default function CourseEditor() {
         {justCloned && (
           <Alert data-testid="clone-banner">
             <AlertDescription className="flex items-start justify-between gap-4">
-              <span>
-                Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
-                Uploaded videos and images still point at the original course's files until the
-                media copy finishes.
+              <span className="space-y-2 block">
+                <span className="block">
+                  Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
+                  {mediaStale
+                    ? ' Some videos or images could not be copied and still point at the original course.'
+                    : ''}
+                </span>
+                {mediaStale && <span className="block">{retryButton}</span>}
               </span>
               <Button
                 variant="ghost"
