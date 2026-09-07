@@ -17,7 +17,10 @@ interface Props {
   onAutoFileConsumed: () => void;
   /** Video block title, used as the heading when appending to an existing transcript. */
   videoTitle?: string;
+  /** Called after a transcript is written, so sections can re-read the timings. */
+  onSaved?: () => void;
 }
+
 
 type Status = 'idle' | 'extracting' | 'transcribing' | 'review' | 'saving';
 
