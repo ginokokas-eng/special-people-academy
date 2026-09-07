@@ -129,6 +129,7 @@ export function BlockReflection({
 
       <Textarea
         value={text}
+        data-testid="reflection-text"
         readOnly={readOnly}
         rows={7}
         aria-label="Your answer"
@@ -140,7 +141,7 @@ export function BlockReflection({
       <div className="flex flex-wrap items-center gap-3">
         {!readOnly ? (
           <>
-            <Button className="pressable" onClick={() => void submit()} disabled={!longEnough || saving}>
+            <Button className="pressable" data-testid="reflection-submit" onClick={() => void submit()} disabled={!longEnough || saving}>
               {submitted ? 'Send again' : 'Submit for marking'}
             </Button>
             <span className="text-xs tabular-nums text-muted-foreground">
@@ -154,6 +155,7 @@ export function BlockReflection({
             {mark ? (
               <Badge
                 variant="secondary"
+                data-testid="reflection-mark"
                 className={cn(
                   'gap-1.5',
                   mark.outcome === 'met' ? 'text-success' : 'text-foreground'
@@ -163,7 +165,7 @@ export function BlockReflection({
                 {markLabel}
               </Badge>
             ) : (
-              <Badge variant="secondary" className="gap-1.5">
+              <Badge variant="secondary" data-testid="reflection-mark" className="gap-1.5">
                 <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                 Sent — waiting to be marked
               </Badge>

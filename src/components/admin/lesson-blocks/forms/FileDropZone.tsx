@@ -18,6 +18,8 @@ interface Props {
   /** Name of the already-stored file, if any. */
   storedName?: string | null;
   onFile: (file: File | null) => void;
+  /** Optional test id for the hidden native file input. */
+  inputTestId?: string;
 }
 
 /**
@@ -35,6 +37,7 @@ export function FileDropZone({
   progress,
   storedName,
   onFile,
+  inputTestId,
 }: Props) {
   const [dragging, setDragging] = useState(false);
   const open = () => {
@@ -53,6 +56,7 @@ export function FileDropZone({
         accept={accept}
         disabled={uploading}
         className="sr-only"
+        data-testid={inputTestId}
         onChange={(e) => onFile(e.target.files?.[0] ?? null)}
       />
       <div

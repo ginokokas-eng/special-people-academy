@@ -123,6 +123,7 @@ export function BankPicker({
                 <Button
                   type="button"
                   size="sm"
+                  data-testid={`bank-picker-insert-${row.id}`}
                   disabled={picking !== null}
                   onClick={async () => {
                     setPicking(row.id);

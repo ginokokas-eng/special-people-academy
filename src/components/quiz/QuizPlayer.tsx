@@ -185,7 +185,7 @@ export function QuizPlayer({
     const { score, passed, correct_count: correctCount, total } = result;
 
     return (
-      <Card className="max-w-2xl mx-auto">
+      <Card className="max-w-2xl mx-auto" data-testid="quiz-result">
         <CardHeader className="text-center pb-2">
           <div className={cn(
             "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center",
@@ -368,6 +368,7 @@ export function QuizPlayer({
                 state={state}
                 disabled={revealed || checking}
                 onSelect={() => handleAnswerSelect(index)}
+                testId={`quiz-option-${index}`}
               />
             );
           })}
@@ -422,6 +423,7 @@ export function QuizPlayer({
         {!revealed ? (
           <Button
             className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
+            data-testid="quiz-check"
             onClick={handleSubmitAnswer}
             disabled={selectedAnswer === null || checking}
           >
@@ -431,6 +433,7 @@ export function QuizPlayer({
         ) : (
           <Button
             className="pressable h-[52px] w-full rounded-full text-[15px] font-semibold"
+            data-testid="quiz-submit"
             onClick={handleNextQuestion}
             disabled={submitting}
           >

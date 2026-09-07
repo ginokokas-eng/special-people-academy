@@ -148,6 +148,7 @@ export function CheckpointEditor({ payload, onChange, idPrefix, lessonId }: Prop
             variant="outline"
             size="sm"
             onClick={() => update([...checkpoints, newCheckpoint(0)])}
+            data-testid={`block-form-video-checkpoint-add-${idPrefix}`}
           >
             <Plus className="mr-1.5 h-3.5 w-3.5" /> Add checkpoint
           </Button>
@@ -191,6 +192,7 @@ export function CheckpointEditor({ payload, onChange, idPrefix, lessonId }: Prop
                 <Label htmlFor={`${idPrefix}-cp-${cp.id}-at`}>Time (mm:ss)</Label>
                 <Input
                   id={`${idPrefix}-cp-${cp.id}-at`}
+                  data-testid={`block-form-video-checkpoint-at-${idPrefix}-${index}`}
                   value={raw[cp.id] ?? secondsToMmSs(cp.at_s)}
                   placeholder="1:30"
                   aria-invalid={!cp.at_s || cp.at_s <= 0 || undefined}
@@ -216,6 +218,7 @@ export function CheckpointEditor({ payload, onChange, idPrefix, lessonId }: Prop
                 <Label htmlFor={`${idPrefix}-cp-${cp.id}-q`}>Question</Label>
                 <Input
                   id={`${idPrefix}-cp-${cp.id}-q`}
+                  data-testid={`block-form-video-checkpoint-question-${idPrefix}-${index}`}
                   value={cp.question}
                   onChange={(e) => patch(cp.id, { question: e.target.value })}
                 />
@@ -232,10 +235,12 @@ export function CheckpointEditor({ payload, onChange, idPrefix, lessonId }: Prop
                     checked={cp.correct_id === opt.id}
                     onChange={() => patch(cp.id, { correct_id: opt.id })}
                     aria-label={`Option ${oi + 1} is correct`}
+                    data-testid={`block-form-video-checkpoint-correct-${idPrefix}-${index}-${oi}`}
                     className="h-4 w-4"
                   />
                   <Input
                     value={opt.label}
+                    data-testid={`block-form-video-checkpoint-option-${idPrefix}-${index}-${oi}`}
                     placeholder={`Option ${oi + 1}`}
                     onChange={(e) =>
                       patch(cp.id, {

@@ -108,6 +108,7 @@ export function CarouselBlockForm({
               <Label htmlFor={`${idPrefix}-slide-${index}-title`}>Slide title</Label>
               <Input
                 id={`${idPrefix}-slide-${index}-title`}
+                data-testid={`block-form-carousel-title-${idPrefix}-${index}`}
                 value={item.title}
                 onChange={(e) => patchItem(index, { title: e.target.value })}
               />
@@ -116,6 +117,7 @@ export function CarouselBlockForm({
               <Label htmlFor={`${idPrefix}-slide-${index}-text`}>Slide text</Label>
               <Textarea
                 id={`${idPrefix}-slide-${index}-text`}
+                data-testid={`block-form-carousel-text-${idPrefix}-${index}`}
                 rows={3}
                 value={item.text}
                 onChange={(e) => patchItem(index, { text: e.target.value })}
@@ -154,6 +156,7 @@ export function CarouselBlockForm({
         onClick={() =>
           setItems([...items, { id: crypto.randomUUID(), title: '', text: '' }])
         }
+        data-testid={`block-form-carousel-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add slide
       </Button>
@@ -217,12 +220,14 @@ export function HotGraphicBlockForm({
         idPrefix={idPrefix}
         courseId={courseId}
         lessonId={lessonId}
+        urlTestId={`block-form-hot_graphic-url-${idPrefix}`}
       />
 
       <div className="space-y-1.5">
         <Label htmlFor={`${idPrefix}-alt`}>Alt text for the image (required)</Label>
         <Input
           id={`${idPrefix}-alt`}
+          data-testid={`block-form-hot_graphic-alt-${idPrefix}`}
           value={payload.alt ?? ''}
           placeholder="e.g. A feeding pump set up beside a bed"
           onChange={(e) => onChange({ ...payload, alt: e.target.value })}
@@ -237,6 +242,7 @@ export function HotGraphicBlockForm({
               size="sm"
               variant={placing ? 'default' : 'outline'}
               onClick={() => setPlacing((v) => !v)}
+              data-testid={`block-form-hot_graphic-hotspot-add-${idPrefix}`}
             >
               {placing ? 'Click the image to place a point' : 'Add a point'}
             </Button>
@@ -312,6 +318,7 @@ export function HotGraphicBlockForm({
               <Label htmlFor={`${idPrefix}-spot-${index}-title`}>Title</Label>
               <Input
                 id={`${idPrefix}-spot-${index}-title`}
+                data-testid={`block-form-hot_graphic-hotspot-title-${idPrefix}-${index}`}
                 value={spot.title}
                 onChange={(e) => patchSpot(spot.id, { title: e.target.value })}
               />
@@ -320,6 +327,7 @@ export function HotGraphicBlockForm({
               <Label htmlFor={`${idPrefix}-spot-${index}-text`}>What learners read</Label>
               <Textarea
                 id={`${idPrefix}-spot-${index}-text`}
+                data-testid={`block-form-hot_graphic-hotspot-text-${idPrefix}-${index}`}
                 rows={3}
                 value={spot.text}
                 onChange={(e) => patchSpot(spot.id, { text: e.target.value })}

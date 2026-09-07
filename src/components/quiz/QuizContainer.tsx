@@ -503,7 +503,7 @@ export function QuizContainer({
               Attempts exhausted
             </Button>
           ) : (
-            <Button size="lg" onClick={() => setStarted(true)} disabled={hasPassed && attemptsLeft === 0}>
+            <Button size="lg" data-testid="quiz-start" onClick={() => setStarted(true)} disabled={hasPassed && attemptsLeft === 0}>
               <Play className="h-4 w-4 mr-2" />
               {attempts.length > 0 ? 'Retake Quiz' : 'Start Quiz'}
             </Button>

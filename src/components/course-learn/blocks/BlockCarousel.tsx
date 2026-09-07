@@ -288,6 +288,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
             type="button"
             variant="outline"
             size="sm"
+            data-testid="carousel-prev"
             className="pressable min-h-11"
             onClick={() => go(index - 1)}
             disabled={index === 0}
@@ -317,6 +318,7 @@ export function BlockCarousel({ payload, onAllViewed, showProgress }: Props) {
             type="button"
             variant="outline"
             size="sm"
+            data-testid="carousel-next"
             className="pressable min-h-11"
             onClick={() => go(index + 1)}
             disabled={index === items.length - 1}

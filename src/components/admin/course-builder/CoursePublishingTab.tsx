@@ -303,7 +303,7 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
               </div>
 
               {course.status === 'review' && canPublish && (
-                <Button onClick={() => handleStatusChange('published')} disabled={saving}>
+                <Button onClick={() => handleStatusChange('published')} disabled={saving} data-testid="publish-course">
                   {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
                   Publish Course
                 </Button>

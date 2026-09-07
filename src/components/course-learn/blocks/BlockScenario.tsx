@@ -225,13 +225,14 @@ export function BlockScenario({
 
         {current.kind === 'decision' && (
           <div className="space-y-2.5" role="group" aria-label="What do you do?">
-            {(current.choices ?? []).map((choice) => {
+            {(current.choices ?? []).map((choice, i) => {
               const chosen = picked === choice.id;
               const style = QUALITY_STYLES[choice.quality] ?? QUALITY_STYLES.acceptable;
               return (
                 <button
                   key={choice.id}
                   type="button"
+                  data-testid={`scenario-choice-${i}`}
                   onClick={() => choose(choice)}
                   disabled={!!picked && !chosen}
                   aria-pressed={chosen}

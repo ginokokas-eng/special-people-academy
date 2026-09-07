@@ -24,6 +24,8 @@ interface Props {
   /** Needed to build the storage path {course_id}/{lesson_id}/{uuid}.{ext}. */
   courseId?: string;
   lessonId?: string;
+  /** Optional override for the URL/file input's test id (defaults to image-url pattern). */
+  urlTestId?: string;
 }
 
 /**
@@ -38,6 +40,7 @@ export function MediaUploadField({
   label = 'Image',
   courseId,
   lessonId,
+  urlTestId,
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -116,6 +119,7 @@ export function MediaUploadField({
       {source === 'storage' ? (
         <FileDropZone
           inputId={`${idPrefix}-image-file`}
+          inputTestId={urlTestId ?? `block-form-image-url-${idPrefix}`}
           inputRef={inputRef}
           accept={IMAGE_ACCEPT}
           label={`${label} file`}
@@ -134,6 +138,7 @@ export function MediaUploadField({
           </Label>
           <Input
             id={`${idPrefix}-image-url`}
+            data-testid={urlTestId ?? `block-form-image-url-${idPrefix}`}
             value={value?.url ?? ''}
             placeholder="https://…/photo.jpg"
             onChange={(e) => onChange({ source: 'url', url: e.target.value })}

@@ -55,6 +55,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
         <Label htmlFor={`${idPrefix}-question`}>Question</Label>
         <Textarea
           id={`${idPrefix}-question`}
+          data-testid={`block-form-mcq-question-${idPrefix}`}
           rows={2}
           value={payload.question ?? ''}
           placeholder="e.g. What do you check before every feed?"
@@ -69,6 +70,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
               <Label htmlFor={`${idPrefix}-option-${opt.id}`}>Answer {i + 1}</Label>
               <Input
                 id={`${idPrefix}-option-${opt.id}`}
+                data-testid={`block-form-mcq-option-${idPrefix}-${i}`}
                 value={opt.label}
                 onChange={(e) =>
                   onChange({
@@ -112,6 +114,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
             options: [...options, { id: crypto.randomUUID(), label: '' }],
           })
         }
+        data-testid={`block-form-mcq-option-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add answer
       </Button>
@@ -123,7 +126,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
             value={payload.correct_id || options[0]?.id}
             onValueChange={(v) => onChange({ ...payload, correct_id: v })}
           >
-            <SelectTrigger id={`${idPrefix}-correct`}>
+            <SelectTrigger id={`${idPrefix}-correct`} data-testid={`block-form-mcq-correct-${idPrefix}`}>
               <SelectValue placeholder="Choose the correct answer" />
             </SelectTrigger>
             <SelectContent>
@@ -139,6 +142,7 @@ export function McqBlockForm({ payload, onChange, idPrefix }: FormProps<McqPaylo
           <Label htmlFor={`${idPrefix}-explanation`}>Explanation (shown after answering)</Label>
           <Textarea
             id={`${idPrefix}-explanation`}
+            data-testid={`block-form-mcq-explanation-${idPrefix}`}
             rows={2}
             value={payload.explanation ?? ''}
             onChange={(e) => onChange({ ...payload, explanation: e.target.value })}
@@ -251,7 +255,7 @@ function BankActions({
           )}
         </>
       ) : (
-        <Button type="button" variant="outline" size="sm" onClick={saveToBank} disabled={saving}>
+        <Button type="button" variant="outline" size="sm" onClick={saveToBank} disabled={saving} data-testid="bank-save-question">
           <Library className="mr-2 h-4 w-4" /> Save to question bank
         </Button>
       )}
@@ -273,6 +277,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
         <Label htmlFor={`${idPrefix}-prompt`}>Instruction</Label>
         <Input
           id={`${idPrefix}-prompt`}
+          data-testid={`block-form-drag_match-prompt-${idPrefix}`}
           value={payload.prompt ?? ''}
           placeholder="e.g. Match each step to when it happens"
           onChange={(e) => onChange({ ...payload, prompt: e.target.value })}
@@ -287,6 +292,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
               <Label htmlFor={`${idPrefix}-target-${target.id}`}>Group {i + 1}</Label>
               <Input
                 id={`${idPrefix}-target-${target.id}`}
+                data-testid={`block-form-drag_match-target-${idPrefix}-${i}`}
                 value={target.label}
                 onChange={(e) =>
                   onChange({
@@ -317,6 +323,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
           onClick={() =>
             onChange({ ...payload, targets: [...targets, { id: crypto.randomUUID(), label: '' }] })
           }
+          data-testid={`block-form-drag_match-target-add-${idPrefix}`}
         >
           <Plus className="mr-2 h-4 w-4" /> Add group
         </Button>
@@ -366,6 +373,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
                 <Label htmlFor={`${idPrefix}-item-${item.id}`}>Item text</Label>
                 <Input
                   id={`${idPrefix}-item-${item.id}`}
+                  data-testid={`block-form-drag_match-item-${idPrefix}-${i}`}
                   value={item.label}
                   onChange={(e) =>
                     onChange({
@@ -388,7 +396,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
                     })
                   }
                 >
-                  <SelectTrigger id={`${idPrefix}-item-target-${item.id}`}>
+                  <SelectTrigger id={`${idPrefix}-item-target-${item.id}`} data-testid={`block-form-drag_match-item-target-${idPrefix}-${i}`}>
                     <SelectValue placeholder="Choose a group" />
                   </SelectTrigger>
                   <SelectContent>
@@ -416,6 +424,7 @@ export function DragMatchBlockForm({ payload, onChange, idPrefix }: FormProps<Dr
               ],
             })
           }
+          data-testid={`block-form-drag_match-item-add-${idPrefix}`}
         >
           <Plus className="mr-2 h-4 w-4" /> Add item
         </Button>
@@ -541,6 +550,7 @@ export function FlipCardsBlockForm({ payload, onChange, idPrefix }: FormProps<Fl
                 <Label htmlFor={`${idPrefix}-front-${card.id}`}>Front</Label>
                 <Input
                   id={`${idPrefix}-front-${card.id}`}
+                  data-testid={`block-form-flip_cards-front-${idPrefix}-${i}`}
                   value={card.front}
                   onChange={(e) =>
                     onChange({
@@ -556,6 +566,7 @@ export function FlipCardsBlockForm({ payload, onChange, idPrefix }: FormProps<Fl
                 <Label htmlFor={`${idPrefix}-back-${card.id}`}>Back</Label>
                 <Textarea
                   id={`${idPrefix}-back-${card.id}`}
+                  data-testid={`block-form-flip_cards-back-${idPrefix}-${i}`}
                   rows={2}
                   value={card.back}
                   onChange={(e) =>
@@ -578,6 +589,7 @@ export function FlipCardsBlockForm({ payload, onChange, idPrefix }: FormProps<Fl
         onClick={() =>
           onChange({ ...payload, cards: [...cards, { id: crypto.randomUUID(), front: '', back: '' }] })
         }
+        data-testid={`block-form-flip_cards-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add card
       </Button>
@@ -621,7 +633,7 @@ export function ChecklistBlockForm({ payload, onChange, idPrefix }: FormProps<Ch
             onChange({ ...payload, mode: value as 'reference' | 'assessed' })
           }
         >
-          <SelectTrigger id={`${idPrefix}-mode`}>
+          <SelectTrigger id={`${idPrefix}-mode`} data-testid={`block-form-checklist-mode-${idPrefix}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -682,6 +694,7 @@ export function ChecklistBlockForm({ payload, onChange, idPrefix }: FormProps<Ch
                 <Label htmlFor={`${idPrefix}-step-title-${step.id}`}>Step title</Label>
                 <Input
                   id={`${idPrefix}-step-title-${step.id}`}
+                  data-testid={`block-form-checklist-step-${idPrefix}-${i}`}
                   value={step.step_title}
                   onChange={(e) =>
                     onChange({
@@ -743,6 +756,7 @@ export function ChecklistBlockForm({ payload, onChange, idPrefix }: FormProps<Ch
             ],
           })
         }
+        data-testid={`block-form-checklist-step-add-${idPrefix}`}
       >
         <Plus className="mr-2 h-4 w-4" /> Add step
       </Button>

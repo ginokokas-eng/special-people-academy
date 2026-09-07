@@ -84,13 +84,14 @@ export function BlockMcq({
       </p>
 
       <div className="space-y-2.5" role="group" aria-label="Answer options">
-        {options.map((opt) => {
+        {options.map((opt, i) => {
           const chosen = selected === opt.id;
           const showState = answered && chosen;
           return (
             <button
               key={opt.id}
               type="button"
+              data-testid={`mcq-option-${i}`}
               onClick={() => choose(opt.id)}
               aria-pressed={chosen}
               className={cn(

@@ -545,10 +545,12 @@ export default function LessonContentEditor() {
             </span>
           )}
           <Button
+            data-testid="save-content-open"
             onClick={openSaveDialog}
             disabled={
               saving || !dirty || checkpointsInvalid || scenariosInvalid || visibilityInvalid
             }
+
           >
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -616,6 +618,7 @@ export default function LessonContentEditor() {
                 await handleSave();
               }}
               disabled={saving}
+              data-testid="save-content"
             >
               Save content
             </Button>

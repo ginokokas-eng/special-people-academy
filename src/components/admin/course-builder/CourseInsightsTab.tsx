@@ -87,7 +87,7 @@ export function CourseInsightsTab({ courseId }: { courseId: string }) {
           ) : (
             <div className="max-w-md">
               <Select value={lessonId ?? undefined} onValueChange={setLessonId}>
-                <SelectTrigger aria-label="Lesson">
+                <SelectTrigger aria-label="Lesson" data-testid="insights-lesson-select">
                   <SelectValue placeholder="Choose a lesson" />
                 </SelectTrigger>
                 <SelectContent>

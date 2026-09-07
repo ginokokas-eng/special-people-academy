@@ -43,12 +43,14 @@ function shuffled<T>(list: T[]): T[] {
 
 function ItemButton({
   item,
+  index,
   selected,
   onActivate,
   locked,
   placed,
 }: {
   item: DragMatchItem;
+  index: number;
   selected: boolean;
   onActivate: () => void;
   locked: boolean;
@@ -63,6 +65,7 @@ function ItemButton({
     <button
       ref={setNodeRef}
       type="button"
+      data-testid={`dragmatch-token-${index}`}
       {...attributes}
       {...listeners}
       onClick={onActivate}
@@ -93,12 +96,14 @@ function ItemButton({
 
 function TargetZone({
   id,
+  index,
   label,
   active,
   onActivate,
   children,
 }: {
   id: string;
+  index: number;
   label: string;
   active: boolean;
   onActivate: () => void;
@@ -108,6 +113,7 @@ function TargetZone({
   return (
     <div
       ref={setNodeRef}
+      data-testid={`dragmatch-target-${index}`}
       className={cn(
         'pressable rounded-xl border-2 border-dashed border-border p-3',
         (isOver || active) && 'border-solid border-primary/50 bg-violet-soft'
@@ -317,13 +323,14 @@ export function BlockDragMatch({
 
           <div className="flex flex-wrap gap-2">
             {poolIds.length ? (
-              poolIds.map((id) => {
+              poolIds.map((id, i) => {
                 const item = byId.get(id);
                 if (!item) return null;
                 return (
                   <ItemButton
                     key={id}
                     item={item}
+                    index={i}
                     selected={selectedId === id}
                     onActivate={() => activateItem(id)}
                     locked={false}
@@ -338,23 +345,25 @@ export function BlockDragMatch({
         </div>
 
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {targets.map((target) => (
+          {targets.map((target, ti) => (
             <TargetZone
               key={target.id}
               id={target.id}
+              index={ti}
               label={target.label}
               active={Boolean(selectedId)}
               onActivate={() => selectedId && place(selectedId, target.id)}
             >
               {order
                 .filter((id) => placements[id] === target.id)
-                .map((id) => {
+                .map((id, ii) => {
                   const item = byId.get(id);
                   if (!item) return null;
                   return (
                     <ItemButton
                       key={id}
                       item={item}
+                      index={ii}
                       selected={false}
                       onActivate={() => activateItem(id)}
                       locked={lockedIds.has(id)}
@@ -372,7 +381,7 @@ export function BlockDragMatch({
       </DndContext>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="button" className="pressable" onClick={check} disabled={!allPlaced || solved}>
+        <Button type="button" data-testid="check-answer" className="pressable" onClick={check} disabled={!allPlaced || solved}>
           Check answers
         </Button>
         {solved && (

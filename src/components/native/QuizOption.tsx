@@ -11,6 +11,7 @@ export const QuizOption = ({
   state = 'idle',
   disabled = false,
   onSelect,
+  testId,
 }: {
   /** A, B, C, D */
   letter: string;
@@ -19,6 +20,7 @@ export const QuizOption = ({
   /** Answer already checked — the row keeps its state but stops accepting taps. */
   disabled?: boolean;
   onSelect: () => void;
+  testId?: string;
 }) => {
   const ringColour =
     state === 'selected'
@@ -45,6 +47,7 @@ export const QuizOption = ({
       disabled={disabled}
       aria-pressed={state !== 'idle'}
       data-state={state}
+      data-testid={testId}
       className="quiz-option pressable flex min-h-[68px] w-full items-center gap-3.5 rounded-2xl bg-card px-4 py-3.5 text-left disabled:cursor-default"
     >
       {/* The state ring is its own element rather than an outline or shadow on

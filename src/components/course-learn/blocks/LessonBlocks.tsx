@@ -183,12 +183,13 @@ function CardDeckBlock({
         </Badge>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {cards.map((card) => {
+        {cards.map((card, i) => {
           const open = revealed.has(card.id);
           return (
             <button
               key={card.id}
               type="button"
+              data-testid={`carddeck-card-${i}`}
               onClick={() => toggle(card.id)}
               aria-expanded={open}
               className={cn(
@@ -283,7 +284,7 @@ function AccordionBlock({
       >
         {items.map((item, i) => (
           <AccordionItem key={item.id} value={item.id} className="border-border/60 last:border-b-0">
-            <AccordionTrigger className="pressable text-left text-sm font-semibold data-[state=open]:text-primary">
+            <AccordionTrigger data-testid={`accordion-item-${i}`} className="pressable text-left text-sm font-semibold data-[state=open]:text-primary">
               {item.title || `Section ${i + 1}`}
             </AccordionTrigger>
             <AccordionContent>
@@ -800,13 +801,23 @@ export function LessonBlocks({
                   {row.length === 2 ? (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       {row.map((block) => (
-                        <div key={block.id}>{renderBlock(block)}</div>
+                        <div
+                          key={block.id}
+                          data-testid={`learner-block-${visibleBlocks.findIndex((b) => b.id === block.id)}-${block.block_type}`}
+                        >
+                          {renderBlock(block)}
+                        </div>
                       ))}
                     </div>
                   ) : (
                     // Breakout is scoped to media elements (.media-breakout)
                     // inside a wide row — never to headings or instructions.
-                    <div className={cn(wide && 'media-wide')}>{renderBlock(row[0])}</div>
+                    <div
+                      className={cn(wide && 'media-wide')}
+                      data-testid={`learner-block-${visibleBlocks.findIndex((b) => b.id === row[0].id)}-${row[0].block_type}`}
+                    >
+                      {renderBlock(row[0])}
+                    </div>
 
                   )}
                 </RevealOnScroll>
@@ -825,7 +836,7 @@ export function LessonBlocks({
             </span>
           ) : (
             <>
-              <Button className="pressable" onClick={() => onComplete?.()} disabled={!allSatisfied}>
+              <Button className="pressable" data-testid="mark-complete" onClick={() => onComplete?.()} disabled={!allSatisfied}>
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Mark as complete
               </Button>

@@ -46,12 +46,13 @@ export function BlockFlipCards({ payload, showProgress, onAllFlipped }: BlockFli
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {cards.map((card) => {
+        {cards.map((card, i) => {
           const isFlipped = flipped.has(card.id);
           return (
             <button
               key={card.id}
               type="button"
+              data-testid={`flipcard-${i}`}
               onClick={() => toggle(card.id)}
               aria-pressed={isFlipped}
               className={cn(
