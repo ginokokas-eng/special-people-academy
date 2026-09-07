@@ -101,6 +101,18 @@ export default function CourseEditor() {
         requirements: Array.isArray(data.requirements) ? (data.requirements as string[]) : [],
         available_delivery_types: Array.isArray(data.available_delivery_types) ? data.available_delivery_types : [],
       });
+
+      if (data.cloned_from_course_id) {
+        const { data: sourceRow } = await supabase
+          .from('courses')
+          .select('title')
+          .eq('id', data.cloned_from_course_id)
+          .maybeSingle();
+        setClonedFromTitle(sourceRow?.title ?? null);
+      } else {
+        setClonedFromTitle(null);
+      }
+
     } catch (error) {
       console.error('Error fetching course:', error);
       toast.error('Failed to load course');
