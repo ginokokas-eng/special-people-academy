@@ -259,9 +259,21 @@ export default function CourseEditor() {
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="space-y-3">
+            {course.cloned_from_course_id && (
+              <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
+                Cloned from{' '}
+                <Link
+                  to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
+                  className="underline underline-offset-2"
+                >
+                  {clonedFromTitle ?? 'the original course'}
+                </Link>
+              </p>
+            )}
             <CourseOverviewTab course={course} onUpdate={updateCourse} />
           </TabsContent>
+
 
           <TabsContent value="modules">
             <CourseModulesTab courseId={course.id} />
