@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { loadRun, staffStatePath } from './support/env';
+import { loadRun, saveRun, staffStatePath } from './support/env';
 
 /**
  * Round trip: save an authored MCQ to the shared bank, see it on the bank page,
@@ -19,7 +19,17 @@ test('an MCQ can be saved to the bank and reinserted', async ({ page }) => {
     { timeout: 30_000 },
   );
   await page.getByTestId('bank-save-question').first().click();
-  await saved;
+  const savedResponse = await saved;
+  // Record what was created so teardown can remove it: bank rows are shared and
+  // survive the course delete.
+  try {
+    const created = (await savedResponse.json()) as { id?: string }[] | { id?: string };
+    const rows = Array.isArray(created) ? created : [created];
+    const ids = rows.map((r) => r?.id).filter((id): id is string => !!id);
+    if (ids.length) saveRun({ ...run, bankQuestionIds: [...(run.bankQuestionIds ?? []), ...ids] });
+  } catch {
+    // A representation-less insert is fine; teardown falls back on the title.
+  }
   await expect(page.getByText('Saved to the question bank').first()).toBeVisible({ timeout: 20_000 });
 
   await page.goto('/admin-portal/question-bank');

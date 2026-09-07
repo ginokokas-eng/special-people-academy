@@ -68,6 +68,8 @@ export interface RunRecord {
   mcqBlockId?: string;
   /** Draft copy made by 10-clone-course.spec.ts; teardown deletes it first. */
   cloneCourseId?: string;
+  /** Bank rows created by 06; teardown removes them (they outlive the course). */
+  bankQuestionIds?: string[];
 }
 
 
