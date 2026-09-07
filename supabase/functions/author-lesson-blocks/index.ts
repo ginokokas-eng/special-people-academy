@@ -5,9 +5,10 @@
  * lesson content: it returns id-free drafts that the author accepts (or edits,
  * or rejects) in the editor, and only the editor's own Save writes blocks.
  *
- * Modes: draft_lesson · knowledge_check · suggest_checkpoints · improve_block ·
- * translate_blocks (staff draft only — learners never see draft translations).
- * Every run is logged to ai_authoring_runs (user_id only — no learner PII).
+ * Modes: draft_lesson · knowledge_check · suggest_checkpoints · chapterise ·
+ * improve_block · translate_blocks (staff draft only — learners never see draft
+ * translations). Every run is logged to ai_authoring_runs (user_id only — no
+ * learner PII).
  */
 import { callGatewayJson, GATEWAY_MODEL } from '../_shared/ai-gateway.ts';
 import { adminClient, corsHeaders, json, requireOpsTrainingAdmin, resolveUser } from '../_shared/staff-auth.ts';
@@ -16,14 +17,22 @@ const MAX_TEXT_CHARS = 40_000;
 const MAX_INSTRUCTION_CHARS = 300;
 const DAILY_RUN_CEILING = 60;
 
-type Mode = 'draft_lesson' | 'knowledge_check' | 'suggest_checkpoints' | 'improve_block' | 'translate_blocks';
+type Mode =
+  | 'draft_lesson'
+  | 'knowledge_check'
+  | 'suggest_checkpoints'
+  | 'chapterise'
+  | 'improve_block'
+  | 'translate_blocks';
 const MODES: Mode[] = [
   'draft_lesson',
   'knowledge_check',
   'suggest_checkpoints',
+  'chapterise',
   'improve_block',
   'translate_blocks',
 ];
+
 
 /** v1 ships Romanian only. Adding a language is a constant change here. */
 const TRANSLATION_LANGS: Record<string, string> = { ro: 'Romanian (Română)' };
