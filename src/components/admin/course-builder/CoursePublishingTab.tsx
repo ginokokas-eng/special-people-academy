@@ -268,13 +268,13 @@ export function CoursePublishingTab({ course, onUpdate, isSuperAdmin, userEmail 
           {!course.is_published && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Change Status</Label>
+                <Label htmlFor="course-status">Change Status</Label>
                 <Select
                   value={course.status}
                   onValueChange={handleStatusChange}
                   disabled={saving}
                 >
-                  <SelectTrigger className="w-64">
+                  <SelectTrigger id="course-status" className="w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

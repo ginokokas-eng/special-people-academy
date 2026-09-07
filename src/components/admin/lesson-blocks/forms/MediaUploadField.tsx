@@ -24,8 +24,10 @@ interface Props {
   /** Needed to build the storage path {course_id}/{lesson_id}/{uuid}.{ext}. */
   courseId?: string;
   lessonId?: string;
-  /** Optional override for the URL/file input's test id (defaults to image-url pattern). */
+  /** Optional override for the URL input's test id (defaults to image-url pattern). */
   urlTestId?: string;
+  /** Optional override for the file input's test id (defaults to image-file pattern). */
+  fileTestId?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ export function MediaUploadField({
   courseId,
   lessonId,
   urlTestId,
+  fileTestId,
 }: Props) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -119,7 +122,7 @@ export function MediaUploadField({
       {source === 'storage' ? (
         <FileDropZone
           inputId={`${idPrefix}-image-file`}
-          inputTestId={urlTestId ?? `block-form-image-url-${idPrefix}`}
+          inputTestId={fileTestId ?? `block-form-image-file-${idPrefix}`}
           inputRef={inputRef}
           accept={IMAGE_ACCEPT}
           label={`${label} file`}

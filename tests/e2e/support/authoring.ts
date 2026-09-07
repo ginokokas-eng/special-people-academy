@@ -84,6 +84,10 @@ export async function fillBlock(page: Page, type: BlockType, p: string, runId: s
       break;
 
     case 'image':
+      // MediaUploadField puts the SAME testid on the file input (upload mode) and the URL input
+      // (link mode); switch this block to link mode first. Blocks are filled in order, so the
+      // first 'Paste a link' button on the page belongs to this image block.
+      await page.getByRole('button', { name: 'Paste a link' }).first().click();
       await t(`block-form-image-url-${p}`).fill('https://placehold.co/800x450.png');
       await t(`block-form-image-alt-${p}`).fill('A placeholder illustration');
       break;
@@ -92,7 +96,11 @@ export async function fillBlock(page: Page, type: BlockType, p: string, runId: s
       // URL source keeps the suite off the upload path; checkpoints are covered
       // separately by 08-video-checkpoints with the uploaded fixture.
       await t(`block-form-video-title-${p}`).fill('Short clip');
-      await chooseOption(page, `block-form-video-source-${p}`, /url|link|external/i).catch(() => {});
+      // `block-form-video-source-<p>` is the 'Upload a file' button (it opens the file picker);
+      // the link mode is its untagged sibling button.
+      await t(`block-form-video-source-${p}`)
+        .locator('xpath=following-sibling::button[normalize-space()="Paste a link"]')
+        .click();
       await t(`block-form-video-url-${p}`).fill('https://www.youtube.com/watch?v=aqz-KE-bpKQ');
       break;
 
@@ -106,7 +114,9 @@ export async function fillBlock(page: Page, type: BlockType, p: string, runId: s
       await page.locator(`[data-testid="block-form-hot_graphic-file-${p}"], input[type="file"]`).last()
         .setInputFiles(IMAGE)
         .catch(() => {});
+      // 'Add a point' only arms placement mode; the pin is dropped by clicking the image.
       await t(`block-form-hot_graphic-hotspot-add-${p}`).click();
+      await page.getByRole('img', { name: 'Diagram of a feeding set' }).first().click({ position: { x: 120, y: 90 } });
       await t(`block-form-hot_graphic-hotspot-title-${p}-0`).fill('Giving set');
       await t(`block-form-hot_graphic-hotspot-text-${p}-0`).fill('Replace this every 24 hours.');
       break;
@@ -115,7 +125,7 @@ export async function fillBlock(page: Page, type: BlockType, p: string, runId: s
       await t(`block-form-mcq-question-${p}`).fill('How often is a giving set replaced?');
       await t(`block-form-mcq-option-${p}-0`).fill('Every 24 hours');
       await t(`block-form-mcq-option-${p}-1`).fill('Once a week');
-      await chooseOption(page, `block-form-mcq-correct-${p}`, /Every 24 hours|1|A/i);
+      await chooseOption(page, `block-form-mcq-correct-${p}`, /Every 24 hours/);
       await t(`block-form-mcq-explanation-${p}`).fill('Daily replacement reduces infection risk.');
       break;
 
@@ -133,7 +143,8 @@ export async function fillBlock(page: Page, type: BlockType, p: string, runId: s
       break;
 
     case 'scenario':
-      await t(`block-form-scenario-title-${p}`).fill('A blocked tube');
+      // The default scenario payload (start decision → best/unsafe endings) already passes
+      // validateScenario; `block-form-scenario-title-<p>` is a Select trigger, not a text field.
       break;
 
     case 'reflection':

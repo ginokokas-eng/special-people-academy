@@ -562,24 +562,27 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Title</Label>
+              <Label htmlFor="quiz-title">Title</Label>
               <Input
+                id="quiz-title"
                 value={quizForm.title}
                 onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Passing Score (%)</Label>
+                <Label htmlFor="quiz-passing-score">Passing Score (%)</Label>
                 <Input
+                  id="quiz-passing-score"
                   type="number"
                   value={quizForm.passing_score}
                   onChange={(e) => setQuizForm({ ...quizForm, passing_score: parseInt(e.target.value) || 70 })}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Attempts Allowed</Label>
+                <Label htmlFor="quiz-attempts-allowed">Attempts Allowed</Label>
                 <Input
+                  id="quiz-attempts-allowed"
                   type="number"
                   value={quizForm.attempts_allowed}
                   onChange={(e) => setQuizForm({ ...quizForm, attempts_allowed: parseInt(e.target.value) || 3 })}
@@ -606,8 +609,9 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Question</Label>
+              <Label htmlFor="quiz-question">Question</Label>
               <Textarea
+                id="quiz-question"
                 value={questionForm.question}
                 onChange={(e) => setQuestionForm({ ...questionForm, question: e.target.value })}
               />
@@ -636,8 +640,9 @@ export function CourseQuizTab({ courseId }: CourseQuizTabProps) {
               <p className="text-xs text-muted-foreground">Select the radio button next to the correct answer</p>
             </div>
             <div className="space-y-2">
-              <Label>Explanation (shown after answering)</Label>
+              <Label htmlFor="quiz-explanation">Explanation (shown after answering)</Label>
               <Textarea
+                id="quiz-explanation"
                 value={questionForm.explanation}
                 onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })}
                 placeholder="Optional explanation of the correct answer"

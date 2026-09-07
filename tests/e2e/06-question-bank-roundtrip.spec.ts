@@ -13,8 +13,14 @@ test('an MCQ can be saved to the bank and reinserted', async ({ page }) => {
   const run = loadRun();
 
   await page.goto(`/admin-portal/courses/${run.courseId}/lessons/${run.lessonAId}/content`);
+  // Wait for the bank insert to land before navigating — otherwise page.goto aborts it.
+  const saved = page.waitForResponse(
+    (r) => r.url().includes('/rest/v1/question_bank') && r.request().method() === 'POST' && r.ok(),
+    { timeout: 30_000 },
+  );
   await page.getByTestId('bank-save-question').first().click();
-  await expect(page.getByText(/bank/i).first()).toBeVisible({ timeout: 20_000 });
+  await saved;
+  await expect(page.getByText('Saved to the question bank').first()).toBeVisible({ timeout: 20_000 });
 
   await page.goto('/admin-portal/question-bank');
   await expect(page.locator('[data-testid^="bank-row-"]').first()).toBeVisible({ timeout: 20_000 });

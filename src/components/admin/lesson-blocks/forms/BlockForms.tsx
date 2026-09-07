@@ -452,6 +452,7 @@ export function VideoBlockForm({
           type="button"
           size="sm"
           variant={source === 'url' ? 'default' : 'outline'}
+          data-testid={`block-form-video-source-url-${idPrefix}`}
           onClick={() => onChange({ ...payload, source: 'url' })}
         >
           Paste a link

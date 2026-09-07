@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { staffStatePath } from './support/env';
+import { loadRun, staffStatePath } from './support/env';
 
 /**
  * The reflection submitted in spec 02 must appear in the marking queue and be
@@ -10,10 +10,12 @@ import { staffStatePath } from './support/env';
 test.use({ storageState: staffStatePath });
 
 test('staff marks the learner reflection', async ({ page }) => {
+  const run = loadRun();
   await page.goto('/admin-portal/trainer');
   await expect(page.getByRole('heading', { name: 'Marking' })).toBeVisible();
 
-  const row = page.locator('[data-testid^="marking-row-"]').filter({ hasText: /next shift|reflection/i }).first();
+  // Queue cards show learner name + 'course · lesson', not the answer text: find ours by course title.
+  const row = page.locator('[data-testid^="marking-row-"]').filter({ hasText: run.courseTitle }).first();
   await expect(row, 'the learner reflection from spec 02 should be awaiting marking').toBeVisible({
     timeout: 20_000,
   });

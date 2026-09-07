@@ -153,7 +153,7 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               value={course.category}
               onValueChange={(value) => onUpdate({ category: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger id="category">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -170,7 +170,7 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               value={course.level || ''}
               onValueChange={(value) => onUpdate({ level: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger id="level">
                 <SelectValue placeholder="Select level" />
               </SelectTrigger>
               <SelectContent>
@@ -396,7 +396,7 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               placeholder="Add a learning outcome..."
               onKeyDown={(e) => e.key === 'Enter' && addItem('learning_outcomes', newOutcome, setNewOutcome)}
             />
-            <Button onClick={() => addItem('learning_outcomes', newOutcome, setNewOutcome)}>
+            <Button aria-label="Add learning outcome" onClick={() => addItem('learning_outcomes', newOutcome, setNewOutcome)}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -427,7 +427,7 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               placeholder="Add target audience..."
               onKeyDown={(e) => e.key === 'Enter' && addItem('target_audience', newAudience, setNewAudience)}
             />
-            <Button onClick={() => addItem('target_audience', newAudience, setNewAudience)}>
+            <Button aria-label="Add target audience" onClick={() => addItem('target_audience', newAudience, setNewAudience)}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -458,7 +458,7 @@ export function CourseOverviewTab({ course, onUpdate }: CourseOverviewTabProps) 
               placeholder="Add a requirement..."
               onKeyDown={(e) => e.key === 'Enter' && addItem('requirements', newRequirement, setNewRequirement)}
             />
-            <Button onClick={() => addItem('requirements', newRequirement, setNewRequirement)}>
+            <Button aria-label="Add requirement" onClick={() => addItem('requirements', newRequirement, setNewRequirement)}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
