@@ -167,6 +167,7 @@ export function CourseHome({
     lessons.filter((l) => l.lesson_type === 'quiz').map((l) => l.id)
   );
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const reduced = useReducedMotion();
 
   const grouped: HubModule[] = modules
     .map((m) => ({
