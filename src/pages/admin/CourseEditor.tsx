@@ -113,8 +113,10 @@ export default function CourseEditor() {
           .eq('id', data.cloned_from_course_id)
           .maybeSingle();
         setClonedFromTitle(sourceRow?.title ?? null);
+        await checkMedia(data.id, data.cloned_from_course_id);
       } else {
         setClonedFromTitle(null);
+        setMediaStale(false);
       }
 
     } catch (error) {
