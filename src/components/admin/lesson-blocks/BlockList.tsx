@@ -90,6 +90,8 @@ interface BlockListProps {
   comments?: Record<string, BlockComment[]>;
   onAddComment?: (clientId: string, body: string) => Promise<void>;
   onResolveComment?: (id: string, resolved: boolean) => Promise<void>;
+  /** Advisory content-quality suggestion counts, keyed by block index. */
+  lintByBlock?: Record<number, number>;
 }
 
 /** Short preview of a block's own wording, to tell two MCQs apart in a list. */
@@ -124,6 +126,7 @@ export function BlockList({
   comments = {},
   onAddComment,
   onResolveComment,
+  lintByBlock = {},
 }: BlockListProps) {
   // Pointer drag for the mouse, arrow buttons for the keyboard; the sortable
   // keyboard sensor keeps the handle usable too.
@@ -201,6 +204,16 @@ export function BlockList({
                 {blockVisibility(block.payload) && (
                   <Badge variant="outline" className="border-primary/40 text-primary">
                     Conditional
+                  </Badge>
+                )}
+                {!!lintByBlock[index] && (
+                  <Badge
+                    variant="outline"
+                    className="border-muted-foreground/40 text-muted-foreground"
+                    title="Suggestions in Content quality above. These never stop you saving."
+                  >
+                    {lintByBlock[index]}{' '}
+                    {lintByBlock[index] === 1 ? 'suggestion' : 'suggestions'}
                   </Badge>
                 )}
               </div>
