@@ -82,7 +82,7 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
       ctrl.seekTo(ceiling);
       return;
     }
-    setBlockedNote(null);
+    setBlockedNote(`Jumped to ${formatTime(seconds)}`);
     ctrl.seekTo(seconds);
   };
 
@@ -125,7 +125,11 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
         </div>
 
         {!!query.trim() && (
-          <p className="text-xs text-muted-foreground" aria-live="polite">
+          <p
+            className="text-xs text-muted-foreground"
+            aria-live="polite"
+            data-testid="transcript-search-summary"
+          >
             {searchSummary(matches, chapters.length > 0)}
           </p>
         )}
@@ -139,13 +143,14 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
                   variant="ghost"
                   size="sm"
                   className="h-7 px-2 text-xs"
+                  data-testid="transcript-chapters-show-all"
                   onClick={() => setChapterFilter(null)}
                 >
                   Show the whole video
                 </Button>
               )}
             </div>
-            <ul className="space-y-1">
+            <ul className="space-y-1" data-testid="transcript-chapters">
               {chapters.map((chapter, i) => {
                 const isPlaying = activeChapter === i;
                 const isFiltered = chapterFilter === i;
@@ -160,6 +165,8 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
                         type="button"
                         onClick={() => jumpTo(chapter.start)}
                         disabled={!canSeek}
+                        data-testid={`transcript-chapter-${i}`}
+                        aria-current={isPlaying ? 'true' : undefined}
                         aria-label={`Play from ${formatTime(chapter.start)}: ${chapter.title}`}
                         className={`flex flex-1 items-center gap-2 text-left ${
                           canSeek ? 'hover:text-primary' : 'cursor-default'
@@ -177,6 +184,7 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
                         variant={isFiltered ? 'default' : 'ghost'}
                         size="sm"
                         className="h-7 shrink-0 px-2 text-xs"
+                        data-testid={`transcript-chapter-read-${i}`}
                         onClick={() => setChapterFilter(isFiltered ? null : i)}
                       >
                         {isFiltered ? 'Showing' : 'Read'}
@@ -190,7 +198,11 @@ export function TranscriptTab({ transcript, loading, canSeek, controllerRef, cur
         )}
 
         {blockedNote && (
-          <p className="rounded-md border border-warning/40 bg-warning/10 p-2 text-xs" aria-live="polite">
+          <p
+            className="rounded-md border border-warning/40 bg-warning/10 p-2 text-xs"
+            aria-live="polite"
+            data-testid="transcript-seek-status"
+          >
             {blockedNote}
           </p>
         )}
