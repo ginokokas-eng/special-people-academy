@@ -30,7 +30,13 @@ interface Props {
   lessonId?: string;
   /** Learner already completed this lesson — never re-lock their seeking. */
   lessonCompleted?: boolean;
+  /**
+   * Page-level media bridge, so the lesson transcript can drive this video.
+   * The first video block on the page registers itself here.
+   */
+  mediaControllerRef?: React.MutableRefObject<MediaController | null>;
 }
+
 
 interface CheckpointAnswer {
   selected_id: string;
