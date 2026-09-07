@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CheckpointEditor } from './CheckpointEditor';
 import { TranscriptReviewPanel } from '@/components/admin/lesson-blocks/TranscriptReviewPanel';
+import { TranscriptChaptersPanel } from '@/components/admin/lesson-blocks/TranscriptChaptersPanel';
+
 import { MediaUploadField } from './MediaUploadField';
 
 import {
@@ -385,6 +387,9 @@ export function VideoBlockForm({
   const [error, setError] = useState<string | null>(null);
   /** Handed to the transcript panel after a successful upload (browser-side audio extraction). */
   const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
+  /** Bumped after a transcript save so the sections panel re-reads the timings. */
+  const [transcriptVersion, setTranscriptVersion] = useState(0);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const source = payload.source === 'url' ? 'url' : 'storage';
 
@@ -477,13 +482,18 @@ export function VideoBlockForm({
             onFile={handleFile}
           />
           {payload.path && (
-            <TranscriptReviewPanel
-              lessonId={lessonId}
-              autoFile={transcribeFile}
-              onAutoFileConsumed={() => setTranscribeFile(null)}
-              videoTitle={payload.title}
-            />
+            <>
+              <TranscriptReviewPanel
+                lessonId={lessonId}
+                autoFile={transcribeFile}
+                onAutoFileConsumed={() => setTranscribeFile(null)}
+                videoTitle={payload.title}
+                onSaved={() => setTranscriptVersion((v) => v + 1)}
+              />
+              <TranscriptChaptersPanel lessonId={lessonId} refreshKey={transcriptVersion} />
+            </>
           )}
+
         </div>
 
       ) : (

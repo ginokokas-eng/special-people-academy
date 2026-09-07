@@ -1613,6 +1613,7 @@ export type Database = {
       }
       lesson_transcripts: {
         Row: {
+          chapters: Json | null
           created_at: string
           id: string
           language_code: string
@@ -1624,6 +1625,7 @@ export type Database = {
           vtt_url: string | null
         }
         Insert: {
+          chapters?: Json | null
           created_at?: string
           id?: string
           language_code?: string
@@ -1635,6 +1637,7 @@ export type Database = {
           vtt_url?: string | null
         }
         Update: {
+          chapters?: Json | null
           created_at?: string
           id?: string
           language_code?: string

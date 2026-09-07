@@ -285,7 +285,26 @@ export default function CourseLearn() {
   );
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
-  const canSeek = isVideoLesson;
+  /**
+   * A block lesson may hold a video block, which registers itself on `mediaRef`
+   * once mounted. Poll for it so transcript timestamps only become clickable
+   * when there is really a player to drive.
+   */
+  const [blockMediaReady, setBlockMediaReady] = useState(false);
+  useEffect(() => {
+    setBlockMediaReady(false);
+    if (isVideoLesson || !lessonBlocks.length) return;
+    const id = setInterval(() => {
+      if (mediaRef.current) {
+        setBlockMediaReady(true);
+        clearInterval(id);
+      }
+    }, 400);
+    return () => clearInterval(id);
+  }, [activeLesson?.id, isVideoLesson, lessonBlocks.length]);
+  const canSeek = isVideoLesson || blockMediaReady;
+
+
   const activeModuleName = useMemo(
     () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
     [modules, activeLesson]
@@ -420,7 +439,10 @@ export default function CourseLearn() {
       const [{ data: tData }, { data: vData }] = await Promise.all([
         sb
           .from('lesson_transcripts')
-          .select('id, lesson_id, language_code, language_label, transcript_text, vtt_url, segments')
+          .select(
+            'id, lesson_id, language_code, language_label, transcript_text, vtt_url, segments, chapters'
+          )
+
           .eq('lesson_id', activeLesson.id)
           .order('language_code')
           .limit(1),
@@ -1029,7 +1051,9 @@ export default function CourseLearn() {
           completed={!!activeLesson.completed}
           trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
           onComplete={() => markComplete(activeLesson.id, { returnHome: true })}
+          mediaControllerRef={mediaRef}
         />
+
         </div>
       );
     }

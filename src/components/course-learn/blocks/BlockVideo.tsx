@@ -30,7 +30,13 @@ interface Props {
   lessonId?: string;
   /** Learner already completed this lesson — never re-lock their seeking. */
   lessonCompleted?: boolean;
+  /**
+   * Page-level media bridge, so the lesson transcript can drive this video.
+   * The first video block on the page registers itself here.
+   */
+  mediaControllerRef?: React.MutableRefObject<MediaController | null>;
 }
+
 
 interface CheckpointAnswer {
   selected_id: string;
@@ -55,6 +61,7 @@ export function BlockVideo({
   lessonId: lessonIdProp,
   lessonCompleted,
   onOutcome,
+  mediaControllerRef,
 }: Props) {
   const { prefs, setPrefs } = useLearnerPrefs();
   const controllerRef = useRef<MediaController | null>(null);
@@ -63,9 +70,30 @@ export function BlockVideo({
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
+  // Publish this player to the page so the transcript can seek it. Delegating
+  // keeps the checkpoint seek ceiling in force — the transcript cannot bypass it.
+  useEffect(() => {
+    const bridge = mediaControllerRef;
+    if (!bridge || bridge.current) return;
+    bridge.current = {
+      seekTo: (s) => controllerRef.current?.seekTo(s),
+      getCurrentTime: () => controllerRef.current?.getCurrentTime() ?? 0,
+      isAvailable: () => !!controllerRef.current?.isAvailable(),
+      pause: () => controllerRef.current?.pause?.(),
+      play: () => controllerRef.current?.play?.(),
+      getDuration: () => controllerRef.current?.getDuration?.() ?? 0,
+      getSeekCeiling: () => controllerRef.current?.getSeekCeiling?.() ?? null,
+    };
+    return () => {
+      bridge.current = null;
+    };
+  }, [mediaControllerRef]);
+
   const isStorage = payload.source !== 'url' && !!payload.path;
   const externalUrl = (payload.url || '').trim();
   const embedUrl = payload.source === 'url' ? videoEmbedUrl(externalUrl) : null;
+
+
 
   // Captions are built client-side from the stored transcript segments — a
   // signed bucket URL cannot be used as a plain <track src>.

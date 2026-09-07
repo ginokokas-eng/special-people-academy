@@ -9,7 +9,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { MediaController } from '@/components/course-learn/types';
 import { BlockVideo } from './BlockVideo';
+
 import { RevealOnScroll } from './RevealOnScroll';
 import { LessonProgressStrip } from './LessonProgressStrip';
 import { BackToTop } from './BackToTop';
@@ -63,7 +65,13 @@ interface LessonBlocksProps {
   preview?: boolean;
   /** Per-lesson trickle: veil content below the first unfinished gating block. */
   trickleEnabled?: boolean;
+  /**
+   * Page-level media bridge. The first video block registers itself so the
+   * lesson transcript can seek it. Omitted in the admin preview.
+   */
+  mediaControllerRef?: React.MutableRefObject<MediaController | null>;
 }
+
 
 
 /* ---------------------------------- text ---------------------------------- */
@@ -373,7 +381,9 @@ export function LessonBlocks({
   onComplete,
   preview,
   trickleEnabled,
+  mediaControllerRef,
 }: LessonBlocksProps) {
+
   const [deckState, setDeckState] = useState<Record<string, boolean>>({});
   /** Right/wrong per assessed block. null = attempted-but-not-assessed/unknown. */
   const [blockOutcome, setBlockOutcome] = useState<Record<string, boolean | null>>({});
@@ -581,6 +591,8 @@ export function LessonBlocks({
           preview={preview}
           onWatched={(done) => setSignal(block.id, done)}
           onOutcome={(value) => setOutcome(block.id, value)}
+          mediaControllerRef={mediaControllerRef}
+
         />
       )}
       {block.block_type === 'carousel' && (

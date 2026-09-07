@@ -76,6 +76,12 @@ export interface TranscriptSegment {
   text: string;
 }
 
+/** A named section of a video. English ('en') transcript row only for now. */
+export interface TranscriptChapter {
+  start: number; // seconds
+  title: string;
+}
+
 export interface LessonTranscript {
   id: string;
   lesson_id: string;
@@ -84,7 +90,9 @@ export interface LessonTranscript {
   transcript_text: string | null;
   vtt_url: string | null;
   segments: TranscriptSegment[] | null;
+  chapters: TranscriptChapter[] | null;
 }
+
 
 /** Imperative bridge so tabs (notes, transcript) can drive the active video. */
 export interface MediaController {
@@ -97,5 +105,11 @@ export interface MediaController {
   play?: () => void;
   /** Media duration in seconds, or 0 when not yet known. */
   getDuration?: () => number;
+  /**
+   * Highest time the learner may seek to right now (the earliest unanswered
+   * locked checkpoint), or null when there is no ceiling.
+   */
+  getSeekCeiling?: () => number | null;
 }
+
 

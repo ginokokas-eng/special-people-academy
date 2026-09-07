@@ -4,6 +4,11 @@ import { Copy, Download, Check } from '@/components/icons';
 import { toast } from 'sonner';
 import { TranscriptTab } from './TranscriptTab';
 import { formatTime } from './useLearnerPrefs';
+import {
+  chapterHeading,
+  normaliseChapters,
+  snapToSegmentStarts,
+} from '@/lib/transcriptChapters';
 import type { LessonTranscript, MediaController } from './types';
 
 interface Props {
@@ -16,14 +21,32 @@ interface Props {
   allowDownload?: boolean;
 }
 
+/**
+ * Copy/download text. Section headings are inserted where they start, so a
+ * downloaded transcript reads the same way the video is laid out.
+ */
 function buildPlainText(transcript: LessonTranscript): string {
-  if (transcript.segments && transcript.segments.length > 0) {
-    return transcript.segments
-      .map((s) => `[${formatTime(s.start)}] ${s.text}`)
-      .join('\n');
+  const segments = transcript.segments ?? [];
+  if (segments.length > 0) {
+    const chapters =
+      transcript.language_code === 'en'
+        ? snapToSegmentStarts(normaliseChapters(transcript.chapters), segments)
+        : [];
+    const lines: string[] = [];
+    let next = 0;
+    for (const s of segments) {
+      while (next < chapters.length && chapters[next].start <= s.start) {
+        if (lines.length) lines.push('');
+        lines.push(chapterHeading(chapters[next]), '');
+        next += 1;
+      }
+      lines.push(`[${formatTime(s.start)}] ${s.text}`);
+    }
+    return lines.join('\n');
   }
   return transcript.transcript_text ?? '';
 }
+
 
 export function MobileTranscript({
   transcript,

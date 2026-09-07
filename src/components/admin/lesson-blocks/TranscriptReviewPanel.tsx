@@ -17,7 +17,10 @@ interface Props {
   onAutoFileConsumed: () => void;
   /** Video block title, used as the heading when appending to an existing transcript. */
   videoTitle?: string;
+  /** Called after a transcript is written, so sections can re-read the timings. */
+  onSaved?: () => void;
 }
+
 
 type Status = 'idle' | 'extracting' | 'transcribing' | 'review' | 'saving';
 
@@ -40,7 +43,9 @@ export function TranscriptReviewPanel({
   autoFile,
   onAutoFileConsumed,
   videoTitle,
+  onSaved,
 }: Props) {
+
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [text, setText] = useState('');
@@ -173,6 +178,8 @@ export function TranscriptReviewPanel({
       setTruncated(null);
       setMode('replace');
       setStatus('idle');
+      onSaved?.();
+
     } catch (err) {
       console.error('Saving transcript failed:', err);
       setError('The transcript could not be saved. Please try again.');
