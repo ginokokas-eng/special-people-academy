@@ -276,7 +276,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className="pressable rounded-[10px] font-semibold"
-                    onClick={() => navigate('/my-learning')}
+                    onClick={() => navigate('/my-courses')}
                   >
                     See my plan
                   </Button>

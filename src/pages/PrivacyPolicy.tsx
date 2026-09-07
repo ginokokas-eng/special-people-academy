@@ -142,7 +142,7 @@ export default function PrivacyPolicy() {
             </p>
             <ul>
               <li><strong>Account Data:</strong> Retained while your account is active and for [X years] after account closure.</li>
-              <li><strong>Learning Progress Data:</strong> Retained for the duration of the learner's enrollment and for [X years] thereafter for reporting purposes.</li>
+              <li><strong>Learning Progress Data:</strong> Retained for the duration of the learner's enrolment and for [X years] thereafter for reporting purposes.</li>
               <li><strong>Support Communications:</strong> Retained for [X years] after resolution.</li>
               <li><strong>Analytics Data:</strong> Aggregated data may be retained indefinitely; individual-level data is retained for [X months].</li>
             </ul>

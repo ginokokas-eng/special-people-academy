@@ -34,7 +34,7 @@ export interface NavItem {
 export const learnerNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Courses', href: '/my-courses', icon: BookOpen },
-  { label: 'My Learning', href: '/my-learning', icon: GraduationCap },
+  
   { label: 'Certificates', href: '/certificates', icon: Trophy },
 ];
 
