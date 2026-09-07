@@ -39,6 +39,7 @@ export function CloneCourseDialog({ source, onOpenChange }: Props) {
   const [title, setTitle] = useState('');
   const [copyTranslations, setCopyTranslations] = useState(true);
   const [working, setWorking] = useState(false);
+  const [mediaCount, setMediaCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const open = !!source;
@@ -48,6 +49,7 @@ export function CloneCourseDialog({ source, onOpenChange }: Props) {
     setTitle(cloneDefaultTitle(source.title));
     setCopyTranslations(true);
     setError(null);
+    setMediaCount(null);
   }, [source]);
 
   const handleConfirm = async () => {
@@ -62,11 +64,28 @@ export function CloneCourseDialog({ source, onOpenChange }: Props) {
       });
       if (rpcError) throw rpcError;
 
-      const result = data as { course_id?: string } | null;
+      const result = data as { course_id?: string; media?: unknown[] } | null;
       if (!result?.course_id) throw new Error('The copy did not report a new course.');
 
+      // Uploaded files live in the original course's folder, so they are copied
+      // across before the copy opens. A failure here is never fatal — the editor
+      // offers to try again.
+      setMediaCount(Array.isArray(result.media) ? result.media.length : 0);
+      let media: 'ok' | 'partial' | 'failed' = 'failed';
+      try {
+        const { data: mediaData, error: fnError } = await supabase.functions.invoke(
+          'clone-course-media',
+          { body: { course_id: result.course_id } },
+        );
+        if (fnError) throw fnError;
+        const remaining = Number((mediaData as { remaining?: number } | null)?.remaining ?? 1);
+        media = remaining === 0 ? 'ok' : 'partial';
+      } catch (mediaErr) {
+        console.error('Copying course media failed:', mediaErr);
+      }
+
       onOpenChange(false);
-      navigate(`/admin-portal/courses/${result.course_id}/edit?cloned=1`);
+      navigate(`/admin-portal/courses/${result.course_id}/edit?cloned=1&media=${media}`);
     } catch (err) {
       console.error('Error cloning course:', err);
       setError(
@@ -116,6 +135,11 @@ export function CloneCourseDialog({ source, onOpenChange }: Props) {
               </span>
             </Label>
           </div>
+          {working && mediaCount !== null && (
+            <p className="text-sm text-muted-foreground" data-testid="clone-media-progress">
+              Copying {mediaCount} file{mediaCount === 1 ? '' : 's'}…
+            </p>
+          )}
           {error && (
             <Alert variant="destructive">
               <AlertDescription data-testid="clone-error">{error}</AlertDescription>
