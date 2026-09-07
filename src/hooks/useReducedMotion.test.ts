@@ -1,25 +1,43 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { motionReduced, setDocumentMotion } from './useReducedMotion';
 
-function mockMedia(matches: boolean) {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    configurable: true,
-    value: vi.fn().mockReturnValue({
-      matches,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }),
-  });
+/**
+ * The suite runs in node, so window/document are stubbed here. The helper only
+ * touches `documentElement.dataset.motion` and `matchMedia`, which is exactly
+ * what these tests drive.
+ */
+const html = {
+  dataset: {} as Record<string, string | undefined>,
+  setAttribute(_name: string, value: string) {
+    this.dataset.motion = value;
+  },
+  removeAttribute() {
+    delete this.dataset.motion;
+  },
+  hasAttribute() {
+    return this.dataset.motion !== undefined;
+  },
+};
+
+function stub(mediaMatches: boolean) {
+  (globalThis as Record<string, unknown>).document = { documentElement: html };
+  (globalThis as Record<string, unknown>).window = {
+    matchMedia: vi.fn().mockReturnValue({ matches: mediaMatches }),
+    dispatchEvent: vi.fn(),
+  };
+  (globalThis as Record<string, unknown>).Event = class {
+    constructor(public type: string) {}
+  };
 }
 
 describe('motionReduced', () => {
   beforeEach(() => {
-    document.documentElement.removeAttribute('data-motion');
-    mockMedia(false);
+    html.dataset = {};
+    stub(false);
   });
   afterEach(() => {
-    document.documentElement.removeAttribute('data-motion');
+    delete (globalThis as Record<string, unknown>).document;
+    delete (globalThis as Record<string, unknown>).window;
   });
 
   it('is false with no attribute and no media match', () => {
@@ -28,19 +46,19 @@ describe('motionReduced', () => {
 
   it('is true when the document attribute is set', () => {
     setDocumentMotion(true);
-    expect(document.documentElement.dataset.motion).toBe('reduce');
+    expect(html.dataset.motion).toBe('reduce');
     expect(motionReduced()).toBe(true);
   });
 
   it('is false again once the attribute is cleared', () => {
     setDocumentMotion(true);
     setDocumentMotion(false);
-    expect(document.documentElement.hasAttribute('data-motion')).toBe(false);
+    expect(html.dataset.motion).toBeUndefined();
     expect(motionReduced()).toBe(false);
   });
 
   it('is true when the operating system asks for reduced motion', () => {
-    mockMedia(true);
+    stub(true);
     expect(motionReduced()).toBe(true);
   });
 });
