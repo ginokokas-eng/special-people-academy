@@ -32,10 +32,10 @@ test('staff duplicate a course into a draft copy', async ({ page }) => {
   await expect(page.getByText(run.courseTitle, { exact: true })).toBeVisible();
 
   // Row actions menu → Duplicate.
-  await page.getByTestId(`course-duplicate-${run.courseId}`).waitFor({ state: 'attached' }).catch(() => {});
   const row = page.getByRole('row', { hasText: run.courseTitle }).first();
   await row.getByRole('button').last().click();
   await page.getByTestId(`course-duplicate-${run.courseId}`).click();
+
 
   const titleInput = page.getByTestId('clone-title');
   await expect(titleInput).toBeVisible();
