@@ -295,7 +295,7 @@ export default function CourseLearn() {
     setBlockMediaReady(false);
     if (isVideoLesson || !lessonBlocks.length) return;
     const id = setInterval(() => {
-      if (mediaRef.current) {
+      if (mediaRef.current?.isAvailable()) {
         setBlockMediaReady(true);
         clearInterval(id);
       }
