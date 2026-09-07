@@ -63,7 +63,13 @@ interface LessonBlocksProps {
   preview?: boolean;
   /** Per-lesson trickle: veil content below the first unfinished gating block. */
   trickleEnabled?: boolean;
+  /**
+   * Page-level media bridge. The first video block registers itself so the
+   * lesson transcript can seek it. Omitted in the admin preview.
+   */
+  mediaControllerRef?: React.MutableRefObject<MediaController | null>;
 }
+
 
 
 /* ---------------------------------- text ---------------------------------- */
