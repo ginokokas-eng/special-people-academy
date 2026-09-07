@@ -178,7 +178,7 @@ export function TranscriptChaptersPanel({ lessonId, refreshKey }: Props) {
           {draft.map((row, i) => {
             const invalidTime = parseTimestamp(row.time) === null;
             return (
-              <div key={i} className="flex items-start gap-2">
+              <div key={i} className="flex items-start gap-2" data-testid={`transcript-chapter-row-${i}`}>
                 <div className="w-24 shrink-0">
                   <Label className="sr-only" htmlFor={`chapter-time-${i}`}>
                     Section {i + 1} start time
