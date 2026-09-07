@@ -206,6 +206,14 @@ export default function CourseEditor() {
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
+            <Button
+              variant="outline"
+              data-testid="course-duplicate"
+              onClick={() => setCloneSource({ id: course.id, title: course.title })}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Duplicate course
+            </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -216,6 +224,27 @@ export default function CourseEditor() {
             </Button>
           </div>
         </div>
+
+        {justCloned && (
+          <Alert data-testid="clone-banner">
+            <AlertDescription className="flex items-start justify-between gap-4">
+              <span>
+                Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
+                Uploaded videos and images still point at the original course's files until the
+                media copy finishes.
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Dismiss this message"
+                onClick={() => setBannerDismissed(true)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
 
         <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-9">
