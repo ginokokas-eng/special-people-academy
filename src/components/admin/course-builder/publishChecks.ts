@@ -25,6 +25,7 @@ import {
 } from '@/components/course-learn/blocks/types';
 import { parsePoolConfig, poolIsFillable } from '@/lib/questionBank';
 import { languageByCode } from '@/lib/translation';
+import { lintLesson } from '@/lib/contentLint';
 
 
 export interface PublishCheck {
@@ -526,6 +527,30 @@ export async function evaluatePublishChecks(courseId: string): Promise<PublishCh
       });
     }
   }
+
+  // Advisory readability/accessibility sweep over block lessons. Reading age is
+  // never a blocker — clinical vocabulary inflates it — so this only names the
+  // lessons with fixable wording or missing picture descriptions.
+  const hardToRead: string[] = [];
+  for (const [lessonId, rows] of byLesson) {
+    const ordered = [...rows]
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+      .map((r) => ({
+        block_type: (r.block_type ?? 'text') as BlockType,
+        payload: (r.payload ?? {}) as BlockPayload,
+      }));
+    const { issues } = lintLesson(ordered);
+    const warnings = issues.filter((i) => i.severity === 'warning').length;
+    if (warnings > 0) hardToRead.push(`${lessonTitle(lessonId)} (${warnings})`);
+  }
+  checks.push({
+    id: 'content-readability',
+    label: 'Content is easy to read',
+    passed: hardToRead.length === 0,
+    detail: `Some wording could be simpler, or a picture needs a description: ${names(hardToRead)}. Open the lesson and see “Content quality”.`,
+    tab: 'Content',
+    severity: 'warning',
+  });
 
   return checks;
 
