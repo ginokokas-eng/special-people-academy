@@ -48,7 +48,9 @@ interface Course {
   prerequisite_course_id: string | null;
   prerequisite_required: boolean;
   require_recompletion_on_change: boolean;
+  cloned_from_course_id: string | null;
 }
+
 
 
 export default function CourseEditor() {
