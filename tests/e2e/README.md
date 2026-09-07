@@ -72,8 +72,9 @@ Specs run in file order with one worker because they share one authored course:
 | `05-insights` | Lesson Insights shows the learner's answers |
 | `06-question-bank-roundtrip` | MCQ → bank → picker → back into the lesson |
 | `08-video-checkpoints` | optional: uploaded video + checkpoint gate (`E2E_VIDEO=1`) |
-| `10-clone-course` | Duplicate makes a draft copy; counts and remapped rules match |
-| `99-teardown` | deletes the run's course (and any clone) via `e2e_delete_course` |
+| `09-transcript-chapters` | staff rename/add transcript sections; learner reads one section and searches |
+| `10-clone-course` | Duplicate makes a draft copy; counts and remapped rules match, and its files are copied into the copy's own folder |
+| `99-teardown` | deletes the run's uploaded files, its course (and any clone) via `e2e_delete_course`, and any question-bank rows it created |
 
 
 ## Teardown
@@ -116,6 +117,13 @@ Stable roles and labels first (`getByRole('button', { name: 'Create Course' })`)
   `carousel-next`, `hotspot-<i>`, `scenario-choice-<i>`, `reflection-text` /
   `reflection-submit` / `reflection-mark`, `learner-video`, `video-checkpoint`,
   `checkpoint-option-<i>`, `mark-complete`
+- transcript: `transcript-chapters-suggest` / `transcript-chapters-add` /
+  `transcript-chapters-save` / `transcript-chapter-row-<i>` (staff);
+  `transcript-chapters`, `transcript-chapter-<i>`, `transcript-chapter-read-<i>`,
+  `transcript-chapters-show-all`, `transcript-search-summary`,
+  `transcript-seek-status` (learner)
+- cloning: `course-duplicate-<id>`, `clone-title`, `clone-translations`,
+  `clone-confirm`, `clone-media-progress`, `clone-banner`, `clone-media-retry`
 - quiz: `quiz-start`, `quiz-check`, `quiz-submit`, `quiz-result`
 - staff review: `marking-row-<blockId>-<userId>`, `marking-open`,
   `marking-outcome-met`, `marking-save`, `insights-lesson-select`,
