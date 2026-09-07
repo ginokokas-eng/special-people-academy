@@ -72,9 +72,20 @@ export function BlockVideo({
 
   // Publish this player to the page so the transcript can seek it. Delegating
   // keeps the checkpoint seek ceiling in force — the transcript cannot bypass it.
+  // Registration waits for the underlying player: publishing an empty bridge
+  // makes transcript timestamps clickable before a seek can actually land.
+  const [playerReady, setPlayerReady] = useState(false);
+  useEffect(() => {
+    if (playerReady) return;
+    const id = setInterval(() => {
+      if (controllerRef.current?.isAvailable()) setPlayerReady(true);
+    }, 200);
+    return () => clearInterval(id);
+  }, [playerReady]);
+
   useEffect(() => {
     const bridge = mediaControllerRef;
-    if (!bridge || bridge.current) return;
+    if (!bridge || bridge.current || !playerReady) return;
     bridge.current = {
       seekTo: (s) => controllerRef.current?.seekTo(s),
       getCurrentTime: () => controllerRef.current?.getCurrentTime() ?? 0,
@@ -87,7 +98,7 @@ export function BlockVideo({
     return () => {
       bridge.current = null;
     };
-  }, [mediaControllerRef]);
+  }, [mediaControllerRef, playerReady]);
 
   const isStorage = payload.source !== 'url' && !!payload.path;
   const externalUrl = (payload.url || '').trim();

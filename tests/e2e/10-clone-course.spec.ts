@@ -32,8 +32,8 @@ test('staff duplicate a course into a draft copy', async ({ page }) => {
   await expect(page.getByText(run.courseTitle, { exact: true })).toBeVisible();
 
   // Row actions menu → Duplicate.
-  const row = page.getByRole('row', { hasText: run.courseTitle }).first();
-  await row.getByRole('button').last().click();
+  const row = page.getByRole('row').filter({ hasText: run.courseTitle }).first();
+  await row.getByRole('button', { name: 'Course actions' }).click();
   await page.getByTestId(`course-duplicate-${run.courseId}`).click();
 
 
@@ -48,10 +48,23 @@ test('staff duplicate a course into a draft copy', async ({ page }) => {
   const cloneResponse = page.waitForResponse(
     (res) => res.url().includes('/rest/v1/rpc/clone_course') && res.request().method() === 'POST',
   );
+  const mediaResponse = page.waitForResponse(
+    (res) => res.url().includes('/functions/v1/clone-course-media'),
+    { timeout: 60_000 },
+  );
   await page.getByTestId('clone-confirm').click();
   const body = (await (await cloneResponse).json()) as { course_id: string };
   const cloneCourseId = body.course_id;
   expect(cloneCourseId).toBeTruthy();
+
+  const media = (await (await mediaResponse).json()) as {
+    copied: number;
+    skipped: number;
+    failed: { path: string }[];
+    remaining: number;
+  };
+  expect(media.failed, 'no file should fail to copy').toEqual([]);
+  expect(media.remaining, 'nothing should still point at the original course').toBe(0);
 
   await expect(page).toHaveURL(new RegExp(`/admin-portal/courses/${cloneCourseId}/edit`));
   await expect(page.getByTestId('clone-banner')).toBeVisible();
@@ -135,6 +148,24 @@ test('staff duplicate a course into a draft copy', async ({ page }) => {
     (await countFor(api, `standard_links?course_id=eq.${cloneCourseId}&select=id`)) +
     (await countFor(api, `standard_links?lesson_id=in.(${cloneLessonIds})&select=id`));
   expect(cloneStandardLinks).toBe(srcStandardLinks);
+
+  // No uploaded file in the copy may still live in the original's folder.
+  const clonePayloads = await select<{ payload: unknown }>(
+    api,
+    `lesson_blocks?lesson_id=in.(${cloneLessonIds})&select=payload`,
+  );
+  for (const row of clonePayloads) {
+    expect(JSON.stringify(row.payload ?? {}), 'block media should be re-pointed').not.toContain(
+      `${run.courseId}/`,
+    );
+  }
+  const cloneVideoSources = await select<{ source_url: string | null }>(
+    api,
+    `lesson_video_sources?lesson_id=in.(${cloneLessonIds})&select=source_url`,
+  );
+  for (const row of cloneVideoSources) {
+    expect(row.source_url ?? '').not.toContain(`${run.courseId}/`);
+  }
 
   // Copied translations must never claim to be reviewed.
   const cloneTranslations = await select<{ status: string }>(

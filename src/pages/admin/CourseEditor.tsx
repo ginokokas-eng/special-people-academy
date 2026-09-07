@@ -67,9 +67,13 @@ export default function CourseEditor() {
   const [cloneSource, setCloneSource] = useState<CloneSource | null>(null);
   /** Title of the course this one was copied from, when it is a copy. */
   const [clonedFromTitle, setClonedFromTitle] = useState<string | null>(null);
-  // The dialog lands here with ?cloned=1 straight after a copy is made.
+  // The dialog lands here with ?cloned=1&media=ok|partial|failed after a copy.
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const justCloned = searchParams.get('cloned') === '1' && !bannerDismissed;
+  /** True while any file in this course still points at the original course. */
+  const [mediaStale, setMediaStale] = useState(searchParams.get('media') !== 'ok');
+  const [retryingMedia, setRetryingMedia] = useState(false);
+
 
 
   useEffect(() => {
@@ -109,8 +113,10 @@ export default function CourseEditor() {
           .eq('id', data.cloned_from_course_id)
           .maybeSingle();
         setClonedFromTitle(sourceRow?.title ?? null);
+        await checkMedia(data.id, data.cloned_from_course_id);
       } else {
         setClonedFromTitle(null);
+        setMediaStale(false);
       }
 
     } catch (error) {
@@ -121,6 +127,59 @@ export default function CourseEditor() {
       setLoading(false);
     }
   };
+
+  /**
+   * Does any uploaded file in this copy still sit in the original course's
+   * folder? Files there are refused for this course's learners, so staff are
+   * offered a retry until nothing points at the original any more.
+   */
+  const checkMedia = async (courseId: string, sourceId: string) => {
+    const { data: lessons } = await supabase.from('lessons').select('id').eq('course_id', courseId);
+    const lessonIds = (lessons ?? []).map((l) => l.id);
+    if (!lessonIds.length) {
+      setMediaStale(false);
+      return;
+    }
+    const [{ data: blocks }, { data: sources }] = await Promise.all([
+      supabase.from('lesson_blocks').select('payload').in('lesson_id', lessonIds),
+      supabase.from('lesson_video_sources').select('source_url').in('lesson_id', lessonIds),
+    ]);
+    const stale =
+      (blocks ?? []).some((b) => JSON.stringify(b.payload ?? {}).includes(`${sourceId}/`)) ||
+      (sources ?? []).some((s) => String(s.source_url ?? '').startsWith(`${sourceId}/`));
+    setMediaStale(stale);
+  };
+
+  const retryMedia = async () => {
+    if (!course?.cloned_from_course_id) return;
+    setRetryingMedia(true);
+    try {
+      const { error } = await supabase.functions.invoke('clone-course-media', {
+        body: { course_id: course.id },
+      });
+      if (error) throw error;
+      await checkMedia(course.id, course.cloned_from_course_id);
+      toast.success('Files copied');
+    } catch (err) {
+      console.error('Retrying the media copy failed:', err);
+      toast.error('The files could not be copied. Please try again.');
+    } finally {
+      setRetryingMedia(false);
+    }
+  };
+
+  const retryButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      data-testid="clone-media-retry"
+      onClick={retryMedia}
+      disabled={retryingMedia}
+    >
+      {retryingMedia && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+      Retry media copy
+    </Button>
+  );
 
   const handleSave = async () => {
     if (!course) return;
@@ -228,10 +287,14 @@ export default function CourseEditor() {
         {justCloned && (
           <Alert data-testid="clone-banner">
             <AlertDescription className="flex items-start justify-between gap-4">
-              <span>
-                Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
-                Uploaded videos and images still point at the original course's files until the
-                media copy finishes.
+              <span className="space-y-2 block">
+                <span className="block">
+                  Copied from {clonedFromTitle ?? 'the original course'} — nothing is published yet.
+                  {mediaStale
+                    ? ' Some videos or images could not be copied and still point at the original course.'
+                    : ''}
+                </span>
+                {mediaStale && <span className="block">{retryButton}</span>}
               </span>
               <Button
                 variant="ghost"
@@ -261,15 +324,18 @@ export default function CourseEditor() {
 
           <TabsContent value="overview" className="space-y-3">
             {course.cloned_from_course_id && (
-              <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
-                Cloned from{' '}
-                <Link
-                  to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
-                  className="underline underline-offset-2"
-                >
-                  {clonedFromTitle ?? 'the original course'}
-                </Link>
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground" data-testid="cloned-from-line">
+                  Cloned from{' '}
+                  <Link
+                    to={`/admin-portal/courses/${course.cloned_from_course_id}/edit`}
+                    className="underline underline-offset-2"
+                  >
+                    {clonedFromTitle ?? 'the original course'}
+                  </Link>
+                </p>
+                {mediaStale && retryButton}
+              </div>
             )}
             <CourseOverviewTab course={course} onUpdate={updateCourse} />
           </TabsContent>

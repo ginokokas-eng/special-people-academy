@@ -25,10 +25,13 @@ test.describe('staff', () => {
     const prefix = await addBlock(page, 'video', index);
     await page.getByTestId(`block-form-video-title-${prefix}`).fill('Uploaded clip');
     await page.locator('input[type="file"]').last().setInputFiles(videoFixture);
-    await expect(page.getByText(/uploaded|ready/i).first()).toBeVisible({ timeout: 60_000 });
+    // FileDropZone shows "Uploaded: <file name>" once the object is in storage.
+    await expect(page.getByText(/^Uploaded: /).first()).toBeVisible({ timeout: 60_000 });
 
     await page.getByTestId(`block-form-video-checkpoint-add-${prefix}`).click();
-    await page.getByTestId(`block-form-video-checkpoint-at-${prefix}-0`).fill('1');
+    const at = page.getByTestId(`block-form-video-checkpoint-at-${prefix}-0`);
+    await at.fill('0:01');
+    await expect(at).toHaveValue('0:01');
     await page
       .getByTestId(`block-form-video-checkpoint-question-${prefix}-0`)
       .fill('Was the feed checked?');
