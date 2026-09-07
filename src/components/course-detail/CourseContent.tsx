@@ -242,7 +242,7 @@ export function CourseContent({
           <div className="text-sm text-muted-foreground">
             {hasModules ? `${modules.length} ${modules.length === 1 ? 'module' : 'modules'} • ` : ''}
             {lessonCountLabel(totalLessons)}
-            {totalDurationLabel ? ` • ${totalDurationLabel}` : ''}
+            {totalDurationLabel ? ` • ${totalDurationLabel} online content` : ''}
             {canAccessCourse && courseProgress.total > 0 && (
               <span className="text-success ml-2">
                 ({courseProgress.completed}/{courseProgress.total} required lessons)

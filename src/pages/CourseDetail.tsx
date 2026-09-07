@@ -27,7 +27,7 @@ import { CoursePrerequisite } from '@/components/course-detail/CoursePrerequisit
 import { MobileBottomCTA } from '@/components/course-detail/MobileBottomCTA';
 import { isNativeShell } from '@/lib/native';
 import { requiredProgress } from '@/lib/progress';
-import { minutesFromSeconds, totalDurationSeconds } from '@/lib/duration';
+import { formatMinutes, minutesFromSeconds, totalDurationSeconds } from '@/lib/duration';
 
 import { CourseBookingPanel } from '@/components/course-detail/CourseBookingPanel';
 import { Button } from '@/components/ui/button';
@@ -579,6 +579,17 @@ export default function CourseDetail() {
       ? course.duration_minutes
       : minutesFromSeconds(totalDurationSeconds(lessons));
 
+  // Presentation only. For blended courses the authored course duration is the
+  // TOTAL (online lessons + practical time), so it can exceed the lesson sum.
+  const onlineMinutes = minutesFromSeconds(totalDurationSeconds(lessons));
+  const showsPractical =
+    course?.delivery_type === 'blended' && onlineMinutes > 0 && onlineMinutes < heroDurationMinutes;
+  const heroDurationLabel = heroDurationMinutes > 0
+    ? showsPractical
+      ? `${formatMinutes(heroDurationMinutes)} total · ${formatMinutes(onlineMinutes)} online · plus practical session`
+      : `${formatMinutes(heroDurationMinutes)} total`
+    : undefined;
+
 
   const averageRating = reviews.length > 0
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
@@ -651,6 +662,7 @@ export default function CourseDetail() {
         isInternal={course.is_internal}
         hasCertificate={course.has_certificate}
         durationMinutes={heroDurationMinutes}
+        durationLabel={heroDurationLabel}
         lastUpdated={course.last_updated || undefined}
         language={course.language}
         thumbnailUrl={course.thumbnail_url || undefined}
