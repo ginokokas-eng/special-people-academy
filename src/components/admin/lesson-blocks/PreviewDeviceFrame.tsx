@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { RotateCcw } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { TRANSLATION_LANGUAGES } from '@/lib/translation';
 import type { LessonBlock } from '@/components/course-learn/blocks/types';
@@ -194,7 +193,6 @@ export function PreviewDeviceFrame({
           data-testid="preview-reload"
           onClick={() => setReloadKey((k) => k + 1)}
         >
-          <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
           Reload
         </Button>
       </div>

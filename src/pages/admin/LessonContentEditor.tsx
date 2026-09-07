@@ -18,6 +18,10 @@ import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { TranslationsPanel } from '@/components/admin/lesson-blocks/TranslationsPanel';
 import {
+  PreviewDeviceFrame,
+  type TranslationStatusSummary,
+} from '@/components/admin/lesson-blocks/PreviewDeviceFrame';
+import {
   BlockTransferDialog,
   type BlockTransferRequest,
 } from '@/components/admin/lesson-blocks/BlockTransferDialog';
@@ -755,10 +759,12 @@ export default function LessonContentEditor() {
             <Eye className="h-4 w-4" />
             Learner preview
           </div>
-          <LessonBlocks
+          <PreviewDeviceFrame
+            courseId={courseId}
+            lessonId={lessonId}
             blocks={previewBlocks}
-            preview
             trickleEnabled={lesson?.trickle_enabled ?? false}
+            translationStatus={translationStatus}
           />
         </div>
       </div>
