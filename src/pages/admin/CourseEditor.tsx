@@ -313,6 +313,9 @@ export default function CourseEditor() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <CloneCourseDialog source={cloneSource} onOpenChange={() => setCloneSource(null)} />
     </PortalLayout>
   );
 }
+
