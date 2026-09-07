@@ -43,7 +43,9 @@ export function TranscriptReviewPanel({
   autoFile,
   onAutoFileConsumed,
   videoTitle,
+  onSaved,
 }: Props) {
+
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [text, setText] = useState('');
