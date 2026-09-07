@@ -285,7 +285,13 @@ export default function CourseLearn() {
   );
 
   const isVideoLesson = activeLesson?.lesson_type === 'video';
-  const canSeek = isVideoLesson;
+  /**
+   * Block lessons may hold a video block, which registers itself on `mediaRef`.
+   * Seeking is only offered once a player is actually there, so timestamps never
+   * look clickable on a text-only lesson.
+   */
+  const canSeek = isVideoLesson || (!!mediaRef.current && lessonBlocks.length > 0);
+
   const activeModuleName = useMemo(
     () => modules.find((m) => m.id === activeLesson?.module_id)?.title ?? null,
     [modules, activeLesson]
@@ -1029,7 +1035,9 @@ export default function CourseLearn() {
           completed={!!activeLesson.completed}
           trickleEnabled={!!(activeLesson as { trickle_enabled?: boolean }).trickle_enabled}
           onComplete={() => markComplete(activeLesson.id, { returnHome: true })}
+          mediaControllerRef={mediaRef}
         />
+
         </div>
       );
     }
