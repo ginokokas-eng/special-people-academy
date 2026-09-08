@@ -203,7 +203,10 @@ export interface EvidenceChecklist {
   lessonTitle: string;
   heading: string;
   steps: string[];
+  /** Raw stored outcome, e.g. 'competent'. */
   outcome: string;
+  /** Human label, e.g. 'Competent'. */
+  outcomeLabel: string;
   assessorName: string;
   signedAt: string | null;
   signedLabel: string;
@@ -211,6 +214,7 @@ export interface EvidenceChecklist {
   criteria: Record<string, unknown>;
   comment: string;
 }
+
 
 export interface EvidenceQuizResult {
   courseTitle: string;
@@ -328,6 +332,26 @@ export function verificationLine(code: string | null | undefined): string {
   return value ? `Verify at ${VERIFY_HOST}/verify/${value}` : '';
 }
 
+const OUTCOME_LABELS: Record<string, string> = {
+  competent: 'Competent',
+  not_yet: 'Not yet competent',
+  not_yet_competent: 'Not yet competent',
+  met: 'Met',
+  not_met: 'Not yet met',
+};
+
+/** Readable outcome label: 'competent' → 'Competent'. Empty stays empty. */
+export function outcomeLabel(outcome: string | null | undefined): string {
+  const raw = text(outcome);
+  if (!raw) return '';
+  const known = OUTCOME_LABELS[raw.toLowerCase()];
+  if (known) return known;
+  const words = raw.replace(/[_-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+
+
 const byTitle = (a: string, b: string) => a.localeCompare(b, 'en-GB');
 const dateValue = (iso: string | null): number => {
   if (!iso) return 0;
@@ -411,6 +435,8 @@ export function buildEvidenceModel(raw: RawEvidencePack | null | undefined): Evi
       heading: text(c.heading),
       steps: list(c.steps).map((s) => text(s)),
       outcome: text(c.outcome),
+      outcomeLabel: outcomeLabel(c.outcome),
+
       assessorName: text(c.assessor_name),
       signedAt: c.signed_at ?? null,
       signedLabel: formatEvidenceDate(c.signed_at),

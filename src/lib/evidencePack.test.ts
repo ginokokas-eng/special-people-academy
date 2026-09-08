@@ -3,6 +3,7 @@ import {
   buildEvidenceModel,
   evidenceFileName,
   formatEvidenceDate,
+  outcomeLabel,
   signatureLine,
   summariseEvidence,
   verificationLine,
@@ -333,5 +334,15 @@ describe('summariseEvidence', () => {
 
   it('flags a learner with nothing to show', () => {
     expect(summariseEvidence(buildEvidenceModel({})).isEmpty).toBe(true);
+  });
+});
+
+describe('outcomeLabel', () => {
+  it('reads observation outcomes as words', () => {
+    expect(outcomeLabel('competent')).toBe('Competent');
+    expect(outcomeLabel('not_yet')).toBe('Not yet competent');
+    expect(outcomeLabel('met')).toBe('Met');
+    expect(outcomeLabel('')).toBe('');
+    expect(outcomeLabel('needs_review')).toBe('Needs review');
   });
 });
