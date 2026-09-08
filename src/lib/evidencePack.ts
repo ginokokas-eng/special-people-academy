@@ -332,6 +332,26 @@ export function verificationLine(code: string | null | undefined): string {
   return value ? `Verify at ${VERIFY_HOST}/verify/${value}` : '';
 }
 
+const OUTCOME_LABELS: Record<string, string> = {
+  competent: 'Competent',
+  not_yet: 'Not yet competent',
+  not_yet_competent: 'Not yet competent',
+  met: 'Met',
+  not_met: 'Not yet met',
+};
+
+/** Readable outcome label: 'competent' → 'Competent'. Empty stays empty. */
+export function outcomeLabel(outcome: string | null | undefined): string {
+  const raw = text(outcome);
+  if (!raw) return '';
+  const known = OUTCOME_LABELS[raw.toLowerCase()];
+  if (known) return known;
+  const words = raw.replace(/[_-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+
+
 const byTitle = (a: string, b: string) => a.localeCompare(b, 'en-GB');
 const dateValue = (iso: string | null): number => {
   if (!iso) return 0;
