@@ -195,7 +195,7 @@ export async function renderEvidencePdf(
       const tick = value === true ? '\u2713' : value === false ? '\u2717' : '–';
       c.text(`${tick} ${step}`, { indent: 12 });
     }
-    c.text(`Outcome: ${dash(checklist.outcome)}`, { indent: 12 });
+    c.text(`Outcome: ${dash(checklist.outcomeLabel || checklist.outcome)}`, { indent: 12 });
     if (checklist.signatureLine) c.text(checklist.signatureLine, { indent: 12, bold: true });
     if (checklist.comment) c.text(`Assessor comment: ${checklist.comment}`, { indent: 12 });
   }
