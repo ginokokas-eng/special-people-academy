@@ -517,7 +517,81 @@ export function CopilotPanel({
               </p>
             )}
           </TabsContent>
+
+          {rewriteBlock && rewritePayload && rewriteStats && (
+            <TabsContent value="rewrite_question" className="space-y-3 pt-4" data-testid="rewrite-tab">
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <p className="text-sm font-medium text-foreground">{rewritePayload.question}</p>
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="rewrite-stats">
+                  {rewriteSummary(rewriteStats)}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                The right answer stays exactly as it is. Only the wrong answers, their feedback and
+                the explanation can change.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="rewrite-focus">What should change</Label>
+                <Select
+                  value={rewriteFocus}
+                  onValueChange={(value) => setRewriteFocus(value as RewriteFocus)}
+                >
+                  <SelectTrigger id="rewrite-focus">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">The wrong answers and the explanation</SelectItem>
+                    <SelectItem value="distractors">Just the wrong answers</SelectItem>
+                    <SelectItem value="explanation">Just the feedback and explanation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={runRewrite} disabled={busy} data-testid="rewrite-run">
+                {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Rewrite this question
+              </Button>
+
+              {rewriteErrors.length > 0 && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive">
+                    That rewrite was refused, because it changed something it must not:
+                  </p>
+                  <ul className="mt-1 list-disc pl-5 text-xs text-destructive">
+                    {rewriteErrors.map((message) => (
+                      <li key={message}>{message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {rewriteDraft && (
+                <div className="space-y-3 rounded-lg border bg-card p-3" data-testid="rewrite-diff">
+                  <h3 className="text-sm font-semibold text-foreground">What would change</h3>
+                  <RewriteDiff before={rewritePayload} after={rewriteDraft} />
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={acceptRewrite} data-testid="rewrite-accept">
+                      <Check className="mr-1 h-4 w-4" />
+                      Use this rewrite
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setRewriteDraft(null)}
+                      data-testid="rewrite-reject"
+                    >
+                      Keep the question as it is
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Accepting replaces this question in the editor. Nothing is saved until you press
+                    “Save content”.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          )}
         </Tabs>
+
 
         {error && (
           <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
