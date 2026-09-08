@@ -71,8 +71,18 @@ import {
 export default function LessonContentEditor() {
   const { id: courseId, lessonId } = useParams<{ id: string; lessonId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  /** Deep link from Insights: which block to scroll to, and whether to rewrite it. */
+  const focusBlockId = searchParams.get('block');
+  const wantsRewrite = searchParams.get('copilot') === 'rewrite';
+  const [rewriteStat, setRewriteStat] = useState<BlockItemStat | null>(null);
+  const [openRewrite, setOpenRewrite] = useState(false);
+  /** Pre-filled save note when a rewrite came from Insights. */
+  const [rewriteSaveNote, setRewriteSaveNote] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
+
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [lesson, setLesson] = useState<{
