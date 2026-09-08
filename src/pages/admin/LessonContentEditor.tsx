@@ -242,6 +242,51 @@ export default function LessonContentEditor() {
     ]);
 
   /**
+   * Replaces ONE existing block's payload in place (used by the Insights
+   * rewrite). The block keeps its id and its client id, so every answer already
+   * recorded against it — and every statistic — stays attached to it.
+   */
+  const replaceBlockPayload = (clientId: string, payload: BlockPayload, changeNote: string) => {
+    mutate((prev) => prev.map((b) => (b.client_id === clientId ? { ...b, payload } : b)));
+    setRewriteSaveNote(changeNote);
+    toast.success('Question rewritten — save the lesson to keep it');
+  };
+
+  /**
+   * Stats for the block Insights sent us to rewrite. They arrive in router
+   * state; when someone pastes the link instead, we read them back from the
+   * global item-stats RPC.
+   */
+  useEffect(() => {
+    if (!wantsRewrite || !focusBlockId || rewriteStat || !lessonId) return;
+    const passed = (location.state as { blockStat?: BlockItemStat } | null)?.blockStat;
+    if (passed && passed.block_id === focusBlockId) {
+      setRewriteStat(passed);
+      setOpenRewrite(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc('lesson_block_item_stats', { _lesson: lessonId });
+      if (cancelled) return;
+      if (error) {
+        console.error('Error loading item stats for rewrite:', error);
+        return;
+      }
+      const row = ((data ?? []) as unknown as BlockItemStat[]).find(
+        (r) => r.block_id === focusBlockId
+      );
+      if (!row) return;
+      setRewriteStat(row);
+      setOpenRewrite(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [wantsRewrite, focusBlockId, rewriteStat, lessonId, location.state]);
+
+
+  /**
    * Seeds the lesson from a template. The seeded blocks are ordinary drafts —
    * the template choice is not recorded anywhere.
    */
