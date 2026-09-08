@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,15 @@ import { AlertTriangle, Check, Loader2, Sparkles, Trash2 } from '@/components/ic
 import { BlockList } from './BlockList';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { draftBlockIssues, mapDraftBlocks, type DraftBlock } from '@/lib/aiAuthoring';
+import type { BlockItemStat } from '@/components/admin/course-builder/blockStats';
+import {
+  buildRewriteStats,
+  diffMcq,
+  rewriteNote,
+  rewriteSummary,
+  validateRewrite,
+  type RewriteFocus,
+} from '@/lib/rewriteQuestion';
 import {
   BLOCK_LABELS,
   defaultContributesToCompletion,
@@ -33,9 +42,16 @@ import {
   type BlockPayload,
   type BlockType,
   type LessonBlock,
+  type McqPayload,
 } from '@/components/course-learn/blocks/types';
 
 export const AI_DISCLAIMER = 'AI drafts are suggestions. Review every word before publishing.';
+
+/** The block Insights sent us to rewrite, with its aggregate statistics. */
+export interface RewriteTarget {
+  clientId: string;
+  stat: BlockItemStat;
+}
 
 export interface CopilotPanelProps {
   lessonId?: string;
@@ -45,15 +61,23 @@ export interface CopilotPanelProps {
   blocks: BlockDraft[];
   /** Appends accepted blocks to the editor's unsaved list. */
   onAccept: (accepted: { block_type: BlockType; payload: BlockPayload }[]) => void;
+  /** Set when the author arrived from Insights asking to rewrite one question. */
+  rewrite?: RewriteTarget | null;
+  /** True once, to open this panel straight on the rewrite tab. */
+  openRewrite?: boolean;
+  onOpenRewriteHandled?: () => void;
+  /** Replaces one existing block in place, keeping its id and its statistics. */
+  onReplace?: (clientId: string, payload: BlockPayload, note: string) => void;
 }
 
-type Mode = 'draft_lesson' | 'knowledge_check' | 'improve_block';
+type Mode = 'draft_lesson' | 'knowledge_check' | 'improve_block' | 'rewrite_question';
 
 /** A draft awaiting Accept / Edit / Reject. Nothing here is saved. */
 interface DraftItem extends BlockDraft {
   issues: string[];
   editing: boolean;
 }
+
 
 /** Honest message from the function, or a plain fallback. */
 export function copilotErrorMessage(error: unknown, fallback = 'The draft could not be made.'): string {
