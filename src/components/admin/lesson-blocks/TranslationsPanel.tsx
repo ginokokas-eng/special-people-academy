@@ -22,6 +22,7 @@ import {
 } from '@/components/course-learn/blocks/types';
 import {
   TRANSLATION_LANGUAGES,
+  batchTranslatable,
   deriveAvailableLangs,
   extractTranslatableTexts,
   sourceHash,
@@ -142,9 +143,9 @@ export function TranslationsPanel({ lessonId }: { lessonId?: string }) {
   const draftBlocks = async (targets: typeof translatable) => {
     if (!lessonId || !targets.length) return;
     setBusy('draft');
+    let failed = 0;
     try {
-      for (let i = 0; i < targets.length; i += BATCH_SIZE) {
-        const batch = targets.slice(i, i + BATCH_SIZE);
+      for (const batch of batchTranslatable(targets, TRANSLATE_CHAR_BUDGET, BATCH_MAX)) {
         const { data, error } = await supabase.functions.invoke('author-lesson-blocks', {
           body: {
             mode: 'translate_blocks',
@@ -160,11 +161,28 @@ export function TranslationsPanel({ lessonId }: { lessonId?: string }) {
           },
         });
         if (error) {
-          const message =
-            (data as { error?: string } | null)?.error ??
-            'The translation service could not be reached.';
+          let body: { error?: string; reason?: unknown } | null =
+            (data as { error?: string } | null) ?? null;
+          try {
+            const context = (error as { context?: { json?: () => Promise<unknown> } }).context;
+            const parsed = context?.json ? await context.json() : null;
+            if (parsed && typeof parsed === 'object') body = parsed as typeof body;
+          } catch {
+            /* no readable body — fall back below */
+          }
+          const reasons = Array.isArray(body?.reason)
+            ? (body!.reason as unknown[]).map(String).join('; ')
+            : typeof body?.reason === 'string'
+              ? body.reason
+              : '';
+          const message = body?.error
+            ? reasons
+              ? `${body.error} ${reasons}`
+              : body.error
+            : 'The translation service could not be reached.';
           toast.error(message);
-          return;
+          failed += batch.length;
+          continue;
         }
         const replies = ((data as { blocks?: { block_id: string; texts: Record<string, string> }[] })
           ?.blocks ?? []);
@@ -194,11 +212,19 @@ export function TranslationsPanel({ lessonId }: { lessonId?: string }) {
           if (saveError) {
             console.error('Could not save translation drafts:', saveError);
             toast.error('Could not save the drafts');
-            return;
+            failed += batch.length;
+            continue;
           }
         }
+        failed += Math.max(0, batch.length - payloads.length);
       }
-      toast.success(`Draft ${language.english} translation ready to review`);
+      if (failed) {
+        toast.warning(
+          `${failed} ${failed === 1 ? 'block' : 'blocks'} could not be drafted — try those again.`
+        );
+      } else {
+        toast.success(`Draft ${language.english} translation ready to review`);
+      }
       await load();
     } finally {
       setBusy(null);
