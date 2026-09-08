@@ -3824,6 +3824,10 @@ export type Database = {
           status: string
         }[]
       }
+      get_learner_evidence_pack: {
+        Args: { _course?: string; _standard?: string; _user: string }
+        Returns: Json
+      }
       get_learner_standard_evidence: {
         Args: { _user?: string }
         Returns: {

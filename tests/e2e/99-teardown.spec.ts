@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs';
 import type { APIRequestContext } from '@playwright/test';
-import { apiFor, rpc } from './support/api';
+import { apiFor, rpc, select } from './support/api';
 import { runFilePath, staffStatePath } from './support/env';
 
 /**
@@ -91,4 +91,29 @@ test('run data is deleted', async () => {
   }
 
   fs.rmSync(runFilePath, { force: true });
+});
+
+/**
+ * Safety net: an earlier crashed run can leave "E2E …" courses behind, and the
+ * run file that named them is gone. Sweep any that remain — their uploaded files
+ * first, then the guarded delete RPC.
+ */
+test('older E2E courses are swept', async () => {
+  const api = await apiFor(staffStatePath);
+  const leftovers = await select<{ id: string; title: string }[]>(
+    api,
+    'courses?title=like.E2E%25&select=id,title',
+  );
+  for (const course of leftovers) {
+    const prefixes = await objectsUnderCourse(api, course.id);
+    if (prefixes.length) {
+      const res = await api.delete(`/storage/v1/object/${BUCKET}`, { data: { prefixes } });
+      expect(res.ok(), `deleting files for ${course.title} should succeed`).toBeTruthy();
+    }
+    const counts = await rpc<Record<string, number>>(api, 'e2e_delete_course', {
+      _course_id: course.id,
+    });
+    expect(counts, `${course.title} should be removed`).toBeTruthy();
+    expect(await objectsUnderCourse(api, course.id), `${course.id} should have no files left`).toEqual([]);
+  }
 });
