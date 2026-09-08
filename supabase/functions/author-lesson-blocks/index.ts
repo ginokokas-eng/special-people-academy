@@ -614,7 +614,52 @@ Deno.serve(async (req) => {
       system = `You are a professional translator for UK social care training. Translate the given strings from British English into ${langName}. Plain, respectful register a care worker would use at work; do not paraphrase, summarise, add or remove content. Keep numbers, units, times, dates, medication names, brand names, proper nouns, job titles of named systems and abbreviations exactly as they are. Keep every placeholder, bullet marker such as "-", and line break in the same place. Never translate the paths, the block ids or any JSON key. Return every block and every path you were given, once each. Return ONLY JSON matching the schema.`;
       user = `Target language: ${langName}\n\nBlocks to translate:\n${serialised}`;
       validate = (d) => validateTranslationReply(d, wanted);
+    } else if (mode === 'rewrite_question') {
+      // Insights → rewrite. AGGREGATE STATISTICS ONLY: option labels and pick
+      // counts. No learner id, name, email or answer row ever reaches the model.
+      const blockType = String(input.block_type ?? '');
+      if (blockType !== 'mcq')
+        return json({ error: 'Only knowledge check questions can be rewritten from Insights.' }, 400);
+      const payload = (input.payload ?? {}) as Rec;
+      const options = Array.isArray(payload.options) ? (payload.options as Rec[]) : [];
+      if (options.length < 2) return json({ error: 'That question has no answers to rewrite.' }, 400);
+      const correctId = String(payload.correct_id ?? '');
+      const correctIndex = options.findIndex((o) => String(o.id ?? '') === correctId);
+      if (correctIndex < 0) return json({ error: 'That question has no correct answer marked.' }, 400);
+
+      const focus = ['distractors', 'explanation', 'both'].includes(String(input.focus ?? ''))
+        ? String(input.focus)
+        : 'both';
+      const stats = (input.stats ?? {}) as Rec;
+      const tallies = Array.isArray(stats.option_tallies) ? (stats.option_tallies as Rec[]) : [];
+      const statLines = tallies
+        .map(
+          (t) =>
+            `- "${String(t.label ?? '')}"${t.is_correct ? ' (correct answer)' : ''}: chosen ${Number(t.count ?? 0)} times`
+        )
+        .join('\n');
+      const before = {
+        question: String(payload.question ?? ''),
+        options: options.map((o) => ({ label: String(o.label ?? ''), feedback: String(o.feedback ?? '') })),
+        correct_index: correctIndex,
+        explanation: String(payload.explanation ?? ''),
+      };
+      const serialised = JSON.stringify(before);
+      inputChars = serialised.length + statLines.length;
+
+      schema = rewriteSchema;
+      schemaName = 'mcq_rewrite';
+      const focusLine =
+        focus === 'distractors'
+          ? 'Change only the wrong answers and their feedback.'
+          : focus === 'explanation'
+            ? 'Change only the feedback and the explanation.'
+            : 'Improve the wrong answers, their feedback and the explanation.';
+      system += ` Rewrite ONE multiple-choice knowledge check so learners who understand the topic stop getting it wrong. Return exactly ${options.length} answers in the same order. The correct answer is at index ${correctIndex}: copy its wording BYTE FOR BYTE and keep correct_index at ${correctIndex}. ${focusLine} You may tighten the question wording, but never change what it asks or what the right answer is. Each wrong answer must stay a plausible mistake, and its feedback must say briefly why it is wrong.`;
+      user = `Current question:\n${serialised}\n\nHow learners answered (aggregate counts only):\n${statLines || '- no answers recorded yet'}`;
+      validate = (d) => validateRewriteReply(d, before);
     } else {
+
 
       const blockType = String(input.block_type ?? '');
       const instruction = String(input.instruction ?? '').trim();
