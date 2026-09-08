@@ -638,7 +638,21 @@ export default function LessonContentEditor() {
             lessonTitle={lesson?.title}
             blocks={blocks}
             onAccept={addBlocks}
+            rewrite={
+              focusBlockId && rewriteStat ? { clientId: focusBlockId, stat: rewriteStat } : null
+            }
+            openRewrite={openRewrite}
+            onOpenRewriteHandled={() => {
+              setOpenRewrite(false);
+              // The block stays highlighted; only the "open the copilot" request
+              // is spent, so a refresh does not reopen the panel.
+              const next = new URLSearchParams(searchParams);
+              next.delete('copilot');
+              setSearchParams(next, { replace: true });
+            }}
+            onReplace={replaceBlockPayload}
           />
+
           <Button
             variant="outline"
             onClick={() => {
