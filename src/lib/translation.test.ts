@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  batchTranslatable,
   deriveAvailableLangs,
   extractTranslatableTexts,
   mergeTranslation,
@@ -152,5 +153,32 @@ describe('deriveAvailableLangs', () => {
         ])
       )
     ).toEqual(['ro']);
+  });
+});
+
+describe('batchTranslatable', () => {
+  const entry = (id: string, len: number) => ({ id, texts: { a: 'x'.repeat(len) } });
+
+  it('starts a new batch when the budget would be exceeded', () => {
+    const batches = batchTranslatable([entry('1', 600), entry('2', 600), entry('3', 600)], 1500, 5);
+    expect(batches.map((b) => b.map((e) => e.id))).toEqual([['1', '2'], ['3']]);
+  });
+
+  it('puts a single oversize entry in its own batch', () => {
+    const batches = batchTranslatable([entry('1', 100), entry('2', 5000), entry('3', 100)], 1500, 5);
+    expect(batches.map((b) => b.map((e) => e.id))).toEqual([['1'], ['2'], ['3']]);
+  });
+
+  it('never exceeds the max count', () => {
+    const batches = batchTranslatable(
+      Array.from({ length: 7 }, (_, i) => entry(String(i), 1)),
+      1500,
+      5
+    );
+    expect(batches.map((b) => b.length)).toEqual([5, 2]);
+  });
+
+  it('returns no batches for no entries', () => {
+    expect(batchTranslatable([], 1500, 5)).toEqual([]);
   });
 });
