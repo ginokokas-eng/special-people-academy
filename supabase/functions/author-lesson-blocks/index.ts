@@ -191,6 +191,31 @@ const chaptersSchema = {
   required: ['chapters'],
 };
 
+/**
+ * A rewritten MCQ. Options carry per-answer feedback here (the draft schema does
+ * not), because the whole point of a rewrite is better wrong answers.
+ */
+const rewriteSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    question: { type: 'string' },
+    options: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { label: { type: 'string' }, feedback: { type: 'string' } },
+        required: ['label', 'feedback'],
+      },
+    },
+    correct_index: { type: 'integer' },
+    explanation: { type: 'string' },
+  },
+  required: ['question', 'options', 'correct_index', 'explanation'],
+};
+
+
 
 
 /**
