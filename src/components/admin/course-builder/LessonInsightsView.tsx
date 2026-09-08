@@ -46,7 +46,22 @@ interface BlockRow {
   payload: BlockPayload;
 }
 
-export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | null; orgId?: string | null }) {
+export function LessonInsightsPanel({
+  lessonId,
+  orgId,
+  courseId,
+}: {
+  lessonId: string | null;
+  orgId?: string | null;
+  /** Set in Course Builder only: enables the "rewrite this question" link. */
+  courseId?: string;
+}) {
+  const [searchParams] = useSearchParams();
+  // Test-only overrides so a browser test can force the weak-question CTA on.
+  const thresholds = {
+    threshold: Number(searchParams.get('rewrite_threshold')) || undefined,
+    minLearners: Number(searchParams.get('rewrite_min_learners')) || undefined,
+  };
   const [stats, setStats] = useState<BlockItemStat[]>([]);
   const [detail, setDetail] = useState<LearnerDetailRow[]>([]);
   const [blocks, setBlocks] = useState<Record<string, BlockRow>>({});
@@ -133,7 +148,14 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
     <div className="min-w-0 space-y-5">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {stats.map((stat) => (
-          <BlockInsightCard key={stat.block_id} stat={stat} block={blocks[stat.block_id]} />
+          <BlockInsightCard
+            key={stat.block_id}
+            stat={stat}
+            block={blocks[stat.block_id]}
+            courseId={orgId ? undefined : courseId}
+            lessonId={lessonId}
+            thresholds={thresholds}
+          />
         ))}
       </div>
 
@@ -204,8 +226,23 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
 
 /* ------------------------------- block card ------------------------------- */
 
-export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?: BlockRow }) {
+export function BlockInsightCard({
+  stat,
+  block,
+  courseId,
+  lessonId,
+  thresholds,
+}: {
+  stat: BlockItemStat;
+  block?: BlockRow;
+  courseId?: string;
+  lessonId?: string | null;
+  thresholds?: RewriteThresholds;
+}) {
   const payload = block?.payload;
+  const navigate = useNavigate();
+  // Only offered in Course Builder, on global figures, for a weak MCQ.
+  const canRewrite = !!courseId && !!lessonId && isWeakMcq(stat, thresholds);
 
   return (
     <Card className="min-w-0" data-testid={`insights-block-card-${stat.block_type}`}>
