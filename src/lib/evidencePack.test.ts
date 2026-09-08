@@ -3,6 +3,7 @@ import {
   buildEvidenceModel,
   evidenceFileName,
   formatEvidenceDate,
+  outcomeLabel,
   signatureLine,
   summariseEvidence,
   verificationLine,
