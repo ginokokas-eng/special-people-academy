@@ -15,6 +15,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useCart } from '@/hooks/useCart';
 import { useGeneralSettings } from '@/hooks/useGeneralSettings';
 import { MobileMyCourses, MobileCourseItem } from '@/components/course-learn/MobileMyCourses';
+import { EvidencePackDialog } from '@/components/evidence/EvidencePackDialog';
 
 interface MyCourse {
   id: string;
@@ -321,10 +322,23 @@ export default function MyCourses() {
               View all courses assigned to you or that you've enrolled in
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/courses')}>
-            <BookOpen className="h-4 w-4 mr-2" />
-            Browse all courses
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {user && (
+              <EvidencePackDialog
+                userId={user.id}
+                learnerName={user.email ?? 'me'}
+                trigger={
+                  <Button variant="outline" size="sm" data-testid="evidence-download-all">
+                    Download my evidence pack
+                  </Button>
+                }
+              />
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate('/courses')}>
+              <BookOpen className="h-4 w-4 mr-2" />
+              Browse all courses
+            </Button>
+          </div>
         </div>
 
         {courses.length === 0 ? (
