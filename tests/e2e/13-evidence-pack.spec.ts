@@ -63,7 +63,13 @@ test('training staff can pull a learner pack, filtered to one course', async () 
   expect(course.title, 'the run course should be named').toContain('E2E');
   expect(course.lessons_total).toBeGreaterThan(0);
   expect(course.lessons_completed).toBeGreaterThan(0);
+
+  // Observed practical checklists come from block_marks (observation or
+  // checklist kinds). The run records no observation, so an empty array is fine
+  // — it must never be null.
+  expect(Array.isArray(pack.checklists), 'checklists should always be an array').toBeTruthy();
 });
+
 
 test('a learner cannot pull somebody else’s pack', async () => {
   const staffId = userIdFrom(staffStatePath);
