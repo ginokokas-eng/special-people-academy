@@ -692,3 +692,48 @@ export function CopilotPanel({
     </Sheet>
   );
 }
+
+/** Plain before/after list of what the rewrite changes. */
+function RewriteDiff({ before, after }: { before: McqPayload; after: McqPayload }) {
+  const diff = diffMcq(before, after);
+  return (
+    <div className="space-y-2 text-sm">
+      {diff.questionChanged && (
+        <p>
+          <span className="text-muted-foreground">Question: </span>
+          <s className="text-muted-foreground">{before.question}</s>{' '}
+          <span className="font-medium text-foreground">{after.question}</span>
+        </p>
+      )}
+      <ul className="space-y-1">
+        {diff.options.map((option) => (
+          <li key={option.index}>
+            {option.isCorrect ? (
+              <span className="text-muted-foreground">
+                Right answer (unchanged): {option.after}
+              </span>
+            ) : option.labelChanged ? (
+              <span>
+                <s className="text-muted-foreground">{option.before}</s>{' '}
+                <span className="font-medium text-foreground">{option.after}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">{option.after}</span>
+            )}
+            {option.feedbackChanged && (
+              <span className="block text-xs text-muted-foreground">
+                Feedback: {after.options[option.index]?.feedback || '(removed)'}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {diff.explanationChanged && (
+        <p className="text-xs">
+          <span className="text-muted-foreground">Explanation: </span>
+          {after.explanation || '(removed)'}
+        </p>
+      )}
+    </div>
+  );
+}
