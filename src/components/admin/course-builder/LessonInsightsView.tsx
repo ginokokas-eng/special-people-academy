@@ -276,7 +276,32 @@ export function BlockInsightCard({
         {stat.block_type === 'scenario' && (
           <ScenarioBreakdown stat={stat} payload={payload as ScenarioPayload | undefined} />
         )}
+
+        {canRewrite && (
+          <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <p className="text-sm text-foreground">
+              Most learners get this wrong first time. The AI can suggest better wrong answers and a
+              clearer explanation — the right answer stays exactly as it is.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-2"
+              data-testid="insights-rewrite-cta"
+              onClick={() =>
+                navigate(
+                  `/admin-portal/courses/${courseId}/lessons/${lessonId}/content?block=${stat.block_id}&copilot=rewrite`,
+                  { state: { blockStat: stat } },
+                )
+              }
+            >
+              <Sparkles className="mr-1 h-4 w-4" aria-hidden="true" />
+              Rewrite this question
+            </Button>
+          </div>
+        )}
       </CardContent>
+
     </Card>
   );
 }
