@@ -438,10 +438,13 @@ export default function LessonContentEditor() {
    * callout or image-only edits.
    */
   const openSaveDialog = () => {
-    setMaterial(materialChangeDefault(savedBlocksRef.current, blocks));
-    setNote('');
+    // A rewrite from Insights changes what learners must know, so it defaults to
+    // material and carries a note saying where it came from.
+    setMaterial(rewriteSaveNote ? true : materialChangeDefault(savedBlocksRef.current, blocks));
+    setNote(rewriteSaveNote ?? '');
     setSaveDialogOpen(true);
   };
+
 
 
   const handleSave = async () => {
