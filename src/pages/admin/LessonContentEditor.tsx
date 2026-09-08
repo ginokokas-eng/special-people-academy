@@ -518,7 +518,9 @@ export default function LessonContentEditor() {
 
       setDirty(false);
       dirtyRef.current = false;
+      setRewriteSaveNote(null);
       await load(true);
+
     } catch (error) {
       console.error('Error saving lesson content:', error);
       toast.error('Failed to save lesson content');
