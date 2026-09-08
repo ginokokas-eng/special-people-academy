@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { apiFor, select } from './support/api';
+import { accessTokenFromState, apiFor, select } from './support/api';
 import { loadRun, staffStatePath } from './support/env';
 
 /**
@@ -31,7 +31,9 @@ test('staff preview a lesson on a phone frame without writing anything', async (
   expect(textBlocks.length, 'lesson A should hold a text block').toBe(1);
   const blockId = textBlocks[0].id;
 
-  const seed = await api.post('/rest/v1/lesson_translations', {
+  // The unique key is (lesson_id, lang, block_id), so name it: merge-duplicates
+  // only upserts when PostgREST is told which conflict target to use.
+  const seed = await api.post('/rest/v1/lesson_translations?on_conflict=lesson_id,lang,block_id', {
     headers: { Prefer: 'return=representation,resolution=merge-duplicates' },
     data: {
       lesson_id: run.lessonAId,
@@ -45,10 +47,14 @@ test('staff preview a lesson on a phone frame without writing anything', async (
   });
   expect(seed.ok(), await seed.text()).toBeTruthy();
 
-  // Nothing formative exists for this staff user on this lesson yet.
+  // Nothing formative exists for this staff user on this lesson yet. The learner
+  // has played the same lesson earlier in the run, so scope the check to STAFF.
+  const staffId = JSON.parse(
+    Buffer.from(accessTokenFromState(staffStatePath).split('.')[1], 'base64').toString(),
+  ).sub as string;
   const before = await select<{ id: string }>(
     api,
-    `lesson_block_responses?lesson_id=eq.${run.lessonAId}&select=id`,
+    `lesson_block_responses?lesson_id=eq.${run.lessonAId}&user_id=eq.${staffId}&select=id`,
   );
   expect(before.length).toBe(0);
 
@@ -107,7 +113,7 @@ test('staff preview a lesson on a phone frame without writing anything', async (
 
   const after = await select<{ id: string }>(
     api,
-    `lesson_block_responses?lesson_id=eq.${run.lessonAId}&select=id`,
+    `lesson_block_responses?lesson_id=eq.${run.lessonAId}&user_id=eq.${staffId}&select=id`,
   );
   expect(after.length).toBe(0);
 
