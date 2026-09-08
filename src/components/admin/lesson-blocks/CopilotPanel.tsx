@@ -93,6 +93,10 @@ export function CopilotPanel({
   lessonTitle,
   blocks,
   onAccept,
+  rewrite = null,
+  openRewrite = false,
+  onOpenRewriteHandled,
+  onReplace,
 }: CopilotPanelProps) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>('draft_lesson');
@@ -107,6 +111,30 @@ export function CopilotPanel({
   const [instruction, setInstruction] = useState('simplify');
   const [freeInstruction, setFreeInstruction] = useState('');
 
+  const [rewriteFocus, setRewriteFocus] = useState<RewriteFocus>('both');
+  const [rewriteDraft, setRewriteDraft] = useState<McqPayload | null>(null);
+  const [rewriteErrors, setRewriteErrors] = useState<string[]>([]);
+
+  // The MCQ block Insights pointed at, matched by its stable client id.
+  const rewriteBlock = useMemo(
+    () =>
+      rewrite ? blocks.find((b) => b.client_id === rewrite.clientId && b.block_type === 'mcq') : undefined,
+    [rewrite, blocks]
+  );
+  const rewritePayload = rewriteBlock ? (rewriteBlock.payload as McqPayload) : null;
+  const rewriteStats = useMemo(
+    () => (rewrite && rewritePayload ? buildRewriteStats(rewrite.stat, rewritePayload) : null),
+    [rewrite, rewritePayload]
+  );
+
+  // Arriving from Insights opens the panel straight on the rewrite tab, once.
+  useEffect(() => {
+    if (!openRewrite || !rewriteBlock) return;
+    setMode('rewrite_question');
+    setOpen(true);
+    onOpenRewriteHandled?.();
+  }, [openRewrite, rewriteBlock, onOpenRewriteHandled]);
+
   const improvable = useMemo(
     () =>
       blocks
@@ -116,6 +144,7 @@ export function CopilotPanel({
         ),
     [blocks]
   );
+
 
   const toDraftItems = (list: DraftBlock[]): DraftItem[] =>
     mapDraftBlocks(list).map((mapped) => ({
