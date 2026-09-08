@@ -203,7 +203,10 @@ export interface EvidenceChecklist {
   lessonTitle: string;
   heading: string;
   steps: string[];
+  /** Raw stored outcome, e.g. 'competent'. */
   outcome: string;
+  /** Human label, e.g. 'Competent'. */
+  outcomeLabel: string;
   assessorName: string;
   signedAt: string | null;
   signedLabel: string;
@@ -211,6 +214,7 @@ export interface EvidenceChecklist {
   criteria: Record<string, unknown>;
   comment: string;
 }
+
 
 export interface EvidenceQuizResult {
   courseTitle: string;
