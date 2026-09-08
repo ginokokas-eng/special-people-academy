@@ -758,7 +758,7 @@ Deno.serve(async (req) => {
         user: userMessage,
         schemaName,
         schema,
-        maxTokens: mode === 'draft_lesson' ? 8192 : 4096,
+        maxTokens: mode === 'draft_lesson' || mode === 'translate_blocks' ? 8192 : 4096,
       });
       if (!result.ok && result.gatewayStatus) {
         await logRun('gateway_error', 0, `gateway ${result.gatewayStatus}`);
