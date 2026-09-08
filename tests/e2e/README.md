@@ -54,6 +54,7 @@ npm run test:e2e            # whole suite (boots npm run dev unless E2E_BASE_URL
 npm run test:e2e:setup      # just sign in and refresh tests/e2e/.auth/*.json
 npm run test:e2e:ui         # interactive
 E2E_VIDEO=1 npm run test:e2e -- 08-video-checkpoints
+E2E_AI=1 npm run test:e2e -- 12-insights-rewrite    # also runs the AI rewrite
 ```
 
 Individual actions (clicks, fills) time out after **15 s**
@@ -75,8 +76,8 @@ Specs run in file order with one worker because they share one authored course:
 | `09-transcript-chapters` | staff rename/add transcript sections; learner reads one section and searches |
 | `10-clone-course` | Duplicate makes a draft copy; counts and remapped rules match, and its files are copied into the copy's own folder |
 | `11-preview-as-learner` | staff preview a lesson in a phone frame: 390px wide, reduced-motion attribute, draft Romanian overlay, and no learner writes |
-| `12-insights-rewrite` | the weak-question prompt in Insights deep-links into the editor, highlights the block and opens the rewrite tab (`E2E_AI=1` also runs the AI draft) |
-| `13-evidence-pack` | `get_learner_evidence_pack` answers for the learner and for staff (course-filtered), always returns arrays, and refuses another learner's pack |
+| `12-insights-rewrite` | the weak-question prompt in Insights deep-links into the editor, highlights the block and opens the rewrite tab (`E2E_AI=1` also runs the AI draft, accepts it in place and saves with the pre-filled note) |
+| `13-evidence-pack` | `get_learner_evidence_pack` answers for the learner and for staff (course-filtered), always returns arrays, refuses another learner's pack, and both the admin and learner Download buttons produce a real PDF |
 | `99-teardown` | deletes the run's uploaded files, its course (and any clone) via `e2e_delete_course`, and any question-bank rows it created, then sweeps any leftover `E2E %` courses from earlier crashed runs |
 
 
