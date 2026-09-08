@@ -39,8 +39,8 @@ test('staff duplicate a course into a draft copy', async ({ page }) => {
 
   const titleInput = page.getByTestId('clone-title');
   await expect(titleInput).toBeVisible();
-  const defaultTitle = await titleInput.inputValue();
-  expect(defaultTitle, 'the cleanup guard only matches titles starting with "E2E "').toMatch(
+  // The dialog fills the default title in an effect one render after it opens; wait for it.
+  await expect(titleInput, 'the cleanup guard only matches titles starting with "E2E "').toHaveValue(
     /^E2E /,
   );
   await expect(page.getByTestId('clone-translations')).toBeVisible();
