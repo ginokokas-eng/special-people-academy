@@ -165,14 +165,17 @@ test.describe('learner', () => {
   });
 });
 
-test('sections lesson media is removed', async () => {
-  // e2e_delete_course removes the lesson, its blocks and transcript; the uploaded
-  // object is ours to delete.
+test('sections lesson media stays until teardown', async () => {
+  // Deleting the clip here would break any spec that runs after this one against
+  // the same lesson, so the object is left in place: the teardown spec sweeps
+  // every file under the run's course folders before it deletes the course.
   if (!mediaPath) test.skip(true, 'nothing was uploaded');
   const api = await apiFor(staffStatePath);
-  // The bulk endpoint takes a JSON body, which suits the API context's JSON content type.
-  const res = await api.delete('/storage/v1/object/lesson-media', { data: { prefixes: [mediaPath] } });
-  expect(res.ok(), await res.text()).toBeTruthy();
-  const left = await select<unknown[]>(api, `lesson_transcripts?lesson_id=eq.${lessonId}&select=id`);
-  expect(left.length, 'the transcript row stays until teardown deletes the course').toBe(1);
+  const [row] = await select<{ id: string }[]>(
+    api,
+    `lesson_transcripts?lesson_id=eq.${lessonId}&select=id`,
+  );
+  expect(row, 'the transcript row stays until teardown deletes the course').toBeTruthy();
+  const head = await api.get(`/storage/v1/object/lesson-media/${mediaPath}`);
+  expect(head.ok(), 'the uploaded clip stays until teardown sweeps the folder').toBeTruthy();
 });
