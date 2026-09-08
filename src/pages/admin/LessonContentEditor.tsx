@@ -818,6 +818,8 @@ export default function LessonContentEditor() {
           <BlockList
 
             blocks={blocks}
+            focusedClientId={focusBlockId}
+
             onChange={changeBlock}
             onMove={moveBlock}
             onDuplicate={duplicateBlock}
