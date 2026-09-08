@@ -259,6 +259,65 @@ export function CopilotPanel({
     if (data?.blocks) setDrafts(toDraftItems(data.blocks));
   };
 
+  /**
+   * Insights → rewrite. Only aggregate counts are sent, and the reply is mapped
+   * back onto the EXISTING option ids so accepting it keeps every statistic and
+   * every answer already recorded against this block.
+   */
+  const runRewrite = async () => {
+    if (!rewriteBlock || !rewritePayload || !rewriteStats) return;
+    setRewriteDraft(null);
+    setRewriteErrors([]);
+    const data = (await run({
+      mode: 'rewrite_question',
+      lesson_id: lessonId,
+      input: {
+        block_type: 'mcq',
+        payload: rewritePayload,
+        stats: rewriteStats,
+        focus: rewriteFocus,
+      },
+    })) as unknown as {
+      question?: string;
+      options?: { label?: string; feedback?: string }[];
+      correct_index?: number;
+      explanation?: string;
+    } | null;
+    if (!data?.options) return;
+    const replyOptions = data.options;
+    const next: McqPayload = {
+      ...rewritePayload,
+      question: (data.question ?? rewritePayload.question).trim(),
+      explanation: (data.explanation ?? rewritePayload.explanation ?? '').trim() || undefined,
+      options: rewritePayload.options.map((option, index) => {
+        const reply = replyOptions[index];
+        const feedback = (reply?.feedback ?? option.feedback ?? '').trim();
+        return {
+          ...option,
+          label: (reply?.label ?? option.label).trim() || option.label,
+          feedback: feedback || undefined,
+        };
+      }),
+      correct_id:
+        rewritePayload.options[Number(data.correct_index)]?.id ?? rewritePayload.correct_id,
+    };
+    const errors = validateRewrite(rewritePayload, next);
+    if (errors.length) {
+      setRewriteErrors(errors);
+      return;
+    }
+    setRewriteDraft(next);
+  };
+
+  const acceptRewrite = () => {
+    if (!rewriteBlock || !rewriteDraft || !rewriteStats || !onReplace) return;
+    onReplace(rewriteBlock.client_id, rewriteDraft, rewriteNote(rewriteStats));
+    setRewriteDraft(null);
+    setOpen(false);
+  };
+
+
+
   const patchDraft = (clientId: string, patch: Partial<DraftItem>) =>
     setDrafts((prev) =>
       prev.map((d) => {
