@@ -7,13 +7,16 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle2, Loader2, Search } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, Loader2, Search, Sparkles } from '@/components/icons';
+import { isWeakMcq, type RewriteThresholds } from '@/lib/rewriteQuestion';
 import { cn } from '@/lib/utils';
 import type {
   BlockPayload,
