@@ -573,7 +573,7 @@ function SortableBlockCard({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={focusRef}
       style={{
         transform: CSS.Translate.toString(transform),
         transition: reduceMotion ? undefined : transition,
@@ -584,7 +584,6 @@ function SortableBlockCard({
         focused && 'ring-2 ring-primary ring-offset-2'
       )}
       data-testid={focused ? 'block-form-focused' : undefined}
-      ref={focused ? focusRef : undefined}
     >
       <button
         type="button"
