@@ -386,6 +386,43 @@ function validateChaptersReply(data: unknown, starts: number[]): string[] {
   return errs;
 }
 
+/**
+ * A rewrite must keep the question answerable in exactly the same way: same
+ * number of answers, the correct answer's wording untouched and still at the
+ * same index, and something actually improved. Mirrors validateRewrite() in
+ * src/lib/rewriteQuestion.ts.
+ */
+function validateRewriteReply(
+  data: unknown,
+  before: { question: string; options: { label: string; feedback: string }[]; correct_index: number; explanation: string }
+): string[] {
+  if (!data || typeof data !== 'object') return ['reply is not an object'];
+  const r = data as Rec;
+  const errs: string[] = [];
+  const options = Array.isArray(r.options) ? (r.options as Rec[]) : [];
+  if (options.length !== before.options.length)
+    errs.push(`options must contain exactly ${before.options.length} answers`);
+  const ci = Number(r.correct_index);
+  if (ci !== before.correct_index) errs.push(`correct_index must stay ${before.correct_index}`);
+  const correct = options[before.correct_index];
+  if (correct && String(correct.label ?? '') !== before.options[before.correct_index].label)
+    errs.push('the correct answer label must be copied exactly, unchanged');
+  if (!String(r.question ?? '').trim()) errs.push('question must not be empty');
+  if (options.some((o) => !String(o.label ?? '').trim())) errs.push('every option needs a label');
+
+  const changed =
+    String(r.explanation ?? '') !== before.explanation ||
+    options.some((o, i) => {
+      const was = before.options[i];
+      if (!was) return true;
+      if (i === before.correct_index) return String(o.feedback ?? '') !== was.feedback;
+      return String(o.label ?? '') !== was.label || String(o.feedback ?? '') !== was.feedback;
+    });
+  if (!changed) errs.push('the rewrite must actually change something');
+  return errs;
+}
+
+
 
 
 /**
