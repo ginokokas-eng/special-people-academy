@@ -7,13 +7,16 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle2, Loader2, Search } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, Loader2, Search, Sparkles } from '@/components/icons';
+import { isWeakMcq, type RewriteThresholds } from '@/lib/rewriteQuestion';
 import { cn } from '@/lib/utils';
 import type {
   BlockPayload,
@@ -46,7 +49,22 @@ interface BlockRow {
   payload: BlockPayload;
 }
 
-export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | null; orgId?: string | null }) {
+export function LessonInsightsPanel({
+  lessonId,
+  orgId,
+  courseId,
+}: {
+  lessonId: string | null;
+  orgId?: string | null;
+  /** Set in Course Builder only: enables the "rewrite this question" link. */
+  courseId?: string;
+}) {
+  const [searchParams] = useSearchParams();
+  // Test-only overrides so a browser test can force the weak-question CTA on.
+  const thresholds = {
+    threshold: Number(searchParams.get('rewrite_threshold')) || undefined,
+    minLearners: Number(searchParams.get('rewrite_min_learners')) || undefined,
+  };
   const [stats, setStats] = useState<BlockItemStat[]>([]);
   const [detail, setDetail] = useState<LearnerDetailRow[]>([]);
   const [blocks, setBlocks] = useState<Record<string, BlockRow>>({});
@@ -133,7 +151,14 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
     <div className="min-w-0 space-y-5">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {stats.map((stat) => (
-          <BlockInsightCard key={stat.block_id} stat={stat} block={blocks[stat.block_id]} />
+          <BlockInsightCard
+            key={stat.block_id}
+            stat={stat}
+            block={blocks[stat.block_id]}
+            courseId={orgId ? undefined : courseId}
+            lessonId={lessonId}
+            thresholds={thresholds}
+          />
         ))}
       </div>
 
@@ -204,8 +229,23 @@ export function LessonInsightsPanel({ lessonId, orgId }: { lessonId: string | nu
 
 /* ------------------------------- block card ------------------------------- */
 
-export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?: BlockRow }) {
+export function BlockInsightCard({
+  stat,
+  block,
+  courseId,
+  lessonId,
+  thresholds,
+}: {
+  stat: BlockItemStat;
+  block?: BlockRow;
+  courseId?: string;
+  lessonId?: string | null;
+  thresholds?: RewriteThresholds;
+}) {
   const payload = block?.payload;
+  const navigate = useNavigate();
+  // Only offered in Course Builder, on global figures, for a weak MCQ.
+  const canRewrite = !!courseId && !!lessonId && isWeakMcq(stat, thresholds);
 
   return (
     <Card className="min-w-0" data-testid={`insights-block-card-${stat.block_type}`}>
@@ -239,7 +279,32 @@ export function BlockInsightCard({ stat, block }: { stat: BlockItemStat; block?:
         {stat.block_type === 'scenario' && (
           <ScenarioBreakdown stat={stat} payload={payload as ScenarioPayload | undefined} />
         )}
+
+        {canRewrite && (
+          <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <p className="text-sm text-foreground">
+              Most learners get this wrong first time. The AI can suggest better wrong answers and a
+              clearer explanation — the right answer stays exactly as it is.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-2"
+              data-testid="insights-rewrite-cta"
+              onClick={() =>
+                navigate(
+                  `/admin-portal/courses/${courseId}/lessons/${lessonId}/content?block=${stat.block_id}&copilot=rewrite`,
+                  { state: { blockStat: stat } },
+                )
+              }
+            >
+              <Sparkles className="mr-1 h-4 w-4" aria-hidden="true" />
+              Rewrite this question
+            </Button>
+          </div>
+        )}
       </CardContent>
+
     </Card>
   );
 }

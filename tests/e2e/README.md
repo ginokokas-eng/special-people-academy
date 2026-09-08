@@ -75,6 +75,7 @@ Specs run in file order with one worker because they share one authored course:
 | `09-transcript-chapters` | staff rename/add transcript sections; learner reads one section and searches |
 | `10-clone-course` | Duplicate makes a draft copy; counts and remapped rules match, and its files are copied into the copy's own folder |
 | `11-preview-as-learner` | staff preview a lesson in a phone frame: 390px wide, reduced-motion attribute, draft Romanian overlay, and no learner writes |
+| `12-insights-rewrite` | the weak-question prompt in Insights deep-links into the editor, highlights the block and opens the rewrite tab (`E2E_AI=1` also runs the AI draft) |
 | `99-teardown` | deletes the run's uploaded files, its course (and any clone) via `e2e_delete_course`, and any question-bank rows it created |
 
 

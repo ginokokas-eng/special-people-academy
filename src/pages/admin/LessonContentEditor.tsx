@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
+import type { BlockItemStat } from '@/components/admin/course-builder/blockStats';
+
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { TranslationsPanel } from '@/components/admin/lesson-blocks/TranslationsPanel';
 import {
@@ -68,8 +71,18 @@ import {
 export default function LessonContentEditor() {
   const { id: courseId, lessonId } = useParams<{ id: string; lessonId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  /** Deep link from Insights: which block to scroll to, and whether to rewrite it. */
+  const focusBlockId = searchParams.get('block');
+  const wantsRewrite = searchParams.get('copilot') === 'rewrite';
+  const [rewriteStat, setRewriteStat] = useState<BlockItemStat | null>(null);
+  const [openRewrite, setOpenRewrite] = useState(false);
+  /** Pre-filled save note when a rewrite came from Insights. */
+  const [rewriteSaveNote, setRewriteSaveNote] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
+
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [lesson, setLesson] = useState<{
@@ -229,6 +242,51 @@ export default function LessonContentEditor() {
     ]);
 
   /**
+   * Replaces ONE existing block's payload in place (used by the Insights
+   * rewrite). The block keeps its id and its client id, so every answer already
+   * recorded against it — and every statistic — stays attached to it.
+   */
+  const replaceBlockPayload = (clientId: string, payload: BlockPayload, changeNote: string) => {
+    mutate((prev) => prev.map((b) => (b.client_id === clientId ? { ...b, payload } : b)));
+    setRewriteSaveNote(changeNote);
+    toast.success('Question rewritten — save the lesson to keep it');
+  };
+
+  /**
+   * Stats for the block Insights sent us to rewrite. They arrive in router
+   * state; when someone pastes the link instead, we read them back from the
+   * global item-stats RPC.
+   */
+  useEffect(() => {
+    if (!wantsRewrite || !focusBlockId || rewriteStat || !lessonId) return;
+    const passed = (location.state as { blockStat?: BlockItemStat } | null)?.blockStat;
+    if (passed && passed.block_id === focusBlockId) {
+      setRewriteStat(passed);
+      setOpenRewrite(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc('lesson_block_item_stats', { _lesson: lessonId });
+      if (cancelled) return;
+      if (error) {
+        console.error('Error loading item stats for rewrite:', error);
+        return;
+      }
+      const row = ((data ?? []) as unknown as BlockItemStat[]).find(
+        (r) => r.block_id === focusBlockId
+      );
+      if (!row) return;
+      setRewriteStat(row);
+      setOpenRewrite(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [wantsRewrite, focusBlockId, rewriteStat, lessonId, location.state]);
+
+
+  /**
    * Seeds the lesson from a template. The seeded blocks are ordinary drafts —
    * the template choice is not recorded anywhere.
    */
@@ -380,10 +438,13 @@ export default function LessonContentEditor() {
    * callout or image-only edits.
    */
   const openSaveDialog = () => {
-    setMaterial(materialChangeDefault(savedBlocksRef.current, blocks));
-    setNote('');
+    // A rewrite from Insights changes what learners must know, so it defaults to
+    // material and carries a note saying where it came from.
+    setMaterial(rewriteSaveNote ? true : materialChangeDefault(savedBlocksRef.current, blocks));
+    setNote(rewriteSaveNote ?? '');
     setSaveDialogOpen(true);
   };
+
 
 
   const handleSave = async () => {
@@ -457,7 +518,9 @@ export default function LessonContentEditor() {
 
       setDirty(false);
       dirtyRef.current = false;
+      setRewriteSaveNote(null);
       await load(true);
+
     } catch (error) {
       console.error('Error saving lesson content:', error);
       toast.error('Failed to save lesson content');
@@ -575,7 +638,21 @@ export default function LessonContentEditor() {
             lessonTitle={lesson?.title}
             blocks={blocks}
             onAccept={addBlocks}
+            rewrite={
+              focusBlockId && rewriteStat ? { clientId: focusBlockId, stat: rewriteStat } : null
+            }
+            openRewrite={openRewrite}
+            onOpenRewriteHandled={() => {
+              setOpenRewrite(false);
+              // The block stays highlighted; only the "open the copilot" request
+              // is spent, so a refresh does not reopen the panel.
+              const next = new URLSearchParams(searchParams);
+              next.delete('copilot');
+              setSearchParams(next, { replace: true });
+            }}
+            onReplace={replaceBlockPayload}
           />
+
           <Button
             variant="outline"
             onClick={() => {
@@ -741,6 +818,8 @@ export default function LessonContentEditor() {
           <BlockList
 
             blocks={blocks}
+            focusedClientId={focusBlockId}
+
             onChange={changeBlock}
             onMove={moveBlock}
             onDuplicate={duplicateBlock}

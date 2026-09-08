@@ -103,7 +103,7 @@ export function CourseInsightsTab({ courseId }: { courseId: string }) {
         </CardContent>
       </Card>
 
-      {!!lessons.length && <LessonInsightsPanel lessonId={lessonId} />}
+      {!!lessons.length && <LessonInsightsPanel lessonId={lessonId} courseId={courseId} />}
 
       <RetentionPanel courseId={courseId} />
 

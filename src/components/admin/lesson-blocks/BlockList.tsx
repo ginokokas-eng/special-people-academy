@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -92,6 +93,11 @@ interface BlockListProps {
   onResolveComment?: (id: string, resolved: boolean) => Promise<void>;
   /** Advisory content-quality suggestion counts, keyed by block index. */
   lintByBlock?: Record<number, number>;
+  /**
+   * Block to scroll to and outline — set when an author arrives from Insights
+   * with ?block=<id>. Blocks are always expanded, so there is nothing to open.
+   */
+  focusedClientId?: string | null;
 }
 
 /** Short preview of a block's own wording, to tell two MCQs apart in a list. */
@@ -127,6 +133,7 @@ export function BlockList({
   onAddComment,
   onResolveComment,
   lintByBlock = {},
+  focusedClientId = null,
 }: BlockListProps) {
   // Pointer drag for the mouse, arrow buttons for the keyboard; the sortable
   // keyboard sensor keeps the handle usable too.
@@ -194,7 +201,12 @@ export function BlockList({
         const pairedWithNext = isHalf && !pairedWithPrev && nextIsHalf;
 
         return (
-          <SortableBlockCard key={block.client_id} id={block.client_id} label={`${index + 1}. ${BLOCK_LABELS[block.block_type]}`}>
+          <SortableBlockCard
+            key={block.client_id}
+            id={block.client_id}
+            label={`${index + 1}. ${BLOCK_LABELS[block.block_type]}`}
+            focused={block.client_id === focusedClientId}
+          >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
@@ -538,25 +550,40 @@ function SortableBlockCard({
   id,
   label,
   children,
+  focused = false,
 }: {
   id: string;
   label: string;
   children: React.ReactNode;
+  focused?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id });
+  // Bring the block the author was sent to into view, once.
+  const focusRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setNodeRef(node);
+      if (node && focused) node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    },
+    [setNodeRef, focused]
+  );
   const reduceMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   return (
     <div
-      ref={setNodeRef}
+      ref={focusRef}
       style={{
         transform: CSS.Translate.toString(transform),
         transition: reduceMotion ? undefined : transition,
       }}
-      className={cn('relative rounded-lg border bg-card p-4', isDragging && 'z-10 shadow-lg')}
+      className={cn(
+        'relative rounded-lg border bg-card p-4',
+        isDragging && 'z-10 shadow-lg',
+        focused && 'ring-2 ring-primary ring-offset-2'
+      )}
+      data-testid={focused ? 'block-form-focused' : undefined}
     >
       <button
         type="button"

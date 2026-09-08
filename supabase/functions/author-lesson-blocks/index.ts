@@ -6,7 +6,8 @@
  * or rejects) in the editor, and only the editor's own Save writes blocks.
  *
  * Modes: draft_lesson · knowledge_check · suggest_checkpoints · chapterise ·
- * improve_block · translate_blocks (staff draft only — learners never see draft
+ * improve_block · rewrite_question (Insights → rewrite; aggregate counts only) ·
+ * translate_blocks (staff draft only — learners never see draft
  * translations). Every run is logged to ai_authoring_runs (user_id only — no
  * learner PII).
  */
@@ -23,6 +24,7 @@ type Mode =
   | 'suggest_checkpoints'
   | 'chapterise'
   | 'improve_block'
+  | 'rewrite_question'
   | 'translate_blocks';
 const MODES: Mode[] = [
   'draft_lesson',
@@ -30,8 +32,10 @@ const MODES: Mode[] = [
   'suggest_checkpoints',
   'chapterise',
   'improve_block',
+  'rewrite_question',
   'translate_blocks',
 ];
+
 
 
 /** v1 ships Romanian only. Adding a language is a constant change here. */
@@ -190,6 +194,31 @@ const chaptersSchema = {
   },
   required: ['chapters'],
 };
+
+/**
+ * A rewritten MCQ. Options carry per-answer feedback here (the draft schema does
+ * not), because the whole point of a rewrite is better wrong answers.
+ */
+const rewriteSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    question: { type: 'string' },
+    options: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { label: { type: 'string' }, feedback: { type: 'string' } },
+        required: ['label', 'feedback'],
+      },
+    },
+    correct_index: { type: 'integer' },
+    explanation: { type: 'string' },
+  },
+  required: ['question', 'options', 'correct_index', 'explanation'],
+};
+
 
 
 
@@ -385,6 +414,43 @@ function validateChaptersReply(data: unknown, starts: number[]): string[] {
   }
   return errs;
 }
+
+/**
+ * A rewrite must keep the question answerable in exactly the same way: same
+ * number of answers, the correct answer's wording untouched and still at the
+ * same index, and something actually improved. Mirrors validateRewrite() in
+ * src/lib/rewriteQuestion.ts.
+ */
+function validateRewriteReply(
+  data: unknown,
+  before: { question: string; options: { label: string; feedback: string }[]; correct_index: number; explanation: string }
+): string[] {
+  if (!data || typeof data !== 'object') return ['reply is not an object'];
+  const r = data as Rec;
+  const errs: string[] = [];
+  const options = Array.isArray(r.options) ? (r.options as Rec[]) : [];
+  if (options.length !== before.options.length)
+    errs.push(`options must contain exactly ${before.options.length} answers`);
+  const ci = Number(r.correct_index);
+  if (ci !== before.correct_index) errs.push(`correct_index must stay ${before.correct_index}`);
+  const correct = options[before.correct_index];
+  if (correct && String(correct.label ?? '') !== before.options[before.correct_index].label)
+    errs.push('the correct answer label must be copied exactly, unchanged');
+  if (!String(r.question ?? '').trim()) errs.push('question must not be empty');
+  if (options.some((o) => !String(o.label ?? '').trim())) errs.push('every option needs a label');
+
+  const changed =
+    String(r.explanation ?? '') !== before.explanation ||
+    options.some((o, i) => {
+      const was = before.options[i];
+      if (!was) return true;
+      if (i === before.correct_index) return String(o.feedback ?? '') !== was.feedback;
+      return String(o.label ?? '') !== was.label || String(o.feedback ?? '') !== was.feedback;
+    });
+  if (!changed) errs.push('the rewrite must actually change something');
+  return errs;
+}
+
 
 
 
@@ -614,7 +680,52 @@ Deno.serve(async (req) => {
       system = `You are a professional translator for UK social care training. Translate the given strings from British English into ${langName}. Plain, respectful register a care worker would use at work; do not paraphrase, summarise, add or remove content. Keep numbers, units, times, dates, medication names, brand names, proper nouns, job titles of named systems and abbreviations exactly as they are. Keep every placeholder, bullet marker such as "-", and line break in the same place. Never translate the paths, the block ids or any JSON key. Return every block and every path you were given, once each. Return ONLY JSON matching the schema.`;
       user = `Target language: ${langName}\n\nBlocks to translate:\n${serialised}`;
       validate = (d) => validateTranslationReply(d, wanted);
+    } else if (mode === 'rewrite_question') {
+      // Insights → rewrite. AGGREGATE STATISTICS ONLY: option labels and pick
+      // counts. No learner id, name, email or answer row ever reaches the model.
+      const blockType = String(input.block_type ?? '');
+      if (blockType !== 'mcq')
+        return json({ error: 'Only knowledge check questions can be rewritten from Insights.' }, 400);
+      const payload = (input.payload ?? {}) as Rec;
+      const options = Array.isArray(payload.options) ? (payload.options as Rec[]) : [];
+      if (options.length < 2) return json({ error: 'That question has no answers to rewrite.' }, 400);
+      const correctId = String(payload.correct_id ?? '');
+      const correctIndex = options.findIndex((o) => String(o.id ?? '') === correctId);
+      if (correctIndex < 0) return json({ error: 'That question has no correct answer marked.' }, 400);
+
+      const focus = ['distractors', 'explanation', 'both'].includes(String(input.focus ?? ''))
+        ? String(input.focus)
+        : 'both';
+      const stats = (input.stats ?? {}) as Rec;
+      const tallies = Array.isArray(stats.option_tallies) ? (stats.option_tallies as Rec[]) : [];
+      const statLines = tallies
+        .map(
+          (t) =>
+            `- "${String(t.label ?? '')}"${t.is_correct ? ' (correct answer)' : ''}: chosen ${Number(t.count ?? 0)} times`
+        )
+        .join('\n');
+      const before = {
+        question: String(payload.question ?? ''),
+        options: options.map((o) => ({ label: String(o.label ?? ''), feedback: String(o.feedback ?? '') })),
+        correct_index: correctIndex,
+        explanation: String(payload.explanation ?? ''),
+      };
+      const serialised = JSON.stringify(before);
+      inputChars = serialised.length + statLines.length;
+
+      schema = rewriteSchema;
+      schemaName = 'mcq_rewrite';
+      const focusLine =
+        focus === 'distractors'
+          ? 'Change only the wrong answers and their feedback.'
+          : focus === 'explanation'
+            ? 'Change only the feedback and the explanation.'
+            : 'Improve the wrong answers, their feedback and the explanation.';
+      system += ` Rewrite ONE multiple-choice knowledge check so learners who understand the topic stop getting it wrong. Return exactly ${options.length} answers in the same order. The correct answer is at index ${correctIndex}: copy its wording BYTE FOR BYTE and keep correct_index at ${correctIndex}. ${focusLine} You may tighten the question wording, but never change what it asks or what the right answer is. Each wrong answer must stay a plausible mistake, and its feedback must say briefly why it is wrong.`;
+      user = `Current question:\n${serialised}\n\nHow learners answered (aggregate counts only):\n${statLines || '- no answers recorded yet'}`;
+      validate = (d) => validateRewriteReply(d, before);
     } else {
+
 
       const blockType = String(input.block_type ?? '');
       const instruction = String(input.instruction ?? '').trim();

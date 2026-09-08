@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,15 @@ import { AlertTriangle, Check, Loader2, Sparkles, Trash2 } from '@/components/ic
 import { BlockList } from './BlockList';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { draftBlockIssues, mapDraftBlocks, type DraftBlock } from '@/lib/aiAuthoring';
+import type { BlockItemStat } from '@/components/admin/course-builder/blockStats';
+import {
+  buildRewriteStats,
+  diffMcq,
+  rewriteNote,
+  rewriteSummary,
+  validateRewrite,
+  type RewriteFocus,
+} from '@/lib/rewriteQuestion';
 import {
   BLOCK_LABELS,
   defaultContributesToCompletion,
@@ -33,9 +42,16 @@ import {
   type BlockPayload,
   type BlockType,
   type LessonBlock,
+  type McqPayload,
 } from '@/components/course-learn/blocks/types';
 
 export const AI_DISCLAIMER = 'AI drafts are suggestions. Review every word before publishing.';
+
+/** The block Insights sent us to rewrite, with its aggregate statistics. */
+export interface RewriteTarget {
+  clientId: string;
+  stat: BlockItemStat;
+}
 
 export interface CopilotPanelProps {
   lessonId?: string;
@@ -45,15 +61,23 @@ export interface CopilotPanelProps {
   blocks: BlockDraft[];
   /** Appends accepted blocks to the editor's unsaved list. */
   onAccept: (accepted: { block_type: BlockType; payload: BlockPayload }[]) => void;
+  /** Set when the author arrived from Insights asking to rewrite one question. */
+  rewrite?: RewriteTarget | null;
+  /** True once, to open this panel straight on the rewrite tab. */
+  openRewrite?: boolean;
+  onOpenRewriteHandled?: () => void;
+  /** Replaces one existing block in place, keeping its id and its statistics. */
+  onReplace?: (clientId: string, payload: BlockPayload, note: string) => void;
 }
 
-type Mode = 'draft_lesson' | 'knowledge_check' | 'improve_block';
+type Mode = 'draft_lesson' | 'knowledge_check' | 'improve_block' | 'rewrite_question';
 
 /** A draft awaiting Accept / Edit / Reject. Nothing here is saved. */
 interface DraftItem extends BlockDraft {
   issues: string[];
   editing: boolean;
 }
+
 
 /** Honest message from the function, or a plain fallback. */
 export function copilotErrorMessage(error: unknown, fallback = 'The draft could not be made.'): string {
@@ -69,6 +93,10 @@ export function CopilotPanel({
   lessonTitle,
   blocks,
   onAccept,
+  rewrite = null,
+  openRewrite = false,
+  onOpenRewriteHandled,
+  onReplace,
 }: CopilotPanelProps) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>('draft_lesson');
@@ -83,6 +111,30 @@ export function CopilotPanel({
   const [instruction, setInstruction] = useState('simplify');
   const [freeInstruction, setFreeInstruction] = useState('');
 
+  const [rewriteFocus, setRewriteFocus] = useState<RewriteFocus>('both');
+  const [rewriteDraft, setRewriteDraft] = useState<McqPayload | null>(null);
+  const [rewriteErrors, setRewriteErrors] = useState<string[]>([]);
+
+  // The MCQ block Insights pointed at, matched by its stable client id.
+  const rewriteBlock = useMemo(
+    () =>
+      rewrite ? blocks.find((b) => b.client_id === rewrite.clientId && b.block_type === 'mcq') : undefined,
+    [rewrite, blocks]
+  );
+  const rewritePayload = rewriteBlock ? (rewriteBlock.payload as McqPayload) : null;
+  const rewriteStats = useMemo(
+    () => (rewrite && rewritePayload ? buildRewriteStats(rewrite.stat, rewritePayload) : null),
+    [rewrite, rewritePayload]
+  );
+
+  // Arriving from Insights opens the panel straight on the rewrite tab, once.
+  useEffect(() => {
+    if (!openRewrite || !rewriteBlock) return;
+    setMode('rewrite_question');
+    setOpen(true);
+    onOpenRewriteHandled?.();
+  }, [openRewrite, rewriteBlock, onOpenRewriteHandled]);
+
   const improvable = useMemo(
     () =>
       blocks
@@ -92,6 +144,7 @@ export function CopilotPanel({
         ),
     [blocks]
   );
+
 
   const toDraftItems = (list: DraftBlock[]): DraftItem[] =>
     mapDraftBlocks(list).map((mapped) => ({
@@ -206,6 +259,65 @@ export function CopilotPanel({
     if (data?.blocks) setDrafts(toDraftItems(data.blocks));
   };
 
+  /**
+   * Insights → rewrite. Only aggregate counts are sent, and the reply is mapped
+   * back onto the EXISTING option ids so accepting it keeps every statistic and
+   * every answer already recorded against this block.
+   */
+  const runRewrite = async () => {
+    if (!rewriteBlock || !rewritePayload || !rewriteStats) return;
+    setRewriteDraft(null);
+    setRewriteErrors([]);
+    const data = (await run({
+      mode: 'rewrite_question',
+      lesson_id: lessonId,
+      input: {
+        block_type: 'mcq',
+        payload: rewritePayload,
+        stats: rewriteStats,
+        focus: rewriteFocus,
+      },
+    })) as unknown as {
+      question?: string;
+      options?: { label?: string; feedback?: string }[];
+      correct_index?: number;
+      explanation?: string;
+    } | null;
+    if (!data?.options) return;
+    const replyOptions = data.options;
+    const next: McqPayload = {
+      ...rewritePayload,
+      question: (data.question ?? rewritePayload.question).trim(),
+      explanation: (data.explanation ?? rewritePayload.explanation ?? '').trim() || undefined,
+      options: rewritePayload.options.map((option, index) => {
+        const reply = replyOptions[index];
+        const feedback = (reply?.feedback ?? option.feedback ?? '').trim();
+        return {
+          ...option,
+          label: (reply?.label ?? option.label).trim() || option.label,
+          feedback: feedback || undefined,
+        };
+      }),
+      correct_id:
+        rewritePayload.options[Number(data.correct_index)]?.id ?? rewritePayload.correct_id,
+    };
+    const errors = validateRewrite(rewritePayload, next);
+    if (errors.length) {
+      setRewriteErrors(errors);
+      return;
+    }
+    setRewriteDraft(next);
+  };
+
+  const acceptRewrite = () => {
+    if (!rewriteBlock || !rewriteDraft || !rewriteStats || !onReplace) return;
+    onReplace(rewriteBlock.client_id, rewriteDraft, rewriteNote(rewriteStats));
+    setRewriteDraft(null);
+    setOpen(false);
+  };
+
+
+
   const patchDraft = (clientId: string, patch: Partial<DraftItem>) =>
     setDrafts((prev) =>
       prev.map((d) => {
@@ -270,11 +382,17 @@ export function CopilotPanel({
         <p className="mt-2 text-xs text-muted-foreground">{AI_DISCLAIMER}</p>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="mt-4">
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-4">
             <TabsTrigger value="draft_lesson">Draft from text</TabsTrigger>
             <TabsTrigger value="knowledge_check">Knowledge check</TabsTrigger>
             <TabsTrigger value="improve_block">Improve</TabsTrigger>
+            {rewriteBlock && (
+              <TabsTrigger value="rewrite_question" data-testid="rewrite-tab-trigger">
+                Rewrite from Insights
+              </TabsTrigger>
+            )}
           </TabsList>
+
 
           <TabsContent value="draft_lesson" className="space-y-3 pt-4">
             <div className="space-y-1.5">
@@ -405,7 +523,81 @@ export function CopilotPanel({
               </p>
             )}
           </TabsContent>
+
+          {rewriteBlock && rewritePayload && rewriteStats && (
+            <TabsContent value="rewrite_question" className="space-y-3 pt-4" data-testid="rewrite-tab">
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <p className="text-sm font-medium text-foreground">{rewritePayload.question}</p>
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="rewrite-stats">
+                  {rewriteSummary(rewriteStats)}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                The right answer stays exactly as it is. Only the wrong answers, their feedback and
+                the explanation can change.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="rewrite-focus">What should change</Label>
+                <Select
+                  value={rewriteFocus}
+                  onValueChange={(value) => setRewriteFocus(value as RewriteFocus)}
+                >
+                  <SelectTrigger id="rewrite-focus">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="both">The wrong answers and the explanation</SelectItem>
+                    <SelectItem value="distractors">Just the wrong answers</SelectItem>
+                    <SelectItem value="explanation">Just the feedback and explanation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={runRewrite} disabled={busy} data-testid="rewrite-run">
+                {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Rewrite this question
+              </Button>
+
+              {rewriteErrors.length > 0 && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive">
+                    That rewrite was refused, because it changed something it must not:
+                  </p>
+                  <ul className="mt-1 list-disc pl-5 text-xs text-destructive">
+                    {rewriteErrors.map((message) => (
+                      <li key={message}>{message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {rewriteDraft && (
+                <div className="space-y-3 rounded-lg border bg-card p-3" data-testid="rewrite-diff">
+                  <h3 className="text-sm font-semibold text-foreground">What would change</h3>
+                  <RewriteDiff before={rewritePayload} after={rewriteDraft} />
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={acceptRewrite} data-testid="rewrite-accept">
+                      <Check className="mr-1 h-4 w-4" />
+                      Use this rewrite
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setRewriteDraft(null)}
+                      data-testid="rewrite-reject"
+                    >
+                      Keep the question as it is
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Accepting replaces this question in the editor. Nothing is saved until you press
+                    “Save content”.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          )}
         </Tabs>
+
 
         {error && (
           <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
@@ -498,5 +690,50 @@ export function CopilotPanel({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+/** Plain before/after list of what the rewrite changes. */
+function RewriteDiff({ before, after }: { before: McqPayload; after: McqPayload }) {
+  const diff = diffMcq(before, after);
+  return (
+    <div className="space-y-2 text-sm">
+      {diff.questionChanged && (
+        <p>
+          <span className="text-muted-foreground">Question: </span>
+          <s className="text-muted-foreground">{before.question}</s>{' '}
+          <span className="font-medium text-foreground">{after.question}</span>
+        </p>
+      )}
+      <ul className="space-y-1">
+        {diff.options.map((option) => (
+          <li key={option.index}>
+            {option.isCorrect ? (
+              <span className="text-muted-foreground">
+                Right answer (unchanged): {option.after}
+              </span>
+            ) : option.labelChanged ? (
+              <span>
+                <s className="text-muted-foreground">{option.before}</s>{' '}
+                <span className="font-medium text-foreground">{option.after}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">{option.after}</span>
+            )}
+            {option.feedbackChanged && (
+              <span className="block text-xs text-muted-foreground">
+                Feedback: {after.options[option.index]?.feedback || '(removed)'}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {diff.explanationChanged && (
+        <p className="text-xs">
+          <span className="text-muted-foreground">Explanation: </span>
+          {after.explanation || '(removed)'}
+        </p>
+      )}
+    </div>
   );
 }
