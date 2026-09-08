@@ -43,8 +43,14 @@ interface Row {
   overrides: Record<string, string>;
 }
 
-/** Blocks are sent in small batches so one long lesson does not blow the limit. */
-const BATCH_SIZE = 5;
+/**
+ * Blocks are sent in batches sized by how much source text they carry, so one
+ * rich block (video checkpoints, a labelled image, a carousel) cannot push a
+ * batch past what the model can return in a single JSON reply.
+ */
+export const TRANSLATE_CHAR_BUDGET = 1500;
+/** Hard ceiling on entries per batch, whatever the budget allows. */
+const BATCH_MAX = 5;
 
 /**
  * Staff translation workbench for one lesson.
