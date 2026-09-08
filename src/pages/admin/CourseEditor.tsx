@@ -309,7 +309,22 @@ export default function CourseEditor() {
         )}
 
 
-        <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })} className="space-y-6">
+        {/* Merge, never replace: a deep link's other parameters (Insights
+            thresholds, for instance) must survive a tab switch. */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) =>
+            setSearchParams(
+              (prev) => {
+                const next = new URLSearchParams(prev);
+                next.set('tab', v);
+                return next;
+              },
+              { replace: true },
+            )
+          }
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="modules">Modules & Lessons</TabsTrigger>

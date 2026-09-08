@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import fs from 'node:fs';
 import { accessTokenFromState, apiFor, rpc } from './support/api';
 import { learnerStatePath, loadRun, staffStatePath } from './support/env';
 
@@ -72,4 +73,70 @@ test('a learner cannot pull somebody else’s pack', async () => {
   });
   expect(res.ok(), 'reading another learner should be refused').toBeFalsy();
   expect(await res.text()).toContain('not_allowed');
+});
+
+/* -------------------------- part 2: the download -------------------------- */
+
+function emailFrom(statePath: string): string {
+  return JSON.parse(
+    Buffer.from(accessTokenFromState(statePath).split('.')[1], 'base64').toString(),
+  ).email as string;
+}
+
+async function assertPdf(download: import('@playwright/test').Download) {
+  const file = await download.path();
+  expect(file, 'the download should land on disk').toBeTruthy();
+  const bytes = fs.readFileSync(file!);
+  expect(bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
+  expect(bytes.byteLength, 'the pack should hold real content').toBeGreaterThan(5_000);
+}
+
+test.describe('staff download', () => {
+  test.use({ storageState: staffStatePath });
+
+  test('staff download a learner pack from the learner directory', async ({ page }) => {
+    test.slow();
+    const learnerEmail = emailFrom(learnerStatePath);
+    const learnerId = userIdFrom(learnerStatePath);
+
+    await page.goto('/admin-portal/learners');
+    await page.getByPlaceholder(/Search name, email/).fill(learnerEmail);
+    const open = page.getByTestId(`learner-evidence-${learnerId}`);
+    await expect(open).toBeVisible({ timeout: 30_000 });
+
+    const loaded = page.waitForResponse(
+      (r) => r.url().includes('/rest/v1/rpc/get_learner_evidence_pack'),
+      { timeout: 30_000 },
+    );
+    await open.click();
+    expect((await loaded).status(), 'the pack RPC should answer').toBeLessThan(300);
+
+    const download = page.waitForEvent('download');
+    await page.getByTestId('evidence-download').click();
+    await assertPdf(await download);
+  });
+});
+
+test.describe('learner download', () => {
+  test.use({ storageState: learnerStatePath });
+
+  test('the learner downloads their own pack from the Certificate tab', async ({ page }) => {
+    test.slow();
+    const run = loadRun();
+    await page.goto(`/courses/${run.courseId}/learn`);
+    const tab = page.getByRole('tab', { name: /Certificate/ });
+    await tab.waitFor({ timeout: 30_000 });
+    await tab.click();
+
+    const loaded = page.waitForResponse(
+      (r) => r.url().includes('/rest/v1/rpc/get_learner_evidence_pack'),
+      { timeout: 30_000 },
+    );
+    await page.getByTestId('evidence-download-self').click();
+    expect((await loaded).status()).toBeLessThan(300);
+
+    const download = page.waitForEvent('download');
+    await page.getByTestId('evidence-download').click();
+    await assertPdf(await download);
+  });
 });

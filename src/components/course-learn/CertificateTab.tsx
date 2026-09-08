@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Award, GraduationCap, Download, Clock, ShieldCheck } from '@/components/icons';
 import { toast } from 'sonner';
 import { QUIZ_LOCKOUT_NEXT_STEP } from '@/components/quiz/quizCopy';
+import { EvidencePackDialog } from '@/components/evidence/EvidencePackDialog';
 import type { LearnCourse } from './types';
 
 const sb = supabase as any;
@@ -210,6 +211,19 @@ export function CertificateTab({ course }: { course: LearnCourse }) {
           />
         )}
       </div>
+      {user && (
+        <EvidencePackDialog
+          userId={user.id}
+          learnerName={user.email ?? 'me'}
+          defaultCourseId={course.id}
+          trigger={
+            <Button variant="outline" size="sm" data-testid="evidence-download-self">
+              <Download className="mr-2 h-4 w-4" />
+              Download my evidence for this course
+            </Button>
+          }
+        />
+      )}
       {!course.has_certificate && (
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Award className="h-3.5 w-3.5" />

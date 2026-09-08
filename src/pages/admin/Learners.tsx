@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Loader2, GraduationCap, Search, RefreshCw } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { EvidencePackDialog } from '@/components/evidence/EvidencePackDialog';
 
 interface Learner {
   user_id: string;
@@ -197,6 +198,7 @@ export default function Learners() {
                       <TableHead className="text-right">Certificates</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead className="whitespace-nowrap">Last sign-in</TableHead>
+                      <TableHead className="text-right">Evidence</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -216,6 +218,21 @@ export default function Learners() {
                         <TableCell className="text-right">{l.certificates_count}</TableCell>
                         <TableCell className="text-muted-foreground text-sm">{fmt(l.created_at)}</TableCell>
                         <TableCell className="text-muted-foreground text-sm">{fmt(l.last_sign_in_at)}</TableCell>
+                        <TableCell className="text-right">
+                          <EvidencePackDialog
+                            userId={l.user_id}
+                            learnerName={l.full_name || l.email}
+                            trigger={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                data-testid={`learner-evidence-${l.user_id}`}
+                              >
+                                Evidence pack
+                              </Button>
+                            }
+                          />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

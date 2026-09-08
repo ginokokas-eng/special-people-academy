@@ -15,10 +15,11 @@ test.use({ storageState: staffStatePath });
 test('staff follow the Insights prompt into the copilot rewrite tab', async ({ page }) => {
   const run = loadRun();
 
+  // Open the Insights tab through the URL: switching tabs by click rewrites the
+  // search params and would drop the threshold overrides.
   await page.goto(
-    `/admin-portal/courses/${run.courseId}/edit?rewrite_threshold=101&rewrite_min_learners=1`,
+    `/admin-portal/courses/${run.courseId}/edit?tab=insights&rewrite_threshold=101&rewrite_min_learners=1`,
   );
-  await page.getByRole('tab', { name: 'Insights' }).click();
   await page.getByTestId('insights-lesson-select').click();
   await page.getByRole('option', { name: 'All blocks' }).click();
 
@@ -38,6 +39,22 @@ test('staff follow the Insights prompt into the copilot rewrite tab', async ({ p
 
   await page.getByTestId('rewrite-run').click();
   await expect(page.getByTestId('rewrite-diff')).toBeVisible({ timeout: 120_000 });
-  await page.getByTestId('rewrite-reject').click();
+
+  // Accept: the block is replaced in place (same id), never appended, and the
+  // save note is pre-filled so the change is recorded as material.
+  const blocksBefore = await page.locator('[data-testid^="block-form-visibility-when-"]').count();
+  await page.getByTestId('rewrite-accept').click();
+  await expect(page.getByText('Question rewritten')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('rewrite-diff')).toBeHidden();
+  expect(await page.locator('[data-testid^="block-form-visibility-when-"]').count()).toBe(blocksBefore);
+
+  await page.getByTestId('save-content-open').click();
+  // The note is the "change-note" input inside the save dialog.
+  await expect(page.locator('#change-note')).toHaveValue(/Rewritten from Insights/);
+  const patched = page.waitForResponse(
+    (r) => r.url().includes('/rest/v1/lesson_blocks') && r.request().method() === 'PATCH',
+    { timeout: 30_000 },
+  );
+  await page.getByTestId('save-content').click();
+  expect((await patched).status(), 'saving the rewritten block should succeed').toBeLessThan(300);
 });
