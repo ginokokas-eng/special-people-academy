@@ -6,7 +6,8 @@
  * or rejects) in the editor, and only the editor's own Save writes blocks.
  *
  * Modes: draft_lesson · knowledge_check · suggest_checkpoints · chapterise ·
- * improve_block · translate_blocks (staff draft only — learners never see draft
+ * improve_block · rewrite_question (Insights → rewrite; aggregate counts only) ·
+ * translate_blocks (staff draft only — learners never see draft
  * translations). Every run is logged to ai_authoring_runs (user_id only — no
  * learner PII).
  */
@@ -23,6 +24,7 @@ type Mode =
   | 'suggest_checkpoints'
   | 'chapterise'
   | 'improve_block'
+  | 'rewrite_question'
   | 'translate_blocks';
 const MODES: Mode[] = [
   'draft_lesson',
@@ -30,8 +32,10 @@ const MODES: Mode[] = [
   'suggest_checkpoints',
   'chapterise',
   'improve_block',
+  'rewrite_question',
   'translate_blocks',
 ];
+
 
 
 /** v1 ships Romanian only. Adding a language is a constant change here. */
