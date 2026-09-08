@@ -382,11 +382,17 @@ export function CopilotPanel({
         <p className="mt-2 text-xs text-muted-foreground">{AI_DISCLAIMER}</p>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="mt-4">
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-4">
             <TabsTrigger value="draft_lesson">Draft from text</TabsTrigger>
             <TabsTrigger value="knowledge_check">Knowledge check</TabsTrigger>
             <TabsTrigger value="improve_block">Improve</TabsTrigger>
+            {rewriteBlock && (
+              <TabsTrigger value="rewrite_question" data-testid="rewrite-tab-trigger">
+                Rewrite from Insights
+              </TabsTrigger>
+            )}
           </TabsList>
+
 
           <TabsContent value="draft_lesson" className="space-y-3 pt-4">
             <div className="space-y-1.5">
