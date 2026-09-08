@@ -123,7 +123,9 @@ test.describe('learner download', () => {
   test('the learner downloads their own pack from the Certificate tab', async ({ page }) => {
     test.slow();
     const run = loadRun();
-    await page.goto(`/courses/${run.courseId}/learn`);
+    // The lesson tabs (Certificate among them) only exist inside a lesson view,
+    // not on the course hub, so open lesson A directly.
+    await page.goto(`/courses/${run.courseId}/learn?lesson=${run.lessonAId}`);
     const tab = page.getByRole('tab', { name: /Certificate/ });
     await tab.waitFor({ timeout: 30_000 });
     await tab.click();
