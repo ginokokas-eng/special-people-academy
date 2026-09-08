@@ -16,6 +16,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LessonBlocks } from '@/components/course-learn/blocks/LessonBlocks';
 import { CopilotPanel } from '@/components/admin/lesson-blocks/CopilotPanel';
+import type { BlockItemStat } from '@/components/admin/course-builder/blockStats';
+
 import { BankPicker } from '@/components/admin/question-bank/BankPicker';
 import { TranslationsPanel } from '@/components/admin/lesson-blocks/TranslationsPanel';
 import {
