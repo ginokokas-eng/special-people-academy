@@ -193,6 +193,37 @@ export function deriveAvailableLangs(
     .sort();
 }
 
+/* -------------------------------- batching --------------------------------- */
+
+/**
+ * Splits translatable entries into AI batches by source-text size. A batch stops
+ * growing when the next entry would push it past `budget` characters or when it
+ * already holds `maxCount` entries; an entry bigger than the budget travels
+ * alone. Order is preserved.
+ */
+export function batchTranslatable<T extends { texts: Record<string, string> }>(
+  entries: readonly T[],
+  budget: number,
+  maxCount: number
+): T[][] {
+  const size = (entry: T) => Object.values(entry.texts).reduce((sum, t) => sum + t.length, 0);
+  const batches: T[][] = [];
+  let current: T[] = [];
+  let total = 0;
+  for (const entry of entries) {
+    const cost = size(entry);
+    if (current.length && (current.length >= maxCount || total + cost > budget)) {
+      batches.push(current);
+      current = [];
+      total = 0;
+    }
+    current.push(entry);
+    total += cost;
+  }
+  if (current.length) batches.push(current);
+  return batches;
+}
+
 /* ------------------------------ learner choice ----------------------------- */
 
 /** Where the learner's chosen lesson language is remembered on this device. */
