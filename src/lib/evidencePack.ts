@@ -435,6 +435,8 @@ export function buildEvidenceModel(raw: RawEvidencePack | null | undefined): Evi
       heading: text(c.heading),
       steps: list(c.steps).map((s) => text(s)),
       outcome: text(c.outcome),
+      outcomeLabel: outcomeLabel(c.outcome),
+
       assessorName: text(c.assessor_name),
       signedAt: c.signed_at ?? null,
       signedLabel: formatEvidenceDate(c.signed_at),
